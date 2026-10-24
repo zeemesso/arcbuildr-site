@@ -36,6 +36,9 @@ Follow these steps in order. Do not skip a step. Copy comes first; the structure
 - Label every claim: **VERIFIED** (you ran it and saw the output), **REPORTED** (someone or some tool said so) or **UNVERIFIED**.
 - One branch per task. Zyade merges. No secrets in the repo.
 - Replies: the first line is the next action. Numbered lists of at most 5 items. Include time estimates. English only.
+- Working mode (from 2026-10-24): decide on your own inside CLAUDE.md, STACK and the approved docs (`COPY.md`, `PROTOTYPE.md`, `PLAN.md`). Don't ask Zyade for approvals; this replaces "Zyade approves it" in HOW WE BUILD.
+- Stop and ask Zyade only for: spending money, DNS or domain changes, an account or secret he must create, deploying to production, or being blocked twice on the same thing.
+- Batch those into one list per stop, with a time estimate for each item.
 
 ## STACK (approved 2026-10-24)
 
@@ -48,7 +51,7 @@ Follow these steps in order. Do not skip a step. Copy comes first; the structure
 
 ## STATUS
 
-- Step 1 (Context): done from the brief. See `.agents/product-marketing.md`.
-- Step 2 (Copy): approved. All 19 [ASSUMED] picks approved; #10 and #18 stay placeholders until launch.
-- Step 3 (Requirements) and step 4 (Architecture): approved, with Cloudflare instead of Vercel.
-- Current step: 5 (ASCII prototype). See `PROTOTYPE.md`, waiting for Zyade's review.
+- Steps 1 to 5 done. `COPY.md` and `PROTOTYPE.md` approved by Zyade.
+- Step 6 (Plan): `PLAN.md` written and approved under the working mode.
+- Current step: 7 (Build loop), on Sonnet 5.5. Next: task 1 in `PLAN.md`.
+- Waiting on Zyade: the manual setup list in `PLAN.md`.
