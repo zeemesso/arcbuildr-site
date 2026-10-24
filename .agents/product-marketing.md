@@ -1,94 +1,76 @@
 # Product Marketing Context
 
-**Document version:** v1
+**Document version:** v2
 **Last updated:** 2026-10-24
 
-Source labels: REPORTED = Zyade said it. UNVERIFIED = assumption, not confirmed. TBD = not asked yet.
+Source: Zyade's brief of 2026-10-24. Everything below comes from that brief. Anything the brief does not cover says "Not in brief". Guesses live in `COPY.md`, tagged [ASSUMED], and do not belong here until Zyade confirms them.
 
 ## Product Overview
-**One-liner:** TBD (needs Zyade's words)
-**What it does:** We build a business-driven client's personal brand and content from their real story and expertise. (REPORTED)
-**Product category:** Personal brand service. (REPORTED)
-**Product type:** Done-for-you service, run by co-founders Zyade and Hanane. (REPORTED)
-**Deliverables:** Brand Strategy, Visual Identity System, Profile Audit & Optimization, Content Strategy & Production, Ongoing Support. (REPORTED)
-**Platforms:** Mainly Instagram, some TikTok. No LinkedIn. No YouTube. (REPORTED)
-**Business model:** Packages are drafts. Never publish prices or package details unless Zyade provides them. (REPORTED)
+**One-liner:** Arcbuildr builds a client's personal brand and content from their real story and expertise.
+**What it does:** We build the brand strategy, visual identity, profile and content for business-driven people, mainly on Instagram. Each client's work adapts to who they are. We stay with the client after delivery.
+**Product category:** Personal brand service.
+**Product type:** Service, run by the two co-founders, Zyade and Hanane.
+**Founded:** September 23, 2026.
+**Deliverables:**
+- Brand Strategy
+- Visual Identity System
+- Profile Audit & Optimization
+- Content Strategy & Production: content plan, story sequence system, suggested highlights, carousels, short-form pieces. The format is chosen per piece.
+- Ongoing Support: we stay with the client, with answers and revisions.
+**Platforms:** Instagram first. TikTok for some clients. No LinkedIn. No YouTube.
+**Who publishes:** The client. We don't publish for clients. We sometimes edit their videos.
+**Business model:** Packages of 10, 20 or 30 content pieces, still drafts. Never put prices or package details on the site.
 
 ## Target Audience
-**Target clients:** TBD (step 1, question 1)
-**Decision-makers:** TBD
-**Primary use case:** TBD
-**Jobs to be done:**
-- TBD
-**Use cases:**
-- TBD
+**Target clients:** Business-driven people only. No niche split; each client's work adapts to who they are.
+**Decision-makers:** The client themselves (one person, their own brand).
+**Primary use case:** Not in brief.
+**Jobs to be done:** Not in brief.
 
 ## Problems & Pain Points
-**Core problem:** TBD
-**Why alternatives fall short:**
-- TBD
-**What it costs them:** TBD
-**Emotional tension:** TBD
+Not in brief.
 
 ## Competitive Landscape
-**Direct:** TBD
-**Secondary:** TBD
-**Indirect:** TBD
+Not in brief.
 
 ## Differentiation
 **Key differentiators:**
-- Built from the client's real story and expertise. (REPORTED)
-**How we do it differently:** TBD
-**Why that's better:** TBD
-**Why customers choose us:** TBD
+- The brand and content are built from the client's real story and expertise.
+- No niche template: the work adapts to each client.
+- Ongoing Support after delivery: answers and revisions.
 
 ## Objections
-| Objection | Response |
-|-----------|----------|
-| TBD | TBD |
+Not in brief.
 
-**Anti-persona:** TBD
-
-## Switching Dynamics
-**Push:** TBD
-**Pull:** TBD
-**Habit:** TBD
-**Anxiety:** TBD
+**Anti-persona:** People who are not business-driven.
 
 ## Customer Language
-**How they describe the problem:**
-- TBD
-**How they describe us:**
-- TBD
-**Words to use:** TBD
-**Words to avoid:** TBD
+Not in brief. No client quotes exist yet.
 
 ## Brand Voice
-**Summary:** Zyade's voice: plain, direct, no hype. (REPORTED)
-
-| Attribute | Means | Doesn't mean | Example line |
-|-----------|-------|--------------|--------------|
-| Plain | TBD | TBD | TBD |
-| Direct | TBD | TBD | TBD |
-| No hype | TBD | TBD | TBD |
+**Summary:** Zyade's voice. Plain, direct, no hype.
+**Never use:** Invented numbers, results or claims about clients (none exist that are approved).
 
 ## Proof Points
-**Metrics:** TBD
-**Clients:** TBD
-**Testimonials:** TBD
+**Metrics:** None approved.
+**Clients:** No client names or logos approved for use.
+**Testimonials:** None approved for use.
 
 ## Goals
-**Traffic sources:** TBD (candidates: Instagram, DMs, direct links)
-**Conversion action:** TBD
-**Current metrics:** None. The domain was wiped to day one. (REPORTED)
+**Business goal:** Not in brief.
+**Conversion action:** Not in brief.
+**Traffic sources:** Not in brief.
 
 ## Learnings
 *Decisions and tested lessons. Newest first. Keep it to about 20 active entries.*
 | Date | Learning | Evidence | Applies to | Status |
 |------|----------|----------|------------|--------|
-| 2026-10-24 | Never publish prices or package details without Zyade's approval. | Zyade's rule | Site copy, all skills | active |
+| 2026-10-24 | Never show client names, logos, results or testimonials. None are approved. | Zyade's brief | Site copy, all skills | active |
+| 2026-10-24 | Never say or imply we publish for clients. Clients publish. | Zyade's brief | Site copy, FAQ | active |
+| 2026-10-24 | Never publish prices or package details (10/20/30 pieces) without Zyade's approval. | Zyade's rule | Site copy, all skills | active |
 | 2026-10-24 | No LinkedIn or YouTube in copy, links or plans. | Zyade's rule | Site copy, all skills | active |
 
 ## Changelog
 *Newest first. One line per revision: what changed and why.*
+- v2 (2026-10-24) — Rewrote from Zyade's brief: founding date, deliverable contents, client publishes, packages as drafts, no proof approved. Removed TBD scaffolding.
 - v1 (2026-10-24) — Initial context, seeded from the WHO section of CLAUDE.md before the step 1 interview.
