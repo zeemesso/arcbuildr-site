@@ -13,22 +13,23 @@ Project: arcbuildr.co, built from zero. This repo is the whole project.
 
 ## HOW WE BUILD
 
-Follow these steps in order. Do not skip a step.
+Follow these steps in order. Do not skip a step. Copy comes first; the structure adapts to the copy.
 
-1. **Context.** Interview Zyade one question at a time: who the site is for, where traffic comes from (Instagram, DMs, direct links), what the visitor must do (the outcome), what proof exists.
-2. **Requirements.** A short bullet list. Every page, section and field has a stated purpose. Zyade approves it.
-3. **Architecture.** Propose stack, hosting, integrations (email capture, booking, analytics, pixel) and the funnel: traffic source → router → page → outcome. Zyade approves it.
-4. **ASCII prototype** of every page. Iterate until the structure is right.
-5. **Plan.** Small tasks, each independently testable, written in `PLAN.md`. Zyade approves it.
-6. **Build loop.** Take one task, implement it, run build/lint/tests, fix, mark it done in `PLAN.md`, take the next. Tell Zyade when to switch the model to Sonnet 5.5 for this step. Opus stays on planning and copy.
-7. **Test.** Build passes, mobile and desktop layouts checked, every link and form works.
-8. **Visual feedback.** A Vercel preview per branch, with the Agentation toolbar enabled on previews only. Zyade pastes its annotations into the chat.
-9. **Deploy** only when Zyade says so.
-10. **Iterate** from real use.
+1. **Context.** Built from Zyade's brief, saved in `.agents/product-marketing.md`. Use only what the brief says; tag anything else [ASSUMED].
+2. **Copy.** All page copy in `COPY.md`, in Zyade's voice. Every [ASSUMED] item is listed at the top. Zyade approves it.
+3. **Requirements.** A short bullet list, derived from the approved copy. Every page, section and field has a stated purpose. Zyade approves it.
+4. **Architecture.** Propose stack, hosting, integrations (email capture, booking, analytics, pixel) and the funnel: traffic source → router → page → outcome. Zyade approves it.
+5. **ASCII prototype** of every page, shaped around the copy. Iterate until the structure is right.
+6. **Plan.** Small tasks, each independently testable, written in `PLAN.md`. Zyade approves it.
+7. **Build loop.** Take one task, implement it, run build/lint/tests, fix, mark it done in `PLAN.md`, take the next. Tell Zyade when to switch the model to Sonnet 5.5 for this step. Opus stays on planning and copy.
+8. **Test.** Build passes, mobile and desktop layouts checked, every link and form works.
+9. **Visual feedback.** A Vercel preview per branch, with the Agentation toolbar enabled on previews only. Zyade pastes its annotations into the chat.
+10. **Deploy** only when Zyade says so.
+11. **Iterate** from real use.
 
 ## RULES
 
-- Planning is 80% of the work. No code before step 5 is approved.
+- Planning is 80% of the work. No code before step 6 (Plan) is approved.
 - Design references arrive as screenshots, not URLs.
 - Skills arrive in `.claude/skills` from Zyade's Mac. Pull only when told. Pick the right skill yourself; Zyade does not type slash commands.
 - Copy is in Zyade's voice: plain, direct, no hype.
@@ -38,4 +39,5 @@ Follow these steps in order. Do not skip a step.
 
 ## STATUS
 
-- Current step: 1 (Context).
+- Step 1 (Context): done from the brief. See `.agents/product-marketing.md`.
+- Current step: 2 (Copy). Draft in `COPY.md`, waiting for Zyade's review.
