@@ -1,22 +1,22 @@
 # PLAN.md
 
-Step 6 (Plan), 2026-10-24. Approved under the working mode in `CLAUDE.md`.
+Step 6 (Plan), 2026-10-24. Approved under the working mode in `CLAUDE.md`. Revised 2026-10-24: single build branch, locked-down self-test, Notion version pinned.
 
-Sources: `COPY.md` (text), `PROTOTYPE.md` (structure), `CLAUDE.md` STACK (tools). Each task is small, has its own branch and its own test, and ends with `npm run check` passing (from task 2 on).
+Sources: `COPY.md` (text), `PROTOTYPE.md` (structure), `CLAUDE.md` STACK (tools). Each task is small, is one commit and has its own test. From task 2 on, each ends with `npm run check` passing.
 
 ## How the build loop runs
 
-1. Take the first task not marked done.
-2. Branch: `claude/task-NN-<slug>`, based on the previous task's branch, so each preview shows everything built so far. Zyade merges the branches in order.
-3. Implement, run the checks, fix until green.
-4. Mark the task done here, with the date and what was VERIFIED.
-5. Push. Workers Builds gives the branch a preview URL.
+1. All build work happens on one branch, `claude/build`, based on the planning branch. One commit per task, in order. No other task branches.
+2. `main` is untouched until Zyade says deploy. Then he merges `claude/build` once.
+3. Take the first task not marked done. Implement it, run the checks, fix until green. Mark it done here in the same commit, with the date and what was VERIFIED. Push.
+4. Workers Builds gives `claude/build` a preview URL. Claude checks it with `curl`.
 
 ## Known constraints
 
-- This sandbox can't reach `api.notion.com`, `api.resend.com`, `api.cloudflare.com` or `*.workers.dev`: the environment's network policy returns 403 (VERIFIED 2026-10-24 with `curl`). npm works (VERIFIED). So real API calls are proven from a Cloudflare preview, not from here. If Zyade adds those hosts to the environment's allowed domains, Claude can open previews and check results directly.
+- The sandbox network allows `*.workers.dev`, npm and git only. Claude verifies previews with `curl` and never calls Notion or Resend from the sandbox. Only the deployed Worker calls them. (`api.notion.com`, `api.resend.com` and `api.cloudflare.com` returned 403 on 2026-10-24: VERIFIED. The `*.workers.dev` allowance is REPORTED, from Zyade.)
+- Environment variables added in the Claude Code environment settings appear only in a new session (REPORTED, Claude Code docs). `SELFTEST_KEY` needs that before Claude can call the self-test.
 - Wrangler 4.152.0 runs here (VERIFIED). Worker Previews need 4.135.0 or later (REPORTED).
-- Previews of non-main branches use the Worker's secrets, so preview tests write real rows to the Notion database. Test rows are named `TEST ...` and get deleted by hand.
+- Preview tests write real rows to the Notion database. Test rows are named `TEST ...`; Zyade deletes them by hand.
 
 ## Technical decisions
 
@@ -24,111 +24,122 @@ Sources: `COPY.md` (text), `PROTOTYPE.md` (structure), `CLAUDE.md` STACK (tools)
 |------|----------|-----|
 | Site | Astro, static output, no adapter | Every page is static. Astro needs no adapter for static output (REPORTED, Astro docs) |
 | Worker | One small Worker entry (`src/worker.ts`) serving the built files as static assets and handling `/api/*`, `/ig`, `/dm`, `/tt` first | Keeps Astro static. One place for all server logic |
-| Notion | Plain `fetch` to the Notion REST API, no SDK | Reports on the Notion SDK in Workers are mixed (REPORTED) |
+| Notion | Plain `fetch` to the Notion REST API, no SDK. API version pinned as one constant, `NOTION_VERSION = "2022-06-28"`, in `src/lib/notion.ts`. Rows are created with `database_id` | Reports on the Notion SDK in Workers are mixed (REPORTED). `2022-06-28` needs only the database ID from the URL, not the extra data source ID that `2025-09-03` needs. Whether Notion still accepts `2022-06-28` for a database created in 2026 is UNVERIFIED; the self-test proves it. If it is rejected, switch to `2025-09-03` with `data_source_id` and tell Zyade where to copy the ID |
 | Resend | Plain `fetch` to the Resend REST API | Same reason, and no dependency |
 | Sender for alerts | `onboarding@resend.dev` until `arcbuildr.co` is verified in Resend | Domain verification is a DNS change. The test sender can only email the Resend account's own address (REPORTED) |
 | FAQ | `<details>` / `<summary>` | Works without JavaScript, keyboard and screen-reader friendly |
 | Booking | Cal.com embed script on `/thanks`, name and email prefilled from the URL | From the prototype |
 | Agentation | React island, included only when the build-time branch is not `main` | Previews only, never on the live site |
 | Tests | Vitest for Worker logic, Playwright (pre-installed Chromium) for pages, axe for accessibility | Runs in this sandbox without network to Cloudflare |
+| Branch name | `WORKERS_CI_BRANCH` first; if missing, `git rev-parse --abbrev-ref HEAD`; if that fails or says `HEAD`, `unknown`. The source is recorded. `unknown` counts as `main`: preview-only features stay off | Fails closed. `WORKERS_CI_BRANCH` is UNVERIFIED until the first Workers build |
 | Design | Decided in task 3 with the hallmark and frontend-design skills, written to `DESIGN.md` | No screenshots received yet. Zyade corrects through Agentation in step 9 |
 
 ## Tasks
 
 ### Task 1: Scaffold and prove the integrations
-Branch `claude/task-01-proof`. Status: not started.
+Commit: `task 1`. Status: not started.
 
-- Astro project with one placeholder page. `wrangler.jsonc` set up for Workers static assets, with `run_worker_first` for `/api/*`.
-- `src/worker.ts` with `GET /api/selftest`, compiled in only when the build-time branch is not `main`. It:
-  1. creates one Notion page in the leads database named `TEST selftest <time>`,
-  2. sends one Resend email to the alert address,
-  3. returns JSON: `{ notion: "ok" | error, resend: "ok" | error, branch: "<name>" }`.
-- The build reads the branch name from Workers Builds' build variables (`WORKERS_CI_BRANCH`, UNVERIFIED name) and prints it into the build log and the placeholder page.
-- **Done when:** on the branch preview, `/api/selftest` returns `notion: ok`, `resend: ok` and the branch name; the Notion row exists; the email arrives; the build log shows the branch name. Local `npm run build` passes (VERIFIED here). The rest is checked on the preview, by Claude if the hosts are allowed, otherwise by Zyade (2 minutes).
-- If the branch variable doesn't exist, fall back to comparing the Worker version against production, and record that here.
+- Astro project (static output) with one placeholder page. `wrangler.jsonc` for Workers static assets, with `run_worker_first` for `/api/*`.
+- Build step `scripts/build-info.mjs` records the branch as in the decisions table, prints it in the build log and shows it on the placeholder page.
+- `src/lib/notion.ts` and `src/lib/resend.ts`: the same functions task 7 uses for real leads.
+- `GET /api/selftest` returns the same 404 as any unknown `/api` path unless all of these hold: the branch is known and is not `main`; secret `SELFTEST_KEY` is set and at least 16 characters; the request header `X-Selftest-Key` equals it. When they hold, it creates one Notion row `TEST selftest <time>` using every real column, sends one Resend email to `ALERT_EMAIL`, and returns JSON with the branch, branch source, commit, Notion page id and Resend message id. It never returns secrets or the APIs' response bodies.
+- **Done when:**
+  1. Vitest passes: the 404 cases (no header, wrong header, short key, no key, main, unknown branch) and the request shapes, with `fetch` stubbed.
+  2. `npm run build` and a `wrangler deploy --dry-run` bundle succeed here.
+  3. On the `claude/build` preview, `curl -H "X-Selftest-Key: $SELFTEST_KEY" <preview>/api/selftest` returns `notion.ok`, `resend.ok`, a Notion page id, a Resend message id and `branch: "claude/build"` with the branch source.
+  4. The same call without the header returns 404.
+  5. On `main`, the call returns 404 even with the key. Checked after the first merge, or by building locally with the branch set to `main`.
+
+### Task 1b: Remove the self-test
+Commit: `task 1b`. Status: not started. Runs as soon as task 1 passes.
+
+- Delete `/api/selftest`, its key check and its tests. Keep `notion.ts` and `resend.ts`.
+- **Done when:** the preview returns 404 on `/api/selftest` even with the key; `npm run build` passes. Zyade can then delete the `SELFTEST_KEY` secret.
 
 ### Task 2: Checks and CI
-Branch `claude/task-02-checks`.
+Commit: `task 2`. Status: not started.
 - `npm run check`: `astro check`, Prettier, Vitest, Playwright.
 - GitHub Action running `npm run check` on every push.
 - **Done when:** `npm run check` passes here and the Action is green.
 
 ### Task 3: Design system and base layout
-Branch `claude/task-03-design`.
+Commit: `task 3`. Status: not started.
 - `DESIGN.md`: type, color, spacing and the reasons, chosen with the hallmark and frontend-design skills. Fonts self-hosted. CSS custom properties.
 - Base layout: sticky header (wordmark and "Book a call"), footer, page shell. Body text at least 16 px, tap targets at least 44 px.
 - **Done when:** Playwright screenshots at 375 px and 1280 px match the prototype frames; axe reports no violations.
 
 ### Task 4: Home sections 1 to 5
-Branch `claude/task-04-home`.
+Commit: `task 4`. Status: not started.
 - Hero, Who it's for, What we build, Who does what, Who we are (photo and founder lines as placeholders), with anchors `#top`, `#for`, `#build`, `#roles`, `#us`.
 - Text taken from `COPY.md` word for word.
 - **Done when:** a test confirms every headline and body line from `COPY.md` appears on the page; the hero fits in a 375 x 667 first screen; all buttons jump to `#start`.
 
 ### Task 5: Questions section
-Branch `claude/task-05-faq`.
+Commit: `task 5`. Status: not started.
 - 8 questions as `<details>`, first one open.
 - **Done when:** a test opens and closes each item by keyboard; the answers are in the page HTML.
 
 ### Task 6: Form (page side)
-Branch `claude/task-06-form-ui`.
+Commit: `task 6`. Status: not started.
 - Fields, labels, helper text, the right mobile keyboards, hidden `src`, `referrer`, `sent_at` and the spam trap.
 - Inline errors, "Sending..." state with no double submit, server-failure message that keeps what was typed (copy from `PROTOTYPE.md`).
 - Works without JavaScript as a plain form post.
 - **Done when:** Playwright fills invalid and valid values, sees each error and state, and the request body has every field.
 
 ### Task 7: Lead endpoint
-Branch `claude/task-07-lead-api`.
+Commit: `task 7`. Status: not started.
 - `POST /api/lead`: validate, drop spam-trap hits, create the Notion row (Status: New), send the Resend alert, then redirect to `/thanks?name=&email=`.
 - If Notion fails: return the failure state, no redirect. If only Resend fails: still redirect; the lead is safe in Notion.
 - **Done when:** Vitest covers valid, invalid, spam, Notion down and Resend down, with `fetch` stubbed; a real `TEST` lead sent on the preview lands in Notion and triggers the email.
 
 ### Task 8: Short links
-Branch `claude/task-08-short-links`.
+Commit: `task 8`. Status: not started.
 - `/ig`, `/dm`, `/tt` redirect (302) to `/?src=ig|dm|tt`. The form copies `src` into its hidden field.
 - **Done when:** Vitest checks each redirect; Playwright checks `src` reaches the request body.
 
 ### Task 9: Thanks page
-Branch `claude/task-09-thanks`.
+Commit: `task 9`. Status: not started.
 - Cal.com embed prefilled from the URL, fallback line, header without the button, `noindex`.
 - **Done when:** Playwright sees prefill values passed to the embed; the fallback shows when the embed script is blocked; a direct visit with no URL values still works.
 
 ### Task 10: Privacy page
-Branch `claude/task-10-privacy`.
+Commit: `task 10`. Status: not started.
 - Five sections from `COPY.md`, naming Cloudflare, Notion, Resend and Cal.com. Marked "needs a legal check before launch" in `PLAN.md`, not on the page.
 - **Done when:** the page builds and is linked from the form and the footer.
 
 ### Task 11: Agentation on previews
-Branch `claude/task-11-agentation`.
+Commit: `task 11`. Status: not started.
 - React island with the Agentation toolbar, included only when the build-time branch is not `main`.
 - **Done when:** the preview shows the toolbar; a local build with the branch set to `main` contains no Agentation code (checked with `grep` on `dist/`).
 
 ### Task 12: Analytics, meta and 404
-Branch `claude/task-12-meta`.
+Commit: `task 12`. Status: not started.
 - Cloudflare Web Analytics beacon, page titles and descriptions from `COPY.md`, Open Graph tags, `robots.txt`, sitemap without `/thanks`, a plain 404 page.
 - **Done when:** a test reads the built HTML and finds each tag; `/thanks` is absent from the sitemap.
 
 ### Task 13: Remove the self-test and run step 8
-Branch `claude/task-13-test-pass`.
-- Delete `/api/selftest`.
+Commit: `task 13`. Status: not started.
 - Step 8 checks: build passes, layouts at 375 px and 1280 px, every link, the form end to end on the preview, Lighthouse mobile on the preview.
 - **Done when:** all of the above are VERIFIED or listed with a reason, and the preview link goes to Zyade for step 9.
 
 ## Manual setup for Zyade
 
-Everything below is free. Nothing touches DNS or the live domain. Total: about 50 minutes.
+Everything below is free. Nothing touches DNS or the live domain. Total: about 55 minutes.
 
 | # | What | Where | Time | Needed by |
 |---|------|-------|------|-----------|
-| 1 | Allow `api.notion.com`, `api.resend.com`, `api.cloudflare.com` and `*.workers.dev` in this cloud environment's network settings (Edit environment, Network access, Allowed domains; leave package managers ticked) | Claude Code environment settings | 3 min | Task 1 (optional, lets Claude check previews itself) |
+| 1 | Claude Code environment (menu in the session title bar, Edit): Network access, add `*.workers.dev` under Allowed domains and leave package managers ticked. Add an environment variable `SELFTEST_KEY` set to a random string of 48 characters (`openssl rand -hex 24`). Then start a new session, because variables appear only in new sessions | Claude Code | 5 min | Verifying task 1 |
 | 2 | Notion: create an internal integration and copy its token. Create a database "Arcbuildr leads" with columns Name (title), Email (email), Instagram (text), Business (text), Goal (text), Source (select: ig, dm, tt, direct), Referrer (text), Submitted (date), Status (select: New, Booked, Call done, Client, Not a fit). Share the database with the integration and copy its ID from the URL | notion.so | 10 min | Task 1 |
 | 3 | Resend: create a free account with the email that should get lead alerts, then create an API key | resend.com | 5 min | Task 1 |
-| 4 | Cloudflare: create a free account. Workers & Pages, Create, Import a repository, pick `zeemesso/arcbuildr-site`. Production branch `main`; turn on builds for non-production branches; build command `npm run build`; deploy command `npx wrangler deploy`; non-production deploy command `npx wrangler versions upload`. Then add 4 secrets to the Worker: `NOTION_TOKEN`, `NOTION_DATABASE_ID`, `RESEND_API_KEY`, `ALERT_EMAIL`. Do this after Claude pushes the task 1 branch, which holds `wrangler.jsonc` | dash.cloudflare.com | 20 min | Task 1 |
+| 4 | Cloudflare: create a free account. Workers & Pages, Create, "Start with Hello World", name it exactly `arcbuildr` (it must match `name` in `wrangler.jsonc`), and deploy it. Then in that Worker: Settings, Builds, Connect `zeemesso/arcbuildr-site`. Production branch `main`. Turn on builds for non-production branches. Build command `npm run build`; deploy command `npx wrangler deploy`; non-production deploy command `npx wrangler versions upload`. Then Settings, Variables and Secrets: add 5 secrets, `NOTION_TOKEN`, `NOTION_DATABASE_ID`, `RESEND_API_KEY`, `ALERT_EMAIL`, `SELFTEST_KEY` (same value as item 1) | dash.cloudflare.com | 25 min | Task 1 |
 | 5 | Cal.com: create a free account and a 30-minute event "Intro call". Send Claude the booking link | cal.com | 10 min | Task 9 |
 
-Paste the token, IDs and keys only into the Cloudflare secrets screen. Never paste them into this chat or the repo.
+Paste the token, IDs and keys only into Cloudflare's secrets screen and the Claude Code environment settings. Never paste them into the chat or the repo.
 
-On item 4: the `main` branch only gets a `*.workers.dev` address. `arcbuildr.co` stays untouched until you say deploy. The first `main` build may fail because `main` has no app yet (UNVERIFIED). That's expected and harmless.
+Notes on item 4:
+- Create the Worker by hand first. If the repo is connected before a Worker exists, the first build runs on `main`, which has no app yet, and fails. Secrets can't be added until the Worker exists.
+- Pushes to `main` will keep failing to build until you merge `claude/build`. That is expected and harmless: the live domain isn't attached.
+- If the GitHub check on `claude/build` doesn't show the preview URL, send Claude the `*.workers.dev` subdomain (shown on the Worker's page).
 
 ## Later stops (not now)
 
