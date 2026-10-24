@@ -4,7 +4,11 @@ import { handleSelftest } from "../src/lib/selftest";
 import { NOTION_VERSION, leadProperties } from "../src/lib/notion";
 
 const KEY = "k".repeat(32);
-const preview: BuildInfo = { branch: "claude/build", branchSource: "WORKERS_CI_BRANCH", commit: "abc123" };
+const preview: BuildInfo = {
+  branch: "claude/build",
+  branchSource: "WORKERS_CI_BRANCH",
+  commit: "abc123",
+};
 const env: Env = {
   ASSETS: {} as Fetcher,
   NOTION_TOKEN: "notion-secret",
@@ -40,14 +44,28 @@ describe("self-test refuses with an identical 404", () => {
   it("wrong header", async () =>
     expectRefused(handleSelftest(req({ "X-Selftest-Key": "x".repeat(32) }), env, preview)));
   it("key secret too short", async () =>
-    expectRefused(handleSelftest(req({ "X-Selftest-Key": "short" }), { ...env, SELFTEST_KEY: "short" }, preview)));
+    expectRefused(
+      handleSelftest(
+        req({ "X-Selftest-Key": "short" }),
+        { ...env, SELFTEST_KEY: "short" },
+        preview,
+      ),
+    ));
   it("key secret not set", async () =>
-    expectRefused(handleSelftest(req({ "X-Selftest-Key": KEY }), { ...env, SELFTEST_KEY: undefined }, preview)));
+    expectRefused(
+      handleSelftest(req({ "X-Selftest-Key": KEY }), { ...env, SELFTEST_KEY: undefined }, preview),
+    ));
   it("on main, even with the right key", async () =>
-    expectRefused(handleSelftest(req({ "X-Selftest-Key": KEY }), env, { ...preview, branch: "main" })));
+    expectRefused(
+      handleSelftest(req({ "X-Selftest-Key": KEY }), env, { ...preview, branch: "main" }),
+    ));
   it("on an unknown branch, even with the right key", async () =>
     expectRefused(
-      handleSelftest(req({ "X-Selftest-Key": KEY }), env, { ...preview, branch: "unknown", branchSource: "none" }),
+      handleSelftest(req({ "X-Selftest-Key": KEY }), env, {
+        ...preview,
+        branch: "unknown",
+        branchSource: "none",
+      }),
     ));
   it("wrong method", async () =>
     expectRefused(handleSelftest(req({ "X-Selftest-Key": KEY }, "POST"), env, preview)));
@@ -72,9 +90,17 @@ describe("self-test with the right key on a preview", () => {
     expect(notionInit.headers.Authorization).toBe("Bearer notion-secret");
     const notionBody = JSON.parse(notionInit.body);
     expect(notionBody.parent).toEqual({ database_id: "db-id" });
-    expect(Object.keys(notionBody.properties).sort()).toEqual(
-      ["Business", "Email", "Goal", "Instagram", "Name", "Referrer", "Source", "Status", "Submitted"],
-    );
+    expect(Object.keys(notionBody.properties).sort()).toEqual([
+      "Business",
+      "Email",
+      "Goal",
+      "Instagram",
+      "Name",
+      "Referrer",
+      "Source",
+      "Status",
+      "Submitted",
+    ]);
     expect(notionBody.properties.Name.title[0].text.content).toMatch(/^TEST selftest /);
     expect(notionBody.properties.Status).toEqual({ select: { name: "New" } });
 
@@ -98,7 +124,11 @@ describe("self-test with the right key on a preview", () => {
   });
 
   it("names a missing binding without calling the API", async () => {
-    const res = await handleSelftest(req({ "X-Selftest-Key": KEY }), { ...env, RESEND_API_KEY: undefined }, preview);
+    const res = await handleSelftest(
+      req({ "X-Selftest-Key": KEY }),
+      { ...env, RESEND_API_KEY: undefined },
+      preview,
+    );
     const body = (await res.json()) as { resend: { error: string } };
     expect(body.resend.error).toBe("missing RESEND_API_KEY");
     expect(fetchMock.mock.calls.every(([u]) => String(u).includes("notion.com"))).toBe(true);

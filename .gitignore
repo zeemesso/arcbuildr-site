@@ -7,3 +7,5 @@ src/generated/
 .env
 .env.*
 *.log
+test-results/
+playwright-report/

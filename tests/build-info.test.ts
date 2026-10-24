@@ -9,7 +9,10 @@ describe("resolveBranch", () => {
     });
   });
   it("falls back to git when the variable is missing", () => {
-    expect(resolveBranch({}, () => "feature-x")).toEqual({ branch: "feature-x", branchSource: "git" });
+    expect(resolveBranch({}, () => "feature-x")).toEqual({
+      branch: "feature-x",
+      branchSource: "git",
+    });
   });
   it("ignores an empty variable", () => {
     expect(resolveBranch({ WORKERS_CI_BRANCH: "  " }, () => "feature-x").branchSource).toBe("git");
@@ -24,6 +27,8 @@ describe("resolveBranch", () => {
 
 describe("resolveCommit", () => {
   it("shortens the commit", () => {
-    expect(resolveCommit({ WORKERS_CI_COMMIT_SHA: "0123456789abcdef" }, () => "")).toBe("0123456789ab");
+    expect(resolveCommit({ WORKERS_CI_COMMIT_SHA: "0123456789abcdef" }, () => "")).toBe(
+      "0123456789ab",
+    );
   });
 });

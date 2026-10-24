@@ -6,7 +6,10 @@ import { pathToFileURL } from "node:url";
 
 function git(...args) {
   try {
-    return execFileSync("git", args, { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] }).trim();
+    return execFileSync("git", args, {
+      encoding: "utf8",
+      stdio: ["ignore", "pipe", "ignore"],
+    }).trim();
   } catch {
     return "";
   }
@@ -30,5 +33,7 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
   const info = { ...resolveBranch(process.env), commit: resolveCommit(process.env) };
   mkdirSync("src/generated", { recursive: true });
   writeFileSync("src/generated/build-info.json", JSON.stringify(info, null, 2) + "\n");
-  console.log(`build-info: branch=${info.branch} source=${info.branchSource} commit=${info.commit}`);
+  console.log(
+    `build-info: branch=${info.branch} source=${info.branchSource} commit=${info.commit}`,
+  );
 }

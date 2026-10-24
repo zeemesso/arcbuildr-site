@@ -7,13 +7,23 @@
     "prebuild": "node scripts/build-info.mjs",
     "build": "astro build",
     "dev": "astro dev",
+    "preview": "astro preview --port 4321 --host 127.0.0.1 --ignore-lock",
     "pretest": "node scripts/build-info.mjs",
-    "test": "vitest run"
+    "test": "vitest run",
+    "typecheck": "astro check",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test:e2e": "playwright test",
+    "check": "npm run format:check && npm run typecheck && npm test && npm run build && npm run test:e2e"
   },
   "devDependencies": {
+    "@astrojs/check": "^0.9.12",
     "@cloudflare/workers-types": "^5.20261024.1",
+    "@playwright/test": "^1.64.1",
     "astro": "^7.4.1",
-    "typescript": "^7.0.2",
+    "prettier": "^3.9.10",
+    "prettier-plugin-astro": "^1.1.2",
+    "typescript": "^6.0.3",
     "vitest": "^5.0.5",
     "wrangler": "^4.152.0"
   }

@@ -62,7 +62,12 @@ Commit: `task 1b`. Status: not started. Runs as soon as task 1 passes.
 - **Done when:** the preview returns 404 on `/api/selftest` even with the key; `npm run build` passes. Zyade can then delete the `SELFTEST_KEY` secret.
 
 ### Task 2: Checks and CI
-Commit: `task 2`. Status: not started.
+Commit: `task 2`. Status: built 2026-10-24; waiting for the first GitHub Action run.
+
+Verified here (VERIFIED, 2026-10-24): `npm run check` passes: Prettier, `astro check` (0 errors), 17 Vitest tests, build, and the Playwright smoke test at phone (Pixel 7) and desktop (1280 px) sizes using the sandbox Chromium.
+- The smoke test caught a missing favicon (the browser's `/favicon.ico` request returned 404). Added a placeholder `public/favicon.svg`; task 3 replaces it.
+- TypeScript is pinned to 6, because `@astrojs/check` does not support 7 yet.
+- In CI, `npx playwright install chromium` provides the browser instead of the sandbox copy.
 - `npm run check`: `astro check`, Prettier, Vitest, Playwright.
 - GitHub Action running `npm run check` on every push.
 - **Done when:** `npm run check` passes here and the Action is green.

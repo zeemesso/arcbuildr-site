@@ -1,0 +1,10 @@
+dist
+.astro
+.wrangler
+node_modules
+package-lock.json
+*.md
+.claude
+.agents
+playwright-report
+test-results

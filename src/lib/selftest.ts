@@ -43,7 +43,11 @@ export async function selftestAllowed(
   return sameSecret(header, key);
 }
 
-export async function handleSelftest(request: Request, env: Env, info: BuildInfo): Promise<Response> {
+export async function handleSelftest(
+  request: Request,
+  env: Env,
+  info: BuildInfo,
+): Promise<Response> {
   if (request.method !== "GET" || !(await selftestAllowed(request, env, info))) return notFound();
 
   const now = new Date().toISOString();
