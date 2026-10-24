@@ -23,7 +23,7 @@ Follow these steps in order. Do not skip a step. Copy comes first; the structure
 6. **Plan.** Small tasks, each independently testable, written in `PLAN.md`. Zyade approves it.
 7. **Build loop.** Take one task, implement it, run build/lint/tests, fix, mark it done in `PLAN.md`, take the next. Tell Zyade when to switch the model to Sonnet 5.5 for this step. Opus stays on planning and copy.
 8. **Test.** Build passes, mobile and desktop layouts checked, every link and form works.
-9. **Visual feedback.** A Vercel preview per branch, with the Agentation toolbar enabled on previews only. Zyade pastes its annotations into the chat.
+9. **Visual feedback.** A Cloudflare preview URL per branch, with the Agentation toolbar enabled on non-main branches only. Zyade pastes its annotations into the chat.
 10. **Deploy** only when Zyade says so.
 11. **Iterate** from real use.
 
@@ -37,7 +37,18 @@ Follow these steps in order. Do not skip a step. Copy comes first; the structure
 - One branch per task. Zyade merges. No secrets in the repo.
 - Replies: the first line is the next action. Numbered lists of at most 5 items. Include time estimates. English only.
 
+## STACK (approved 2026-10-24)
+
+- Astro, deployed to Cloudflare Workers with static assets, Free plan. Preview URL per branch.
+- Form: a Worker endpoint writes each lead to a Notion database and sends a Resend alert.
+- Booking: Cal.com Free, embedded on `/thanks`.
+- Analytics: Cloudflare Web Analytics, no cookies. Lead and booking counts come from Notion statuses and Cal.com.
+- No pixel and no cookie banner at launch.
+- Secrets (Notion, Resend) live in Cloudflare secrets, never in the repo.
+
 ## STATUS
 
 - Step 1 (Context): done from the brief. See `.agents/product-marketing.md`.
-- Current step: 2 (Copy). Draft in `COPY.md`, waiting for Zyade's review.
+- Step 2 (Copy): approved. All 19 [ASSUMED] picks approved; #10 and #18 stay placeholders until launch.
+- Step 3 (Requirements) and step 4 (Architecture): approved, with Cloudflare instead of Vercel.
+- Current step: 5 (ASCII prototype). See `PROTOTYPE.md`, waiting for Zyade's review.
