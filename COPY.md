@@ -1,6 +1,6 @@
 # COPY.md
 
-Step 2 (Copy). Draft 1, 2026-10-24. Waiting for Zyade's review.
+Step 2 (Copy). Draft 1, 2026-10-24. Approved by Zyade 2026-10-24; #10 and #18 stay placeholders until launch.
 
 Sources: Zyade's brief (see `.agents/product-marketing.md`). Skills used: product-marketing, site-architecture, copywriting, marketing-psychology, cro, humanizer.
 
