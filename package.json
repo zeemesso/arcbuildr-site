@@ -1,0 +1,20 @@
+{
+  "name": "arcbuildr-site",
+  "private": true,
+  "type": "module",
+  "version": "0.0.1",
+  "scripts": {
+    "prebuild": "node scripts/build-info.mjs",
+    "build": "astro build",
+    "dev": "astro dev",
+    "pretest": "node scripts/build-info.mjs",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^5.20261024.1",
+    "astro": "^7.4.1",
+    "typescript": "^7.0.2",
+    "vitest": "^5.0.5",
+    "wrangler": "^4.152.0"
+  }
+}

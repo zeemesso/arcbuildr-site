@@ -37,7 +37,12 @@ Sources: `COPY.md` (text), `PROTOTYPE.md` (structure), `CLAUDE.md` STACK (tools)
 ## Tasks
 
 ### Task 1: Scaffold and prove the integrations
-Commit: `task 1`. Status: not started.
+Commit: `task 1`. Status: built 2026-10-24, waiting for the preview check (needs Zyade's setup list).
+
+Verified here (VERIFIED, 2026-10-24):
+- `npm test`: 17 Vitest tests pass, including all 404 cases and the Notion and Resend request shapes with `fetch` stubbed.
+- `npm run build` passes; `tsc --noEmit` passes; `wrangler deploy --dry-run` bundles the Worker and one asset.
+- Ran the Worker in local workerd with a fake key and no Notion or Resend secrets, so no outside call was possible. On branch `claude/build`: no header gives 404, the right key gives the JSON with `missing NOTION_TOKEN` and `missing RESEND_API_KEY`. On branch `main`: both give 404. The placeholder page shows the branch line.
 
 - Astro project (static output) with one placeholder page. `wrangler.jsonc` for Workers static assets, with `run_worker_first` for `/api/*`.
 - Build step `scripts/build-info.mjs` records the branch as in the decisions table, prints it in the build log and shows it on the placeholder page.

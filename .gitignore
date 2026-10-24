@@ -1,0 +1,9 @@
+node_modules/
+dist/
+.astro/
+.wrangler/
+src/generated/
+.dev.vars
+.env
+.env.*
+*.log
