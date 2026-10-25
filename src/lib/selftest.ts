@@ -93,3 +93,20 @@ export async function handleSelftest(
     },
   );
 }
+
+/** TEMPORARY (removed in task 1b): which bindings exist, names and booleans only. */
+export async function handleDiag(request: Request, env: Env, info: BuildInfo): Promise<Response> {
+  if (!isPreviewBranch(info.branch)) return notFound();
+  const header = request.headers.get("X-Selftest-Key") ?? "";
+  const key = env.SELFTEST_KEY ?? "";
+  return new Response(
+    JSON.stringify({
+      bindings: Object.keys(env).sort(),
+      keySet: key.length > 0,
+      keyLength: key.length,
+      headerLength: header.length,
+      match: key.length > 0 && (await sameSecret(header, key)),
+    }),
+    { headers: { "content-type": "application/json", "cache-control": "no-store" } },
+  );
+}

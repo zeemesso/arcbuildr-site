@@ -10,7 +10,7 @@
     "preview": "astro preview --port 4321 --host 127.0.0.1 --ignore-lock",
     "pretest": "node scripts/build-info.mjs",
     "test": "vitest run",
-    "typecheck": "astro check",
+    "typecheck": "node scripts/build-info.mjs && astro check",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "test:e2e": "playwright test",
