@@ -1,0 +1,94 @@
+---
+import Base from "../layouts/Base.astro";
+---
+
+<Base
+  title="Privacy | Arcbuildr"
+  description="What Arcbuildr collects when you use this site, why, who else sees it, and how to ask us to delete it."
+  noindex
+>
+  <article class="wrap privacy">
+    <h1>Privacy</h1>
+    <p class="updated">Last updated: October 25, 2026</p>
+
+    <section aria-labelledby="p-who">
+      <h2 id="p-who">Who we are</h2>
+      <p>
+        Arcbuildr is a personal brand service run by Zyade and Hanane. To reach us about your
+        details, email [email] or send a DM to @arcbuildr on Instagram.
+      </p>
+    </section>
+
+    <section aria-labelledby="p-collect">
+      <h2 id="p-collect">What we collect</h2>
+      <p>
+        What you type in the form: your name, email, Instagram handle, business and, if you fill it
+        in, what you want your personal brand to do for your business. We also save which link you
+        came from (such as our Instagram bio), the page you came from, and the time you sent the
+        form.
+      </p>
+      <p>
+        The booking tool records the time you pick. Our site statistics count visits to each page
+        and do not use cookies.
+      </p>
+    </section>
+
+    <section aria-labelledby="p-why">
+      <h2 id="p-why">Why we collect it</h2>
+      <p>
+        To prepare for the call and hold it, and to see how many people visit the site and book. We
+        don't use your details for anything else.
+      </p>
+    </section>
+
+    <section aria-labelledby="p-others">
+      <h2 id="p-others">Who else sees it</h2>
+      <p>These services handle your details for us:</p>
+      <ul>
+        <li>Cloudflare hosts this site and counts visits without cookies.</li>
+        <li>Notion stores what you type in the form.</li>
+        <li>Resend sends us an email when a new form comes in.</li>
+        <li>Cal.com runs the booking calendar on the next page.</li>
+      </ul>
+      <p>We don't sell your details or share them with anyone else.</p>
+    </section>
+
+    <section aria-labelledby="p-keep">
+      <h2 id="p-keep">How long we keep it, and how to ask us to delete it</h2>
+      <p>
+        We keep your details while we talk about working together and while we work with you. To
+        have them deleted, email [email] or send us a DM, and we delete them from Notion and from
+        our email.
+      </p>
+    </section>
+  </article>
+</Base>
+
+<style>
+  .privacy {
+    display: grid;
+    gap: var(--space-lg);
+    padding-block: var(--space-xl) var(--space-2xl);
+  }
+  .updated {
+    color: var(--color-ink-muted);
+    font-size: var(--text-sm);
+  }
+  section {
+    display: grid;
+    gap: var(--space-sm);
+    padding-top: var(--space-lg);
+    border-top: var(--rule-thin);
+  }
+  h2 {
+    font-size: var(--text-xl);
+  }
+  ul {
+    margin: 0;
+    padding-left: var(--space-lg);
+    max-width: var(--measure);
+  }
+  li + li {
+    margin-top: var(--space-xs);
+  }
+</style>

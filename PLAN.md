@@ -132,7 +132,7 @@ Commit: `task 9`. Status: DONE 2026-10-25, with one input open. `npm run check` 
 - **Done when:** Playwright sees prefill values passed to the embed; the fallback shows when the embed script is blocked; a direct visit with no URL values still works.
 
 ### Task 10: Privacy page
-Commit: `task 10`. Status: not started.
+Commit: `task 10`. Status: DONE 2026-10-25. `npm run check` passes (VERIFIED): five sections in the `COPY.md` order, the four tools named, linked from the form and the footer, axe clean. **Needs a legal check before launch.** Zyade to confirm: the retention line ("while we talk about working together and while we work with you" is ASSUMED, no period was given), the "Last updated" date, and the email once it exists (#18).
 - Five sections from `COPY.md`, naming Cloudflare, Notion, Resend and Cal.com. Marked "needs a legal check before launch" in `PLAN.md`, not on the page.
 - **Done when:** the page builds and is linked from the form and the footer.
 
