@@ -42,7 +42,6 @@ const hideFromSearch = noindex || showBuild;
     <noscript>
       <style>
         .site-header__cta.is-quiet {
-          opacity: 1;
           translate: none;
           visibility: visible;
         }
@@ -183,17 +182,15 @@ const hideFromSearch = noindex || showBuild;
       min-height: 3.25rem !important;
       padding-inline: var(--space-xl) !important;
       box-shadow: var(--shadow-lift);
+      /* Slides, never fades: a half-transparent button would fail contrast mid-transition. */
       transition:
-        opacity var(--dur-fast) var(--ease-out),
         translate var(--dur-fast) var(--ease-out),
         visibility 0s;
     }
     .site-header__cta.is-quiet {
-      opacity: 0;
-      translate: 0 1rem;
+      translate: 0 calc(100% + 2rem);
       visibility: hidden;
       transition:
-        opacity var(--dur-fast) var(--ease-out),
         translate var(--dur-fast) var(--ease-out),
         visibility 0s linear var(--dur-fast);
     }

@@ -55,7 +55,7 @@ Rules:
 
 ## Components
 
-- Header: a floating dark pill, centred, sticky. The logo, then "Book a call". On phones (< 48 rem) that same link becomes a floating pill at the bottom of the screen. It hides while the hero button or the form is on screen (`IntersectionObserver` in `Base.astro`). There is only one "Book a call" link in the page.
+- Header: a floating dark pill, centred, sticky. The mobile dock slides in and out (translate), never fades, so its contrast never dips mid-transition. The logo, then "Book a call". On phones (< 48 rem) that same link becomes a floating pill at the bottom of the screen. It hides while the hero button or the form is on screen (`IntersectionObserver` in `Base.astro`). There is only one "Book a call" link in the page.
 - Buttons: pill, brand orange, white text at 19 px / 700 (large text, so 3:1 is the bar), an arrow drawn in CSS (`content: "→" / ""`, so screen readers skip it). Hover nudges the arrow 2 px; press scales to 0.97.
 - Footer: a dark rounded panel inside the container with the logo, Privacy and the copyright. No tagline, handles or email (Zyade, 2026-10-26).
 - Logo: `src/components/Logo.astro`, used by the header and the footer.
