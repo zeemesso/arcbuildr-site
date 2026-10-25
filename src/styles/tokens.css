@@ -1,28 +1,65 @@
-/* Hallmark · macrostructure: Long Document · tone: austere editorial · anchor hue: sienna 38
- * theme: custom (paper oklch(97% 0.012 85) · accent oklch(48% 0.14 38) · Newsreader + Instrument Sans)
- * axes: light / roman-serif / warm
+/* Direction A, "Daylight bento" (DESIGN.md). References: docs/references/.
+ * Cool light page, white cards, one electric-violet action color, five deliverable hues.
+ * Open Runde (rounded grotesk) + one Instrument Serif italic phrase per headline.
  */
+@font-face {
+  font-family: "Open Runde";
+  src: url("/fonts/open-runde-400.woff2") format("woff2");
+  font-weight: 400;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Open Runde";
+  src: url("/fonts/open-runde-600.woff2") format("woff2");
+  font-weight: 500 600;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Open Runde";
+  src: url("/fonts/open-runde-700.woff2") format("woff2");
+  font-weight: 700;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Instrument Serif";
+  src: url("/fonts/instrument-serif-italic.woff2") format("woff2");
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+}
+
 :root {
-  --color-paper: oklch(97% 0.012 85);
-  --color-paper-2: oklch(94% 0.016 85);
-  --color-ink: oklch(22% 0.02 60);
-  --color-ink-muted: oklch(42% 0.02 60);
-  --color-rule: oklch(84% 0.015 80);
-  --color-accent: oklch(48% 0.14 38);
-  --color-accent-hover: oklch(40% 0.13 38);
-  --color-on-accent: oklch(98% 0.01 85);
-  --color-focus: oklch(40% 0.17 255);
-  --color-error: oklch(46% 0.17 28);
+  --color-paper: oklch(97.2% 0.004 270);
+  --color-paper-2: oklch(94.5% 0.006 270);
+  --color-card: oklch(100% 0 0);
+  --color-ink: oklch(19% 0.015 275);
+  --color-ink-muted: oklch(45% 0.015 275);
+  --color-rule: oklch(91% 0.006 270);
+  --color-accent: oklch(50% 0.25 278);
+  --color-accent-hover: oklch(43% 0.23 278);
+  --color-accent-soft: oklch(50% 0.25 278 / 0.1);
+  --color-on-accent: oklch(99% 0 0);
+  --color-focus: oklch(50% 0.25 278);
+  --color-error: oklch(48% 0.19 25);
 
-  --font-display: "Newsreader Variable", "Iowan Old Style", Georgia, serif;
-  --font-body: "Instrument Sans Variable", system-ui, -apple-system, "Segoe UI", sans-serif;
+  /* One hue per deliverable, in build order. Text-safe on white (L 50%). */
+  --hue-strategy: oklch(50% 0.14 155);
+  --hue-identity: oklch(52% 0.2 350);
+  --hue-profile: oklch(50% 0.16 245);
+  --hue-content: oklch(52% 0.16 45);
+  --hue-support: oklch(50% 0.1 200);
 
+  --font-display: "Open Runde", ui-rounded, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-body: var(--font-display);
+  --font-serif: "Instrument Serif", "Iowan Old Style", Georgia, serif;
+
+  --text-xs: 0.75rem;
   --text-sm: 0.875rem;
-  --text-base: 1rem;
+  --text-base: 1.0625rem;
   --text-lg: 1.1875rem;
   --text-xl: 1.5rem;
-  --text-2xl: clamp(1.75rem, 1.4rem + 1.6vw, 2.5rem);
-  --text-display: clamp(2.5rem, 1.8rem + 3.6vw, 4.75rem);
+  --text-2xl: clamp(2rem, 1.35rem + 2.8vw, 3.5rem);
+  --text-display: clamp(2.5rem, 1.55rem + 4.2vw, 4.75rem);
 
   --space-2xs: 0.25rem;
   --space-xs: 0.5rem;
@@ -33,13 +70,21 @@
   --space-2xl: 4rem;
   --space-3xl: 6rem;
 
-  --measure: 40rem;
+  --measure: 38rem;
   --page-max: 72rem;
   --gutter: clamp(1.25rem, 5vw, 3rem);
   --tap: 2.75rem;
-  --radius-sm: 0.25rem;
+  --radius-sm: 0.5rem;
+  --radius-md: 1rem;
+  --radius-lg: 1.75rem;
+  --radius-pill: 999px;
   --rule-thin: 1px solid var(--color-rule);
+  --shadow-card:
+    0 1px 2px oklch(19% 0.015 275 / 0.04), 0 8px 24px -12px oklch(19% 0.015 275 / 0.12);
+  --shadow-lift:
+    0 2px 4px oklch(19% 0.015 275 / 0.06), 0 24px 48px -20px oklch(19% 0.015 275 / 0.28);
 
-  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
-  --dur-fast: 120ms;
+  --ease-out: cubic-bezier(0.2, 0.6, 0.2, 1);
+  --dur-fast: 150ms;
+  --dur-reveal: 700ms;
 }

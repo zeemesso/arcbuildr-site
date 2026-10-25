@@ -11,7 +11,10 @@ Sources: `COPY.md` (text), `PROTOTYPE.md` (structure), `CLAUDE.md` STACK (tools)
 3. Take the first task not marked done. Implement it, run the checks, fix until green. Mark it done here in the same commit, with the date and what was VERIFIED. Push.
 4. Workers Builds gives `claude/build` a preview URL. Claude checks it with `curl`.
 
-## Known constraints
+## Known constraints (cloud sandbox, until 2026-10-25)
+
+The build now runs locally (see `CLAUDE.md`). These applied to the cloud session and are kept for the record.
+
 
 - The sandbox network allows `*.workers.dev`, npm and git only. Claude verifies previews with `curl` and never calls Notion or Resend from the sandbox. Only the deployed Worker calls them. (`api.notion.com`, `api.resend.com` and `api.cloudflare.com` returned 403 on 2026-10-24: VERIFIED. The `*.workers.dev` allowance is REPORTED, from Zyade.)
 - Environment variables added in the Claude Code environment settings appear only in a new session (REPORTED, Claude Code docs). `SELFTEST_KEY` needs that before Claude can call the self-test.
@@ -162,6 +165,15 @@ Commit: `task 13`. Status: DONE 2026-10-25 (self-test removal was done in task 1
 - Step 8 checks: build passes, layouts at 375 px and 1280 px, every link, the form end to end on the preview, Lighthouse mobile on the preview.
 - **Done when:** all of the above are VERIFIED or listed with a reason, and the preview link goes to Zyade for step 9.
 
+### Visual layer v2 (Direction A)
+Commit: `visual layer v2`. Status: DONE 2026-10-26, now in step 9 (Agentation).
+- References analyzed with Playwright: `docs/references/context-con.md`, `docs/references/onefactor-kallaway.md`. Zyade picked Direction A, "Daylight bento", written to `DESIGN.md`.
+- New tokens, Open Runde + Instrument Serif Italic (OFL, subset to Latin, about 90 KB for all four files), floating pill header, mobile bottom CTA dock, bento of the five deliverables with CSS illustrations, founder note, FAQ and form cards, dark footer panel, CSS-only scroll reveal.
+- No `COPY.md` text changed. Backend, form logic and tests untouched, apart from the dev-only Agentation endpoint and a `predev` step.
+- `npm run check` passes against the built preview (VERIFIED, 2026-10-26): format, `astro check`, 21 Vitest tests, build, the main-build check, 74 Playwright tests at phone and desktop sizes with axe clean.
+- Fixed on the way: `npm run dev` failed without `build-info.json` (added `predev`); the dev server moved to port 4322 because Playwright's `reuseExistingServer` was testing the dev server on 4321 instead of the build; the mobile CTA dock now starts hidden so it never flashes in over the hero.
+- Not verified: Lighthouse on the new design (run it on the next preview), real iOS Safari and the Instagram in-app browser.
+
 ## Manual setup for Zyade
 
 Everything below is free. Nothing touches DNS or the live domain. Total: about 55 minutes.
@@ -181,16 +193,17 @@ Notes on item 4:
 - Pushes to `main` will keep failing to build until you merge `claude/build`. That is expected and harmless: the live domain isn't attached.
 - If the GitHub check on `claude/build` doesn't show the preview URL, send Claude the `*.workers.dev` subdomain (shown on the Worker's page).
 
-## Open items for Zyade (as of 2026-10-25)
+## Open items for Zyade (as of 2026-10-26)
 
 | # | What | Time |
 |---|------|------|
-| 1 | Open the preview and click through it on your phone: `https://claude-build-arcbuildr.zeemesso.workers.dev`. Send annotations from the Agentation toolbar (step 9) | 15 min |
-| 2 | In Notion, check the `TEST lead`, `TEST browser lead` and `TEST selftest` rows arrived, then delete them. Check the alert inbox for "New lead: TEST ..." emails | 5 min |
-| 3 | Send the Cal.com booking link (`<username>/<event>`). `src/config.ts` holds a placeholder | 2 min |
-| 4 | Cloudflare Web Analytics token as build variable `PUBLIC_CF_ANALYTICS_TOKEN` | 5 min |
-| 5 | Optional: delete the `SELFTEST_KEY` secret in Cloudflare and the Claude Code environment | 2 min |
-| 6 | Launch inputs (#10, #18): founder lines and photo, real handles and email, retention wording and legal check of `/privacy` | later |
+| 1 | Cal.com booking link (`<username>/<event>`). `src/config.ts` still holds the placeholder `arcbuildr/intro-call` | 2 min |
+| 2 | Cloudflare Web Analytics token as build variable `PUBLIC_CF_ANALYTICS_TOKEN` on the Worker | 5 min |
+| 3 | In Notion, delete the 3 test rows: `TEST lead`, `TEST browser lead`, `TEST selftest` | 2 min |
+| 4 | Delete the `SELFTEST_KEY` secret in Cloudflare and in the cloud Claude Code environment | 2 min |
+| 5 | Founder photo of you both, plus one line each for Zyade and Hanane (#10) | later |
+| 6 | Real handles and email (#18): Instagram, TikTok, contact email | later |
+| 7 | Legal check of `/privacy`, including the retention wording | later |
 
 ## Later stops (not now)
 

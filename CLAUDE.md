@@ -23,15 +23,16 @@ Follow these steps in order. Do not skip a step. Copy comes first; the structure
 6. **Plan.** Small tasks, each independently testable, written in `PLAN.md`. Zyade approves it.
 7. **Build loop.** Take one task, implement it, run build/lint/tests, fix, mark it done in `PLAN.md`, take the next. Tell Zyade when to switch the model to Sonnet 5.5 for this step. Opus stays on planning and copy.
 8. **Test.** Build passes, mobile and desktop layouts checked, every link and form works.
-9. **Visual feedback.** A Cloudflare preview URL per branch, with the Agentation toolbar enabled on non-main branches only. Zyade pastes its annotations into the chat.
+9. **Visual feedback.** Locally: `npm run dev` on `http://127.0.0.1:4322` with the Agentation toolbar synced live to `agentation-mcp` on `localhost:4747`. Zyade clicks and annotates; Claude reads `GET /pending` and fixes. Remotely: a Cloudflare preview URL per branch, toolbar on non-main branches only, annotations pasted into the chat.
 10. **Deploy** only when Zyade says so.
 11. **Iterate** from real use.
 
 ## RULES
 
 - Planning is 80% of the work. No code before step 6 (Plan) is approved.
-- Design references arrive as screenshots, not URLs.
-- Skills arrive in `.claude/skills` from Zyade's Mac. Pull only when told. Pick the right skill yourself; Zyade does not type slash commands.
+- Design references (REA rule): any reference site, URL or screenshot, is analyzed with REA or Playwright before a design decision. Record only its mechanics (grid, type scale, spacing, color logic, motion, section patterns) in `docs/references/<site>.md`. Never copy its code, text or assets. Strip tracking parameters and tokens from reference URLs.
+- Pick the right skill yourself from `~/.claude/skill-index.md`; Zyade does not type slash commands.
+- Model routing follows `~/.claude/model-routing.md`: Opus for design, copy and review; Codex for multi-file mechanical code; `delegate` only for non-crucial public or internal text.
 - Copy is in Zyade's voice: plain, direct, no hype.
 - Label every claim: **VERIFIED** (you ran it and saw the output), **REPORTED** (someone or some tool said so) or **UNVERIFIED**.
 - Build work lives on one branch, `claude/build`, one commit per task, no stacked task branches. Zyade merges. `main` stays untouched until he says deploy. No secrets in the repo.
@@ -39,7 +40,7 @@ Follow these steps in order. Do not skip a step. Copy comes first; the structure
 - Working mode (from 2026-10-24): decide on your own inside CLAUDE.md, STACK and the approved docs (`COPY.md`, `PROTOTYPE.md`, `PLAN.md`). Don't ask Zyade for approvals; this replaces "Zyade approves it" in HOW WE BUILD.
 - Stop and ask Zyade only for: spending money, DNS or domain changes, an account or secret he must create, deploying to production, or being blocked twice on the same thing.
 - Batch those into one list per stop, with a time estimate for each item.
-- Never call Notion or Resend from the sandbox. Verify previews with `curl` against `*.workers.dev` only.
+- Lead tests that write to Notion or send through Resend use names starting with `TEST`, and Zyade deletes those rows. Never send a test lead from the live domain.
 
 ## STACK (approved 2026-10-24)
 
@@ -53,5 +54,6 @@ Follow these steps in order. Do not skip a step. Copy comes first; the structure
 ## STATUS
 
 - Steps 1 to 6 done. `COPY.md`, `PROTOTYPE.md` and `PLAN.md` approved.
-- Current step: 8 and 9. All build tasks (1 to 13) are done on `claude/build`. The preview is ready for Zyade's review in step 9.
-- Waiting on Zyade: the open items list in `PLAN.md`. Deploy (step 10) only when he says so.
+- 2026-10-26: the build moved from the cloud sandbox to a local Claude Code session in `~/arcbuildr-site`. Visual layer v2 (Direction A, `DESIGN.md`) replaced the task 3 design. All checks pass.
+- Current step: 9, visual feedback through Agentation on localhost. Then deploy (step 10) only when Zyade says so.
+- Waiting on Zyade: the open items list in `PLAN.md`.

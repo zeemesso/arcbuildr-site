@@ -38,8 +38,17 @@ const hideFromSearch = noindex || showBuild;
     <meta name="twitter:card" content="summary" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <title>{title}</title>
+    <noscript>
+      <style>
+        .site-header__cta.is-quiet {
+          opacity: 1;
+          translate: none;
+          visibility: visible;
+        }
+      </style>
+    </noscript>
   </head>
-  <body>
+  <body class:list={[{ "has-dock": cta }]}>
     {analyticsToken && (
       <script
         defer
@@ -52,12 +61,12 @@ const hideFromSearch = noindex || showBuild;
       Skip to content
     </a>
     <header class="site-header">
-      <div class="wrap site-header__row">
+      <div class="site-header__pill">
         <a class="wordmark" href="/">
           Arcbuildr
         </a>
         {cta && (
-          <a class="btn" href="/#start">
+          <a class="btn site-header__cta is-quiet" href="/#start">
             Book a call
           </a>
         )}
@@ -66,8 +75,8 @@ const hideFromSearch = noindex || showBuild;
     <main id="main">
       <slot />
     </main>
-    <footer class="site-footer">
-      <div class="wrap">
+    <footer class="site-footer wrap">
+      <div class="site-footer__panel">
         <p class="site-footer__line">Arcbuildr. Personal brand service.</p>
         <ul class="site-footer__links">
           <li>Instagram @arcbuildr</li>
@@ -93,6 +102,22 @@ const hideFromSearch = noindex || showBuild;
   if (__PREVIEW__) import("../components/mountFeedback");
 </script>
 
+<script>
+  // Mobile dock: the header CTA floats at the bottom, but steps aside while the hero button or the form is on screen.
+  const dock = document.querySelector(".site-header__cta");
+  const targets = document.querySelectorAll(".hero__action, #start");
+  // Starts quiet so it never flashes in over the hero; pages without a hero or form show it at once.
+  if (dock && !targets.length) dock.classList.remove("is-quiet");
+  if (dock && targets.length) {
+    const seen = new Set<Element>();
+    const io = new IntersectionObserver((entries) => {
+      for (const e of entries) e.isIntersecting ? seen.add(e.target) : seen.delete(e.target);
+      dock.classList.toggle("is-quiet", seen.size > 0);
+    });
+    targets.forEach((t) => io.observe(t));
+  }
+</script>
+
 <style is:global>
   main {
     flex: 1;
@@ -101,75 +126,139 @@ const hideFromSearch = noindex || showBuild;
   .site-header {
     position: sticky;
     top: 0;
-    z-index: 10;
-    background: var(--color-paper);
-    border-bottom: var(--rule-thin);
+    z-index: 20;
+    display: flex;
+    justify-content: center;
+    padding: var(--space-sm) var(--gutter) 0;
+    pointer-events: none;
   }
-  .site-header__row {
+  .site-header__pill {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: var(--space-md);
-    min-height: 3.5rem;
-    padding-block: var(--space-xs);
+    gap: var(--space-xl);
+    width: 100%;
+    max-width: 30rem;
+    padding: 0.375rem 0.375rem 0.375rem var(--space-lg);
+    border-radius: var(--radius-pill);
+    background: var(--color-ink);
+    color: var(--color-paper);
+    box-shadow: var(--shadow-lift);
+    pointer-events: auto;
   }
   .wordmark {
     display: inline-flex;
     align-items: center;
+    gap: var(--space-xs);
     min-height: var(--tap);
-    font-family: var(--font-display);
-    font-size: var(--text-xl);
-    font-weight: 600;
-    letter-spacing: -0.02em;
+    font-size: var(--text-lg);
+    font-weight: 700;
+    letter-spacing: -0.04em;
     text-decoration: none;
+  }
+  /* The arc mark: three quarters of a ring in the action color. */
+  .wordmark::before {
+    content: "";
+    width: 0.95em;
+    height: 0.95em;
+    border: 0.2em solid var(--color-accent);
+    border-left-color: transparent;
+    border-radius: 50%;
+    transform: rotate(-45deg);
+  }
+  .site-header__pill .btn {
+    min-height: var(--tap);
+    padding-inline: var(--space-lg);
+  }
+
+  @media (max-width: 47.99rem) {
+    .site-header__pill {
+      max-width: none;
+      justify-content: center;
+      padding-left: 0.375rem;
+    }
+    .site-header__cta {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: max(var(--space-md), env(safe-area-inset-bottom));
+      width: fit-content;
+      margin-inline: auto;
+      min-height: 3.25rem !important;
+      padding-inline: var(--space-xl) !important;
+      box-shadow: var(--shadow-lift);
+      transition:
+        opacity var(--dur-fast) var(--ease-out),
+        translate var(--dur-fast) var(--ease-out),
+        visibility 0s;
+    }
+    .site-header__cta.is-quiet {
+      opacity: 0;
+      translate: 0 1rem;
+      visibility: hidden;
+      transition:
+        opacity var(--dur-fast) var(--ease-out),
+        translate var(--dur-fast) var(--ease-out),
+        visibility 0s linear var(--dur-fast);
+    }
+    .has-dock .site-footer {
+      padding-bottom: 5.5rem;
+    }
   }
 
   .site-footer {
     margin-top: var(--space-3xl);
-    padding-block: var(--space-xl);
-    border-top: var(--rule-thin);
-    background: var(--color-paper-2);
+    padding-bottom: var(--space-md);
+  }
+  .site-footer__panel {
+    display: grid;
+    gap: var(--space-md);
+    padding: var(--space-xl) var(--space-lg);
+    border-radius: var(--radius-lg);
+    background: var(--color-ink);
+    color: var(--color-paper);
   }
   .site-footer__line {
-    font-family: var(--font-display);
-    font-size: var(--text-lg);
+    font-size: var(--text-xl);
+    font-weight: 700;
+    letter-spacing: -0.03em;
   }
   .site-footer__links {
     display: flex;
     flex-direction: column;
-    gap: var(--space-xs);
-    margin: var(--space-md) 0;
+    margin: 0;
     padding: 0;
     list-style: none;
   }
+  .site-footer__links li,
   .site-footer__links a {
-    display: inline-flex;
-    align-items: center;
-    min-height: var(--tap);
-  }
-  .site-footer__links li {
     display: flex;
     align-items: center;
     min-height: var(--tap);
   }
   .site-footer__small {
-    color: var(--color-ink-muted);
+    color: oklch(78% 0.01 275);
     font-size: var(--text-sm);
   }
 
   @media (min-width: 64rem) {
-    .site-footer .wrap {
-      display: grid;
+    .site-footer__panel {
       grid-template-columns: 1fr auto;
       align-items: center;
       column-gap: var(--space-xl);
+      padding: var(--space-2xl) var(--space-2xl) var(--space-xl);
     }
     .site-footer__links {
       grid-row: 1 / span 2;
       grid-column: 2;
       flex-direction: row;
       gap: var(--space-lg);
-      margin: 0;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .site-header__cta {
+      transition: none !important;
     }
   }
 </style>
