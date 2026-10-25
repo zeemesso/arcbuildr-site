@@ -144,7 +144,9 @@ Commit: `task 11`. Status: DONE 2026-10-25. Instead of a React island, a script 
 - **Done when:** the preview shows the toolbar; a local build with the branch set to `main` contains no Agentation code (checked with `grep` on `dist/`).
 
 ### Task 12: Analytics, meta and 404
-Commit: `task 12`. Status: not started.
+Commit: `task 12`. Status: DONE 2026-10-25, with one input open. `npm run check` passes (VERIFIED): Playwright reads the served pages for the title, description, Open Graph tags and canonical link; `sitemap.xml` lists `/` and `/privacy` only; the plain 404 page answers 404 with a link home; no beacon without a token. `scripts/verify-main-build.mjs` builds as `main` and confirms: indexable home, `/thanks` noindex, `robots.txt` allows crawling and names the sitemap, sitemap has no `/thanks`. Preview builds are always noindex and `robots.txt` disallows everything.
+- No Open Graph image (no image exists yet).
+- **Zyade: Web Analytics token.** In Cloudflare, Analytics, Web Analytics, add the site, copy the token, and add it as a build variable `PUBLIC_CF_ANALYTICS_TOKEN` on the Worker (Settings, Builds, Variables). Until then no beacon is on the page.
 - Cloudflare Web Analytics beacon, page titles and descriptions from `COPY.md`, Open Graph tags, `robots.txt`, sitemap without `/thanks`, a plain 404 page.
 - **Done when:** a test reads the built HTML and finds each tag; `/thanks` is absent from the sitemap.
 
