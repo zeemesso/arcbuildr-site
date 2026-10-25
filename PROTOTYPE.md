@@ -366,3 +366,112 @@ Server failed (Notion or network down)
 - No cookie banner (no pixel and cookieless analytics, per the approved stack).
 - Agentation toolbar appears on non-main branch previews only, bottom right. Never on the live site.
 - Tap targets at least 44 px tall. Body text at least 16 px, so iPhone doesn't zoom into form fields.
+
+---
+
+# Hub (draft 2, 2026-10-26)
+
+Zyade, 2026-10-26: arcbuildr.co is the hub that sells Arcbuildr, and the build is not limited by the approved text. New pages use `COPY.md` lines where they exist. Anything else is a visible `[Placeholder: …]` for Zyade to write. No invented claims, results, prices or client names.
+
+```
+arcbuildr.co
+├── /              Home: the whole argument and the form (built)
+├── /method        How we build: the five deliverables in order, in depth
+├── /about         Zyade and Hanane, why Arcbuildr exists, how we work
+├── /notes         Notes: short posts on personal brands, the proof we can show before client proof
+│   └── /notes/<slug>
+├── /thanks        (built)
+└── /privacy       (built)
+```
+
+Left out on purpose: a work or case-study page (no client proof is approved), a link-in-bio page (the bio link goes straight to Home via `/ig`), and a standalone form page (the form stays at `/#start`).
+
+Every new page ends with the same call band linking to `/#start`. The short links do not change.
+
+## Header (all pages)
+
+```
+mobile                                    desktop
++----------------------------------------+  +--------------------------------------------------------+
+| (arc) arcbuildr               [ Menu ] |  | (arc) arcbuildr   Method  Notes  About  [ Book a call ]|
++----------------------------------------+  +--------------------------------------------------------+
+         ... page ...
+      [   Book a call   ]   <- bottom dock, as built
+```
+- Mobile "Menu" opens a sheet (HTML `popover`, no JavaScript): Method, Notes, About, then Book a call. Esc or a tap outside closes it.
+- The current page's link is marked `aria-current="page"`.
+
+## Method `/method` (mobile)
+
+```
++----------------------------------------+
+| HOW WE BUILD                           |
+| Five builds,                           |
+| in order.                    <- .hl    |
+| [Placeholder: one-line lede]           |
+| [     Book an intro call     ]         |
++----------------------------------------+
+| 01  (art)  Brand Strategy              |
+| <COPY.md line for the deliverable>     |
+| What you give us                       |
+|  - [Placeholder]                       |
+| What you get                           |
+|  - [Placeholder]                       |
++----------------------------------------+
+| 02 ... 05, same card, own hue and art  |
++----------------------------------------+
+| What we don't do                       |
+|  - We don't publish for you.           |
+|  - No LinkedIn, no YouTube.            |
++----------------------------------------+
+| Call band  [ Book an intro call ]      |
++----------------------------------------+
+```
+- The five deliverables come from one shared data file, used by Home's bento and this page, so names and lines never drift.
+- Cards stack with a vertical line joining the numbers (the order matters). Desktop: number and art on the left, text on the right.
+- The hero button has `.hero__action`, so the dock hides while it is on screen.
+
+## About `/about` (mobile)
+
+```
++----------------------------------------+
+| ABOUT                                  |
+| Two founders,                          |
+| one method.                  <- .hl    |
+| Founded September 23, 2026.            |
++----------------------------------------+
+| [photo]  Zyade     [Placeholder: role] |
+|          [Placeholder: one line]       |
+| [photo]  Hanane    [Placeholder: role] |
+|          [Placeholder: one line]       |
++----------------------------------------+
+| Why Arcbuildr                          |
+| [Placeholder: the story, 2-3 lines]    |
++----------------------------------------+
+| How we work (3 cards)                  |
+|  Your real story / No niche template / |
+|  We stay after delivery                |
++----------------------------------------+
+| Call band                              |
++----------------------------------------+
+```
+- The three principles are the brief's differentiators, so they are not placeholders.
+
+## Notes `/notes` and `/notes/<slug>` (mobile)
+
+```
+/notes                                  /notes/<slug>
++--------------------------------------+ +--------------------------------------+
+| NOTES                                | | Oct 26, 2026 · 3 min read            |
+| [Placeholder: h1]                    | | <note title>                         |
+| [Placeholder: lede]                  | | <summary>                            |
++--------------------------------------+ +--------------------------------------+
+| Oct 26, 2026 · 3 min                 | | <body, 38 rem measure>               |
+| <note title>                         | | ...                                  |
+| <one-line summary>             ->    | +--------------------------------------+
++--------------------------------------+ | Call band                            |
+| ... newest first                     | +--------------------------------------+
++--------------------------------------+
+```
+- Notes are Markdown files in `src/content/notes/` (`title`, `summary`, `date`, `draft`). Drafts show on previews and are left out of the main build, so placeholder notes never go live.
+- Notes are in the sitemap; drafts are not.

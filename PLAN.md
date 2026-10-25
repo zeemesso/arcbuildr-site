@@ -168,11 +168,36 @@ Commit: `task 13`. Status: DONE 2026-10-25 (self-test removal was done in task 1
 ### Visual layer v2 (Direction A)
 Commit: `visual layer v2`. Status: DONE 2026-10-26, now in step 9 (Agentation).
 - References analyzed with Playwright: `docs/references/context-con.md`, `docs/references/onefactor-kallaway.md`. Zyade picked Direction A, "Daylight bento", written to `DESIGN.md`.
-- New tokens, Open Runde + Instrument Serif Italic (OFL, subset to Latin, about 90 KB for all four files), floating pill header, mobile bottom CTA dock, bento of the five deliverables with CSS illustrations, founder note, FAQ and form cards, dark footer panel, CSS-only scroll reveal.
+- New tokens, Open Runde only (OFL, subset to Latin, about 22 KB per weight; the serif was dropped in Agentation round 1), floating pill header, mobile bottom CTA dock, bento of the five deliverables with CSS illustrations, founder note, FAQ and form cards, dark footer panel, CSS-only scroll reveal.
 - No `COPY.md` text changed. Backend, form logic and tests untouched, apart from the dev-only Agentation endpoint and a `predev` step.
 - `npm run check` passes against the built preview (VERIFIED, 2026-10-26): format, `astro check`, 21 Vitest tests, build, the main-build check, 74 Playwright tests at phone and desktop sizes with axe clean.
 - Fixed on the way: `npm run dev` failed without `build-info.json` (added `predev`); the dev server moved to port 4322 because Playwright's `reuseExistingServer` was testing the dev server on 4321 instead of the build; the mobile CTA dock now starts hidden so it never flashes in over the hero.
-- Not verified: Lighthouse on the new design (run it on the next preview), real iOS Safari and the Instagram in-app browser.
+- Lighthouse 12 on the local build of `claude/build`, 2026-10-26 (VERIFIED). Mobile: Home 94 performance (LCP 2.5 s, speed index 4.1 s, the intro and the hero entrance), /privacy 98, /thanks 99. Desktop: 100 on all three. Accessibility 100 everywhere. SEO 66 because preview builds are `noindex` on purpose; the main build is checked by `test:main-build`. /thanks best practices 78 to 79: the Cal.com embed sets a third-party cookie. Accepted, no fix.
+- Not verified: real iOS Safari and the Instagram in-app browser.
+
+### Hub (from 2026-10-26)
+Prototype: `PROTOTYPE.md`, "Hub". Each task is one commit on `claude/build` and passes `npm run check`. Routing: Codex builds H1 to H3 from the prototype and Opus reviews each diff; H4 runs in a Claude Code cloud session on `claude/hub-notes` and is cherry-picked onto `claude/build` (an exception to the one-branch rule, so it can run in parallel).
+
+#### H1: Navigation
+- Header links Method, Notes, About on desktop; a "Menu" button opening a `popover` sheet on mobile; `aria-current` on the current page. The dock stays as built.
+- Shared `CallBand.astro` (heading, button to `/#start`) for new pages.
+- **Done when:** tests open and close the sheet by tap and Esc, every nav link returns 200 (Notes after H4), axe is clean, tap targets are at least 44 px at phone and desktop sizes.
+
+#### H2: Method page
+- `src/data/deliverables.ts` holds the five deliverables (name, line, hue, art); Home's bento reads it with no visual change.
+- `/method` as in the prototype, placeholders visible.
+- **Done when:** a test checks the five names and lines on `/method` and Home, the hero fits a 375 x 667 screen, axe is clean, and `/method` is in the sitemap.
+
+#### H3: About page
+- `/about` as in the prototype.
+- **Done when:** a test checks the h1, the founding date and the three principles; axe is clean; `/about` is in the sitemap.
+
+#### H4: Notes
+- Astro content collection `notes` (`title`, `summary`, `date`, `draft`), `/notes` index newest first, `/notes/[slug]`, two placeholder drafts.
+- **Done when:** tests check the index order and a note page; `test:main-build` fails if a draft is in the main build or its sitemap; axe is clean.
+
+#### H5: Hub check
+- `npm run check`, Lighthouse on every page at phone and desktop sizes, Agentation round on the new pages.
 
 ## Manual setup for Zyade
 
