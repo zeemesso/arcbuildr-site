@@ -71,7 +71,7 @@ Verified here (VERIFIED, 2026-10-24):
   5. On `main`, the call returns 404 even with the key. Checked after the first merge, or by building locally with the branch set to `main`.
 
 ### Task 1b: Remove the self-test
-Commit: `task 1b`. Status: built 2026-10-25; preview check pending. `npm run check` passes (VERIFIED: 7 Vitest tests, build, Playwright).
+Commit: `task 1b`. Status: DONE 2026-10-25. Preview f83375d: `/api/selftest` and `/api/selftest-diag` both 404 with the right key (VERIFIED). `npm run check` passes (VERIFIED: 7 Vitest tests, build, Playwright).
 
 - Delete `/api/selftest`, its key check and its tests. Keep `notion.ts` and `resend.ts`.
 - **Done when:** the preview returns 404 on `/api/selftest` even with the key; `npm run build` passes. Zyade can then delete the `SELFTEST_KEY` secret.
