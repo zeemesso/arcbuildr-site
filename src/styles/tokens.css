@@ -81,6 +81,9 @@
   --shadow-lift: 0 2px 4px rgb(26 26 26 / 0.06), 0 24px 48px -20px rgb(26 26 26 / 0.28);
 
   --ease-out: cubic-bezier(0.2, 0.6, 0.2, 1);
+  --ease-in-out: cubic-bezier(0.7, 0, 0.2, 1);
+  /* A soft spring: small overshoot, then settle. */
+  --spring: linear(0, 0.25 8%, 0.7 20%, 1.04 36%, 1.06 44%, 1.01 62%, 0.995 78%, 1);
   --dur-fast: 150ms;
   --dur-reveal: 700ms;
 }

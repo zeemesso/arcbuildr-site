@@ -121,13 +121,13 @@ const faq = [
           <i></i>
         </span>
         <div class="profile__highlights">
-          {steps.map((s) => (
-            <span style={`--hue: var(--hue-${s.hue})`}></span>
+          {steps.map((s, i) => (
+            <span style={`--hue: var(--hue-${s.hue}); --i: ${i}`}></span>
           ))}
         </div>
         <div class="profile__tiles">
           {Array.from({ length: 6 }, (_, i) => (
-            <span style={`--hue: var(--hue-${steps[i % 5].hue})`}></span>
+            <span style={`--hue: var(--hue-${steps[i % 5].hue}); --i: ${i}`}></span>
           ))}
         </div>
       </div>
@@ -151,12 +151,15 @@ const faq = [
   </section>
 
   <section class="section wrap" id="build" aria-labelledby="build-title">
-    <h2 id="build-title" class="section__title">
+    <h2 id="build-title" class="section__title reveal">
       What we build, <span class="hl">in the order we build it</span>
     </h2>
     <ol class="bento">
-      {steps.map((s) => (
-        <li class="card bento__card reveal" style={`--hue: var(--hue-${s.hue})`}>
+      {steps.map((s, i) => (
+        <li
+          class="card bento__card reveal"
+          style={`--hue: var(--hue-${s.hue}); --d: ${(i < 2 ? i : i - 2) * 90}ms`}
+        >
           <div class="bento__text">
             <h3>{s.name}</h3>
             <p>{s.text}</p>
@@ -175,7 +178,7 @@ const faq = [
   </section>
 
   <section class="section wrap" id="roles" aria-labelledby="roles-title">
-    <h2 id="roles-title" class="section__title">
+    <h2 id="roles-title" class="section__title reveal">
       Who does <span class="hl">what</span>
     </h2>
     <div class="roles">
@@ -220,10 +223,10 @@ const faq = [
   </section>
 
   <section class="section wrap" id="questions" aria-labelledby="questions-title">
-    <h2 id="questions-title" class="section__title">
+    <h2 id="questions-title" class="section__title reveal">
       Questions
     </h2>
-    <div class="card faq">
+    <div class="card faq reveal">
       {faq.map((item, i) => (
         <details open={i === 0}>
           <summary>{item.q}</summary>
@@ -234,7 +237,7 @@ const faq = [
   </section>
 
   <section class="section wrap" id="start" aria-labelledby="start-title">
-    <div class="card start">
+    <div class="card start reveal">
       <div class="start__intro">
         <h2 id="start-title">
           Start <span class="hl">with a call</span>
@@ -789,6 +792,310 @@ const faq = [
   @media (prefers-reduced-motion: reduce) {
     .faq summary::after {
       transition: none;
+    }
+  }
+</style>
+
+<style>
+  /* Motion. Text moves by clip and translate only; it never sits half transparent on screen. */
+  @media (prefers-reduced-motion: no-preference) {
+    .hero {
+      --t0: 0s;
+    }
+    :global(.intro) .hero {
+      --t0: 1.45s;
+    }
+
+    /* Hero entrance */
+    .hero h1 {
+      animation: wipe-up 0.9s var(--ease-out) var(--t0) backwards;
+    }
+    .lede {
+      animation: wipe-up 0.9s var(--ease-out) calc(var(--t0) + 0.12s) backwards;
+    }
+    .hero__action .btn {
+      animation: pop 0.7s var(--spring) calc(var(--t0) + 0.3s) backwards;
+    }
+    .note {
+      animation: rise 0.7s var(--ease-out) calc(var(--t0) + 0.4s) backwards;
+    }
+    .profile__card--before {
+      animation:
+        fly-before 1s var(--spring) calc(var(--t0) + 0.45s) backwards,
+        float 6s ease-in-out calc(var(--t0) + 1.5s) infinite alternate;
+    }
+    .profile__card--after {
+      animation: fly-after 1.1s var(--spring) calc(var(--t0) + 0.55s) backwards;
+    }
+
+    /* The profile keeps building: story ring spins, highlights pop, tiles fill, a shine passes. */
+    .profile__card--after .profile__avatar {
+      position: relative;
+      outline: 0;
+    }
+    .profile__card--after .profile__avatar::before {
+      content: "";
+      position: absolute;
+      inset: -7px;
+      border-radius: 50%;
+      background: conic-gradient(
+        var(--color-accent),
+        var(--hue-content),
+        var(--color-sage),
+        var(--color-accent)
+      );
+      mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 2.5px));
+      animation: spin 4s linear infinite;
+    }
+    .profile__highlights span {
+      animation: pop 0.6s var(--spring) calc(var(--t0) + 1s + var(--i) * 80ms) backwards;
+    }
+    .profile__card--after .profile__tiles span {
+      animation: tile-in 0.6s var(--spring) calc(var(--t0) + 1.2s + var(--i) * 90ms) backwards;
+    }
+    .profile__card--after .profile__tiles {
+      position: relative;
+      overflow: clip;
+      border-radius: 4px;
+    }
+    .profile__card--after .profile__tiles::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(
+        105deg,
+        transparent 35%,
+        rgb(255 255 255 / 0.45) 50%,
+        transparent 65%
+      );
+      translate: -100% 0;
+      animation: shine 5s var(--ease-in-out) calc(var(--t0) + 2.4s) infinite;
+    }
+
+    /* Bento cards lift; each drawing moves in its own way once its card is in view. */
+    .bento__card:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-lift);
+    }
+    .bento__card:not(:global(.is-in)) .art i {
+      animation-play-state: paused;
+    }
+    .art--target i:nth-child(4) {
+      display: block;
+      left: 50%;
+      top: 50%;
+      width: 4rem;
+      height: 4rem;
+      border-radius: 50%;
+      border: 2px solid var(--hue);
+      translate: -50% -50%;
+      animation: ping 2.4s var(--ease-out) 0.6s infinite;
+    }
+    .art--target i:nth-child(3) {
+      animation: pop 0.6s var(--spring) 0.3s backwards;
+    }
+    .art--swatches i {
+      animation: rise-far 0.8s var(--spring) backwards;
+    }
+    .art--swatches i:nth-child(2) {
+      animation-delay: 0.08s;
+    }
+    .art--swatches i:nth-child(3) {
+      animation-delay: 0.16s;
+    }
+    .art--swatches i:nth-child(4) {
+      animation-delay: 0.24s;
+    }
+    .bento__card:hover .art--swatches {
+      gap: 0.9rem;
+    }
+    .art--swatches {
+      transition: gap 0.35s var(--spring);
+    }
+    .art--grid i {
+      animation: tile-focus 6s ease-in-out infinite;
+    }
+    .art--grid i:nth-child(2) {
+      animation-delay: 1s;
+    }
+    .art--grid i:nth-child(3) {
+      animation-delay: 2s;
+    }
+    .art--grid i:nth-child(4) {
+      animation-delay: 3s;
+    }
+    .art--grid i:nth-child(5) {
+      animation-delay: 4s;
+    }
+    .art--grid i:nth-child(6) {
+      animation-delay: 5s;
+    }
+    .art--stack i:nth-child(-n + 3) {
+      transition:
+        rotate 0.45s var(--spring),
+        translate 0.45s var(--spring);
+    }
+    .bento__card:hover .art--stack i:nth-child(1) {
+      translate: -125% 0.3rem;
+      rotate: -14deg;
+    }
+    .bento__card:hover .art--stack i:nth-child(2) {
+      translate: 25% 0.3rem;
+      rotate: 14deg;
+    }
+    .bento__card:hover .art--stack i:nth-child(3) {
+      translate: -50% -0.9rem;
+    }
+    .art--chat i:nth-child(1) {
+      transform-origin: bottom left;
+      animation: chat 5s var(--spring) infinite;
+    }
+    .art--chat i:nth-child(2) {
+      transform-origin: bottom right;
+      animation: chat 5s var(--spring) 0.9s infinite;
+    }
+
+    /* Polaroids drop and settle when the note arrives. */
+    .polaroid {
+      transition:
+        transform 0.9s var(--spring),
+        opacity 0.5s var(--ease-out);
+    }
+    .polaroid--back {
+      transition-delay: 0.15s;
+    }
+    .photo {
+      transition-delay: 0.3s;
+    }
+    :global(.js) .note-card:not(:global(.is-in)) .polaroid {
+      opacity: 0;
+      transform: translateY(-3rem) rotate(-10deg);
+    }
+    :global(.is-instant) .polaroid {
+      transition: none;
+    }
+    .polaroids:hover .photo {
+      transform: rotate(-4deg) scale(1.03);
+      transition-delay: 0s;
+    }
+
+    /* FAQ answers open smoothly where the browser can animate to auto. */
+    .faq details::details-content {
+      block-size: 0;
+      overflow: clip;
+      transition:
+        block-size 0.35s var(--ease-out),
+        content-visibility 0.35s allow-discrete;
+    }
+    .faq details[open]::details-content {
+      block-size: auto;
+    }
+  }
+
+  @supports (interpolate-size: allow-keywords) {
+    :global(:root) {
+      interpolate-size: allow-keywords;
+    }
+  }
+
+  @keyframes wipe-up {
+    from {
+      clip-path: inset(0 0 100% 0);
+      translate: 0 0.35em;
+    }
+    to {
+      clip-path: inset(0 0 -20% 0);
+      translate: 0 0;
+    }
+  }
+  @keyframes rise {
+    from {
+      translate: 0 0.75rem;
+    }
+  }
+  @keyframes rise-far {
+    from {
+      translate: 0 5rem;
+    }
+  }
+  @keyframes pop {
+    from {
+      scale: 0;
+    }
+  }
+  @keyframes tile-in {
+    from {
+      scale: 0.4;
+      opacity: 0;
+    }
+  }
+  @keyframes fly-before {
+    from {
+      opacity: 0;
+      translate: -40% 15%;
+      rotate: -22deg;
+    }
+  }
+  @keyframes fly-after {
+    from {
+      opacity: 0;
+      translate: 25% 35%;
+      rotate: 16deg;
+    }
+  }
+  @keyframes float {
+    to {
+      transform: translateY(-10px) rotate(-1.5deg);
+    }
+  }
+  @keyframes spin {
+    to {
+      rotate: 1turn;
+    }
+  }
+  @keyframes shine {
+    0%,
+    100% {
+      translate: -100% 0;
+    }
+    35%,
+    99% {
+      translate: 100% 0;
+    }
+  }
+  @keyframes ping {
+    from {
+      scale: 0.6;
+      opacity: 0.8;
+    }
+    to {
+      scale: 1.9;
+      opacity: 0;
+    }
+  }
+  @keyframes tile-focus {
+    0%,
+    14% {
+      background: var(--hue);
+      scale: 1.08;
+    }
+    22%,
+    100% {
+      background: color-mix(in oklab, var(--hue) 30%, var(--color-card));
+      scale: 1;
+    }
+  }
+  @keyframes chat {
+    0% {
+      scale: 0;
+    }
+    12%,
+    80% {
+      scale: 1;
+    }
+    92%,
+    100% {
+      scale: 0;
     }
   }
 </style>

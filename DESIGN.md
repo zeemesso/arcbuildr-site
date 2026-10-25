@@ -64,13 +64,21 @@ Rules:
 
 ## Motion
 
-- Scroll reveal is CSS only (`animation-timeline: view()`) and moves cards by transform, never opacity, so text never drops below its contrast. Browsers without support show everything at rest.
-- Transitions are 150 ms, ease `0.2, 0.6, 0.2, 1`, and name their properties. No `transition: all`.
-- `prefers-reduced-motion: reduce` turns off the reveal, smooth scroll and all transitions.
+Added 2026-10-26 after Zyade: "we lack animations and motion, it doesn't feel like context-con". No library: CSS plus two small inline scripts in `Base.astro`.
+
+- **Intro** (home, first visit per session, about 2 s, any tap or key skips): the brand arc draws, "arcbuild" rises letter by letter, the orange "r" lands last, then the page lifts away like a curtain and the header pill drops in. A head script sets `.intro` before first paint; reduced motion never gets it.
+- **Hero entrance:** headline and lede wipe up (clip and translate), the button pops on a spring, both profile cards fly in and settle.
+- **Living hero:** a story ring spins around the avatar, highlights pop in turn, tiles fill one by one, a shine crosses the grid every 5 s, the back card floats.
+- **Scroll reveal:** `.reveal` fades and rises as it enters (`IntersectionObserver` adds `.is-in`), staggered with `--d` in the bento. Anything on screen at load is shown at once with no transition, so axe never sees half-transparent text. Without JS nothing is hidden (`.js` gate). No scale on reveals, so tap targets keep their 44 px.
+- **Bento drawings:** the target pings, swatches rise and spread on hover, the grid's focus tile walks, the carousel fans out on hover, the chat bubbles pop in turn. Loops pause until the card is in view. Cards lift 4 px on hover.
+- **Polaroids** drop and settle when the founder note arrives, and straighten on hover. **FAQ** answers open smoothly where the browser can animate to `auto` (`::details-content`, `interpolate-size`).
+- Easing: `--spring` (a `linear()` spring with a small overshoot), `--ease-out`, `--ease-in-out`. Text moves by clip and translate only.
+- The mobile dock slides (translate), never fades, so its contrast never dips mid-transition.
+- `prefers-reduced-motion: reduce` turns off the intro, the entrances, the loops, the reveals, smooth scroll and all transitions.
 
 ## Not used, on purpose
 
-- No intro splash, no WebGL, no live counters (no real data yet), no prices, no countdown.
+- No WebGL, no live counters (no real data yet), no prices, no countdown. The intro is about 2 s and once per session, not context-con's 6 s on every visit.
 - No new copy. Every word on the page is from `COPY.md`.
 
 ## Verified

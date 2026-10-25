@@ -16,6 +16,7 @@ const { title = "Arcbuildr", description, noindex = false, cta = true } = Astro.
 // Cloudflare Web Analytics, cookieless. Needs the site token from the dashboard; without it, no beacon.
 const analyticsToken = import.meta.env.PUBLIC_CF_ANALYTICS_TOKEN;
 const canonical = new URL(Astro.url.pathname, Astro.site);
+const isHome = Astro.url.pathname === "/";
 
 // Preview-only build line. Unknown branch counts as main, so it stays hidden.
 const showBuild = !["main", "unknown", ""].includes(buildInfo.branch);
@@ -27,6 +28,21 @@ const hideFromSearch = noindex || showBuild;
 <html lang="en">
   <head>
     <meta charset="utf-8" />
+    <script is:inline>
+      // Before first paint: mark JS (reveals may hide below-fold content) and, on the first
+      // home visit of the session, play the intro. Reduced motion never gets it.
+      (() => {
+        const html = document.documentElement;
+        html.classList.add("js");
+        try {
+          const calm = matchMedia("(prefers-reduced-motion: reduce)").matches;
+          if (location.pathname === "/" && !calm && !sessionStorage.getItem("arc-intro")) {
+            html.classList.add("intro");
+            sessionStorage.setItem("arc-intro", "1");
+          }
+        } catch {}
+      })();
+    </script>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     {hideFromSearch && <meta name="robots" content="noindex" />}
     {description && <meta name="description" content={description} />}
@@ -56,6 +72,26 @@ const hideFromSearch = noindex || showBuild;
         src="https://static.cloudflareinsights.com/beacon.min.js"
         data-cf-beacon={JSON.stringify({ token: analyticsToken })}
       />
+    )}
+    {isHome && (
+      <div class="intro-curtain" aria-hidden="true">
+        <div class="intro-curtain__mark">
+          <svg viewBox="0 0 100 66">
+            <path
+              d="M18 52 A 32 32 0 0 1 82 52"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="18"
+              stroke-linecap="round"
+            ></path>
+          </svg>
+          <span class="intro-curtain__word">
+            {[..."arcbuildr"].map((c, i) => (
+              <span style={`--i: ${i}`}>{c}</span>
+            ))}
+          </span>
+        </div>
+      </div>
     )}
     <a class="skip" href="#main">
       Skip to content
@@ -89,6 +125,38 @@ const hideFromSearch = noindex || showBuild;
         )}
       </div>
     </footer>
+    <script is:inline>
+      // Tap or key skips the intro.
+      (() => {
+        const html = document.documentElement;
+        if (!html.classList.contains("intro")) return;
+        const end = () => html.classList.remove("intro");
+        addEventListener("pointerdown", end, { once: true });
+        addEventListener("keydown", end, { once: true });
+        setTimeout(end, 2600);
+      })();
+      // Reveal on scroll. Already on screen: shown at once, with no transition.
+      (() => {
+        const els = document.querySelectorAll(".reveal");
+        if (!("IntersectionObserver" in window))
+          return els.forEach((e) => e.classList.add("is-in"));
+        const io = new IntersectionObserver(
+          (entries) => {
+            for (const e of entries) {
+              if (!e.isIntersecting) continue;
+              e.target.classList.add("is-in");
+              io.unobserve(e.target);
+            }
+          },
+          { rootMargin: "0px 0px -8% 0px" },
+        );
+        for (const e of els) {
+          const r = e.getBoundingClientRect();
+          if (r.top < innerHeight && r.bottom > 0) e.classList.add("is-in", "is-instant");
+          else io.observe(e);
+        }
+      })();
+    </script>
   </body>
 </html>
 
