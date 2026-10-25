@@ -37,7 +37,14 @@ Sources: `COPY.md` (text), `PROTOTYPE.md` (structure), `CLAUDE.md` STACK (tools)
 ## Tasks
 
 ### Task 1: Scaffold and prove the integrations
-Commit: `task 1`. Status: built 2026-10-24. Workers Builds runs on `claude/build` (VERIFIED 2026-10-25: check run "Workers Builds: arcbuildr" success on 22d45bd and ea6a699; versions 58377669 and 5bf2591d uploaded). Blocked on the preview URL: expected `5bf2591d-arcbuildr.zeemesso.workers.dev` and `claude-build-arcbuildr.zeemesso.workers.dev` both fail (root `arcbuildr.zeemesso.workers.dev` gives the Hello World Worker, 200). Version URL body is `error code: 1042`, alias gives 404 (VERIFIED). Added `workers_dev` and `preview_urls` true to `wrangler.jsonc`, no change. Likely cause (UNVERIFIED): Preview URLs toggle off in the dashboard. Preview URL: not yet known.
+Commit: `task 1`. Status: built 2026-10-24; preview works, selftest blocked on a secret mismatch.
+
+Preview check (VERIFIED, 2026-10-25), after Zyade turned on Preview URLs:
+- Preview URL: `https://claude-build-arcbuildr.zeemesso.workers.dev` (branch alias) and `https://<first 8 of version id>-arcbuildr.zeemesso.workers.dev` (per version). Both return 200. The page shows `Build: claude/build (WORKERS_CI_BRANCH)`, so `WORKERS_CI_BRANCH` works.
+- `/api/selftest` with no header, a wrong header, and the right-looking key all return 404.
+- Temporary `/api/selftest-diag` (removed in task 1b) shows all 5 secrets are bound, `SELFTEST_KEY` is 48 characters, and the header's hash does not match. Cause: the Cloudflare `SELFTEST_KEY` secret differs from the Claude Code environment `SELFTEST_KEY`. Zyade must set both to the same value.
+- Notion row id, Resend message id: not yet.
+- CI fix: `typecheck` now runs `scripts/build-info.mjs` first. The GitHub Action `check` is green on 1ac9589 (VERIFIED).
 
 Verified here (VERIFIED, 2026-10-24):
 - `npm test`: 17 Vitest tests pass, including all 404 cases and the Notion and Resend request shapes with `fetch` stubbed.
