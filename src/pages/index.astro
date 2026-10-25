@@ -77,7 +77,7 @@ const faq = [
 >
   <section class="hero wrap" id="top" aria-labelledby="hero-title">
     <h1 id="hero-title">
-      We build your personal brand from your <span class="serif">real story.</span>
+      We build your personal brand from your <span class="hl">real story.</span>
     </h1>
     <p class="lede">
       Arcbuildr is a personal brand service for business-driven people. We take your story and what
@@ -136,7 +136,7 @@ const faq = [
 
   <section class="statement wrap reveal" id="for" aria-labelledby="for-title">
     <h2 id="for-title">
-      For people who <span class="serif">build businesses</span>
+      For people who <span class="hl">build businesses</span>
     </h2>
     <div class="statement__body">
       <p>
@@ -152,7 +152,7 @@ const faq = [
 
   <section class="section wrap" id="build" aria-labelledby="build-title">
     <h2 id="build-title" class="section__title">
-      What we build, <span class="serif">in the order we build it</span>
+      What we build, <span class="hl">in the order we build it</span>
     </h2>
     <ol class="bento">
       {steps.map((s) => (
@@ -176,7 +176,7 @@ const faq = [
 
   <section class="section wrap" id="roles" aria-labelledby="roles-title">
     <h2 id="roles-title" class="section__title">
-      Who does <span class="serif">what</span>
+      Who does <span class="hl">what</span>
     </h2>
     <div class="roles">
       <p class="card roles__card roles__card--us reveal">
@@ -202,7 +202,7 @@ const faq = [
         </div>
       </div>
       <h2 id="us-title">
-        Who <span class="serif">we are</span>
+        Who <span class="hl">we are</span>
       </h2>
       <div class="prose">
         <p>
@@ -237,7 +237,7 @@ const faq = [
     <div class="card start">
       <div class="start__intro">
         <h2 id="start-title">
-          Start <span class="serif">with a call</span>
+          Start <span class="hl">with a call</span>
         </h2>
         <p>Tell us about you and your business. On the next screen, you pick a time.</p>
       </div>
@@ -280,7 +280,8 @@ const faq = [
     width: min(100%, 26rem);
     height: 24rem;
     margin-top: var(--space-xl);
-    overflow: hidden;
+    /* Clip only the bottom fade; the tilted cards may reach past the sides. */
+    overflow: visible clip;
     mask-image: linear-gradient(to bottom, #000 70%, transparent);
   }
   .profile__card {
@@ -295,16 +296,17 @@ const faq = [
     box-shadow: var(--shadow-lift);
   }
   .profile__card--before {
-    width: 78%;
-    left: -4%;
+    width: 74%;
+    left: 0;
     top: 2.5rem;
     rotate: -7deg;
     opacity: 0.55;
     box-shadow: var(--shadow-card);
   }
   .profile__card--after {
-    width: 84%;
-    left: 14%;
+    width: 80%;
+    left: auto;
+    right: 0;
     rotate: 3deg;
   }
   .profile__head {
@@ -416,8 +418,8 @@ const faq = [
     justify-self: center;
     text-align: center;
   }
-  .section__title .serif,
-  .statement h2 .serif {
+  .section__title .hl,
+  .statement h2 .hl {
     display: block;
   }
 

@@ -49,7 +49,7 @@ arcbuildr.co
 
 Navigation:
 - Header: wordmark (links to `/`) and one button, "Book a call", which jumps to the form. No other links, so the page has one path.
-- Footer: Instagram, TikTok, email, Privacy.
+- Footer: logo, Privacy. (Zyade, 2026-10-26: no handles or email in the footer.)
 
 The section order on the home page follows the argument below. Step 5 (ASCII prototype) will shape the layout around it.
 
@@ -184,9 +184,10 @@ It depends on how much content we're making. You'll get a timeline on the call. 
 
 ### Footer
 
-Arcbuildr. Personal brand service.
-Instagram @arcbuildr · TikTok @arcbuildr · [email] · Privacy [ASSUMED 18]
+[Logo] · Privacy
 © 2026 Arcbuildr
+
+Zyade, 2026-10-26 (Agentation): no "Personal brand service." line, and no Instagram, TikTok or email links in the footer.
 
 ---
 

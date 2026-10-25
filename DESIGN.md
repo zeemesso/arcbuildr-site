@@ -17,8 +17,9 @@ Colors come from the earlier Arcbuildr kit (orange, sage, ink, paper, taupe), ch
 
 | Token | Value | Use | Contrast |
 |-------|-------|-----|----------|
-| `--color-accent` | `#E8722E` (brand orange) | Buttons, logo arc and "r", open FAQ icon, hero accents | Ink text on it 5.70:1. White on it 3.05:1, so never white text |
-| `--color-on-accent` | `#1A1A1A` | Button text | |
+| `--color-accent` | `#E8722E` (brand orange) | Buttons, logo arc and "r", open FAQ icon, hero accents | White on it 3.05:1: passes only as large text, so buttons are 19 px bold |
+| `--color-on-accent` | `#FFFFFF` | Button text (Zyade: white on dark buttons, dark on light ones) | |
+| `--color-accent-hover` / `--color-accent-text` | `#D45E00` | Button hover (white 3.88:1), orange headline words | |
 | `--color-sage` | `#597058` | The "we" card, the first deliverable | White text 5.41:1 |
 | `--color-ink` | `#1A1A1A` | Text, header pill, footer panel | |
 | `--color-ink-muted` | `#5F5A54` (taupe, darkened) | Body copy in cards, small print | 6.84:1 on white |
@@ -41,10 +42,9 @@ Rules:
 
 ## Type
 
-- **Open Runde** (rounded grotesk, OFL) for everything, weights 400 / 600 / 700. Self-hosted from `public/fonts/`, subset to Latin with fonttools: about 22 KB per weight.
-- **Instrument Serif Italic** (OFL) for one phrase per headline, wrapped in `<span class="serif">`, at 1.12 em so its x-height matches. In section titles the serif phrase sits on its own line.
+- **Open Runde** (rounded grotesk, OFL) is the only font, weights 400 / 600 / 700. Self-hosted from `public/fonts/`, subset to Latin with fonttools: about 22 KB per weight. License in `public/fonts/OFL-open-runde.txt`, no Reserved Font Name.
+- Headline emphasis is color, not a second font (Zyade, 2026-10-26): one phrase per headline in `<span class="hl">`, colored `--color-accent-text` (`#D45E00`: 3.47:1 on the page, 3.88:1 on white, so headlines only, where large-text 3:1 applies). In section titles the phrase sits on its own line.
 - Scale: display `clamp(2.5rem … 4.75rem)`, line height 0.95, tracking −0.04 em. h2 `clamp(2rem … 3.5rem)`, −0.035 em. h3 1.5 rem / 600. Body 17 px, line height 1.6. Small 14 px. Label 12 px uppercase, +0.12 em.
-- License files ship next to the fonts (`public/fonts/OFL-*.txt`). Neither font has a Reserved Font Name.
 
 ## Layout
 
@@ -56,8 +56,9 @@ Rules:
 ## Components
 
 - Header: a floating dark pill, centred, sticky. The logo, then "Book a call". On phones (< 48 rem) that same link becomes a floating pill at the bottom of the screen. It hides while the hero button or the form is on screen (`IntersectionObserver` in `Base.astro`). There is only one "Book a call" link in the page.
-- Buttons: pill, brand orange with ink text, an arrow drawn in CSS (`content: "→" / ""`, so screen readers skip it). Hover nudges the arrow 2 px; press scales to 0.97.
-- Footer: a dark rounded panel inside the container.
+- Buttons: pill, brand orange, white text at 19 px / 700 (large text, so 3:1 is the bar), an arrow drawn in CSS (`content: "→" / ""`, so screen readers skip it). Hover nudges the arrow 2 px; press scales to 0.97.
+- Footer: a dark rounded panel inside the container with the logo, Privacy and the copyright. No tagline, handles or email (Zyade, 2026-10-26).
+- Logo: `src/components/Logo.astro`, used by the header and the footer.
 - FAQ: `<details>` rows in one white card, with a round + icon that turns into × when open.
 - Form: inside a white card, intro left and fields right on desktop. Inputs filled with the page color, border at 3:1 contrast, orange border and a dark-orange ring on focus.
 

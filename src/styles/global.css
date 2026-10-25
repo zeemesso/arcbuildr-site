@@ -61,14 +61,9 @@ h3 {
   letter-spacing: -0.02em;
 }
 
-/* The one serif phrase per headline. 1.12em matches its x-height to the grotesk. */
-.serif {
-  font-family: var(--font-serif);
-  font-style: italic;
-  font-weight: 400;
-  font-size: 1.12em;
-  letter-spacing: -0.01em;
-  line-height: 0.85;
+/* Headline emphasis: the same font, in orange. Headlines are large text, so 3:1 applies. */
+.hl {
+  color: var(--color-accent-text);
 }
 
 p {
@@ -121,7 +116,9 @@ a {
   background: var(--color-accent);
   color: var(--color-on-accent);
   font: inherit;
-  font-weight: 600;
+  /* 19px bold counts as large text, which white on the brand orange needs (3.05:1). */
+  font-size: var(--text-lg);
+  font-weight: 700;
   white-space: nowrap;
   text-decoration: none;
   cursor: pointer;

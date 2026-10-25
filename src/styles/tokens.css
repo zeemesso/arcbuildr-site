@@ -1,6 +1,6 @@
 /* Direction A, "Daylight bento" (DESIGN.md). References: docs/references/.
  * Light paper page, white cards, the brand orange as the one action color, five deliverable hues.
- * Open Runde (rounded grotesk) + one Instrument Serif italic phrase per headline.
+ * Open Runde only. Headline emphasis is color, not a second font.
  */
 @font-face {
   font-family: "Open Runde";
@@ -20,17 +20,9 @@
   font-weight: 700;
   font-display: swap;
 }
-@font-face {
-  font-family: "Instrument Serif";
-  src: url("/fonts/instrument-serif-italic.woff2") format("woff2");
-  font-style: italic;
-  font-weight: 400;
-  font-display: swap;
-}
-
 :root {
   /* Brand colors from the earlier Arcbuildr kit: orange #E8722E, sage #597058, ink #1A1A1A,
-   * paper #FAFAF8, taupe #8C7B6B. Orange keeps ink text (5.7:1); white on it fails AA. */
+   * paper #FAFAF8, taupe #8C7B6B. White on orange is 3.05:1, so button text is 19px bold (large text, 3:1). */
   --color-paper: oklch(96.2% 0.004 85);
   --color-paper-2: oklch(93% 0.006 85);
   --color-card: #ffffff;
@@ -39,9 +31,11 @@
   --color-ink-muted: #5f5a54;
   --color-rule: oklch(90% 0.006 85);
   --color-accent: #e8722e;
-  --color-accent-hover: #f0843f;
+  --color-accent-hover: #d45e00;
+  /* Orange for headline words: 3.47:1 on the page, 3.88:1 on white, large text only. */
+  --color-accent-text: #d45e00;
   --color-accent-soft: rgb(232 114 46 / 0.14);
-  --color-on-accent: #1a1a1a;
+  --color-on-accent: #ffffff;
   --color-sage: #597058;
   --color-taupe: #8c7b6b;
   --color-focus: #c65100;
@@ -56,7 +50,6 @@
 
   --font-display: "Open Runde", ui-rounded, system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-body: var(--font-display);
-  --font-serif: "Instrument Serif", "Iowan Old Style", Georgia, serif;
 
   --text-xs: 0.75rem;
   --text-sm: 0.875rem;
