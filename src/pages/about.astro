@@ -1,0 +1,164 @@
+---
+import Base from "../layouts/Base.astro";
+import CallBand from "../components/CallBand.astro";
+---
+
+<Base
+  title="About · Arcbuildr"
+  description="Meet Zyade and Hanane, the founders of Arcbuildr, and learn how we work."
+>
+  <section class="hero wrap" aria-labelledby="hero-title">
+    <p class="kicker">About</p>
+    <h1 id="hero-title">
+      Two founders,
+      <br />
+      <span class="hl">one method.</span>
+    </h1>
+    <p class="lede">Founded September 23, 2026.</p>
+    <div class="hero__action">
+      <a class="btn btn--lg" href="/#start">
+        Book an intro call
+      </a>
+    </div>
+  </section>
+
+  <div class="about wrap">
+    <section class="founders" aria-label="Founders">
+      {["Zyade", "Hanane"].map((name, i) => (
+        <article class="card founder reveal" style={`--d: ${i * 90}ms`}>
+          <div class="photo" aria-hidden="true">
+            <span>[Photo]</span>
+          </div>
+          <div class="founder__body">
+            <h2>{name}</h2>
+            <p>[Placeholder: role]</p>
+            <p>[Placeholder: one line]</p>
+          </div>
+        </article>
+      ))}
+    </section>
+
+    <section class="card story reveal" aria-labelledby="story-title">
+      <h2 id="story-title">Why Arcbuildr</h2>
+      <p>[Placeholder: the story, 2-3 lines]</p>
+    </section>
+
+    <section class="principles" aria-labelledby="principles-title">
+      <h2 id="principles-title">How we work</h2>
+      <div class="principles__grid">
+        <article class="card principle reveal" style="--d: 0ms">
+          <h3>Your real story</h3>
+          <p>We build your brand and content from your story and what you know.</p>
+        </article>
+        <article class="card principle reveal" style="--d: 90ms">
+          <h3>No niche template</h3>
+          <p>Your work adapts to who you are, not to a template for your niche.</p>
+        </article>
+        <article class="card principle reveal" style="--d: 180ms">
+          <h3>We stay after delivery</h3>
+          <p>
+            Ongoing support: answers when you have questions, revisions when something needs to
+            change.
+          </p>
+        </article>
+      </div>
+    </section>
+
+    <CallBand />
+  </div>
+</Base>
+
+<style>
+  .hero {
+    display: grid;
+    justify-items: center;
+    gap: var(--space-lg);
+    padding-block: var(--space-xl) 0;
+    text-align: center;
+  }
+  .lede {
+    max-width: 34rem;
+    color: var(--color-ink-muted);
+    font-size: var(--text-lg);
+    line-height: 1.55;
+  }
+  .about {
+    display: grid;
+    gap: var(--space-2xl);
+    padding-top: var(--space-2xl);
+  }
+  .founders,
+  .principles__grid {
+    display: grid;
+    gap: var(--space-lg);
+  }
+  .founder {
+    display: grid;
+    align-content: start;
+    justify-items: center;
+    gap: var(--space-lg);
+    padding: var(--space-xl) var(--space-lg);
+    text-align: center;
+  }
+  .photo {
+    display: grid;
+    place-items: center;
+    width: 12rem;
+    max-width: 100%;
+    height: 14rem;
+    padding: 0.6rem 0.6rem 2.4rem;
+    border-radius: 0.35rem;
+    box-shadow: var(--shadow-lift);
+    color: var(--color-ink-muted);
+    font-size: var(--text-sm);
+    text-align: center;
+    background:
+      linear-gradient(var(--color-paper-2), var(--color-paper-2)) content-box,
+      var(--color-card);
+  }
+  .founder__body,
+  .story,
+  .principle {
+    display: grid;
+    align-content: start;
+    gap: var(--space-lg);
+  }
+  .founder__body p,
+  .story p,
+  .principle p {
+    color: var(--color-ink-muted);
+  }
+  .story,
+  .principle {
+    padding: var(--space-xl) var(--space-lg);
+  }
+  .principles {
+    display: grid;
+    gap: var(--space-xl);
+  }
+  .principles > h2 {
+    text-align: center;
+  }
+
+  @media (min-width: 48rem) {
+    .founders {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (min-width: 64rem) {
+    .hero {
+      padding-top: var(--space-3xl);
+    }
+    .about {
+      gap: var(--space-3xl);
+      padding-top: var(--space-3xl);
+    }
+    .story {
+      padding: var(--space-2xl);
+    }
+    .principles__grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+</style>

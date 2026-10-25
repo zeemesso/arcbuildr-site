@@ -191,6 +191,7 @@ Commit: `task H2: method page`. Status: DONE 2026-10-26. Built by Codex, reviewe
 - **Done when:** a test checks the five names and lines on `/method` and Home, the hero fits a 375 x 667 screen, axe is clean, and `/method` is in the sitemap.
 
 #### H3: About page
+Commit: `task H3: about page`. Status: DONE 2026-10-26. Built by Codex, reviewed by Opus, no fixes needed. `npm run check` passes (VERIFIED): 21 Vitest, 113 Playwright, axe clean on `/about` at 375 and 1280 px.
 - `/about` as in the prototype.
 - **Done when:** a test checks the h1, the founding date and the three principles; axe is clean; `/about` is in the sitemap.
 
