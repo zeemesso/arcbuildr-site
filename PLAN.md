@@ -37,7 +37,7 @@ Sources: `COPY.md` (text), `PROTOTYPE.md` (structure), `CLAUDE.md` STACK (tools)
 ## Tasks
 
 ### Task 1: Scaffold and prove the integrations
-Commit: `task 1`. Status: built 2026-10-24, waiting for the preview check (needs Zyade's setup list).
+Commit: `task 1`. Status: built 2026-10-24. Workers Builds runs on `claude/build` (VERIFIED 2026-10-25: check run "Workers Builds: arcbuildr" success on 22d45bd and ea6a699; versions 58377669 and 5bf2591d uploaded). Blocked on the preview URL: expected `5bf2591d-arcbuildr.zeemesso.workers.dev` and `claude-build-arcbuildr.zeemesso.workers.dev` both fail (root `arcbuildr.zeemesso.workers.dev` gives the Hello World Worker, 200). Version URL body is `error code: 1042`, alias gives 404 (VERIFIED). Added `workers_dev` and `preview_urls` true to `wrangler.jsonc`, no change. Likely cause (UNVERIFIED): Preview URLs toggle off in the dashboard. Preview URL: not yet known.
 
 Verified here (VERIFIED, 2026-10-24):
 - `npm test`: 17 Vitest tests pass, including all 404 cases and the Notion and Resend request shapes with `fetch` stubbed.
