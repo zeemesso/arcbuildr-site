@@ -18,3 +18,5 @@ jobs:
       - run: npm run check
         env:
           CI: "true"
+          # A push checkout is detached, so name the branch the way Workers Builds does.
+          WORKERS_CI_BRANCH: ${{ github.ref_name }}

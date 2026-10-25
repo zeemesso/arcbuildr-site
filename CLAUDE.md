@@ -53,5 +53,5 @@ Follow these steps in order. Do not skip a step. Copy comes first; the structure
 ## STATUS
 
 - Steps 1 to 6 done. `COPY.md`, `PROTOTYPE.md` and `PLAN.md` approved.
-- Current step: 7 (Build loop) on branch `claude/build`, Sonnet 5.5. Tasks 1, 1b, 2 to 10 done. Next: task 11.
+- Current step: 7 (Build loop) on branch `claude/build`, Sonnet 5.5. Tasks 1, 1b, 2 to 11 done. Next: task 12.
 - Zyade can delete the `SELFTEST_KEY` secret (Cloudflare and Claude Code env) and the `TEST selftest` Notion row.

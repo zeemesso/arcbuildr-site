@@ -137,7 +137,9 @@ Commit: `task 10`. Status: DONE 2026-10-25. `npm run check` passes (VERIFIED): f
 - **Done when:** the page builds and is linked from the form and the footer.
 
 ### Task 11: Agentation on previews
-Commit: `task 11`. Status: not started.
+Commit: `task 11`. Status: DONE 2026-10-25. Instead of a React island, a script in `Base.astro` loads `src/components/mountFeedback.tsx` only when `__PREVIEW__` is true. `astro.config.mjs` sets it from the same branch rule as the Worker. The first try (an island with `client:only`) still shipped the chunk on main, which `npm run test:main-build` caught.
+- `npm run check` passes (VERIFIED): `scripts/verify-main-build.mjs` builds as `claude/build` (Agentation in 1 file) and as `main` (no file contains it); Playwright finds the `agentation-toolbar` element on a preview build.
+- The GitHub Action now sets `WORKERS_CI_BRANCH` from `github.ref_name`, because a push checkout is detached.
 - React island with the Agentation toolbar, included only when the build-time branch is not `main`.
 - **Done when:** the preview shows the toolbar; a local build with the branch set to `main` contains no Agentation code (checked with `grep` on `dist/`).
 

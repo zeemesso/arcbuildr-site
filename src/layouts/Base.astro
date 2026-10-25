@@ -67,6 +67,11 @@ const showBuild = !["main", "unknown", ""].includes(buildInfo.branch);
   </body>
 </html>
 
+<script>
+  // Dead code on main: the define in astro.config.mjs makes this false and Vite drops the import.
+  if (__PREVIEW__) import("../components/mountFeedback");
+</script>
+
 <style is:global>
   main {
     flex: 1;
