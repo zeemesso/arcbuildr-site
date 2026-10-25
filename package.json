@@ -6,6 +6,7 @@
   "scripts": {
     "prebuild": "node scripts/build-info.mjs",
     "build": "astro build",
+    "predev": "node scripts/build-info.mjs",
     "dev": "astro dev",
     "preview": "astro preview --port 4321 --host 127.0.0.1 --ignore-lock",
     "pretest": "node scripts/build-info.mjs",
