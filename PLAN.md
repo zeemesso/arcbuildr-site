@@ -201,6 +201,7 @@ Commit: `task H4: notes`. Status: DONE 2026-10-26. Built in a Claude Code cloud 
 - **Done when:** tests check the index order and a note page; `test:main-build` fails if a draft is in the main build or its sitemap; axe is clean.
 
 #### H5: Hub check
+Status: checks DONE 2026-10-26, Agentation round open. `npm run check` passes at b65aa9c (VERIFIED). Lighthouse 12 on the local build (VERIFIED), performance / accessibility / best practices: `/method`, `/about`, `/notes`, a note and `/privacy` 100 / 100 / 100 at phone and desktop sizes; Home 94 on phones (intro and hero motion), 100 on desktop; `/thanks` 95 on phones, best practices 78 to 79 (Cal.com cookie). SEO not scored: preview builds are `noindex` on purpose.
 - `npm run check`, Lighthouse on every page at phone and desktop sizes, Agentation round on the new pages.
 
 ## Manual setup for Zyade
