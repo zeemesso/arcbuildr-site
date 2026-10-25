@@ -127,7 +127,7 @@ Commit: `task 8`. Status: DONE 2026-10-25. Vitest checks each redirect (302 to `
 - **Done when:** Vitest checks each redirect; Playwright checks `src` reaches the request body.
 
 ### Task 9: Thanks page
-Commit: `task 9`. Status: not started.
+Commit: `task 9`. Status: DONE 2026-10-25, with one input open. `npm run check` passes (VERIFIED, Cal.com embed replaced by a recorder in the browser): name and email from the URL reach the embed config; a direct visit works with empty values; the fallback line shows when `app.cal.com` is blocked; no "Book a call" button; `noindex`; title "Pick a time | Arcbuildr". The real Cal.com embed has not been loaded (the sandbox cannot reach it, and it is UNVERIFIED). **Zyade: send the Cal.com booking link (setup item 5).** `src/config.ts` holds a placeholder `arcbuildr/intro-call` marked TO CONFIRM; replace it with the real `<username>/<event>`.
 - Cal.com embed prefilled from the URL, fallback line, header without the button, `noindex`.
 - **Done when:** Playwright sees prefill values passed to the embed; the fallback shows when the embed script is blocked; a direct visit with no URL values still works.
 

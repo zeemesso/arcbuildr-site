@@ -1,0 +1,76 @@
+---
+import Base from "../layouts/Base.astro";
+import { CAL_LINK } from "../config";
+---
+
+<Base title="Pick a time | Arcbuildr" noindex cta={false}>
+  <section class="wrap thanks" aria-labelledby="thanks-title">
+    <h1 id="thanks-title">Thanks. We've got your details.</h1>
+    <p>Pick a time for your call below. We'll look at your profile before we talk.</p>
+    <div id="cal" class="cal" data-cal-link={CAL_LINK}></div>
+    <p class="fallback">
+      If no time works, email us at [email] or send a DM to @arcbuildr on Instagram.
+    </p>
+  </section>
+</Base>
+
+<script>
+  // Cal.com's inline embed, prefilled from /thanks?name=&email=. Without values it still works.
+  const cal = document.getElementById("cal")!;
+  const params = new URLSearchParams(location.search);
+  const name = params.get("name") ?? "";
+  const email = params.get("email") ?? "";
+
+  type CalFn = ((...args: unknown[]) => void) & { loaded?: boolean; ns?: object; q?: unknown[] };
+  const w = window as unknown as { Cal?: CalFn };
+
+  w.Cal =
+    w.Cal ||
+    function (this: unknown) {
+      const c = w.Cal!;
+      const args = arguments;
+      if (!c.loaded) {
+        c.ns = {};
+        c.q = c.q || [];
+        const s = document.createElement("script");
+        s.src = "https://app.cal.com/embed/embed.js";
+        s.async = true;
+        document.head.appendChild(s);
+        c.loaded = true;
+      }
+      (c.q = c.q || []).push(args);
+    };
+
+  w.Cal("init", { origin: "https://app.cal.com" });
+  w.Cal("inline", {
+    elementOrSelector: cal,
+    calLink: cal.dataset.calLink,
+    layout: "month_view",
+    config: { name, email },
+  });
+</script>
+
+<style>
+  .thanks {
+    display: grid;
+    gap: var(--space-lg);
+    padding-block: var(--space-xl) var(--space-2xl);
+    justify-items: start;
+  }
+  .cal {
+    width: 100%;
+    max-width: 47.5rem;
+    min-height: 32rem;
+  }
+  .fallback {
+    color: var(--color-ink-muted);
+  }
+  @media (min-width: 64rem) {
+    .thanks {
+      padding-block: var(--space-2xl) var(--space-3xl);
+    }
+    .thanks > .cal {
+      margin-inline: 0;
+    }
+  }
+</style>
