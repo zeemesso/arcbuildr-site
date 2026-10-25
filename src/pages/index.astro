@@ -23,6 +23,41 @@ const steps = [
     text: "We stay with you after we deliver. When you have a question, you get an answer. When something needs to change, we revise it.",
   },
 ];
+
+const faq = [
+  {
+    q: "How much does it cost?",
+    a: "It depends on how much content you need. We'll give you a price after the call, once we know what you need.",
+  },
+  {
+    q: "Do you post for me?",
+    a: "No. We hand you everything ready to post, and you publish it on your account.",
+  },
+  {
+    q: "Do you edit videos?",
+    a: "For some clients, yes. It depends on you and the content. We'll tell you on the call.",
+  },
+  {
+    q: "Which platforms do you work on?",
+    a: "Instagram first. TikTok for some clients, when it fits who you are and who you want to reach. We don't work on LinkedIn or YouTube.",
+  },
+  {
+    q: "Do you work with my industry?",
+    a: "We work with business-driven people in any field. The work starts from you, whatever your industry.",
+  },
+  {
+    q: "What do I need to give you?",
+    a: "Time for a few conversations about your story and your work, and your current profile. You don't need anything ready before the call.",
+  },
+  {
+    q: "Can you guarantee followers or sales?",
+    a: "No. We agree on the work up front, deliver it, and stay with you after. Followers and sales also depend on how often you post and what you do with the content.",
+  },
+  {
+    q: "How long does it take?",
+    a: "It depends on how much content we're making. You'll get a timeline on the call.",
+  },
+];
 ---
 
 <Base
@@ -107,6 +142,18 @@ const steps = [
     </div>
   </section>
 
+  <section class="band wrap" id="questions" aria-labelledby="questions-title">
+    <h2 id="questions-title">Questions</h2>
+    <div class="faq">
+      {faq.map((item, i) => (
+        <details open={i === 0}>
+          <summary>{item.q}</summary>
+          <p>{item.a}</p>
+        </details>
+      ))}
+    </div>
+  </section>
+
   <section class="band wrap" id="start" aria-labelledby="start-title">
     <h2 id="start-title">Start with a call</h2>
     <p>Tell us about you and your business. On the next screen, you pick a time.</p>
@@ -173,6 +220,41 @@ const steps = [
   .steps h3 {
     font-size: var(--text-xl);
     margin-bottom: var(--space-xs);
+  }
+
+  .faq {
+    border-bottom: var(--rule-thin);
+    max-width: 47.5rem;
+  }
+  .faq details {
+    border-top: var(--rule-thin);
+  }
+  .faq summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-md);
+    min-height: var(--tap);
+    padding-block: var(--space-sm);
+    font-weight: 600;
+    cursor: pointer;
+    list-style: none;
+  }
+  .faq summary::-webkit-details-marker {
+    display: none;
+  }
+  .faq summary::after {
+    content: "+";
+    flex: none;
+    font-size: var(--text-xl);
+    line-height: 1;
+    color: var(--color-accent);
+  }
+  .faq details[open] summary::after {
+    content: "\2212";
+  }
+  .faq details p {
+    padding-bottom: var(--space-md);
   }
 
   .photo {

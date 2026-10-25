@@ -100,7 +100,7 @@ Commit: `task 4`. Status: DONE 2026-10-25. `npm run check` passes (VERIFIED): a 
 - **Done when:** a test confirms every headline and body line from `COPY.md` appears on the page; the hero fits in a 375 x 667 first screen; all buttons jump to `#start`.
 
 ### Task 5: Questions section
-Commit: `task 5`. Status: not started.
+Commit: `task 5`. Status: DONE 2026-10-25. `npm run check` passes (VERIFIED): 8 `<details>` items, first open; each item opens and closes with Enter and Space; all 8 answers are in the served HTML; axe still clean.
 - 8 questions as `<details>`, first one open.
 - **Done when:** a test opens and closes each item by keyboard; the answers are in the page HTML.
 

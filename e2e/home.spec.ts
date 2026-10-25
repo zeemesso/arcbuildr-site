@@ -63,3 +63,27 @@ test("hero fits a 375 x 667 first screen", async ({ page }) => {
   );
   expect(overflow).toBeLessThanOrEqual(0);
 });
+
+test("questions: first is open, each opens and closes by keyboard, answers are in the HTML", async ({
+  page,
+}) => {
+  const html = await (await page.request.get("/")).text();
+  const items = page.locator("#questions details");
+  await page.goto("/");
+  expect(await items.count()).toBe(8);
+  await expect(items.nth(0)).toHaveAttribute("open", "");
+  for (let i = 1; i < 8; i++) await expect(items.nth(i)).not.toHaveAttribute("open", "");
+
+  for (let i = 0; i < 8; i++) {
+    const item = items.nth(i);
+    const summary = item.locator("summary");
+    const answer = norm(await item.locator("p").textContent());
+    expect(norm(html.replace(/<[^>]+>/g, " ").replace(/&#39;|&apos;/g, "'"))).toContain(answer);
+    const wasOpen = (await item.getAttribute("open")) !== null;
+    await summary.focus();
+    await page.keyboard.press("Enter");
+    expect((await item.getAttribute("open")) !== null).toBe(!wasOpen);
+    await page.keyboard.press("Space");
+    expect((await item.getAttribute("open")) !== null).toBe(wasOpen);
+  }
+});
