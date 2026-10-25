@@ -151,7 +151,14 @@ Commit: `task 12`. Status: DONE 2026-10-25, with one input open. `npm run check`
 - **Done when:** a test reads the built HTML and finds each tag; `/thanks` is absent from the sitemap.
 
 ### Task 13: Remove the self-test and run step 8
-Commit: `task 13`. Status: not started.
+Commit: `task 13`. Status: DONE 2026-10-25 (self-test removal was done in task 1b). Results for step 8:
+- Build passes; `npm run check` passes with 74 browser tests (VERIFIED). GitHub Action green on 272158a.
+- Layouts at 375 and 1280 px for `/`, `/thanks`, `/privacy` and the 404 page: no sideways scroll, axe clean, screenshots viewed (VERIFIED, local build).
+- Links: every internal link and anchor on the three pages resolves (VERIFIED, local build). External links are not checked: the only ones are placeholders.
+- Form end to end on the preview `claude-build-arcbuildr.zeemesso.workers.dev` (VERIFIED, real browser): `/ig` redirects 302 to `/?src=ig`, the form posts to `/api/lead` (200), and the browser lands on `/thanks/?name=...&email=...`. It wrote a `TEST browser lead` row and sent an alert (not seen from here, as in task 7).
+- Lighthouse mobile on the preview (VERIFIED, v12, one run): Performance 100, Accessibility 100, Best Practices 100, SEO 66. The SEO loss is only "page is not crawlable", expected on a preview that is `noindex`. LCP 1.0 s, CLS 0.02, TBT 90 ms. The unused-JavaScript note is the Agentation toolbar, preview only.
+- Not verified: the real Cal.com embed (the sandbox cannot reach it); the Notion row and the alert email arriving; the production domain; Web Analytics (no token).
+- Open for Zyade: see "Open items" below.
 - Step 8 checks: build passes, layouts at 375 px and 1280 px, every link, the form end to end on the preview, Lighthouse mobile on the preview.
 - **Done when:** all of the above are VERIFIED or listed with a reason, and the preview link goes to Zyade for step 9.
 
@@ -173,6 +180,17 @@ Notes on item 4:
 - Create the Worker by hand first. If the repo is connected before a Worker exists, the first build runs on `main`, which has no app yet, and fails. Secrets can't be added until the Worker exists.
 - Pushes to `main` will keep failing to build until you merge `claude/build`. That is expected and harmless: the live domain isn't attached.
 - If the GitHub check on `claude/build` doesn't show the preview URL, send Claude the `*.workers.dev` subdomain (shown on the Worker's page).
+
+## Open items for Zyade (as of 2026-10-25)
+
+| # | What | Time |
+|---|------|------|
+| 1 | Open the preview and click through it on your phone: `https://claude-build-arcbuildr.zeemesso.workers.dev`. Send annotations from the Agentation toolbar (step 9) | 15 min |
+| 2 | In Notion, check the `TEST lead`, `TEST browser lead` and `TEST selftest` rows arrived, then delete them. Check the alert inbox for "New lead: TEST ..." emails | 5 min |
+| 3 | Send the Cal.com booking link (`<username>/<event>`). `src/config.ts` holds a placeholder | 2 min |
+| 4 | Cloudflare Web Analytics token as build variable `PUBLIC_CF_ANALYTICS_TOKEN` | 5 min |
+| 5 | Optional: delete the `SELFTEST_KEY` secret in Cloudflare and the Claude Code environment | 2 min |
+| 6 | Launch inputs (#10, #18): founder lines and photo, real handles and email, retention wording and legal check of `/privacy` | later |
 
 ## Later stops (not now)
 
