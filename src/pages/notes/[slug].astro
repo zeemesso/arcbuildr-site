@@ -1,0 +1,58 @@
+---
+import { render } from "astro:content";
+import Base from "../../layouts/Base.astro";
+import CallBand from "../../components/CallBand.astro";
+import { formatDate, getNotes, readMinutes } from "../../lib/notes";
+
+export async function getStaticPaths() {
+  const notes = await getNotes();
+  return notes.map((note) => ({ params: { slug: note.id }, props: { note } }));
+}
+
+const { note } = Astro.props;
+const { Content } = await render(note);
+---
+
+<Base title={`${note.data.title} | Arcbuildr`} description={note.data.summary}>
+  <article class="wrap note">
+    <header class="note__head">
+      <p class="kicker">
+        <time datetime={note.data.date.toISOString().slice(0, 10)}>
+          {formatDate(note.data.date)}
+        </time>
+        · {readMinutes(note.body)} min read
+      </p>
+      <h1>{note.data.title}</h1>
+      <p>{note.data.summary}</p>
+    </header>
+    <div class="note__body">
+      <Content />
+    </div>
+  </article>
+  <CallBand />
+</Base>
+
+<style>
+  .note {
+    display: grid;
+    gap: var(--space-xl);
+    padding-block: var(--space-xl) var(--space-lg);
+  }
+  .note__head {
+    display: grid;
+    gap: var(--space-sm);
+  }
+  h1 {
+    font-size: var(--text-2xl);
+    max-width: var(--measure);
+  }
+  .note__body {
+    display: grid;
+    gap: var(--space-md);
+    max-width: var(--measure);
+  }
+  .note__body :global(h2) {
+    margin-top: var(--space-md);
+    font-size: var(--text-xl);
+  }
+</style>
