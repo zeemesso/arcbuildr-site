@@ -62,8 +62,19 @@ const hideFromSearch = noindex || showBuild;
     </a>
     <header class="site-header">
       <div class="site-header__pill">
-        <a class="wordmark" href="/">
-          Arcbuildr
+        <a class="wordmark" href="/" aria-label="Arcbuildr">
+          <svg class="wordmark__arc" viewBox="0 0 100 66" aria-hidden="true">
+            <path
+              d="M18 52 A 32 32 0 0 1 82 52"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="18"
+              stroke-linecap="round"
+            ></path>
+          </svg>
+          <span aria-hidden="true">
+            arcbuild<span class="wordmark__r">r</span>
+          </span>
         </a>
         {cta && (
           <a class="btn site-header__cta is-quiet" href="/#start">
@@ -151,20 +162,20 @@ const hideFromSearch = noindex || showBuild;
     align-items: center;
     gap: var(--space-xs);
     min-height: var(--tap);
-    font-size: var(--text-lg);
+    font-size: 1.3rem;
     font-weight: 700;
-    letter-spacing: -0.04em;
+    letter-spacing: -0.045em;
     text-decoration: none;
   }
-  /* The arc mark: three quarters of a ring in the action color. */
-  .wordmark::before {
-    content: "";
-    width: 0.95em;
-    height: 0.95em;
-    border: 0.2em solid var(--color-accent);
-    border-left-color: transparent;
-    border-radius: 50%;
-    transform: rotate(-45deg);
+  /* The brand arc (arcbuildr-symbol.svg) and the orange "r", set live in Open Runde. */
+  .wordmark__arc {
+    width: 1.35em;
+    height: auto;
+    color: var(--color-accent);
+    translate: 0 -0.06em;
+  }
+  .wordmark__r {
+    color: var(--color-accent);
   }
   .site-header__pill .btn {
     min-height: var(--tap);
@@ -237,7 +248,7 @@ const hideFromSearch = noindex || showBuild;
     min-height: var(--tap);
   }
   .site-footer__small {
-    color: oklch(78% 0.01 275);
+    color: #b5aea6;
     font-size: var(--text-sm);
   }
 

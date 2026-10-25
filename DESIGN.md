@@ -8,27 +8,36 @@ References (mechanics only, nothing copied): `docs/references/context-con.md` (l
 
 - Audience: business owners who find Arcbuildr on Instagram, mostly on a phone in the in-app browser.
 - Job: one action, book an intro call.
-- Feel: bright, friendly, built. Cool light page, white cards, one strong action color. The page has to look finished with no client proof yet, so the cards and the small illustrations carry it instead of photos and numbers.
-- Signature: the hero shows a scattered profile behind a built one, with the five deliverable colors in its highlights and grid. Each bento card has a small CSS illustration of its deliverable. The wordmark has an arc mark (three quarters of a ring) in the action color.
+- Feel: bright, friendly, built. Light paper page, white cards, the brand orange as the one action color. The page has to look finished with no client proof yet, so the cards and the small illustrations carry it instead of photos and numbers.
+- Signature: the hero shows a scattered profile behind a built one, with the five deliverable colors in its highlights and grid. Each bento card has a small CSS illustration of its deliverable.
 
-## Tokens (`src/styles/tokens.css`, OKLCH)
+## Tokens (`src/styles/tokens.css`)
 
-| Token | Value | Use |
-|-------|-------|-----|
-| `--color-paper` | `oklch(97.2% 0.004 270)` | Page background, input fill |
-| `--color-paper-2` | `oklch(94.5% 0.006 270)` | Quiet fills, placeholders |
-| `--color-card` | `oklch(100% 0 0)` | Cards |
-| `--color-ink` | `oklch(19% 0.015 275)` | Text, header pill, footer panel, "we" card |
-| `--color-ink-muted` | `oklch(45% 0.015 275)` | Body copy in cards, small print |
-| `--color-rule` | `oklch(91% 0.006 270)` | Card borders, FAQ hairlines |
-| `--color-accent` | `oklch(50% 0.25 278)` | Electric violet, the "arc". Buttons, arc mark, focus ring |
-| `--hue-strategy` … `--hue-support` | L 50 to 52 %, five hues | One per deliverable: number chip, illustration, hero highlights |
-| `--color-error` | `oklch(48% 0.19 25)` | Form errors |
+Colors come from the earlier Arcbuildr kit (orange, sage, ink, paper, taupe), checked for contrast and given fixed jobs.
+
+| Token | Value | Use | Contrast |
+|-------|-------|-----|----------|
+| `--color-accent` | `#E8722E` (brand orange) | Buttons, logo arc and "r", open FAQ icon, hero accents | Ink text on it 5.70:1. White on it 3.05:1, so never white text |
+| `--color-on-accent` | `#1A1A1A` | Button text | |
+| `--color-sage` | `#597058` | The "we" card, the first deliverable | White text 5.41:1 |
+| `--color-ink` | `#1A1A1A` | Text, header pill, footer panel | |
+| `--color-ink-muted` | `#5F5A54` (taupe, darkened) | Body copy in cards, small print | 6.84:1 on white |
+| `--color-taupe` | `#8C7B6B` | Decorative only | 4.07:1 on white, too low for body text |
+| `--color-paper` | `oklch(96.2% 0.004 85)` | Page background, a shade under brand paper so white cards separate | |
+| `--color-field` | `#FAFAF8` (brand paper) | Input fill | |
+| `--color-card` | `#FFFFFF` | Cards | |
+| `--color-focus` | `#C65100` | Focus ring | 4.08:1 on the page |
+| `--hue-*` | sage, orange, ink, clay `#A34945`, taupe | One per deliverable: chip tint, illustration, hero highlights. Decorative; chip text stays ink | |
 
 Rules:
-- The accent appears on buttons, the arc mark, focus and the open FAQ icon only.
+- Orange is the one action color. It also marks the brand (arc, "r"), never body text.
 - Deliverable hues appear only inside their own card and in the hero visual.
 - Tints use `color-mix(in oklab, …)`. OKLCH mixing with white drifts toward pink, because white has hue 0.
+
+## Logo
+
+- The brand arc (`arcbuildr-symbol.svg`: a thick half circle with round caps) inline as SVG in the header, then "arcbuild" with an orange "r", set live in Open Runde 700 so it renders the same on every device. The old SVG files set the text in system fonts, which differ by device.
+- The favicon is the brand favicon (orange rounded square, white arc).
 
 ## Type
 
@@ -46,11 +55,11 @@ Rules:
 
 ## Components
 
-- Header: a floating dark pill, centred, sticky. Wordmark with the arc mark, then "Book a call". On phones (< 48 rem) that same link becomes a floating pill at the bottom of the screen. It hides while the hero button or the form is on screen (`IntersectionObserver` in `Base.astro`). There is only one "Book a call" link in the page.
-- Buttons: pill, the accent color, an arrow drawn in CSS (`content: "→" / ""`, so screen readers skip it). Hover nudges the arrow 2 px; press scales to 0.97.
+- Header: a floating dark pill, centred, sticky. The logo, then "Book a call". On phones (< 48 rem) that same link becomes a floating pill at the bottom of the screen. It hides while the hero button or the form is on screen (`IntersectionObserver` in `Base.astro`). There is only one "Book a call" link in the page.
+- Buttons: pill, brand orange with ink text, an arrow drawn in CSS (`content: "→" / ""`, so screen readers skip it). Hover nudges the arrow 2 px; press scales to 0.97.
 - Footer: a dark rounded panel inside the container.
 - FAQ: `<details>` rows in one white card, with a round + icon that turns into × when open.
-- Form: inside a white card, intro left and fields right on desktop. Inputs filled with the page color, border at 3:1 contrast, violet border and ring on focus.
+- Form: inside a white card, intro left and fields right on desktop. Inputs filled with the page color, border at 3:1 contrast, orange border and a dark-orange ring on focus.
 
 ## Motion
 

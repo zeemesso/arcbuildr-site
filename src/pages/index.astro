@@ -322,7 +322,7 @@ const faq = [
   .profile__card--after .profile__avatar {
     border: 3px solid var(--color-card);
     outline: 2.5px solid var(--color-accent);
-    background: linear-gradient(135deg, var(--hue-identity), var(--color-accent));
+    background: linear-gradient(135deg, var(--color-accent), var(--hue-content));
   }
   .profile__stats {
     flex: 1;
@@ -448,8 +448,8 @@ const faq = [
     justify-self: start;
     padding: 0.2rem 0.65rem;
     border-radius: var(--radius-pill);
-    background: color-mix(in oklab, var(--hue) 12%, var(--color-card));
-    color: var(--hue);
+    background: color-mix(in oklab, var(--hue) 14%, var(--color-card));
+    color: var(--color-ink);
     font-size: var(--text-sm);
     font-weight: 700;
     font-variant-numeric: tabular-nums;
@@ -602,8 +602,8 @@ const faq = [
     letter-spacing: -0.02em;
   }
   .roles__card--us {
-    background: var(--color-ink);
-    border-color: var(--color-ink);
+    background: var(--color-sage);
+    border-color: var(--color-sage);
     color: var(--color-paper);
   }
   .roles__video {
