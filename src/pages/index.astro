@@ -1,18 +1,232 @@
 ---
 import Base from "../layouts/Base.astro";
+
+const steps = [
+  {
+    name: "Brand Strategy",
+    text: "We start with your story and your expertise. Together we decide who you speak to, what you want to be known for, and what you have to say about it.",
+  },
+  {
+    name: "Visual Identity System",
+    text: "Your colors, type and templates for posts and stories, so everything you publish looks like it comes from the same person.",
+  },
+  {
+    name: "Profile Audit & Optimization",
+    text: "We go through your Instagram profile as it is today and fix what gets in the way: your name field, bio, link and pinned posts.",
+  },
+  {
+    name: "Content Strategy & Production",
+    text: "A content plan, a story sequence system, suggested highlights, carousels and short-form pieces. We choose the format for each piece based on what it has to say.",
+  },
+  {
+    name: "Ongoing Support",
+    text: "We stay with you after we deliver. When you have a question, you get an answer. When something needs to change, we revise it.",
+  },
+];
 ---
 
-<Base title="Arcbuildr" noindex>
-  <section class="wrap placeholder">
-    <h1>Arcbuildr</h1>
-    <p>Placeholder. The site is being built.</p>
+<Base
+  title="Arcbuildr | Personal brand service for business-driven people"
+  description="We build your personal brand and Instagram content from your real story and expertise. Brand strategy, visual identity, profile audit, content and ongoing support."
+  noindex
+>
+  <section class="hero wrap" id="top" aria-labelledby="hero-title">
+    <h1 id="hero-title">We build your personal brand from your real story.</h1>
+    <p class="lede">
+      Arcbuildr is a personal brand service for business-driven people. We take your story and what
+      you know, and build the brand and content that show it on Instagram, and on TikTok when it
+      fits you.
+    </p>
+    <div class="hero__action">
+      <a class="btn btn--block" href="#start">
+        Book an intro call
+      </a>
+      <p class="note">Free, 30 minutes. We'll tell you on the call if we're a fit.</p>
+    </div>
+  </section>
+
+  <section class="band wrap" id="for" aria-labelledby="for-title">
+    <h2 id="for-title">For people who build businesses</h2>
+    <div class="prose">
+      <p>
+        You run a business, or you're building one. You know your field well. Your Instagram shows a
+        small part of that, or none of it, because your time goes into the work.
+      </p>
+      <p>
+        We don't split clients by industry. Each brand starts from the person behind it, so two
+        clients in the same field end up with different brands.
+      </p>
+    </div>
+  </section>
+
+  <section class="band wrap" id="build" aria-labelledby="build-title">
+    <h2 id="build-title">What we build, in the order we build it</h2>
+    <ol class="steps">
+      {steps.map((s) => (
+        <li>
+          <h3>{s.name}</h3>
+          <p>{s.text}</p>
+        </li>
+      ))}
+    </ol>
+  </section>
+
+  <section class="band wrap" id="roles" aria-labelledby="roles-title">
+    <h2 id="roles-title">Who does what</h2>
+    <div class="prose roles">
+      <p>We build the strategy, the identity and the content, and hand it to you ready to post.</p>
+      <p>
+        You publish it on your own account. We don't post for you. Your account stays yours, and the
+        conversations with your audience stay with you.
+      </p>
+      <p class="roles__video">
+        For some clients we also edit their videos. We'll tell you on the call whether that makes
+        sense for you.
+      </p>
+    </div>
+  </section>
+
+  <section class="band wrap" id="us" aria-labelledby="us-title">
+    <h2 id="us-title">Who we are</h2>
+    <div class="us">
+      <div class="photo" role="img" aria-label="Photo of Zyade and Hanane, to come">
+        <span>[Photo of you both.]</span>
+      </div>
+      <div class="prose">
+        <p>
+          Arcbuildr is Zyade and Hanane. We started it on September 23, 2026, and you work with the
+          two of us directly.
+        </p>
+        <p>
+          We're new. That's why this page lays out every step of how we work. On the call, we open
+          your profile together and show you what we'd build for it.
+        </p>
+        <p class="todo">[Zyade: one line on who you are and what you do in Arcbuildr.]</p>
+        <p class="todo">[Hanane: one line on who she is and what she does in Arcbuildr.]</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="band wrap" id="start" aria-labelledby="start-title">
+    <h2 id="start-title">Start with a call</h2>
+    <p>Tell us about you and your business. On the next screen, you pick a time.</p>
   </section>
 </Base>
 
 <style>
-  .placeholder {
-    padding-block: var(--space-2xl);
+  .hero {
+    padding-block: var(--space-xl) var(--space-2xl);
+    display: grid;
+    gap: var(--space-lg);
+  }
+  .lede {
+    font-size: var(--text-lg);
+    line-height: 1.55;
+  }
+  .hero__action {
+    display: grid;
+    gap: var(--space-sm);
+    justify-items: stretch;
+  }
+  .note {
+    color: var(--color-ink-muted);
+    font-size: var(--text-sm);
+  }
+
+  .band {
+    display: grid;
+    gap: var(--space-lg);
+    padding-block: var(--space-xl);
+    border-top: var(--rule-thin);
+  }
+  .prose {
     display: grid;
     gap: var(--space-md);
+  }
+
+  .steps {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    counter-reset: step;
+  }
+  .steps li {
+    counter-increment: step;
+    display: grid;
+    grid-template-columns: 2rem minmax(0, 1fr);
+    column-gap: var(--space-md);
+    padding-block: var(--space-lg);
+    border-top: var(--rule-thin);
+  }
+  .steps li:first-child {
+    border-top: 0;
+    padding-top: 0;
+  }
+  .steps li::before {
+    content: counter(step);
+    grid-row: 1 / span 2;
+    font-family: var(--font-display);
+    font-size: var(--text-xl);
+    line-height: 1.2;
+    color: var(--color-accent);
+  }
+  .steps h3 {
+    font-size: var(--text-xl);
+    margin-bottom: var(--space-xs);
+  }
+
+  .photo {
+    display: grid;
+    place-items: center;
+    aspect-ratio: 4 / 3;
+    background: var(--color-paper-2);
+    border: var(--rule-thin);
+    color: var(--color-ink-muted);
+  }
+  .us {
+    display: grid;
+    gap: var(--space-lg);
+  }
+  .todo {
+    color: var(--color-ink-muted);
+  }
+
+  @media (min-width: 64rem) {
+    .hero {
+      padding-block: var(--space-3xl) var(--space-3xl);
+    }
+    .hero__action {
+      justify-items: start;
+    }
+    .hero__action .btn {
+      display: inline-flex;
+      width: auto;
+    }
+    .band {
+      grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+      column-gap: var(--space-2xl);
+      padding-block: var(--space-2xl);
+    }
+    .band > h2 {
+      max-width: 14ch;
+    }
+    #start > p {
+      max-width: var(--measure);
+    }
+    .roles {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      column-gap: var(--space-xl);
+    }
+    .roles__video {
+      grid-column: 1 / -1;
+    }
+    .us {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      column-gap: var(--space-xl);
+      align-items: start;
+    }
+    #us {
+      grid-template-columns: 1fr;
+    }
   }
 </style>

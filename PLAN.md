@@ -94,7 +94,7 @@ Commit: `task 3`. Status: DONE 2026-10-25. `DESIGN.md` written; base layout, tok
 - **Done when:** Playwright screenshots at 375 px and 1280 px match the prototype frames; axe reports no violations.
 
 ### Task 4: Home sections 1 to 5
-Commit: `task 4`. Status: not started.
+Commit: `task 4`. Status: DONE 2026-10-25. `npm run check` passes (VERIFIED): a test checks every headline and body line of Home sections 1 to 5 against `COPY.md` text, the six anchors, the hero button jumping to `#start`, and the hero fitting 375 x 667. `#start` holds only the heading and intro until task 6. The page keeps `noindex` until task 12.
 - Hero, Who it's for, What we build, Who does what, Who we are (photo and founder lines as placeholders), with anchors `#top`, `#for`, `#build`, `#roles`, `#us`.
 - Text taken from `COPY.md` word for word.
 - **Done when:** a test confirms every headline and body line from `COPY.md` appears on the page; the hero fits in a 375 x 667 first screen; all buttons jump to `#start`.
