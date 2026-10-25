@@ -1,7 +1,7 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
 
-const pages = ["/", "/method/", "/about/", "/thanks", "/privacy", "/no-such-page"];
+const pages = ["/", "/method/", "/about/", "/notes", "/thanks", "/privacy", "/no-such-page"];
 const widths = [
   { width: 375, height: 667 },
   { width: 1280, height: 800 },
@@ -34,7 +34,7 @@ for (const size of widths) {
 test("every internal link and anchor on every page resolves", async ({ page }) => {
   await page.route("https://app.cal.com/**", (route) => route.abort());
   const seen = new Set<string>();
-  for (const path of ["/", "/method/", "/about/", "/thanks", "/privacy"]) {
+  for (const path of ["/", "/method/", "/about/", "/notes", "/thanks", "/privacy"]) {
     await page.goto(path);
     const hrefs = await page
       .locator("a[href]")
@@ -45,8 +45,6 @@ test("every internal link and anchor on every page resolves", async ({ page }) =
       if (seen.has(key)) continue;
       seen.add(key);
       const url = new URL(href, `http://x${path}`);
-      // Notes is pending H4.
-      if (["/notes"].includes(url.pathname)) continue;
       if (url.hash && url.pathname === path) {
         expect(await page.locator(url.hash).count(), key).toBe(1);
       } else {

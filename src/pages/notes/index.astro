@@ -1,0 +1,79 @@
+---
+import Base from "../../layouts/Base.astro";
+import CallBand from "../../components/CallBand.astro";
+import { formatDate, getNotes, readMinutes } from "../../lib/notes";
+
+const notes = await getNotes();
+---
+
+<Base title="Notes · Arcbuildr" description="Notes from Arcbuildr on building a personal brand.">
+  <div class="wrap notes">
+    <header class="notes__head">
+      <p class="kicker">Notes</p>
+      <h1>[Placeholder: notes heading]</h1>
+      <p>[Placeholder: notes lede]</p>
+    </header>
+    <ul class="notes__list">
+      {notes.map((n) => (
+        <li>
+          <a class="card notes__item reveal" href={`/notes/${n.id}`}>
+            <span class="kicker">
+              <time datetime={n.data.date.toISOString().slice(0, 10)}>
+                {formatDate(n.data.date)}
+              </time>
+              {" · "}
+              {readMinutes(n.body)} min
+            </span>
+            <span class="notes__title">{n.data.title}</span>
+            <span class="notes__summary">{n.data.summary}</span>
+          </a>
+        </li>
+      ))}
+    </ul>
+  </div>
+  <div class="wrap">
+    <CallBand />
+  </div>
+</Base>
+
+<style>
+  .notes {
+    display: grid;
+    gap: var(--space-xl);
+    padding-block: var(--space-xl) var(--space-lg);
+  }
+  .notes__head {
+    display: grid;
+    gap: var(--space-sm);
+  }
+  h1 {
+    font-size: var(--text-display);
+  }
+  .notes__list {
+    display: grid;
+    gap: var(--space-md);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .notes__item {
+    display: grid;
+    gap: var(--space-xs);
+    min-height: var(--tap);
+    padding: var(--space-lg);
+    color: inherit;
+    text-decoration: none;
+  }
+  .notes__item:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lift);
+  }
+  .notes__title {
+    font-size: var(--text-xl);
+    font-weight: 600;
+    line-height: 1.2;
+  }
+  .notes__summary {
+    color: var(--color-ink-muted);
+  }
+</style>

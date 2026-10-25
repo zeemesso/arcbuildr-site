@@ -196,6 +196,7 @@ Commit: `task H3: about page`. Status: DONE 2026-10-26. Built by Codex, reviewed
 - **Done when:** a test checks the h1, the founding date and the three principles; axe is clean; `/about` is in the sitemap.
 
 #### H4: Notes
+Commit: `task H4: notes`. Status: DONE 2026-10-26. Built in a Claude Code cloud session (branch `claude/hub-notes-iuu6hv`, commit d03cd81), cherry-picked and reviewed by Opus. Fixed in review: clashes with H1 to H3 (`CallBand.astro`, sitemap), the call band ran edge to edge outside `.wrap`, a missing space before "·" after the date, title separator, rounded tap-target heights. The link check no longer skips `/notes`. `npm run check` passes (VERIFIED): 21 Vitest, 123 Playwright; `test:main-build` fails if a draft note or its sitemap entry reaches the main build.
 - Astro content collection `notes` (`title`, `summary`, `date`, `draft`), `/notes` index newest first, `/notes/[slug]`, two placeholder drafts.
 - **Done when:** tests check the index order and a note page; `test:main-build` fails if a draft is in the main build or its sitemap; axe is clean.
 
