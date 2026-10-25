@@ -122,7 +122,7 @@ Commit: `task 7`. Status: DONE 2026-10-25, one check left for Zyade.
 - **Done when:** Vitest covers valid, invalid, spam, Notion down and Resend down, with `fetch` stubbed; a real `TEST` lead sent on the preview lands in Notion and triggers the email.
 
 ### Task 8: Short links
-Commit: `task 8`. Status: not started.
+Commit: `task 8`. Status: DONE 2026-10-25. Vitest checks each redirect (302 to `/?src=ig|dm|tt`, trailing slash, other paths untouched). Playwright checks that `?src=ig` reaches the request body (`form.spec.ts`), because `astro preview` does not run the Worker. On the preview (2c25019, VERIFIED with curl): `/ig`, `/dm`, `/tt` and `/ig/` answer 302 to `/?src=...`; `/igg` gives 404.
 - `/ig`, `/dm`, `/tt` redirect (302) to `/?src=ig|dm|tt`. The form copies `src` into its hidden field.
 - **Done when:** Vitest checks each redirect; Playwright checks `src` reaches the request body.
 
