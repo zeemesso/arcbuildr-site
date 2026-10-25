@@ -2,7 +2,7 @@
 
 Direction A, "Daylight bento". Chosen by Zyade on 2026-10-26 from two directions built on real references. Replaces the task 3 design (cream paper, roman serif, sienna), which was picked with no references and read as generic.
 
-References (mechanics only, nothing copied): `docs/references/context-con.md` (layout, bento, founder note, one action color) and `docs/references/onefactor-kallaway.md` (type pairing, section order, mobile CTA, CSS-only reveal).
+References (mechanics only, nothing copied): `docs/references/context-con.md` (layout, bento, founder note, one action color) and `docs/references/onefactor-kallaway.md` (section order, mobile CTA, CSS-only reveal).
 
 ## Direction
 
