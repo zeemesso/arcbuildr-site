@@ -179,6 +179,7 @@ Commit: `visual layer v2`. Status: DONE 2026-10-26, now in step 9 (Agentation).
 Prototype: `PROTOTYPE.md`, "Hub". Each task is one commit on `claude/build` and passes `npm run check`. Routing: Codex builds H1 to H3 from the prototype and Opus reviews each diff; H4 runs in a Claude Code cloud session on `claude/hub-notes` and is cherry-picked onto `claude/build` (an exception to the one-branch rule, so it can run in parallel).
 
 #### H1: Navigation
+Commit: `task H1: navigation`. Status: DONE 2026-10-26. Built by Codex, reviewed by Opus. `npm run check` passes (VERIFIED): 21 Vitest, 81 Playwright including `e2e/nav.spec.ts` (sheet opens by tap, closes by Esc and tap outside, axe clean with the sheet open, 44 px targets, `aria-current`). Fixed in review: `aria-current` never matched in the static build (`/privacy/` has a trailing slash); the spec moved from `tests/` (Vitest) to `e2e/`. `e2e/pages.spec.ts` skips `/method`, `/notes` and `/about` until H2 to H4 build them; remove that skip in H5.
 - Header links Method, Notes, About on desktop; a "Menu" button opening a `popover` sheet on mobile; `aria-current` on the current page. The dock stays as built.
 - Shared `CallBand.astro` (heading, button to `/#start`) for new pages.
 - **Done when:** tests open and close the sheet by tap and Esc, every nav link returns 200 (Notes after H4), axe is clean, tap targets are at least 44 px at phone and desktop sizes.

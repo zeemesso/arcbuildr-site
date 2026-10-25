@@ -1,0 +1,24 @@
+---
+interface Props {
+  heading?: string;
+}
+
+const { heading = "[Placeholder: call band heading]" } = Astro.props;
+---
+
+<section class="card call-band">
+  <h2>{heading}</h2>
+  <a class="btn btn--lg" href="/#start">
+    Book an intro call
+  </a>
+</section>
+
+<style>
+  .call-band {
+    display: grid;
+    justify-items: center;
+    gap: var(--space-lg);
+    padding: var(--space-xl) var(--space-lg);
+    text-align: center;
+  }
+</style>
