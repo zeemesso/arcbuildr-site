@@ -113,7 +113,10 @@ Commit: `task 6`. Status: DONE 2026-10-25. `npm run check` passes (VERIFIED, `/a
 - **Done when:** Playwright fills invalid and valid values, sees each error and state, and the request body has every field.
 
 ### Task 7: Lead endpoint
-Commit: `task 7`. Status: not started.
+Commit: `task 7`. Status: DONE 2026-10-25, one check left for Zyade.
+- `npm run check` passes (VERIFIED): 9 new Vitest tests with `fetch` stubbed cover valid (JSON and no-JS 303), invalid, spam trap, Notion down and throwing, Resend down and throwing.
+- Preview `claude-build-arcbuildr.zeemesso.workers.dev` on 90e2472 (VERIFIED with curl): a `TEST lead` POST returned `200 {"ok":true}`, which the code only returns after Notion accepted the row. Invalid gives 400 with field errors; the spam trap gives 200 and stores nothing; GET gives 404.
+- Not seen from here: the row in Notion and the alert email (the sandbox cannot read either). Zyade: look for a `TEST lead` row with Source `ig` and an email "New lead: TEST lead ..." in the alert inbox, then delete the row. Tell Claude if either is missing.
 - `POST /api/lead`: validate, drop spam-trap hits, create the Notion row (Status: New), send the Resend alert, then redirect to `/thanks?name=&email=`.
 - If Notion fails: return the failure state, no redirect. If only Resend fails: still redirect; the lead is safe in Notion.
 - **Done when:** Vitest covers valid, invalid, spam, Notion down and Resend down, with `fetch` stubbed; a real `TEST` lead sent on the preview lands in Notion and triggers the email.
