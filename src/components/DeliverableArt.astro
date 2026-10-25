@@ -1,0 +1,273 @@
+---
+interface Props {
+  art: string;
+}
+
+const { art } = Astro.props;
+---
+
+<div class={`art art--${art}`} aria-hidden="true">
+  <i></i>
+  <i></i>
+  <i></i>
+  <i></i>
+  <i></i>
+  <i></i>
+</div>
+
+<style>
+  /* Bleeds to 0.75rem from the card edge, so its radius stays concentric (1.75 - 0.75). */
+  .art {
+    position: relative;
+    align-self: end;
+    height: 8.5rem;
+    margin: 0 calc(var(--space-sm) - var(--space-lg)) calc(var(--space-sm) - var(--space-lg));
+    border-radius: calc(var(--radius-lg) - var(--space-sm));
+    background: color-mix(in oklab, var(--hue) 9%, var(--color-card));
+    overflow: hidden;
+  }
+  .art i {
+    position: absolute;
+    display: block;
+  }
+  /* Strategy: a target, the point you want to be known for. */
+  .art--target i:nth-child(-n + 3) {
+    left: 50%;
+    top: 50%;
+    border-radius: 50%;
+    border: 2px solid var(--hue);
+    translate: -50% -50%;
+  }
+  .art--target i:nth-child(1) {
+    width: 6.5rem;
+    height: 6.5rem;
+    opacity: 0.35;
+  }
+  .art--target i:nth-child(2) {
+    width: 4rem;
+    height: 4rem;
+    opacity: 0.6;
+  }
+  .art--target i:nth-child(3) {
+    width: 1.4rem;
+    height: 1.4rem;
+    background: var(--hue);
+  }
+  /* Identity: a palette and a type sample. */
+  .art--swatches {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+  }
+  .art--swatches i {
+    position: static;
+    width: 2.25rem;
+    height: 4.5rem;
+    border-radius: var(--radius-pill);
+    background: var(--hue);
+  }
+  .art--swatches i:nth-child(2) {
+    background: color-mix(in oklab, var(--hue) 55%, var(--color-card));
+  }
+  .art--swatches i:nth-child(3) {
+    background: var(--color-ink);
+  }
+  .art--swatches i:nth-child(4) {
+    background: var(--color-card);
+    box-shadow: inset 0 0 0 1px var(--color-rule);
+  }
+  .art--swatches i:nth-child(n + 5) {
+    display: none;
+  }
+  /* Profile: a fixed grid, one tile in focus. */
+  .art--grid {
+    display: grid;
+    grid-template-columns: repeat(3, 2.4rem);
+    gap: 3px;
+    place-content: center;
+  }
+  .art--grid i {
+    position: static;
+    height: 2.4rem;
+    border-radius: 4px;
+    background: color-mix(in oklab, var(--hue) 30%, var(--color-card));
+  }
+  .art--grid i:nth-child(2),
+  .art--grid i:nth-child(6) {
+    background: var(--hue);
+  }
+  /* Content: a carousel, slides fanned out. */
+  .art--stack i:nth-child(-n + 3) {
+    top: 1.4rem;
+    left: 50%;
+    width: 4.6rem;
+    height: 5.75rem;
+    border-radius: 0.6rem;
+    box-shadow: var(--shadow-card);
+  }
+  .art--stack i:nth-child(1) {
+    translate: -110% 0;
+    rotate: -8deg;
+    background: color-mix(in oklab, var(--hue) 35%, var(--color-card));
+  }
+  .art--stack i:nth-child(2) {
+    translate: 10% 0;
+    rotate: 8deg;
+    background: color-mix(in oklab, var(--hue) 60%, var(--color-card));
+  }
+  .art--stack i:nth-child(3) {
+    translate: -50% -0.5rem;
+    background: var(--hue);
+  }
+  /* Support: a question and an answer. */
+  .art--chat i:nth-child(-n + 2) {
+    height: 2rem;
+    border-radius: 1rem;
+  }
+  .art--chat i:nth-child(1) {
+    left: 1.25rem;
+    top: 1.75rem;
+    width: 55%;
+    border-bottom-left-radius: 0.3rem;
+    background: var(--color-card);
+    box-shadow: var(--shadow-card);
+  }
+  .art--chat i:nth-child(2) {
+    right: 1.25rem;
+    bottom: 1.75rem;
+    width: 45%;
+    border-bottom-right-radius: 0.3rem;
+    background: var(--hue);
+  }
+  .art--target i:nth-child(n + 4),
+  .art--stack i:nth-child(n + 4),
+  .art--chat i:nth-child(n + 3) {
+    display: none;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    :global(.card:not(.is-in)) .art i {
+      animation-play-state: paused;
+    }
+    .art--target i:nth-child(4) {
+      display: block;
+      left: 50%;
+      top: 50%;
+      width: 4rem;
+      height: 4rem;
+      border-radius: 50%;
+      border: 2px solid var(--hue);
+      translate: -50% -50%;
+      animation: ping 2.4s var(--ease-out) 0.6s infinite;
+    }
+    .art--target i:nth-child(3) {
+      animation: pop 0.6s var(--spring) 0.3s backwards;
+    }
+    .art--swatches i {
+      animation: rise-far 0.8s var(--spring) backwards;
+    }
+    .art--swatches i:nth-child(2) {
+      animation-delay: 0.08s;
+    }
+    .art--swatches i:nth-child(3) {
+      animation-delay: 0.16s;
+    }
+    .art--swatches i:nth-child(4) {
+      animation-delay: 0.24s;
+    }
+    :global(.card:hover) .art--swatches {
+      gap: 0.9rem;
+    }
+    .art--swatches {
+      transition: gap 0.35s var(--spring);
+    }
+    .art--grid i {
+      animation: tile-focus 6s ease-in-out infinite;
+    }
+    .art--grid i:nth-child(2) {
+      animation-delay: 1s;
+    }
+    .art--grid i:nth-child(3) {
+      animation-delay: 2s;
+    }
+    .art--grid i:nth-child(4) {
+      animation-delay: 3s;
+    }
+    .art--grid i:nth-child(5) {
+      animation-delay: 4s;
+    }
+    .art--grid i:nth-child(6) {
+      animation-delay: 5s;
+    }
+    .art--stack i:nth-child(-n + 3) {
+      transition:
+        rotate 0.45s var(--spring),
+        translate 0.45s var(--spring);
+    }
+    :global(.card:hover) .art--stack i:nth-child(1) {
+      translate: -125% 0.3rem;
+      rotate: -14deg;
+    }
+    :global(.card:hover) .art--stack i:nth-child(2) {
+      translate: 25% 0.3rem;
+      rotate: 14deg;
+    }
+    :global(.card:hover) .art--stack i:nth-child(3) {
+      translate: -50% -0.9rem;
+    }
+    .art--chat i:nth-child(1) {
+      transform-origin: bottom left;
+      animation: chat 5s var(--spring) infinite;
+    }
+    .art--chat i:nth-child(2) {
+      transform-origin: bottom right;
+      animation: chat 5s var(--spring) 0.9s infinite;
+    }
+  }
+  @keyframes rise-far {
+    from {
+      translate: 0 5rem;
+    }
+  }
+  @keyframes ping {
+    from {
+      scale: 0.6;
+      opacity: 0.8;
+    }
+    to {
+      scale: 1.9;
+      opacity: 0;
+    }
+  }
+  @keyframes tile-focus {
+    0%,
+    14% {
+      background: var(--hue);
+      scale: 1.08;
+    }
+    22%,
+    100% {
+      background: color-mix(in oklab, var(--hue) 30%, var(--color-card));
+      scale: 1;
+    }
+  }
+  @keyframes chat {
+    0% {
+      scale: 0;
+    }
+    12%,
+    80% {
+      scale: 1;
+    }
+    92%,
+    100% {
+      scale: 0;
+    }
+  }
+  @keyframes pop {
+    from {
+      scale: 0;
+    }
+  }
+</style>

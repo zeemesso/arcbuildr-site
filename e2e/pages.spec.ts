@@ -1,7 +1,7 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
 
-const pages = ["/", "/thanks", "/privacy", "/no-such-page"];
+const pages = ["/", "/method/", "/thanks", "/privacy", "/no-such-page"];
 const widths = [
   { width: 375, height: 667 },
   { width: 1280, height: 800 },
@@ -21,7 +21,7 @@ for (const size of widths) {
         .withTags(["wcag2a", "wcag2aa", "wcag22aa"])
         .analyze();
       expect(results.violations).toEqual([]);
-      const name = path === "/" ? "home" : path.slice(1);
+      const name = path === "/" ? "home" : path.replace(/^\/|\/$/g, "");
       await page.screenshot({
         path: `test-results/step8/${name}-${size.width}.png`,
         fullPage: true,
@@ -34,7 +34,7 @@ for (const size of widths) {
 test("every internal link and anchor on every page resolves", async ({ page }) => {
   await page.route("https://app.cal.com/**", (route) => route.abort());
   const seen = new Set<string>();
-  for (const path of ["/", "/thanks", "/privacy"]) {
+  for (const path of ["/", "/method/", "/thanks", "/privacy"]) {
     await page.goto(path);
     const hrefs = await page
       .locator("a[href]")
@@ -45,8 +45,8 @@ test("every internal link and anchor on every page resolves", async ({ page }) =
       if (seen.has(key)) continue;
       seen.add(key);
       const url = new URL(href, `http://x${path}`);
-      // H1 adds navigation before these pages are built in H2–H4.
-      if (["/method", "/notes", "/about"].includes(url.pathname)) continue;
+      // Notes and About are pending H3–H4.
+      if (["/notes", "/about"].includes(url.pathname)) continue;
       if (url.hash && url.pathname === path) {
         expect(await page.locator(url.hash).count(), key).toBe(1);
       } else {

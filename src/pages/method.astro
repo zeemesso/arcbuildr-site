@@ -1,0 +1,214 @@
+---
+import Base from "../layouts/Base.astro";
+import CallBand from "../components/CallBand.astro";
+import DeliverableArt from "../components/DeliverableArt.astro";
+import { deliverables } from "../data/deliverables";
+---
+
+<Base
+  title="Method · Arcbuildr"
+  description="How we build your personal brand: brand strategy, visual identity, profile audit, content and ongoing support, in order."
+>
+  <section class="hero wrap" aria-labelledby="hero-title">
+    <p class="kicker">How we build</p>
+    <h1 id="hero-title">
+      Five builds,
+      <br />
+      <span class="hl">in order.</span>
+    </h1>
+    <p class="lede">[Placeholder: one-line lede]</p>
+    <div class="hero__action">
+      <a class="btn btn--lg" href="/#start">
+        Book an intro call
+      </a>
+    </div>
+  </section>
+
+  <div class="method wrap">
+    <ol class="method__steps" role="list" aria-label="The five builds, in order">
+      {deliverables.map((deliverable, i) => (
+        <li
+          class="card method__step reveal"
+          style={`--hue: var(--hue-${deliverable.hue}); --d: ${i * 90}ms`}
+        >
+          <div class="method__visual">
+            <span class="method__number" aria-hidden="true">
+              {String(i + 1).padStart(2, "0")}
+            </span>
+            <DeliverableArt art={deliverable.art} />
+          </div>
+          <div class="method__body">
+            <h2>{deliverable.name}</h2>
+            <p>{deliverable.text}</p>
+            <div class="method__details">
+              <h3>What you give us</h3>
+              <ul>
+                <li>[Placeholder]</li>
+              </ul>
+            </div>
+            <div class="method__details">
+              <h3>What you get</h3>
+              <ul>
+                <li>[Placeholder]</li>
+              </ul>
+            </div>
+          </div>
+        </li>
+      ))}
+    </ol>
+
+    <section class="card exclusions reveal" aria-labelledby="exclusions-title">
+      <h2 id="exclusions-title">What we don't do</h2>
+      <ul>
+        <li>We don't publish for you. You post everything on your account.</li>
+        <li>No LinkedIn, no YouTube.</li>
+      </ul>
+    </section>
+
+    <CallBand />
+  </div>
+</Base>
+
+<style>
+  .hero {
+    display: grid;
+    justify-items: center;
+    gap: var(--space-lg);
+    padding-block: var(--space-xl) 0;
+    text-align: center;
+  }
+  .lede {
+    max-width: 34rem;
+    color: var(--color-ink-muted);
+    font-size: var(--text-lg);
+    line-height: 1.55;
+  }
+  .method {
+    display: grid;
+    gap: var(--space-2xl);
+    padding-top: var(--space-2xl);
+  }
+  .method__steps {
+    display: grid;
+    gap: var(--space-lg);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .method__step {
+    position: relative;
+    display: grid;
+    grid-template-columns: var(--tap) minmax(0, 1fr);
+    gap: var(--space-lg);
+    padding: var(--space-lg);
+  }
+  /* Segments meet at card edges and span the gaps; the end numbers cap the line. */
+  .method__step::before {
+    content: "";
+    position: absolute;
+    left: calc(var(--space-lg) + var(--tap) / 2);
+    top: calc(-1 * var(--space-lg) - 1px);
+    bottom: -1px;
+    width: 2px;
+    background: var(--color-rule);
+    pointer-events: none;
+  }
+  .method__step:first-child::before {
+    top: calc(var(--space-lg) + var(--tap) / 2);
+  }
+  .method__step:last-child::before {
+    bottom: calc(100% - var(--space-lg) - var(--tap) / 2);
+  }
+  .method__visual {
+    display: contents;
+  }
+  .method__number {
+    position: relative;
+    display: grid;
+    place-items: center;
+    align-self: start;
+    min-height: var(--tap);
+    border-radius: var(--radius-pill);
+    background: color-mix(in oklab, var(--hue) 14%, var(--color-card));
+    color: var(--color-ink);
+    font-size: var(--text-sm);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+  }
+  .method__visual :global(.art) {
+    width: 100%;
+    margin: 0;
+    border-radius: var(--radius-md);
+  }
+  .method__body {
+    grid-column: 2;
+    display: grid;
+    gap: var(--space-lg);
+    align-content: start;
+    min-width: 0;
+  }
+  .method__body h2 {
+    font-size: var(--text-xl);
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+  }
+  .method__body p,
+  .method__details ul,
+  .exclusions li {
+    color: var(--color-ink-muted);
+  }
+  .method__details {
+    display: grid;
+    gap: var(--space-xs);
+  }
+  .method__details h3 {
+    font-size: var(--text-base);
+    letter-spacing: inherit;
+  }
+  .method__details ul,
+  .exclusions ul {
+    margin: 0;
+    padding-left: var(--space-lg);
+  }
+  .exclusions {
+    display: grid;
+    gap: var(--space-lg);
+    padding: var(--space-xl) var(--space-lg);
+  }
+  .exclusions ul {
+    display: grid;
+    gap: var(--space-sm);
+  }
+
+  @media (min-width: 64rem) {
+    .hero {
+      padding-top: var(--space-3xl);
+    }
+    .method {
+      gap: var(--space-3xl);
+      padding-top: var(--space-3xl);
+    }
+    .method__step {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+      gap: var(--space-2xl);
+      padding: var(--space-xl);
+    }
+    .method__step::before {
+      display: none;
+    }
+    .method__visual {
+      display: grid;
+      grid-template-columns: var(--tap) minmax(0, 1fr);
+      gap: var(--space-lg);
+      align-content: start;
+    }
+    .method__body h2 {
+      font-size: var(--text-2xl);
+      line-height: 1;
+      letter-spacing: -0.035em;
+    }
+    .exclusions {
+      padding: var(--space-2xl);
+    }
+  }
+</style>

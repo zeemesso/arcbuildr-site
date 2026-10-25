@@ -185,6 +185,7 @@ Commit: `task H1: navigation`. Status: DONE 2026-10-26. Built by Codex, reviewed
 - **Done when:** tests open and close the sheet by tap and Esc, every nav link returns 200 (Notes after H4), axe is clean, tap targets are at least 44 px at phone and desktop sizes.
 
 #### H2: Method page
+Commit: `task H2: method page`. Status: DONE 2026-10-26. Built by Codex, reviewed by Opus. Deliverables live in `src/data/deliverables.ts`, drawings in `src/components/DeliverableArt.astro`; Home unchanged. `npm run check` passes (VERIFIED): 21 Vitest, 99 Playwright, axe clean on `/method` at 375 and 1280 px. Fixed in review: the h1 test ignored the `<br>`; the nav tap-target test now rounds a 43.99999 px reading.
 - `src/data/deliverables.ts` holds the five deliverables (name, line, hue, art); Home's bento reads it with no visual change.
 - `/method` as in the prototype, placeholders visible.
 - **Done when:** a test checks the five names and lines on `/method` and Home, the hero fits a 375 x 667 screen, axe is clean, and `/method` is in the sitemap.

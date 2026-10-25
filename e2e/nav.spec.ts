@@ -75,6 +75,7 @@ test("navigation links and Menu have 44px tap targets", async ({ page }, info) =
     await menu.tap();
   }
   for (const link of await header.locator("a:visible").all()) {
-    expect((await link.boundingBox())!.height).toBeGreaterThanOrEqual(44);
+    // Round: the sheet links can measure 43.99999 px.
+    expect(Math.round((await link.boundingBox())!.height)).toBeGreaterThanOrEqual(44);
   }
 });

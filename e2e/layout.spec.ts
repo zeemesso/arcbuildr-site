@@ -20,15 +20,17 @@ test("header stays on top while scrolling and the button jumps to the form", asy
   await expect(page.getByRole("link", { name: "Book a call" })).toHaveAttribute("href", "/#start");
 });
 
-test("body text is at least 16px and tap targets at least 44px", async ({ page }) => {
-  await page.goto("/");
-  const size = await page.evaluate(() => parseFloat(getComputedStyle(document.body).fontSize));
-  expect(size).toBeGreaterThanOrEqual(16);
-  for (const link of await page.locator("a:visible").all()) {
-    if (await link.evaluate((el) => el.classList.contains("skip"))) continue;
-    expect((await link.boundingBox())!.height).toBeGreaterThanOrEqual(44);
-  }
-});
+for (const path of ["/", "/method/"]) {
+  test(`${path}: body text is at least 16px and tap targets at least 44px`, async ({ page }) => {
+    await page.goto(path);
+    const size = await page.evaluate(() => parseFloat(getComputedStyle(document.body).fontSize));
+    expect(size).toBeGreaterThanOrEqual(16);
+    for (const link of await page.locator("a:visible").all()) {
+      if (await link.evaluate((el) => el.classList.contains("skip"))) continue;
+      expect((await link.boundingBox())!.height).toBeGreaterThanOrEqual(44);
+    }
+  });
+}
 
 test("frames at this width", async ({ page }, info) => {
   await page.goto("/");
