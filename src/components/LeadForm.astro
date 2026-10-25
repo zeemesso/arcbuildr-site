@@ -1,0 +1,263 @@
+---
+// The lead form. Works as a plain POST without JavaScript. The script below adds
+// inline checks, a sending state and a server-failure message that keeps what was typed.
+---
+
+<form id="lead-form" method="post" action="/api/lead" class="form">
+  <div class="field">
+    <label for="f-name">Your name</label>
+    <input id="f-name" name="name" type="text" autocomplete="name" required />
+    <p class="error" id="f-name-error" hidden></p>
+  </div>
+
+  <div class="field">
+    <label for="f-email">Email</label>
+    <input
+      id="f-email"
+      name="email"
+      type="email"
+      inputmode="email"
+      autocomplete="email"
+      autocapitalize="none"
+      spellcheck="false"
+      required
+    />
+    <p class="error" id="f-email-error" hidden></p>
+  </div>
+
+  <div class="field">
+    <label for="f-instagram">Instagram handle</label>
+    <input
+      id="f-instagram"
+      name="instagram"
+      type="text"
+      placeholder="@"
+      autocomplete="off"
+      autocapitalize="none"
+      autocorrect="off"
+      spellcheck="false"
+      aria-describedby="f-instagram-help"
+      required
+    />
+    <p class="help" id="f-instagram-help">
+      So we can look at your profile before the call.
+    </p>
+    <p class="error" id="f-instagram-error" hidden></p>
+  </div>
+
+  <div class="field">
+    <label for="f-business">Your business</label>
+    <input
+      id="f-business"
+      name="business"
+      type="text"
+      autocomplete="organization"
+      aria-describedby="f-business-help"
+      required
+    />
+    <p class="help" id="f-business-help">
+      One line is enough.
+    </p>
+    <p class="error" id="f-business-error" hidden></p>
+  </div>
+
+  <div class="field">
+    <label for="f-goal">What should your personal brand do for your business? (optional)</label>
+    <textarea id="f-goal" name="goal" rows="3" aria-describedby="f-goal-help"></textarea>
+    <p class="help" id="f-goal-help">
+      A sentence or two.
+    </p>
+  </div>
+
+  <input type="hidden" name="src" value="" />
+  <input type="hidden" name="referrer" value="" />
+  <input type="hidden" name="sent_at" value="" />
+  <div class="trap" aria-hidden="true">
+    <label for="f-website">Leave this empty</label>
+    <input id="f-website" name="website" type="text" tabindex="-1" autocomplete="off" />
+  </div>
+
+  <div class="form__action">
+    <button class="btn btn--block" type="submit">
+      Send and pick a time
+    </button>
+    <p class="note">
+      We use your details only to prepare for the call. <a href="/privacy">Privacy</a>
+    </p>
+    <p class="error error--form" id="form-error" role="alert" hidden>
+      We couldn't send your details. Try again, or DM us at @arcbuildr. What you typed is still
+      here.
+    </p>
+    <p class="visually-hidden" id="form-status" role="status"></p>
+  </div>
+
+  <p class="dm">Prefer Instagram? Send us a DM at @arcbuildr.</p>
+</form>
+
+<script>
+  const form = document.getElementById("lead-form") as HTMLFormElement;
+  const button = form.querySelector<HTMLButtonElement>("button[type=submit]")!;
+  const status = document.getElementById("form-status")!;
+  const formError = document.getElementById("form-error")!;
+  const label = button.textContent!;
+
+  form.noValidate = true;
+
+  const field = (name: string) => form.elements.namedItem(name) as HTMLInputElement;
+
+  // Attribution: the short links /ig, /dm and /tt redirect to /?src=...
+  const src = new URLSearchParams(location.search).get("src");
+  field("src").value = src && ["ig", "dm", "tt"].includes(src) ? src : "direct";
+  field("referrer").value = document.referrer;
+
+  const checks: Record<string, (v: string) => string> = {
+    name: (v) => (v ? "" : "Add your name."),
+    email: (v) =>
+      /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v)
+        ? ""
+        : "Check your email address. It needs a full domain, like name@gmail.com.",
+    instagram: (v) => (v.replace(/^@/, "") ? "" : "Add your Instagram handle, like @yourname."),
+    business: (v) => (v ? "" : "Add one line about your business."),
+  };
+
+  function show(name: string, message: string) {
+    const input = field(name);
+    const error = document.getElementById(`f-${name}-error`)!;
+    error.textContent = message;
+    error.hidden = !message;
+    input.toggleAttribute("aria-invalid", !!message);
+    if (message) input.setAttribute("aria-invalid", "true");
+    const help = document.getElementById(`f-${name}-help`);
+    input.setAttribute(
+      "aria-describedby",
+      [help?.id, message ? error.id : ""].filter(Boolean).join(" "),
+    );
+    if (!input.getAttribute("aria-describedby")) input.removeAttribute("aria-describedby");
+  }
+
+  for (const name of Object.keys(checks)) {
+    field(name).addEventListener("blur", () => {
+      if (field(name).value.trim()) show(name, checks[name]!(field(name).value.trim()));
+    });
+    field(name).addEventListener("input", () => {
+      if (field(name).hasAttribute("aria-invalid"))
+        show(name, checks[name]!(field(name).value.trim()));
+    });
+  }
+
+  let sending = false;
+
+  form.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    if (sending) return;
+    formError.hidden = true;
+
+    let firstBad: string | null = null;
+    for (const name of Object.keys(checks)) {
+      const message = checks[name]!(field(name).value.trim());
+      show(name, message);
+      if (message && !firstBad) firstBad = name;
+    }
+    if (firstBad) {
+      field(firstBad).focus();
+      return;
+    }
+
+    field("sent_at").value = new Date().toISOString();
+    sending = true;
+    button.disabled = true;
+    button.textContent = "Sending...";
+    status.textContent = "Sending...";
+
+    try {
+      const res = await fetch(form.action, {
+        method: "POST",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        body: new URLSearchParams(new FormData(form) as unknown as Record<string, string>),
+      });
+      const body = (await res.json().catch(() => null)) as { ok?: boolean } | null;
+      if (!res.ok || !body?.ok) throw new Error(String(res.status));
+      const next = new URLSearchParams({
+        name: field("name").value.trim(),
+        email: field("email").value.trim(),
+      });
+      location.assign(`/thanks?${next}`);
+    } catch {
+      sending = false;
+      button.disabled = false;
+      button.textContent = label;
+      status.textContent = "";
+      formError.hidden = false;
+    }
+  });
+</script>
+
+<style>
+  .form {
+    display: grid;
+    gap: var(--space-lg);
+    max-width: 32rem;
+  }
+  .field {
+    display: grid;
+    gap: var(--space-xs);
+  }
+  label {
+    font-weight: 600;
+  }
+  input:not([type="hidden"]),
+  textarea {
+    width: 100%;
+    min-height: var(--tap);
+    padding: var(--space-sm) var(--space-md);
+    border: 1px solid var(--color-ink-muted);
+    border-radius: var(--radius-sm);
+    background: var(--color-paper);
+    color: var(--color-ink);
+    font: inherit;
+  }
+  textarea {
+    resize: vertical;
+  }
+  input[aria-invalid="true"] {
+    border-color: var(--color-error);
+    border-width: 2px;
+  }
+  .help,
+  .note,
+  .dm {
+    color: var(--color-ink-muted);
+    font-size: var(--text-sm);
+  }
+  .error {
+    color: var(--color-error);
+    font-size: var(--text-sm);
+    font-weight: 600;
+  }
+  .form__action {
+    display: grid;
+    gap: var(--space-sm);
+  }
+  .note a {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--tap);
+  }
+  .trap {
+    position: absolute;
+    left: -10000px;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+  }
+  .visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+  }
+</style>

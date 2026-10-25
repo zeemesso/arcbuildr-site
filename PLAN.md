@@ -105,7 +105,8 @@ Commit: `task 5`. Status: DONE 2026-10-25. `npm run check` passes (VERIFIED): 8 
 - **Done when:** a test opens and closes each item by keyboard; the answers are in the page HTML.
 
 ### Task 6: Form (page side)
-Commit: `task 6`. Status: not started.
+Commit: `task 6`. Status: DONE 2026-10-25. `npm run check` passes (VERIFIED, `/api/lead` stubbed in the browser): each error shows and clears; keyboards and attributes; one POST with every field (`name`, `email`, `instagram`, `business`, `goal`, `src`, `referrer`, `sent_at`, `website`); "Sending..." and a disabled button; an unknown `src` becomes `direct`; a 502 shows the failure message and keeps the typed values; without JavaScript the form is a plain POST to `/api/lead` with native `required`; axe clean.
+- Contract for task 7: the script posts urlencoded with `Accept: application/json` and expects `200 {"ok":true}`; any other answer shows the failure message. It then goes to `/thanks?name=&email=` itself. A plain (no-JS) post expects a 303 redirect to the same URL. The spam trap field is `website`. The DM line "@arcbuildr" is plain text until the handle is confirmed (#18).
 - Fields, labels, helper text, the right mobile keyboards, hidden `src`, `referrer`, `sent_at` and the spam trap.
 - Inline errors, "Sending..." state with no double submit, server-failure message that keeps what was typed (copy from `PROTOTYPE.md`).
 - Works without JavaScript as a plain form post.

@@ -1,5 +1,6 @@
 ---
 import Base from "../layouts/Base.astro";
+import LeadForm from "../components/LeadForm.astro";
 
 const steps = [
   {
@@ -156,7 +157,10 @@ const faq = [
 
   <section class="band wrap" id="start" aria-labelledby="start-title">
     <h2 id="start-title">Start with a call</h2>
-    <p>Tell us about you and your business. On the next screen, you pick a time.</p>
+    <div class="start__body">
+      <p>Tell us about you and your business. On the next screen, you pick a time.</p>
+      <LeadForm />
+    </div>
   </section>
 </Base>
 
@@ -185,6 +189,10 @@ const faq = [
     gap: var(--space-lg);
     padding-block: var(--space-xl);
     border-top: var(--rule-thin);
+  }
+  .start__body {
+    display: grid;
+    gap: var(--space-lg);
   }
   .prose {
     display: grid;
@@ -291,9 +299,6 @@ const faq = [
     }
     .band > h2 {
       max-width: 14ch;
-    }
-    #start > p {
-      max-width: var(--measure);
     }
     .roles {
       grid-template-columns: repeat(2, minmax(0, 1fr));
