@@ -1,23 +1,18 @@
 ---
-import buildInfo from "../generated/build-info.json";
+import Base from "../layouts/Base.astro";
 ---
 
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="robots" content="noindex" />
-    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-    <title>Arcbuildr</title>
-  </head>
-  <body>
-    <main>
-      <h1>Arcbuildr</h1>
-      <p>Placeholder. The site is being built.</p>
-      <p>
-        Build: {buildInfo.branch} ({buildInfo.branchSource}) {buildInfo.commit}
-      </p>
-    </main>
-  </body>
-</html>
+<Base title="Arcbuildr" noindex>
+  <section class="wrap placeholder">
+    <h1>Arcbuildr</h1>
+    <p>Placeholder. The site is being built.</p>
+  </section>
+</Base>
+
+<style>
+  .placeholder {
+    padding-block: var(--space-2xl);
+    display: grid;
+    gap: var(--space-md);
+  }
+</style>

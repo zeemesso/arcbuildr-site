@@ -88,7 +88,7 @@ Verified here (VERIFIED, 2026-10-24): `npm run check` passes: Prettier, `astro c
 - **Done when:** `npm run check` passes here and the Action is green.
 
 ### Task 3: Design system and base layout
-Commit: `task 3`. Status: not started.
+Commit: `task 3`. Status: DONE 2026-10-25. `DESIGN.md` written; base layout, tokens and fonts in place. `npm run check` passes: axe clean, sticky header, 16 px body, 44 px targets, at phone and desktop sizes (VERIFIED). Phone test runs at 412 px (Pixel 7), not 375 px.
 - `DESIGN.md`: type, color, spacing and the reasons, chosen with the hallmark and frontend-design skills. Fonts self-hosted. CSS custom properties.
 - Base layout: sticky header (wordmark and "Book a call"), footer, page shell. Body text at least 16 px, tap targets at least 44 px.
 - **Done when:** Playwright screenshots at 375 px and 1280 px match the prototype frames; axe reports no violations.
