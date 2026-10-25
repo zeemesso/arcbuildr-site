@@ -11,3 +11,4 @@ src/generated/
 *.log
 test-results/
 playwright-report/
+.playwright-mcp/
