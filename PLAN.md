@@ -37,7 +37,15 @@ Sources: `COPY.md` (text), `PROTOTYPE.md` (structure), `CLAUDE.md` STACK (tools)
 ## Tasks
 
 ### Task 1: Scaffold and prove the integrations
-Commit: `task 1`. Status: built 2026-10-24; preview works, selftest blocked on a secret mismatch.
+Commit: `task 1`. Status: DONE 2026-10-25.
+
+Preview self-test (VERIFIED, 2026-10-25, commit b7c4f2c, `https://claude-build-arcbuildr.zeemesso.workers.dev`):
+- No header: 404. With the key: HTTP 200, `ok: true`, `branch: "claude/build"`, `branchSource: "WORKERS_CI_BRANCH"`, commit `b7c4f2c7a365`.
+- Notion accepted `2022-06-28`: row id `404b0a5d-b459-816d-94b5-d2eec716c46d`. No switch to `2025-09-03` needed.
+- Resend message id `01a1736e-edad-7bb8-a3d4-7241a2c255dd`.
+- Earlier causes fixed: Preview URLs toggle (Zyade) and a `SELFTEST_KEY` mismatch (Zyade). CI fix: `typecheck` runs `scripts/build-info.mjs` first; Action green on 1ac9589.
+- Done-when item 5 (`main` gives 404 with the key) was verified in local workerd on 2026-10-24; the `/api/selftest` route is now removed, so `main` has no such route at all.
+- Zyade: delete the `TEST selftest` row in Notion by hand.
 
 Preview check (VERIFIED, 2026-10-25), after Zyade turned on Preview URLs:
 - Preview URL: `https://claude-build-arcbuildr.zeemesso.workers.dev` (branch alias) and `https://<first 8 of version id>-arcbuildr.zeemesso.workers.dev` (per version). Both return 200. The page shows `Build: claude/build (WORKERS_CI_BRANCH)`, so `WORKERS_CI_BRANCH` works.
@@ -63,7 +71,7 @@ Verified here (VERIFIED, 2026-10-24):
   5. On `main`, the call returns 404 even with the key. Checked after the first merge, or by building locally with the branch set to `main`.
 
 ### Task 1b: Remove the self-test
-Commit: `task 1b`. Status: not started. Runs as soon as task 1 passes.
+Commit: `task 1b`. Status: built 2026-10-25; preview check pending. `npm run check` passes (VERIFIED: 7 Vitest tests, build, Playwright).
 
 - Delete `/api/selftest`, its key check and its tests. Keep `notion.ts` and `resend.ts`.
 - **Done when:** the preview returns 404 on `/api/selftest` even with the key; `npm run build` passes. Zyade can then delete the `SELFTEST_KEY` secret.

@@ -5,7 +5,6 @@ export interface Env {
   NOTION_DATABASE_ID?: string;
   RESEND_API_KEY?: string;
   ALERT_EMAIL?: string;
-  SELFTEST_KEY?: string;
 }
 
 export interface BuildInfo {
