@@ -126,7 +126,7 @@ const faq = [
           ))}
         </div>
         <div class="profile__tiles">
-          {Array.from({ length: 9 }, (_, i) => (
+          {Array.from({ length: 6 }, (_, i) => (
             <span style={`--hue: var(--hue-${steps[i % 5].hue})`}></span>
           ))}
         </div>
@@ -275,20 +275,18 @@ const faq = [
   }
 
   /* Hero visual: a scattered profile behind, the built one in front. */
+  /* Both cards share one grid cell, so the box always fits them whole: no clipping, no fade. */
   .profile {
-    position: relative;
+    display: grid;
     width: min(100%, 26rem);
-    height: 24rem;
     margin-top: var(--space-xl);
-    /* Clip only the bottom fade; the tilted cards may reach past the sides. */
-    overflow: visible clip;
-    mask-image: linear-gradient(to bottom, #000 70%, transparent);
+    padding: var(--space-lg) var(--space-sm) var(--space-xl);
   }
   .profile__card {
-    position: absolute;
-    inset: 0 0 auto;
+    grid-area: 1 / 1;
     display: grid;
     gap: var(--space-md);
+    align-content: start;
     padding: var(--space-lg);
     border: var(--rule-thin);
     border-radius: var(--radius-lg);
@@ -297,16 +295,16 @@ const faq = [
   }
   .profile__card--before {
     width: 74%;
-    left: 0;
-    top: 2.5rem;
+    justify-self: start;
+    align-self: start;
+    margin-top: 2.5rem;
     rotate: -7deg;
     opacity: 0.55;
     box-shadow: var(--shadow-card);
   }
   .profile__card--after {
     width: 80%;
-    left: auto;
-    right: 0;
+    justify-self: end;
     rotate: 3deg;
   }
   .profile__head {
@@ -362,7 +360,7 @@ const faq = [
     justify-content: space-between;
   }
   .profile__highlights span {
-    width: 2.6rem;
+    width: min(2.6rem, 16%);
     aspect-ratio: 1;
     border-radius: 50%;
     border: 2px solid var(--color-card);
@@ -768,7 +766,6 @@ const faq = [
     }
     .profile {
       width: 30rem;
-      height: 26rem;
     }
     .statement {
       padding-block: var(--space-3xl) var(--space-2xl);
