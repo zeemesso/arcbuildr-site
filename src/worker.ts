@@ -1,5 +1,6 @@
 import type { Env } from "./lib/env";
 import { handleLead } from "./lib/lead";
+import { shortLinkRedirect } from "./lib/shortlinks";
 
 /** Same answer for every unknown /api request, so nothing leaks. */
 function notFound(): Response {
@@ -11,7 +12,10 @@ function notFound(): Response {
 
 export default {
   async fetch(request, env): Promise<Response> {
-    const { pathname } = new URL(request.url);
+    const url = new URL(request.url);
+    const { pathname } = url;
+    const short = shortLinkRedirect(url);
+    if (short) return short;
     if (pathname === "/api/lead" && request.method === "POST") return handleLead(request, env);
     if (pathname.startsWith("/api/")) return notFound();
     return env.ASSETS.fetch(request);
