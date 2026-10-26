@@ -62,7 +62,7 @@ test("Method heading and hero button fit a 375 x 667 first screen", async ({ pag
     expect(box.x).toBeGreaterThanOrEqual(0);
     expect(box.x + box.width).toBeLessThanOrEqual(375);
   }
-  await expect(page.locator(".site-header__cta")).toBeHidden();
+  await expect(page.locator(".site-header__cta")).toBeVisible();
 });
 
 test("Method is axe clean", async ({ page }) => {
