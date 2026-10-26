@@ -41,6 +41,9 @@ test("Home is axe clean on phone at top and when scrolled", async ({ page }, inf
     .analyze();
   expect(results.violations).toEqual([]);
   await page.evaluate(() => scrollTo(0, 600));
+  // Let the header fold (0.3 s) and the scroll reveals (up to about 1.2 s) settle first.
+  await expect(page.getByRole("banner").getByRole("link", { name: "Method" })).toBeHidden();
+  await page.waitForTimeout(1500);
   results = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag22aa"]).analyze();
   expect(results.violations).toEqual([]);
 });
