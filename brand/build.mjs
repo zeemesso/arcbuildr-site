@@ -4,7 +4,7 @@
 import { writeFileSync, mkdirSync } from "node:fs";
 
 const W = 10; // letter stroke
-const ARC = { r: 22, w: 14 }; // the mark: a half circle, heavier than the letters
+const ARC = { r: 21, w: 11 }; // the mark: a half circle, one step heavier than the letters
 const INK = "#1a1a1a";
 const ACCENT = "#e8722e";
 const PAPER = "#ffffff";
@@ -96,6 +96,28 @@ mkdirSync(new URL("./svg/", import.meta.url), { recursive: true });
 for (const [name, body] of Object.entries(files))
   writeFileSync(new URL(`./svg/${name}`, import.meta.url), body);
 writeFileSync(new URL("../public/favicon.svg", import.meta.url), files["tile.svg"]);
+
+// The site draws the logo inline (header, footer, intro) from this data, so it can animate per stroke.
+const site = { arc: arc(0), word: wordmark(0) };
+writeFileSync(
+  new URL("../src/data/logo.json", import.meta.url),
+  JSON.stringify(
+    {
+      stroke: W,
+      arc: {
+        d: site.arc.d,
+        stroke: ARC.w,
+        viewBox: `-1 ${60 - ARC.r - ARC.w - 1} ${site.arc.width + 2} ${ARC.r + ARC.w + 2}`,
+      },
+      word: {
+        viewBox: `-5 -5 ${site.word.width + 10} 70`,
+        letters: site.word.paths.map((p) => p.d),
+      },
+    },
+    null,
+    2,
+  ) + "\n",
+);
 console.log(Object.keys(files).join("\n"));
 
 // kit.html: live preview of the motion this geometry allows. Inline SVG, pathLength=1 so dash math is 0..1.

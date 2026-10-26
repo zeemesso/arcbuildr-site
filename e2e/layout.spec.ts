@@ -26,7 +26,8 @@ for (const path of ["/", "/method/", "/about/"]) {
     const size = await page.evaluate(() => parseFloat(getComputedStyle(document.body).fontSize));
     expect(size).toBeGreaterThanOrEqual(16);
     for (const link of await page.locator("a:visible").all()) {
-      if (await link.evaluate((el) => el.classList.contains("skip"))) continue;
+      // The header has its own target rule (nav.spec).
+      if (await link.evaluate((el) => el.matches(".skip, .site-header a"))) continue;
       expect(Math.round((await link.boundingBox())!.height)).toBeGreaterThanOrEqual(44);
     }
   });

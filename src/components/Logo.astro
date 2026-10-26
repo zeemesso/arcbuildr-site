@@ -1,9 +1,12 @@
 ---
+import logo from "../data/logo.json";
+
 /** The arc and wordmark are round-capped strokes drawn from brand/build.mjs.
  * On Home it is not a link: a link to the page you are on is a dead tab stop. */
 const here = Astro.url.pathname.replace(/(.)\/$/, "$1");
 const isHome = here === "/";
 const Tag = isHome ? "span" : "a";
+const last = logo.word.letters.length - 1;
 ---
 
 <Tag
@@ -12,12 +15,12 @@ const Tag = isHome ? "span" : "a";
   role={isHome ? "img" : undefined}
   href={isHome ? undefined : "/"}
 >
-  <svg class="wordmark__arc" viewBox="0 24 58 36" aria-hidden="true">
+  <svg class="wordmark__arc" viewBox={logo.arc.viewBox} aria-hidden="true">
     <path
-      d="M7 53A22 22 0 0 1 51 53"
+      d={logo.arc.d}
       fill="none"
       stroke="currentColor"
-      stroke-width="14"
+      stroke-width={logo.arc.stroke}
       stroke-linecap="round"
     ></path>
   </svg>
@@ -25,56 +28,20 @@ const Tag = isHome ? "span" : "a";
     <span>
       <svg
         class="wordmark__word"
-        viewBox="-5 -5 328 70"
+        viewBox={logo.word.viewBox}
         aria-hidden="true"
         fill="none"
         stroke-linecap="round"
         stroke-linejoin="round"
+        stroke-width={logo.stroke}
       >
-        <path
-          class="l l-a"
-          d="M5 40a15 15 0 1 0 30 0a15 15 0 1 0-30 0M35 25V55"
-          stroke="currentColor"
-          stroke-width="10"
-        />
-        <path
-          class="l l-r"
-          d="M52 55V40A15 15 0 0 1 67 25"
-          stroke="currentColor"
-          stroke-width="10"
-        />
-        <path
-          class="l l-c"
-          d="M105.61 29.39A15 15 0 1 0 105.61 50.61"
-          stroke="currentColor"
-          stroke-width="10"
-        />
-        <path
-          class="l l-b"
-          d="M123 5V55M123 40a15 15 0 1 0 30 0a15 15 0 1 0-30 0"
-          stroke="currentColor"
-          stroke-width="10"
-        />
-        <path
-          class="l l-u"
-          d="M170 25V40A15 15 0 0 0 200 40M200 25V55"
-          stroke="currentColor"
-          stroke-width="10"
-        />
-        <path class="l l-i" d="M217 25V55M217 7v.01" stroke="currentColor" stroke-width="10" />
-        <path class="l l-l" d="M234 5V55" stroke="currentColor" stroke-width="10" />
-        <path
-          class="l l-d"
-          d="M251 40a15 15 0 1 0 30 0a15 15 0 1 0-30 0M281 5V55"
-          stroke="currentColor"
-          stroke-width="10"
-        />
-        <path
-          class="wordmark__r"
-          d="M298 55V40A15 15 0 0 1 313 25"
-          stroke="var(--color-accent)"
-          stroke-width="10"
-        />
+        {logo.word.letters.map((d, i) => (
+          <path
+            class={i === last ? "wordmark__r" : undefined}
+            d={d}
+            stroke={i === last ? "var(--color-accent)" : "currentColor"}
+          />
+        ))}
       </svg>
     </span>
   </span>

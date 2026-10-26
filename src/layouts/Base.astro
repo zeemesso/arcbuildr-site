@@ -2,6 +2,7 @@
 import "../styles/global.css";
 import buildInfo from "../generated/build-info.json";
 import Logo from "../components/Logo.astro";
+import logo from "../data/logo.json";
 
 interface Props {
   title?: string;
@@ -37,8 +38,9 @@ const hideFromSearch = noindex || showBuild;
   <head>
     <meta charset="utf-8" />
     <script is:inline>
-      // Before first paint: mark JS (reveals may hide below-fold content) and, on the first
-      // home visit of the session, play the intro. Reduced motion never gets it.
+      // Before first paint: mark JS (reveals may hide below-fold content) and play the intro on
+      // every home load, reloads included (Zyade, 2026-10-26). Reduced motion never gets it.
+      // e2e sets sessionStorage "arc-intro" to skip it.
       (() => {
         const html = document.documentElement;
         html.classList.add("js");
@@ -46,7 +48,6 @@ const hideFromSearch = noindex || showBuild;
           const calm = matchMedia("(prefers-reduced-motion: reduce)").matches;
           if (location.pathname === "/" && !calm && !sessionStorage.getItem("arc-intro")) {
             html.classList.add("intro");
-            sessionStorage.setItem("arc-intro", "1");
           }
         } catch {}
       })();
@@ -76,20 +77,29 @@ const hideFromSearch = noindex || showBuild;
     {isHome && (
       <div class="intro-curtain" aria-hidden="true">
         <div class="intro-curtain__mark">
-          <svg viewBox="0 0 100 66">
+          <svg class="intro-curtain__arc" viewBox={logo.arc.viewBox}>
             <path
-              d="M18 52 A 32 32 0 0 1 82 52"
+              pathLength="1"
+              d={logo.arc.d}
               fill="none"
               stroke="currentColor"
-              stroke-width="18"
+              stroke-width={logo.arc.stroke}
               stroke-linecap="round"
             ></path>
           </svg>
-          <span class="intro-curtain__word">
-            {[..."arcbuildr"].map((c, i) => (
-              <span style={`--i: ${i}`}>{c}</span>
+          <svg
+            class="intro-curtain__word"
+            viewBox={logo.word.viewBox}
+            fill="none"
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width={logo.stroke}
+          >
+            {logo.word.letters.map((d, i) => (
+              <path pathLength="1" d={d} style={`--i: ${i}`} />
             ))}
-          </span>
+          </svg>
         </div>
       </div>
     )}
@@ -276,32 +286,39 @@ const hideFromSearch = noindex || showBuild;
     background: color-mix(in oklab, var(--color-paper) 12%, transparent);
   }
 
-  /* Below 64rem: at the top the pill shows everything, at every width; once the page leaves the
-   * top it closes inward to the favicon tile and the button (context-con mechanic), and opens again
-   * at the top. The pill is centred and sized by its content, so both edges move together.
-   * The wordmark text and the links fold by a grid track (1fr to 0fr), which animates to their
-   * exact width: no overshoot, no jump. Folded parts leave the tab order (visibility, delayed).
-   * The button never changes, so its contrast never dips. */
+  /* Below 64rem the pill follows context-con's mechanics: a compact 48 px pill sized by its content,
+   * centred, with logo, links and button at the top, at every width. Every size is in em of one
+   * fluid font size (14 px at 390 px wide, 11 px floor), so the pill shrinks with the screen
+   * instead of breaking; under ~300 px the links track clips rather than pushing the button out.
+   * Once the page leaves the top the wordmark text and the links fold by a grid track (1fr to 0fr),
+   * so both edges close in toward the centre, leaving the favicon tile and the button.
+   * The button text is ink at 14 px bold: white on this orange (3.05:1) only passes at 19 px. */
   @media (width < 64rem) {
     .site-header {
       --fold: 0.3s cubic-bezier(0, 0, 0.2, 1);
+      padding-inline: 0.75rem;
     }
     .site-header__pill {
       width: fit-content;
       max-width: 100%;
       gap: 0;
-      padding-left: var(--space-md);
+      padding: 0.43em 0.43em 0.43em 0.86em;
+      font-size: clamp(11px, 3.6vw, 14px);
       transition: padding var(--fold);
     }
-    .site-header__pill > * {
+    .site-header .wordmark,
+    .site-header__cta {
       flex: none;
     }
     .site-header .wordmark {
       gap: 0;
+      min-height: 2.77em;
+      font-size: 0.93em;
     }
     .site-header .wordmark__arc {
-      height: 0.9em;
-      border-radius: 0.6rem;
+      width: 1.3em;
+      height: 0.85em;
+      border-radius: 0.62em;
       transition:
         width var(--fold),
         height var(--fold),
@@ -329,26 +346,46 @@ const hideFromSearch = noindex || showBuild;
       white-space: nowrap;
     }
     .site-header .wordmark__text {
-      margin-left: var(--space-xs);
+      margin-left: 0.3em;
     }
     .site-header__nav {
-      margin-left: var(--space-xs);
+      min-width: 0;
+      margin-left: 0.43em;
+    }
+    .site-header__links {
+      gap: 0;
+    }
+    .site-header__nav a {
+      min-height: 3em;
+      padding-inline: 0.42em;
+      font-size: 0.857em;
+      font-weight: 500;
     }
     /* overflow: hidden would clip the focus ring, so draw it inside. */
     .site-header__nav a:focus-visible {
       outline-offset: -3px;
     }
     .site-header__pill .site-header__cta {
-      margin-left: var(--space-sm);
+      min-height: 2.57em;
+      margin-left: 0.3em;
+      padding-inline: 0.9em;
+      color: var(--color-ink);
+      font-size: 1em;
+    }
+    .site-header__pill .site-header__cta::after {
+      content: none;
+    }
+    /* The darker hover orange would drop ink below 4.5:1, so hover lightens instead. */
+    .site-header__pill .site-header__cta:hover {
+      background: color-mix(in oklab, var(--color-accent) 85%, white);
     }
     .is-scrolled .site-header__pill {
-      padding-left: 0.375rem;
+      padding-left: 0.43em;
     }
     .is-scrolled .site-header .wordmark__arc {
-      width: 2.75rem;
-      height: 2.75rem;
-      padding: 0.5rem;
-      translate: 0 0;
+      width: 2.77em;
+      height: 2.77em;
+      padding: 0.62em 0.55em 0.5em;
       background-color: var(--color-accent);
       color: var(--color-on-accent);
     }
@@ -359,88 +396,6 @@ const hideFromSearch = noindex || showBuild;
       opacity: 0;
       visibility: hidden;
       transition-delay: 0s, 0s, 0s, 0s, 0.3s;
-    }
-  }
-
-  /* Phones: smaller links so logo, links and button all fit at the top. */
-  @media (width < 48rem) {
-    .site-header {
-      padding-inline: var(--space-sm);
-    }
-    .site-header__pill {
-      padding-left: var(--space-sm);
-    }
-    .site-header__nav {
-      margin-left: var(--space-2xs);
-    }
-    .site-header__links {
-      gap: 0;
-    }
-    .site-header__nav a {
-      padding-inline: 0.375rem;
-      font-size: 0.8125rem;
-    }
-    .site-header__pill .site-header__cta {
-      margin-left: var(--space-2xs);
-    }
-  }
-
-  /* Small phones: the stacked lockup (arc above a small wordmark) and a smaller button without
-   * the arrow. White on the orange (3.05:1) needs 19 px bold, which does not fit, so the button
-   * text turns ink (5.6:1) at 15 px bold. Hover lightens the orange, since the darker hover
-   * orange would drop ink below 4.5:1. */
-  @media (width < 30rem) {
-    .site-header .wordmark {
-      flex-direction: column;
-      justify-content: center;
-      font-size: 0.75rem;
-      letter-spacing: -0.03em;
-      line-height: 1;
-    }
-    .site-header .wordmark__arc {
-      width: 1.75rem;
-      height: 1.15rem;
-    }
-    .site-header .wordmark__text {
-      margin: 0.125rem 0 0;
-    }
-    .site-header__pill .site-header__cta {
-      padding-inline: var(--space-sm);
-      color: var(--color-ink);
-      font-size: 0.9375rem;
-    }
-    .site-header__pill .site-header__cta:hover {
-      background: color-mix(in oklab, var(--color-accent) 85%, white);
-    }
-    .site-header__pill .site-header__cta::after {
-      content: none;
-    }
-  }
-  /* 320 to 375 px: tighter spacing and 12 px links. */
-  @media (width < 24rem) {
-    .site-header {
-      padding-inline: var(--space-xs);
-    }
-    .site-header__pill {
-      padding-left: var(--space-xs);
-    }
-    .site-header .wordmark {
-      font-size: 0.6875rem;
-    }
-    .site-header .wordmark__arc {
-      width: 1.6rem;
-      height: 1.05rem;
-    }
-    .site-header__nav {
-      margin-left: 0.125rem;
-    }
-    .site-header__nav a {
-      padding-inline: 0.3125rem;
-      font-size: var(--text-xs);
-    }
-    .site-header__pill .site-header__cta {
-      margin-left: 0.125rem;
-      padding-inline: 0.625rem;
     }
   }
 

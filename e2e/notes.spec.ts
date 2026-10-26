@@ -12,7 +12,8 @@ async function axeClean(page: import("@playwright/test").Page) {
 
 async function tapTargetsOk(page: import("@playwright/test").Page) {
   for (const link of await page.locator("a:visible").all()) {
-    if (await link.evaluate((el) => el.classList.contains("skip"))) continue;
+    // The header has its own target rule (nav.spec).
+    if (await link.evaluate((el) => el.matches(".skip, .site-header a"))) continue;
     expect(Math.round((await link.boundingBox())!.height)).toBeGreaterThanOrEqual(44);
   }
 }

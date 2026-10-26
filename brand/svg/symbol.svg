@@ -1,11 +1,1 @@
-<svg
-  xmlns="http://www.w3.org/2000/svg"
-  viewBox="0 24 58 36"
-  role="img"
-  aria-label="Arcbuildr"
-  fill="none"
-  stroke-linecap="round"
-  stroke-linejoin="round"
->
-  <path class="arc" d="M7 53A22 22 0 0 1 51 53" stroke="#e8722e" stroke-width="14" />
-</svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 28 53 32" role="img" aria-label="Arcbuildr" fill="none" stroke-linecap="round" stroke-linejoin="round"><path class="arc" d="M5.5 54.5A21 21 0 0 1 47.5 54.5" stroke="#e8722e" stroke-width="11"/></svg>
