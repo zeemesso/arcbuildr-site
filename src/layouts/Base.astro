@@ -63,16 +63,8 @@ const hideFromSearch = noindex || showBuild;
     <meta name="twitter:card" content="summary" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <title>{title}</title>
-    <noscript>
-      <style>
-        .site-header__cta.is-quiet {
-          translate: none;
-          visibility: visible;
-        }
-      </style>
-    </noscript>
   </head>
-  <body class:list={[{ "has-dock": cta }]}>
+  <body>
     {analyticsToken && (
       <script
         defer
@@ -114,26 +106,11 @@ const hideFromSearch = noindex || showBuild;
             </a>
           ))}
         </nav>
-        <button class="site-header__menu" type="button" popovertarget="site-menu">
-          Menu
-        </button>
         {cta && (
-          <a class="btn site-header__cta is-quiet" href="/#start">
+          <a class="btn site-header__cta" href="/#start">
             Book a call
           </a>
         )}
-      </div>
-      <div id="site-menu" class="site-menu" popover>
-        <nav aria-label="Mobile">
-          {navLinks.map(({ label, href }) => (
-            <a href={href} aria-current={currentPage(href)}>
-              {label}
-            </a>
-          ))}
-          <a class="btn" href="/#start">
-            Book a call
-          </a>
-        </nav>
       </div>
     </header>
     <main id="main">
@@ -204,22 +181,6 @@ const hideFromSearch = noindex || showBuild;
   if (__PREVIEW__) import("../components/mountFeedback");
 </script>
 
-<script>
-  // Mobile dock: the header CTA floats at the bottom, but steps aside while the hero button or the form is on screen.
-  const dock = document.querySelector(".site-header__cta");
-  const targets = document.querySelectorAll(".hero__action, #start");
-  // Starts quiet so it never flashes in over the hero; pages without a hero or form show it at once.
-  if (dock && !targets.length) dock.classList.remove("is-quiet");
-  if (dock && targets.length) {
-    const seen = new Set<Element>();
-    const io = new IntersectionObserver((entries) => {
-      for (const e of entries) e.isIntersecting ? seen.add(e.target) : seen.delete(e.target);
-      dock.classList.toggle("is-quiet", seen.size > 0);
-    });
-    targets.forEach((t) => io.observe(t));
-  }
-</script>
-
 <style is:global>
   main {
     flex: 1;
@@ -268,6 +229,19 @@ const hideFromSearch = noindex || showBuild;
   .wordmark__r {
     color: var(--color-accent);
   }
+  /* Collapsed logo: arc tile appears as a square with background. */
+  @media (width < 64rem) {
+    .is-scrolled .wordmark__arc {
+      width: 2.75rem;
+      height: 2.75rem;
+      padding: 0.4rem;
+      background-color: var(--color-accent);
+      border-radius: 0.6rem;
+      color: var(--color-paper);
+      translate: 0 0;
+      flex-shrink: 0;
+    }
+  }
   .site-header__pill .btn {
     min-height: var(--tap);
     padding-inline: var(--space-lg);
@@ -277,7 +251,6 @@ const hideFromSearch = noindex || showBuild;
     gap: var(--space-2xs);
   }
   .site-header__nav a,
-  .site-menu nav > a,
   .site-footer__links a {
     display: flex;
     align-items: center;
@@ -302,69 +275,19 @@ const hideFromSearch = noindex || showBuild;
     color: var(--color-paper);
     background: color-mix(in oklab, var(--color-paper) 12%, transparent);
   }
-  .site-menu nav > a:not(.btn):hover,
-  .site-menu nav > a[aria-current="page"] {
-    background: color-mix(in oklab, var(--color-ink) 6%, transparent);
-  }
-  .site-header__menu {
-    display: none;
-    min-width: var(--tap);
-    min-height: var(--tap);
-    padding: 0 var(--space-lg);
-    border: 0;
-    border-radius: var(--radius-pill);
-    background: var(--color-paper);
-    color: var(--color-ink);
-    font: inherit;
-    font-size: var(--text-lg);
-    font-weight: 600;
-    cursor: pointer;
-  }
-  .site-menu {
-    position: fixed;
-    inset: 5.5rem var(--gutter) auto auto;
-    width: min(24rem, calc(100% - 2 * var(--gutter)));
-    max-height: calc(100dvh - 7rem);
-    margin: 0;
-    padding: var(--space-lg);
-    border: var(--rule-thin);
-    border-radius: var(--radius-lg);
-    background: var(--color-card);
-    color: var(--color-ink);
-    box-shadow: var(--shadow-lift);
-    pointer-events: auto;
-  }
-  .site-menu nav {
-    display: grid;
-    gap: var(--space-xs);
-  }
-  .site-menu nav > a:not(.btn) {
-    padding-inline: var(--space-sm);
-    border-radius: var(--radius-sm);
-    transition: background-color var(--dur-fast) var(--ease-out);
-  }
-  .site-menu::backdrop {
-    background: color-mix(in oklab, var(--color-ink) 15%, transparent);
-  }
-  @media (min-width: 64rem) {
-    .site-menu:popover-open {
-      display: none;
-    }
-  }
 
-  /* Phones and small laptops: the pill fits its content and closes inward once the page
-   * leaves the top (the links fold away, Menu unfolds), then opens again back at the top.
-   * Widths and opacity only; folded parts are also hidden from focus. */
+  /* Below 64rem: pill closes inward on scroll. Links and wordmark fold away; favicon tile and button remain.
+   * Widths and opacity only; folded parts also hidden from focus via visibility. */
   @media (width < 64rem) {
     .site-header__pill {
       width: fit-content;
       max-width: 100%;
-      gap: 0;
+      gap: var(--space-sm);
     }
-    .site-header__nav,
-    .site-header__menu {
+    .wordmark {
+      display: flex;
+      align-items: center;
       overflow: hidden;
-      white-space: nowrap;
       transition:
         max-width 0.3s var(--ease-out),
         margin 0.3s var(--ease-out),
@@ -372,48 +295,49 @@ const hideFromSearch = noindex || showBuild;
         opacity 0.3s var(--ease-out),
         visibility 0s;
     }
+    .wordmark span {
+      white-space: nowrap;
+    }
     .site-header__nav {
+      overflow: hidden;
+      white-space: nowrap;
+      transition:
+        max-width 0.3s var(--ease-out),
+        margin 0.3s var(--ease-out),
+        opacity 0.3s var(--ease-out),
+        visibility 0s;
       max-width: 20rem;
-      margin-left: var(--space-sm);
+      margin-left: var(--space-xs);
     }
     /* overflow: hidden would clip the focus ring, so draw it inside. */
     .site-header__nav a:focus-visible {
       outline-offset: -3px;
     }
-    .site-header__menu {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      max-width: 0;
-      min-width: 0;
-      margin-left: 0;
-      padding-inline: 0;
+    .site-header__cta {
+      min-height: var(--tap);
+      padding-inline: var(--space-lg);
+      overflow: hidden;
+      transition:
+        max-width 0.3s var(--ease-out),
+        padding 0.3s var(--ease-out);
+    }
+    .is-scrolled .wordmark {
+      max-width: 2.75rem;
+      padding: 0;
+      margin: 0;
       opacity: 0;
       visibility: hidden;
-      transition-property: max-width, margin, padding, opacity, visibility;
       transition-delay: 0s, 0s, 0s, 0s, 0.3s;
     }
-    .site-header__pill .site-header__cta {
-      margin-left: var(--space-sm);
+    .is-scrolled .wordmark span {
+      display: none;
     }
     .is-scrolled .site-header__nav {
       max-width: 0;
       margin-left: 0;
       opacity: 0;
       visibility: hidden;
-      transition-delay: 0s, 0s, 0s, 0s, 0.3s;
-    }
-    .is-scrolled .site-header__menu {
-      max-width: 8rem;
-      min-width: var(--tap);
-      margin-left: var(--space-sm);
-      padding-inline: var(--space-lg);
-      opacity: 1;
-      visibility: visible;
-      transition-delay: 0s;
-    }
-    .site-menu:popover-open {
-      animation: menu-enter var(--dur-fast) var(--ease-out);
+      transition-delay: 0s, 0s, 0s, 0.3s;
     }
   }
 
@@ -432,30 +356,20 @@ const hideFromSearch = noindex || showBuild;
       padding-inline: 0.4rem;
       font-size: var(--text-sm);
     }
+    /* At the top of phones, button is hidden. When scrolled, it unfolds. */
     .site-header__cta {
-      position: fixed;
-      left: 0;
-      right: 0;
-      bottom: max(var(--space-md), env(safe-area-inset-bottom));
-      width: fit-content;
-      margin-inline: auto;
-      min-height: 3.25rem !important;
-      padding-inline: var(--space-xl) !important;
-      box-shadow: var(--shadow-lift);
-      /* Slides, never fades: a half-transparent button would fail contrast mid-transition. */
-      transition:
-        translate var(--dur-fast) var(--ease-out),
-        visibility 0s;
-    }
-    .site-header__cta.is-quiet {
-      translate: 0 calc(100% + 2rem);
+      max-width: 0;
+      padding-inline: 0;
+      opacity: 0;
       visibility: hidden;
-      transition:
-        translate var(--dur-fast) var(--ease-out),
-        visibility 0s linear var(--dur-fast);
+      transition-delay: 0s, 0s, 0s, 0.3s;
     }
-    .has-dock .site-footer {
-      padding-bottom: 5.5rem;
+    .is-scrolled .site-header__cta {
+      max-width: 10rem;
+      padding-inline: var(--space-lg);
+      opacity: 1;
+      visibility: visible;
+      transition-delay: 0s, 0s, 0s, 0s;
     }
   }
   @media (width < 22rem) {
@@ -464,14 +378,6 @@ const hideFromSearch = noindex || showBuild;
     }
     .site-header__nav a {
       padding-inline: 0.3rem;
-    }
-  }
-  @keyframes menu-enter {
-    from {
-      translate: 0 var(--space-sm);
-    }
-    to {
-      translate: 0 0;
     }
   }
 
@@ -521,17 +427,12 @@ const hideFromSearch = noindex || showBuild;
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .site-menu:popover-open {
-      animation: none;
-    }
     .site-header__pill,
+    .wordmark,
     .site-header__nav,
-    .site-header__menu,
     .site-header__nav a,
+    .site-header__cta,
     .site-footer__links a {
-      transition: none !important;
-    }
-    .site-header__cta {
       transition: none !important;
     }
   }

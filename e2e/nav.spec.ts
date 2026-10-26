@@ -11,29 +11,6 @@ test.beforeEach(async ({ page }) => {
   await page.addInitScript(() => sessionStorage.setItem("arc-intro", "1"));
 });
 
-test("mobile Menu opens the sheet and Escape closes it", async ({ page }, info) => {
-  test.skip(info.project.name !== "mobile", "Phone navigation");
-  await page.goto("/");
-  await page.evaluate(() => scrollTo(0, 600));
-  const menu = page.getByRole("button", { name: "Menu", exact: true });
-  const sheet = page.locator("#site-menu");
-  await expect(sheet).toBeHidden();
-  await menu.tap();
-  await expect(sheet).toBeVisible();
-  for (const [name, href] of links) {
-    const link = sheet.getByRole("link", { name, exact: true });
-    await expect(link).toBeVisible();
-    await expect(link).toHaveAttribute("href", href);
-  }
-  await expect(sheet.getByRole("link", { name: "Book a call" })).toHaveAttribute("href", "/#start");
-  await page.keyboard.press("Escape");
-  await expect(sheet).toBeHidden();
-  await expect(menu).toBeFocused();
-  await menu.tap();
-  await page.touchscreen.tap(1, 1);
-  await expect(sheet).toBeHidden();
-});
-
 test("desktop header shows Method, Notes and About", async ({ page }, info) => {
   test.skip(info.project.name !== "desktop", "Desktop navigation");
   await page.goto("/");
@@ -43,7 +20,6 @@ test("desktop header shows Method, Notes and About", async ({ page }, info) => {
     await expect(link).toBeVisible();
     await expect(link).toHaveAttribute("href", href);
   }
-  await expect(header.getByRole("button", { name: "Menu" })).toBeHidden();
 });
 
 test("current page is unmarked on Home and marked on Privacy", async ({ page }) => {
@@ -57,54 +33,65 @@ test("current page is unmarked on Home and marked on Privacy", async ({ page }) 
   await expect(page.locator('a[aria-current="page"]')).toHaveCount(1);
 });
 
-test("Home is axe clean with the mobile sheet open", async ({ page }, info) => {
+test("Home is axe clean on phone at top and when scrolled", async ({ page }, info) => {
   test.skip(info.project.name !== "mobile", "Phone navigation");
   await page.goto("/");
-  await page.evaluate(() => scrollTo(0, 600));
-  await page.getByRole("button", { name: "Menu", exact: true }).tap();
-  const results = await new AxeBuilder({ page })
+  let results = await new AxeBuilder({ page })
     .withTags(["wcag2a", "wcag2aa", "wcag22aa"])
     .analyze();
   expect(results.violations).toEqual([]);
+  await page.evaluate(() => scrollTo(0, 600));
+  results = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag22aa"]).analyze();
+  expect(results.violations).toEqual([]);
 });
 
-test("navigation links and Menu have 44px tap targets", async ({ page }, info) => {
+test("header navigation links and button have 44px tap targets", async ({ page }, info) => {
   await page.goto("/");
   const header = page.getByRole("banner");
   for (const link of await header.locator("a:visible").all()) {
+    // Round: tap targets can measure 43.99999 px.
     expect(Math.round((await link.boundingBox())!.height)).toBeGreaterThanOrEqual(44);
   }
   if (info.project.name === "mobile") {
     await page.evaluate(() => scrollTo(0, 600));
-    const menu = header.getByRole("button", { name: "Menu", exact: true });
-    await expect(menu).toBeVisible();
-    expect((await menu.boundingBox())!.height).toBeGreaterThanOrEqual(44);
-    await menu.tap();
   }
   for (const link of await header.locator("a:visible").all()) {
-    // Round: the sheet links can measure 43.99999 px.
     expect(Math.round((await link.boundingBox())!.height)).toBeGreaterThanOrEqual(44);
   }
 });
 
-test("phone header closes inward on scroll and opens again at the top", async ({ page }, info) => {
+test("phone header folds on scroll and unfolds at the top", async ({ page }, info) => {
   test.skip(info.project.name !== "mobile", "Phone header");
   await page.goto("/");
   const header = page.getByRole("banner");
-  const menu = header.getByRole("button", { name: "Menu", exact: true });
+  const pill = header.locator(".site-header__pill");
   const method = header.getByRole("link", { name: "Method", exact: true });
+  const button = header.getByRole("link", { name: "Book a call", exact: true });
+  const arc = header.locator(".wordmark__arc");
+  const wordmarkSpan = header.locator(".wordmark > span");
+
+  // At top: links and wordmark text visible, button hidden
   await expect(method).toBeVisible();
-  await expect(menu).toBeHidden();
-  const open = (await header.locator(".site-header__pill").boundingBox())!.width;
+  await expect(button).toBeHidden();
+  await expect(wordmarkSpan).toBeVisible();
+  const openWidth = (await pill.boundingBox())!.width;
+
+  // Scroll: links and wordmark text hidden, favicon tile and button visible
   await page.evaluate(() => scrollTo(0, 600));
   await expect(method).toBeHidden();
-  await expect(menu).toBeVisible();
-  await expect
-    .poll(async () => (await header.locator(".site-header__pill").boundingBox())!.width)
-    .toBeLessThan(open);
+  await expect(button).toBeVisible();
+  await expect(wordmarkSpan).toBeHidden();
+  await expect(arc).toHaveCSS("background-color", /rgb.*232.*114.*46/); // accent orange
+  const scrolledWidth = (await pill.boundingBox())!.width;
+  expect(scrolledWidth).toBeLessThan(openWidth);
+
+  // Back to top: links and wordmark visible, button hidden
   await page.evaluate(() => scrollTo(0, 0));
   await expect(method).toBeVisible();
-  await expect(menu).toBeHidden();
+  await expect(button).toBeHidden();
+  await expect(wordmarkSpan).toBeVisible();
+  const backWidth = (await pill.boundingBox())!.width;
+  expect(backWidth).toBeCloseTo(openWidth, 5);
 });
 
 test("header and footer links hover as a pill, never underlined", async ({ page }, info) => {
