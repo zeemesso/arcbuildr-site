@@ -55,7 +55,7 @@ Rules:
 
 ## Components
 
-- Header: a floating dark pill, centred, sticky. Below 64rem it folds on scroll: the links and wordmark text collapse (max-width / margin / padding / opacity, 0.3s), and on phones (< 48rem) the "Book a call" button also hides at the top. When scrolled, the logo collapses to a favicon tile (arc icon in an orange rounded square, 2.75rem / 44px) and the button unfolds. At 64rem and up, the pill stays full width with all items always visible.
+- Header (v3): a floating dark, centred, sticky pill that shows logo, Method / Notes / About and "Book a call" at the top at every width (phones get 12 to 13 px links, a stacked logo below 30rem and an arrowless 15 px bold ink-on-orange button). Below 64rem, once scrolled, it closes symmetrically toward its centre to the favicon tile and the button (wordmark text and links fold by a 1fr to 0fr grid track, 0.3s); at 64rem and up it never changes. The logo is not a link on Home.
 - Buttons: pill, brand orange, white text at 19 px / 700 (large text, so 3:1 is the bar), an arrow drawn in CSS (`content: "→" / ""`, so screen readers skip it). Hover nudges the arrow 2 px; press scales to 0.97.
 - Footer: a dark rounded panel inside the container with the logo, Privacy and the copyright. No tagline, handles or email (Zyade, 2026-10-26).
 - Logo: `src/components/Logo.astro`, used by the header and the footer.
@@ -73,7 +73,7 @@ Added 2026-10-26 after Zyade: "we lack animations and motion, it doesn't feel li
 - **Bento drawings:** the target pings, swatches rise and spread on hover, the grid's focus tile walks, the carousel fans out on hover, the chat bubbles pop in turn. Loops pause until the card is in view. Cards lift 4 px on hover.
 - **Polaroids** drop and settle when the founder note arrives, and straighten on hover. **FAQ** answers open smoothly where the browser can animate to `auto` (`::details-content`, `interpolate-size`).
 - Easing: `--spring` (a `linear()` spring with a small overshoot), `--ease-out`, `--ease-in-out`. Text moves by clip and translate only.
-- **Header fold:** the pill closes inward on scroll below 64rem (links, wordmark, and on phones the button), folded parts hidden via visibility with delayed transitions (transition-delay) so they leave the tab order and don't fade mid-animation.
+- **Header fold:** the pill closes inward on scroll below 64rem (links and wordmark text; the button never changes), folded parts hidden via visibility with delayed transitions (transition-delay) so they leave the tab order and don't fade mid-animation. A reload starts at the top unless the URL has an anchor.
 - `prefers-reduced-motion: reduce` turns off the intro, the entrances, the loops, the reveals, smooth scroll and all transitions, including the header fold.
 
 ## Not used, on purpose
