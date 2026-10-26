@@ -1,5 +1,5 @@
 ---
-/** The brand arc (arcbuildr-symbol.svg) and the wordmark with the orange "r", set live in Open Runde.
+/** The arc and wordmark are round-capped strokes drawn from brand/build.mjs.
  * On Home it is not a link: a link to the page you are on is a dead tab stop. */
 const here = Astro.url.pathname.replace(/(.)\/$/, "$1");
 const isHome = here === "/";
@@ -12,18 +12,70 @@ const Tag = isHome ? "span" : "a";
   role={isHome ? "img" : undefined}
   href={isHome ? undefined : "/"}
 >
-  <svg class="wordmark__arc" viewBox="0 0 100 66" aria-hidden="true">
+  <svg class="wordmark__arc" viewBox="0 24 58 36" aria-hidden="true">
     <path
-      d="M18 52 A 32 32 0 0 1 82 52"
+      d="M7 53A22 22 0 0 1 51 53"
       fill="none"
       stroke="currentColor"
-      stroke-width="18"
+      stroke-width="14"
       stroke-linecap="round"
     ></path>
   </svg>
   <span class="wordmark__text" aria-hidden="true">
     <span>
-      arcbuild<span class="wordmark__r">r</span>
+      <svg
+        class="wordmark__word"
+        viewBox="-5 -5 328 70"
+        aria-hidden="true"
+        fill="none"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <path
+          class="l l-a"
+          d="M5 40a15 15 0 1 0 30 0a15 15 0 1 0-30 0M35 25V55"
+          stroke="currentColor"
+          stroke-width="10"
+        />
+        <path
+          class="l l-r"
+          d="M52 55V40A15 15 0 0 1 67 25"
+          stroke="currentColor"
+          stroke-width="10"
+        />
+        <path
+          class="l l-c"
+          d="M105.61 29.39A15 15 0 1 0 105.61 50.61"
+          stroke="currentColor"
+          stroke-width="10"
+        />
+        <path
+          class="l l-b"
+          d="M123 5V55M123 40a15 15 0 1 0 30 0a15 15 0 1 0-30 0"
+          stroke="currentColor"
+          stroke-width="10"
+        />
+        <path
+          class="l l-u"
+          d="M170 25V40A15 15 0 0 0 200 40M200 25V55"
+          stroke="currentColor"
+          stroke-width="10"
+        />
+        <path class="l l-i" d="M217 25V55M217 7v.01" stroke="currentColor" stroke-width="10" />
+        <path class="l l-l" d="M234 5V55" stroke="currentColor" stroke-width="10" />
+        <path
+          class="l l-d"
+          d="M251 40a15 15 0 1 0 30 0a15 15 0 1 0-30 0M281 5V55"
+          stroke="currentColor"
+          stroke-width="10"
+        />
+        <path
+          class="wordmark__r"
+          d="M298 55V40A15 15 0 0 1 313 25"
+          stroke="var(--color-accent)"
+          stroke-width="10"
+        />
+      </svg>
     </span>
   </span>
 </Tag>

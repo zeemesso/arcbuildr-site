@@ -1,0 +1,45 @@
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  viewBox="-5 -5 398 70"
+  role="img"
+  aria-label="Arcbuildr"
+  fill="none"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+>
+  <path class="arc" d="M7 53A22 22 0 0 1 51 53" stroke="#e8722e" stroke-width="14" />
+  <path
+    class="l l-a"
+    d="M75 40a15 15 0 1 0 30 0a15 15 0 1 0-30 0M105 25V55"
+    stroke="#1a1a1a"
+    stroke-width="10"
+  />
+  <path class="l l-r" d="M122 55V40A15 15 0 0 1 137 25" stroke="#1a1a1a" stroke-width="10" />
+  <path
+    class="l l-c"
+    d="M175.61 29.39A15 15 0 1 0 175.61 50.61"
+    stroke="#1a1a1a"
+    stroke-width="10"
+  />
+  <path
+    class="l l-b"
+    d="M193 5V55M193 40a15 15 0 1 0 30 0a15 15 0 1 0-30 0"
+    stroke="#1a1a1a"
+    stroke-width="10"
+  />
+  <path
+    class="l l-u"
+    d="M240 25V40A15 15 0 0 0 270 40M270 25V55"
+    stroke="#1a1a1a"
+    stroke-width="10"
+  />
+  <path class="l l-i" d="M287 25V55M287 7v.01" stroke="#1a1a1a" stroke-width="10" />
+  <path class="l l-l" d="M304 5V55" stroke="#1a1a1a" stroke-width="10" />
+  <path
+    class="l l-d"
+    d="M321 40a15 15 0 1 0 30 0a15 15 0 1 0-30 0M351 5V55"
+    stroke="#1a1a1a"
+    stroke-width="10"
+  />
+  <path class="l l-r" d="M368 55V40A15 15 0 0 1 383 25" stroke="#e8722e" stroke-width="10" />
+</svg>

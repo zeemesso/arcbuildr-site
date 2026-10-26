@@ -226,15 +226,21 @@ const hideFromSearch = noindex || showBuild;
     letter-spacing: -0.045em;
     text-decoration: none;
   }
-  /* The brand arc (arcbuildr-symbol.svg) and the orange "r", set live in Open Runde. */
+  /* Round-capped arc and wordmark geometry from brand/build.mjs. */
   .wordmark__arc {
     width: 1.35em;
     height: auto;
     color: var(--color-accent);
     translate: 0 -0.06em;
   }
+  .wordmark__word {
+    display: block;
+    height: 1.1em;
+    width: auto;
+  }
   .wordmark__r {
     color: var(--color-accent);
+    stroke: var(--color-accent);
   }
   .site-header__pill .btn {
     min-height: var(--tap);

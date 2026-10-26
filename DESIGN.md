@@ -37,7 +37,7 @@ Rules:
 
 ## Logo
 
-- The brand arc (`arcbuildr-symbol.svg`: a thick half circle with round caps) inline as SVG in the header, then "arcbuild" with an orange "r", set live in Open Runde 700 so it renders the same on every device. The old SVG files set the text in system fonts, which differ by device.
+- The logo is drawn from round-capped strokes on one grid, with `brand/build.mjs` as the geometry source (`brand/svg/*.svg`). `brand/kit.html` previews motion: draw-on, fold to tile, weight, loader, and progress.
 - The favicon is the brand favicon (orange rounded square, white arc).
 
 ## Type
@@ -58,7 +58,7 @@ Rules:
 - Header (v3): a floating dark, centred, sticky pill that shows logo, Method / Notes / About and "Book a call" at the top at every width (phones get 12 to 13 px links, a stacked logo below 30rem and an arrowless 15 px bold ink-on-orange button). Below 64rem, once scrolled, it closes symmetrically toward its centre to the favicon tile and the button (wordmark text and links fold by a 1fr to 0fr grid track, 0.3s); at 64rem and up it never changes. The logo is not a link on Home.
 - Buttons: pill, brand orange, white text at 19 px / 700 (large text, so 3:1 is the bar), an arrow drawn in CSS (`content: "→" / ""`, so screen readers skip it). Hover nudges the arrow 2 px; press scales to 0.97.
 - Footer: a dark rounded panel inside the container with the logo, Privacy and the copyright. No tagline, handles or email (Zyade, 2026-10-26).
-- Logo: `src/components/Logo.astro`, used by the header and the footer.
+- Logo: `src/components/Logo.astro`, used by the header and the footer; round-capped strokes on one grid from `brand/build.mjs`. `brand/kit.html` previews draw-on, fold to tile, weight, loader, and progress.
 - FAQ: `<details>` rows in one white card, with a round + icon that turns into × when open.
 - Form: inside a white card, intro left and fields right on desktop. Inputs filled with the page color, border at 3:1 contrast, orange border and a dark-orange ring on focus.
 

@@ -1,0 +1,370 @@
+<!doctype html><meta charset="utf-8" /><title>Arcbuildr kit</title
+><style>
+  body {
+    margin: 0;
+    padding: 40px;
+    background: #f4f2ee;
+    color: #1a1a1a;
+    font: 15px/1.4 system-ui;
+    display: grid;
+    gap: 48px;
+    max-width: 900px;
+  }
+  h2 {
+    font-size: 13px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #8a8580;
+    margin: 0 0 14px;
+  }
+  .l {
+    stroke: currentColor;
+    stroke-width: var(--w, 10);
+  }
+  .acc {
+    stroke: #e8722e;
+  }
+  .arc {
+    stroke: #e8722e;
+    stroke-width: 14;
+  }
+  .big .word {
+    height: 80px;
+  }
+  .big {
+    display: flex;
+    gap: 14px;
+    align-items: flex-end;
+  }
+  .big .mk {
+    height: 54px;
+    margin-bottom: 2px;
+  }
+  .draw .l,
+  .draw .arc {
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+    animation: d 0.5s cubic-bezier(0.3, 0, 0.2, 1) forwards;
+    animation-delay: calc(0.25s + var(--i, 0) * 0.06s);
+  }
+  .draw .arc {
+    animation-delay: 0s;
+    animation-duration: 0.6s;
+  }
+  @keyframes d {
+    to {
+      stroke-dashoffset: 0;
+    }
+  }
+  .pill {
+    display: flex;
+    align-items: center;
+    margin: auto;
+    width: fit-content;
+    background: #1a1a1a;
+    color: #fff;
+    border-radius: 99px;
+    padding: 6px 6px 6px 18px;
+    gap: 0;
+  }
+  .pill .mk {
+    height: 22px;
+    flex: none;
+    border-radius: 12px;
+    transition:
+      background 0.3s,
+      padding 0.3s;
+  }
+  .pill .word {
+    height: 22px;
+    display: block;
+  }
+  .pill .ww,
+  .pill nav {
+    overflow: hidden;
+    max-width: 200px;
+    transition:
+      max-width 0.3s cubic-bezier(0, 0, 0.2, 1),
+      opacity 0.2s,
+      margin 0.3s;
+    margin-left: 10px;
+  }
+  .pill nav {
+    display: flex;
+    gap: 4px;
+    font-size: 13px;
+    white-space: nowrap;
+    margin-right: 8px;
+  }
+  .pill nav a {
+    padding: 10px 6px;
+    color: #fffc;
+  }
+  .cta {
+    background: #e8722e;
+    color: #fff;
+    font-weight: 700;
+    font-size: 19px;
+    padding: 10px 18px;
+    border-radius: 99px;
+    white-space: nowrap;
+  }
+  .closed {
+    padding-left: 6px;
+  }
+  .closed .mk {
+    background: #e8722e;
+    height: 16px;
+    padding: 11px 6px;
+    margin-right: 6px;
+  }
+  .closed .mk .arc {
+    stroke: #fff;
+  }
+  .closed .ww,
+  .closed nav {
+    max-width: 0;
+    opacity: 0;
+    margin: 0;
+  }
+  .spin {
+    height: 40px;
+    animation: s 1s linear infinite;
+  }
+  .spin .arc {
+    stroke-dasharray: 0.6 0.4;
+    animation: c 1.2s ease-in-out infinite;
+  }
+  @keyframes s {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+  @keyframes c {
+    50% {
+      stroke-dasharray: 0.15 0.85;
+    }
+  }
+  .prog .arc {
+    stroke-dasharray: 1;
+    stroke-dashoffset: calc(1 - var(--p, 0.3));
+  }
+  .track {
+    stroke: #e2ddd6 !important;
+  }
+  .row {
+    display: flex;
+    gap: 32px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  button {
+    font: inherit;
+    padding: 6px 12px;
+  }
+</style>
+<section>
+  <h2>1. Draw-on (intro, page loads)</h2>
+  <div class="big draw" id="draw">
+    <svg class="mk" viewBox="-2 22 62 40" fill="none" stroke-linecap="round">
+      <path pathLength="1" class="arc" d="M7 53A22 22 0 0 1 51 53" /></svg
+    ><svg
+      class="word"
+      viewBox="-5 -5 328 70"
+      fill="none"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    >
+      <path
+        pathLength="1"
+        style="--i: 0"
+        class="l"
+        d="M5 40a15 15 0 1 0 30 0a15 15 0 1 0-30 0M35 25V55"
+      />
+      <path pathLength="1" style="--i: 1" class="l" d="M52 55V40A15 15 0 0 1 67 25" />
+      <path pathLength="1" style="--i: 2" class="l" d="M105.61 29.39A15 15 0 1 0 105.61 50.61" />
+      <path
+        pathLength="1"
+        style="--i: 3"
+        class="l"
+        d="M123 5V55M123 40a15 15 0 1 0 30 0a15 15 0 1 0-30 0"
+      />
+      <path pathLength="1" style="--i: 4" class="l" d="M170 25V40A15 15 0 0 0 200 40M200 25V55" />
+      <path pathLength="1" style="--i: 5" class="l" d="M217 25V55M217 7v.01" />
+      <path pathLength="1" style="--i: 6" class="l" d="M234 5V55" />
+      <path
+        pathLength="1"
+        style="--i: 7"
+        class="l"
+        d="M251 40a15 15 0 1 0 30 0a15 15 0 1 0-30 0M281 5V55"
+      />
+      <path pathLength="1" style="--i: 8" class="l acc" d="M298 55V40A15 15 0 0 1 313 25" />
+    </svg>
+  </div>
+  <button
+    onclick="
+      const e = document.getElementById('draw');
+      e.classList.remove('draw');
+      void e.offsetWidth;
+      e.classList.add('draw');
+    "
+  >
+    replay
+  </button>
+</section>
+<section>
+  <h2>2. Header: closes inward to the tile + CTA</h2>
+  <div class="pill" id="pill">
+    <svg class="mk" viewBox="-2 22 62 40" fill="none" stroke-linecap="round">
+      <path pathLength="1" class="arc" d="M7 53A22 22 0 0 1 51 53" /></svg
+    ><span class="ww"
+      ><svg
+        class="word"
+        viewBox="-5 -5 328 70"
+        fill="none"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <path
+          pathLength="1"
+          style="--i: 0"
+          class="l"
+          d="M5 40a15 15 0 1 0 30 0a15 15 0 1 0-30 0M35 25V55"
+        />
+        <path pathLength="1" style="--i: 1" class="l" d="M52 55V40A15 15 0 0 1 67 25" />
+        <path pathLength="1" style="--i: 2" class="l" d="M105.61 29.39A15 15 0 1 0 105.61 50.61" />
+        <path
+          pathLength="1"
+          style="--i: 3"
+          class="l"
+          d="M123 5V55M123 40a15 15 0 1 0 30 0a15 15 0 1 0-30 0"
+        />
+        <path pathLength="1" style="--i: 4" class="l" d="M170 25V40A15 15 0 0 0 200 40M200 25V55" />
+        <path pathLength="1" style="--i: 5" class="l" d="M217 25V55M217 7v.01" />
+        <path pathLength="1" style="--i: 6" class="l" d="M234 5V55" />
+        <path
+          pathLength="1"
+          style="--i: 7"
+          class="l"
+          d="M251 40a15 15 0 1 0 30 0a15 15 0 1 0-30 0M281 5V55"
+        />
+        <path pathLength="1" style="--i: 8" class="l acc" d="M298 55V40A15 15 0 0 1 313 25" /></svg
+    ></span>
+    <nav><a>Method</a><a>Notes</a><a>About</a></nav>
+    <a class="cta">Book a call</a>
+  </div>
+  <p><button onclick="pill.classList.toggle('closed')">toggle scroll state</button></p>
+</section>
+<section>
+  <h2>3. Weight is one number (stroke width)</h2>
+  <div class="big" id="wt">
+    <svg
+      class="word"
+      viewBox="-5 -5 328 70"
+      fill="none"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    >
+      <path
+        pathLength="1"
+        style="--i: 0"
+        class="l"
+        d="M5 40a15 15 0 1 0 30 0a15 15 0 1 0-30 0M35 25V55"
+      />
+      <path pathLength="1" style="--i: 1" class="l" d="M52 55V40A15 15 0 0 1 67 25" />
+      <path pathLength="1" style="--i: 2" class="l" d="M105.61 29.39A15 15 0 1 0 105.61 50.61" />
+      <path
+        pathLength="1"
+        style="--i: 3"
+        class="l"
+        d="M123 5V55M123 40a15 15 0 1 0 30 0a15 15 0 1 0-30 0"
+      />
+      <path pathLength="1" style="--i: 4" class="l" d="M170 25V40A15 15 0 0 0 200 40M200 25V55" />
+      <path pathLength="1" style="--i: 5" class="l" d="M217 25V55M217 7v.01" />
+      <path pathLength="1" style="--i: 6" class="l" d="M234 5V55" />
+      <path
+        pathLength="1"
+        style="--i: 7"
+        class="l"
+        d="M251 40a15 15 0 1 0 30 0a15 15 0 1 0-30 0M281 5V55"
+      />
+      <path pathLength="1" style="--i: 8" class="l acc" d="M298 55V40A15 15 0 0 1 313 25" />
+    </svg>
+  </div>
+  <input
+    type="range"
+    min="6"
+    max="14"
+    value="10"
+    step=".5"
+    oninput="wt.style.setProperty('--w', this.value)"
+  />
+</section>
+<section>
+  <h2>4. Arc as loader and as reading progress</h2>
+  <div class="row">
+    <svg class="spin" viewBox="-2 22 62 40" fill="none" stroke-linecap="round">
+      <path pathLength="1" class="arc" d="M7 53A22 22 0 0 1 51 53" />
+    </svg>
+    <div class="prog" id="pg" style="position: relative; height: 40px">
+      <svg viewBox="-2 22 62 40" style="height: 40px" fill="none" stroke-linecap="round">
+        <path class="arc track" d="M7 53A22 22 0 0 1 51 53" />
+        <path pathLength="1" class="arc" d="M7 53A22 22 0 0 1 51 53" />
+      </svg>
+    </div>
+    <input
+      type="range"
+      min="0"
+      max="1"
+      step=".01"
+      value=".3"
+      oninput="pg.style.setProperty('--p', this.value)"
+    />
+  </div>
+</section>
+<section>
+  <h2>5. Static files (brand/svg)</h2>
+  <div class="row">
+    <figure style="margin: 0">
+      <img src="svg/symbol.svg" style="height: 40px" />
+      <figcaption style="font-size: 12px; color: #8a8580">symbol.svg</figcaption>
+    </figure>
+    <figure style="margin: 0">
+      <img src="svg/tile.svg" style="height: 48px" />
+      <figcaption style="font-size: 12px; color: #8a8580">tile.svg</figcaption>
+    </figure>
+    <figure style="margin: 0">
+      <img src="svg/wordmark-ink.svg" style="height: 40px" />
+      <figcaption style="font-size: 12px; color: #8a8580">wordmark-ink.svg</figcaption>
+    </figure>
+    <figure style="margin: 0">
+      <img src="svg/lockup-ink.svg" style="height: 40px" />
+      <figcaption style="font-size: 12px; color: #8a8580">lockup-ink.svg</figcaption>
+    </figure>
+    <figure style="margin: 0">
+      <img src="svg/stacked-ink.svg" style="height: 40px" />
+      <figcaption style="font-size: 12px; color: #8a8580">stacked-ink.svg</figcaption>
+    </figure>
+    <figure style="margin: 0">
+      <img
+        src="svg/wordmark-paper.svg"
+        style="height: 40px; background: #1a1a1a; padding: 8px; border-radius: 8px"
+      />
+      <figcaption style="font-size: 12px; color: #8a8580">wordmark-paper.svg</figcaption>
+    </figure>
+    <figure style="margin: 0">
+      <img
+        src="svg/lockup-paper.svg"
+        style="height: 40px; background: #1a1a1a; padding: 8px; border-radius: 8px"
+      />
+      <figcaption style="font-size: 12px; color: #8a8580">lockup-paper.svg</figcaption>
+    </figure>
+    <figure style="margin: 0">
+      <img
+        src="svg/stacked-paper.svg"
+        style="height: 40px; background: #1a1a1a; padding: 8px; border-radius: 8px"
+      />
+      <figcaption style="font-size: 12px; color: #8a8580">stacked-paper.svg</figcaption>
+    </figure>
+  </div>
+</section>
