@@ -14,6 +14,7 @@ test.beforeEach(async ({ page }) => {
 test("mobile Menu opens the sheet and Escape closes it", async ({ page }, info) => {
   test.skip(info.project.name !== "mobile", "Phone navigation");
   await page.goto("/");
+  await page.evaluate(() => scrollTo(0, 600));
   const menu = page.getByRole("button", { name: "Menu", exact: true });
   const sheet = page.locator("#site-menu");
   await expect(sheet).toBeHidden();
@@ -59,6 +60,7 @@ test("current page is unmarked on Home and marked on Privacy", async ({ page }) 
 test("Home is axe clean with the mobile sheet open", async ({ page }, info) => {
   test.skip(info.project.name !== "mobile", "Phone navigation");
   await page.goto("/");
+  await page.evaluate(() => scrollTo(0, 600));
   await page.getByRole("button", { name: "Menu", exact: true }).tap();
   const results = await new AxeBuilder({ page })
     .withTags(["wcag2a", "wcag2aa", "wcag22aa"])
@@ -69,13 +71,51 @@ test("Home is axe clean with the mobile sheet open", async ({ page }, info) => {
 test("navigation links and Menu have 44px tap targets", async ({ page }, info) => {
   await page.goto("/");
   const header = page.getByRole("banner");
+  for (const link of await header.locator("a:visible").all()) {
+    expect(Math.round((await link.boundingBox())!.height)).toBeGreaterThanOrEqual(44);
+  }
   if (info.project.name === "mobile") {
+    await page.evaluate(() => scrollTo(0, 600));
     const menu = header.getByRole("button", { name: "Menu", exact: true });
+    await expect(menu).toBeVisible();
     expect((await menu.boundingBox())!.height).toBeGreaterThanOrEqual(44);
     await menu.tap();
   }
   for (const link of await header.locator("a:visible").all()) {
     // Round: the sheet links can measure 43.99999 px.
     expect(Math.round((await link.boundingBox())!.height)).toBeGreaterThanOrEqual(44);
+  }
+});
+
+test("phone header closes inward on scroll and opens again at the top", async ({ page }, info) => {
+  test.skip(info.project.name !== "mobile", "Phone header");
+  await page.goto("/");
+  const header = page.getByRole("banner");
+  const menu = header.getByRole("button", { name: "Menu", exact: true });
+  const method = header.getByRole("link", { name: "Method", exact: true });
+  await expect(method).toBeVisible();
+  await expect(menu).toBeHidden();
+  const open = (await header.locator(".site-header__pill").boundingBox())!.width;
+  await page.evaluate(() => scrollTo(0, 600));
+  await expect(method).toBeHidden();
+  await expect(menu).toBeVisible();
+  await expect
+    .poll(async () => (await header.locator(".site-header__pill").boundingBox())!.width)
+    .toBeLessThan(open);
+  await page.evaluate(() => scrollTo(0, 0));
+  await expect(method).toBeVisible();
+  await expect(menu).toBeHidden();
+});
+
+test("header and footer links hover as a pill, never underlined", async ({ page }, info) => {
+  test.skip(info.project.name !== "desktop", "Pointer hover");
+  await page.goto("/");
+  for (const link of [
+    page.getByRole("banner").getByRole("link", { name: "Method", exact: true }),
+    page.getByRole("contentinfo").getByRole("link", { name: "Privacy", exact: true }),
+  ]) {
+    await link.hover();
+    await expect(link).toHaveCSS("text-decoration-line", "none");
+    await expect(link).not.toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
   }
 });

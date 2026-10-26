@@ -167,6 +167,13 @@ const hideFromSearch = noindex || showBuild;
         addEventListener("keydown", end, { once: true });
         setTimeout(end, 2600);
       })();
+      // Header pill closes inward once the page leaves the top (CSS limits it to narrow screens).
+      (() => {
+        const html = document.documentElement;
+        const set = () => html.classList.toggle("is-scrolled", scrollY > 24);
+        addEventListener("scroll", set, { passive: true });
+        set();
+      })();
       // Reveal on scroll. Already on screen: shown at once, with no transition.
       (() => {
         const els = document.querySelectorAll(".reveal");
@@ -267,21 +274,37 @@ const hideFromSearch = noindex || showBuild;
   }
   .site-header__nav {
     display: flex;
-    gap: var(--space-md);
+    gap: var(--space-2xs);
   }
   .site-header__nav a,
-  .site-menu nav > a {
+  .site-menu nav > a,
+  .site-footer__links a {
     display: flex;
     align-items: center;
     min-height: var(--tap);
     font-size: var(--text-lg);
     text-decoration: none;
   }
+  /* Hover and the current page: a soft pill, no underline (context-con mechanic). */
+  .site-header__nav a,
+  .site-footer__links a {
+    padding-inline: var(--space-sm);
+    border-radius: var(--radius-pill);
+    color: color-mix(in oklab, var(--color-paper) 80%, transparent);
+    transition:
+      color var(--dur-fast) var(--ease-out),
+      background-color var(--dur-fast) var(--ease-out);
+  }
   .site-header__nav a:hover,
-  .site-menu nav > a:hover,
-  .site-header a[aria-current="page"] {
-    text-decoration: underline;
-    text-underline-offset: 0.2em;
+  .site-header__nav a[aria-current="page"],
+  .site-footer__links a:hover,
+  .site-footer__links a[aria-current="page"] {
+    color: var(--color-paper);
+    background: color-mix(in oklab, var(--color-paper) 12%, transparent);
+  }
+  .site-menu nav > a:not(.btn):hover,
+  .site-menu nav > a[aria-current="page"] {
+    background: color-mix(in oklab, var(--color-ink) 6%, transparent);
   }
   .site-header__menu {
     display: none;
@@ -318,30 +341,96 @@ const hideFromSearch = noindex || showBuild;
   .site-menu nav > a:not(.btn) {
     padding-inline: var(--space-sm);
     border-radius: var(--radius-sm);
+    transition: background-color var(--dur-fast) var(--ease-out);
   }
   .site-menu::backdrop {
     background: color-mix(in oklab, var(--color-ink) 15%, transparent);
   }
-  @media (min-width: 48rem) {
+  @media (min-width: 64rem) {
     .site-menu:popover-open {
       display: none;
     }
   }
 
-  @media (width < 48rem) {
+  /* Phones and small laptops: the pill fits its content and closes inward once the page
+   * leaves the top (the links fold away, Menu unfolds), then opens again back at the top.
+   * Widths and opacity only; folded parts are also hidden from focus. */
+  @media (width < 64rem) {
     .site-header__pill {
-      max-width: none;
+      width: fit-content;
+      max-width: 100%;
+      gap: 0;
+    }
+    .site-header__nav,
+    .site-header__menu {
+      overflow: hidden;
+      white-space: nowrap;
+      transition:
+        max-width 0.3s var(--ease-out),
+        margin 0.3s var(--ease-out),
+        padding 0.3s var(--ease-out),
+        opacity 0.3s var(--ease-out),
+        visibility 0s;
     }
     .site-header__nav {
-      display: none;
+      max-width: 20rem;
+      margin-left: var(--space-sm);
+    }
+    /* overflow: hidden would clip the focus ring, so draw it inside. */
+    .site-header__nav a:focus-visible {
+      outline-offset: -3px;
     }
     .site-header__menu {
       display: inline-flex;
       align-items: center;
       justify-content: center;
+      max-width: 0;
+      min-width: 0;
+      margin-left: 0;
+      padding-inline: 0;
+      opacity: 0;
+      visibility: hidden;
+      transition-property: max-width, margin, padding, opacity, visibility;
+      transition-delay: 0s, 0s, 0s, 0s, 0.3s;
+    }
+    .site-header__pill .site-header__cta {
+      margin-left: var(--space-sm);
+    }
+    .is-scrolled .site-header__nav {
+      max-width: 0;
+      margin-left: 0;
+      opacity: 0;
+      visibility: hidden;
+      transition-delay: 0s, 0s, 0s, 0s, 0.3s;
+    }
+    .is-scrolled .site-header__menu {
+      max-width: 8rem;
+      min-width: var(--tap);
+      margin-left: var(--space-sm);
+      padding-inline: var(--space-lg);
+      opacity: 1;
+      visibility: visible;
+      transition-delay: 0s;
     }
     .site-menu:popover-open {
       animation: menu-enter var(--dur-fast) var(--ease-out);
+    }
+  }
+
+  @media (width < 48rem) {
+    /* Logo plus three links must fit a 375 px screen at the top. */
+    .site-header {
+      padding-inline: var(--space-sm);
+    }
+    .site-header__pill {
+      padding-left: var(--space-md);
+    }
+    .site-header__nav {
+      margin-left: var(--space-2xs);
+    }
+    .site-header__nav a {
+      padding-inline: 0.4rem;
+      font-size: var(--text-sm);
     }
     .site-header__cta {
       position: fixed;
@@ -367,6 +456,14 @@ const hideFromSearch = noindex || showBuild;
     }
     .has-dock .site-footer {
       padding-bottom: 5.5rem;
+    }
+  }
+  @media (width < 22rem) {
+    .site-header .wordmark {
+      font-size: 1.05rem;
+    }
+    .site-header__nav a {
+      padding-inline: 0.3rem;
     }
   }
   @keyframes menu-enter {
@@ -426,6 +523,13 @@ const hideFromSearch = noindex || showBuild;
   @media (prefers-reduced-motion: reduce) {
     .site-menu:popover-open {
       animation: none;
+    }
+    .site-header__pill,
+    .site-header__nav,
+    .site-header__menu,
+    .site-header__nav a,
+    .site-footer__links a {
+      transition: none !important;
     }
     .site-header__cta {
       transition: none !important;
