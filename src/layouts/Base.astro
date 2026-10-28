@@ -275,18 +275,23 @@ const hideFromSearch = noindex || showBuild;
   }
   /* Header logo: 14 px word (16 from 40rem, 19 from 64rem), the scale of context-con's 18 / 20 / 24 px mark. */
   .site-header .wordmark {
-    flex: none;
+    flex: 0 1 auto;
+    min-width: 0;
     gap: 0;
     min-height: 2.83em;
     padding: 0 0.157em 0 0.63em;
     font-size: 0.907em;
   }
   .site-header .wordmark__arc {
+    flex: none;
     width: 1.3em;
     height: 0.85em;
   }
   .site-header .wordmark__text {
     margin-left: 0.3em;
+  }
+  .site-header__nav {
+    flex-shrink: 1000;
   }
   .site-header .wordmark__text,
   .site-header__nav {
@@ -359,9 +364,21 @@ const hideFromSearch = noindex || showBuild;
       font-size: 1.036em;
     }
   }
-  @media (width < 40rem) {
+  @media (width < 26rem) {
     .site-header__pill {
-      font-size: min(14px, 3.4vw);
+      font-size: clamp(13px, 3.4vw, 14px);
+    }
+  }
+  /* Too narrow for the word next to the button: arc and button only, like the closed pill. */
+  @media (width < 15.5rem) {
+    .site-header .wordmark__text,
+    .site-header__nav {
+      grid-template-columns: 0fr;
+      opacity: 0;
+      visibility: hidden;
+    }
+    .site-header .wordmark__text {
+      margin-left: 0.6em;
     }
   }
   @media (width < 64rem) {
