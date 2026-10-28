@@ -38,15 +38,27 @@ const hideFromSearch = noindex || showBuild;
   <head>
     <meta charset="utf-8" />
     <script is:inline>
-      // Before first paint: mark JS (reveals may hide below-fold content) and play the intro on
-      // every home load, reloads included (Zyade, 2026-10-26). Reduced motion never gets it.
+      // Before first paint: mark JS (reveals may hide below-fold content) and play the intro when
+      // Home is entered from outside or reloaded, not when a visitor clicks back to it from inside
+      // the site (Zyade, 2026-10-28). Reduced motion never gets it.
       // e2e sets sessionStorage "arc-intro" to skip it.
       (() => {
         const html = document.documentElement;
         html.classList.add("js");
         try {
           const calm = matchMedia("(prefers-reduced-motion: reduce)").matches;
-          if (location.pathname === "/" && !calm && !sessionStorage.getItem("arc-intro")) {
+          const nav = performance.getEntriesByType("navigation")[0];
+          const inside =
+            nav?.type === "back_forward" ||
+            (nav?.type !== "reload" &&
+              !!document.referrer &&
+              new URL(document.referrer).origin === location.origin);
+          if (
+            location.pathname === "/" &&
+            !calm &&
+            !inside &&
+            !sessionStorage.getItem("arc-intro")
+          ) {
             html.classList.add("intro");
           }
         } catch {}
@@ -290,8 +302,9 @@ const hideFromSearch = noindex || showBuild;
    * centred, with logo, links and button at the top, at every width. Every size is in em of one
    * fluid font size (14 px at 390 px wide, 11 px floor), so the pill shrinks with the screen
    * instead of breaking; under ~300 px the links track clips rather than pushing the button out.
-   * Once the page leaves the top the wordmark text and the links fold by a grid track (1fr to 0fr),
-   * so both edges close in toward the centre, leaving the favicon tile and the button.
+   * Once the page leaves the top the wordmark text and the links close like a drawer: their column
+   * shrinks to 0 (width only) with their content pinned left, so the button slides over them while
+   * the pill re-centres. The arc stays as the handle, no tile (context-con keeps its logo as is).
    * The button text is ink at 14 px bold: white on this orange (3.05:1) only passes at 19 px. */
   @media (width < 64rem) {
     .site-header {
@@ -304,7 +317,6 @@ const hideFromSearch = noindex || showBuild;
       gap: 0;
       padding: 0.43em 0.43em 0.43em 0.86em;
       font-size: clamp(11px, 3.6vw, 14px);
-      transition: padding var(--fold);
     }
     .site-header .wordmark,
     .site-header__cta {
@@ -318,22 +330,13 @@ const hideFromSearch = noindex || showBuild;
     .site-header .wordmark__arc {
       width: 1.3em;
       height: 0.85em;
-      border-radius: 0.62em;
-      transition:
-        width var(--fold),
-        height var(--fold),
-        padding var(--fold),
-        translate var(--fold),
-        background-color var(--fold),
-        color var(--fold);
     }
     .site-header .wordmark__text,
     .site-header__nav {
       display: grid;
-      grid-template: 1fr / 1fr;
+      grid-template-columns: 1fr;
       transition:
         grid-template-columns var(--fold),
-        grid-template-rows var(--fold),
         margin var(--fold),
         opacity var(--fold),
         visibility 0s;
@@ -379,23 +382,19 @@ const hideFromSearch = noindex || showBuild;
     .site-header__pill .site-header__cta:hover {
       background: color-mix(in oklab, var(--color-accent) 85%, white);
     }
-    .is-scrolled .site-header__pill {
-      padding-left: 0.43em;
-    }
-    .is-scrolled .site-header .wordmark__arc {
-      width: 2.77em;
-      height: 2.77em;
-      padding: 0.62em 0.55em 0.5em;
-      background-color: var(--color-accent);
-      color: var(--color-on-accent);
-    }
     .is-scrolled .site-header .wordmark__text,
     .is-scrolled .site-header__nav {
-      grid-template: 0fr / 0fr;
-      margin: 0;
+      grid-template-columns: 0fr;
       opacity: 0;
       visibility: hidden;
-      transition-delay: 0s, 0s, 0s, 0s, 0.3s;
+      transition-delay: 0s, 0s, 0s, 0.3s;
+    }
+    .is-scrolled .site-header__nav {
+      margin-left: 0;
+    }
+    /* Closed, the empty word track keeps a gap so the arc sits as far from the button as from the edge. */
+    .is-scrolled .site-header .wordmark__text {
+      margin-left: 0.6em;
     }
   }
 

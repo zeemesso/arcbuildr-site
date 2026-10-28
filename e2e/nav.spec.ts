@@ -94,7 +94,7 @@ for (const width of narrow) {
     expect(overflow).toBeLessThanOrEqual(0);
   });
 
-  test(`${width}px: scrolled, the pill closes to the tile and button, centred`, async ({
+  test(`${width}px: scrolled, the pill closes to the arc and button, centred`, async ({
     page,
   }, info) => {
     test.skip(info.project.name !== "mobile", "Narrow widths");
@@ -110,7 +110,7 @@ for (const width of narrow) {
     for (const link of h.links) await expect(link).toBeHidden();
     await expect(h.text).toBeHidden();
     await expect(h.arc).toBeVisible();
-    await expect(h.arc).toHaveCSS("background-color", accent);
+    await expect(h.arc).toHaveCSS("color", accent);
     await expect(h.cta).toBeVisible();
     const closed = await settled(h.pill);
     expect(Math.abs(closed.x + closed.width / 2 - mid)).toBeLessThanOrEqual(2);
