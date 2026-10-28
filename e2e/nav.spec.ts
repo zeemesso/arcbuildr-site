@@ -196,11 +196,11 @@ test("Home is axe clean at the top and when scrolled", async ({ page }) => {
   expect(results.violations).toEqual([]);
 });
 
-// Below 64rem the pill uses context-con's compact 36 px targets (WCAG 2.2 AA asks for 24 px);
-// wide screens keep 44 px.
+// The pill uses context-con's compact targets: 36 px links, a 36 px button (40 px from 64rem).
+// WCAG 2.2 AA asks for 24 px.
 test("header navigation links and button have big enough tap targets", async ({ page }) => {
   await page.goto("/method");
-  const min = page.viewportSize()!.width < 1024 ? 32 : 44;
+  const min = page.viewportSize()!.width < 1024 ? 32 : 36;
   const banner = page.getByRole("banner");
   for (const y of [0, 600]) {
     await jump(page, y);

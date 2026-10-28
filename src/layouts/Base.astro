@@ -215,27 +215,38 @@ const hideFromSearch = noindex || showBuild;
     flex: 1;
   }
 
+  /* Header: context-con's pill, measured at 390, 768, 1024 and 1280 px (docs/references/context-con.md).
+   * A dark pill sized by its content and centred: logo, Method / Notes / About, "Book a call →".
+   * Sizes are context-con's px written in em of a 14 px base, two steps: 48 px tall below 64rem,
+   * 56 px from 64rem. Under ~412 px wide the base shrinks with the screen (our button text is longer
+   * than theirs); under ~300 px the links track clips instead of pushing the button off screen.
+   * Below 64rem, once the page leaves the top, the wordmark text and links close like a drawer:
+   * their column shrinks to 0 (width only) with content pinned left, so the button slides over them
+   * while the pill re-centres. The arc stays as the handle. From 64rem it never changes.
+   * The button text is ink: white on this orange (3.05:1) fails AA at 14 px. */
   .site-header {
+    --fold: 0.3s cubic-bezier(0, 0, 0.2, 1);
     position: sticky;
     top: 0;
     z-index: 20;
     display: flex;
     justify-content: center;
-    padding: var(--space-sm) var(--gutter) 0;
+    padding: 12px 12px 0;
     pointer-events: none;
   }
   .site-header__pill {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    gap: var(--space-md);
-    width: 100%;
-    max-width: 56rem;
-    padding: 0.375rem 0.375rem 0.375rem var(--space-lg);
+    gap: 0.143em;
+    width: fit-content;
+    max-width: 100%;
+    height: 3.43em;
+    padding: 0 0.43em;
+    font-size: 14px;
     border-radius: var(--radius-pill);
     background: var(--color-ink);
     color: var(--color-paper);
-    box-shadow: var(--shadow-lift);
+    box-shadow: 0 8px 30px rgb(0 0 0 / 0.18);
     pointer-events: auto;
   }
   .wordmark {
@@ -244,8 +255,6 @@ const hideFromSearch = noindex || showBuild;
     gap: var(--space-xs);
     min-height: var(--tap);
     font-size: 1.3rem;
-    font-weight: 700;
-    letter-spacing: -0.045em;
     text-decoration: none;
   }
   /* Round-capped arc and wordmark geometry from brand/build.mjs. */
@@ -264,124 +273,98 @@ const hideFromSearch = noindex || showBuild;
     color: var(--color-accent);
     stroke: var(--color-accent);
   }
-  .site-header__pill .btn {
-    min-height: var(--tap);
-    padding-inline: var(--space-lg);
+  /* Header logo: 14 px word (16 from 40rem, 19 from 64rem), the scale of context-con's 18 / 20 / 24 px mark. */
+  .site-header .wordmark {
+    flex: none;
+    gap: 0;
+    min-height: 2.83em;
+    padding: 0 0.157em 0 0.63em;
+    font-size: 0.907em;
   }
+  .site-header .wordmark__arc {
+    width: 1.3em;
+    height: 0.85em;
+  }
+  .site-header .wordmark__text {
+    margin-left: 0.3em;
+  }
+  .site-header .wordmark__text,
+  .site-header__nav {
+    display: grid;
+    grid-template-columns: 1fr;
+    min-width: 0;
+    transition:
+      grid-template-columns var(--fold),
+      margin var(--fold),
+      opacity var(--fold),
+      visibility 0s;
+  }
+  .site-header .wordmark__text > span,
   .site-header__links {
     display: flex;
-    gap: var(--space-2xs);
+    min-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
   }
-  .site-header__nav a,
-  .site-footer__links a {
+  .site-header__nav a {
     display: flex;
     align-items: center;
-    min-height: var(--tap);
-    font-size: var(--text-lg);
-    text-decoration: none;
-  }
-  /* Hover and the current page: a soft pill, no underline (context-con mechanic). */
-  .site-header__nav a,
-  .site-footer__links a {
-    padding-inline: var(--space-sm);
+    height: 3em;
+    padding-inline: 0.5em;
     border-radius: var(--radius-pill);
     color: color-mix(in oklab, var(--color-paper) 80%, transparent);
+    font-size: 0.857em;
+    font-weight: 500;
+    text-decoration: none;
     transition:
       color var(--dur-fast) var(--ease-out),
       background-color var(--dur-fast) var(--ease-out);
   }
+  /* overflow: hidden would clip the focus ring, so draw it inside. */
+  .site-header__nav a:focus-visible {
+    outline-offset: -3px;
+  }
+  .site-header__pill .site-header__cta {
+    flex: none;
+    min-height: 2.57em;
+    padding-inline: 1.143em;
+    color: var(--color-ink);
+    font-size: 1em;
+    font-weight: 600;
+  }
+  /* The darker hover orange would drop ink below 4.5:1, so hover lightens instead. */
+  .site-header__pill .site-header__cta:hover {
+    background: color-mix(in oklab, var(--color-accent) 85%, white);
+  }
+  /* Hover and the current page: a soft pill, no underline (context-con mechanic). */
   .site-header__nav a:hover,
   .site-header__nav a[aria-current="page"],
   .site-footer__links a:hover,
   .site-footer__links a[aria-current="page"] {
     color: var(--color-paper);
-    background: color-mix(in oklab, var(--color-paper) 12%, transparent);
+    background: color-mix(in oklab, var(--color-paper) 10%, transparent);
   }
-
-  /* Below 64rem the pill follows context-con's mechanics: a compact 48 px pill sized by its content,
-   * centred, with logo, links and button at the top, at every width. Every size is in em of one
-   * fluid font size (14 px at 390 px wide, 11 px floor), so the pill shrinks with the screen
-   * instead of breaking; under ~300 px the links track clips rather than pushing the button out.
-   * Once the page leaves the top the wordmark text and the links close like a drawer: their column
-   * shrinks to 0 (width only) with their content pinned left, so the button slides over them while
-   * the pill re-centres. The arc stays as the handle, no tile (context-con keeps its logo as is).
-   * The button text is ink at 14 px bold: white on this orange (3.05:1) only passes at 19 px. */
-  @media (width < 64rem) {
-    .site-header {
-      --fold: 0.3s cubic-bezier(0, 0, 0.2, 1);
-      padding-inline: 0.75rem;
-    }
-    .site-header__pill {
-      width: fit-content;
-      max-width: 100%;
-      gap: 0;
-      padding: 0.43em 0.43em 0.43em 0.86em;
-      font-size: clamp(11px, 3.6vw, 14px);
-    }
-    .site-header .wordmark,
-    .site-header__cta {
-      flex: none;
-    }
+  .site-footer__links a {
+    padding-inline: var(--space-sm);
+    border-radius: var(--radius-pill);
+    color: color-mix(in oklab, var(--color-paper) 80%, transparent);
+    font-size: var(--text-lg);
+    text-decoration: none;
+    transition:
+      color var(--dur-fast) var(--ease-out),
+      background-color var(--dur-fast) var(--ease-out);
+  }
+  @media (width >= 40rem) {
     .site-header .wordmark {
-      gap: 0;
-      min-height: 2.77em;
-      font-size: 0.93em;
+      font-size: 1.036em;
     }
-    .site-header .wordmark__arc {
-      width: 1.3em;
-      height: 0.85em;
+  }
+  @media (width < 40rem) {
+    .site-header__pill {
+      font-size: min(14px, 3.4vw);
     }
-    .site-header .wordmark__text,
-    .site-header__nav {
-      display: grid;
-      grid-template-columns: 1fr;
-      transition:
-        grid-template-columns var(--fold),
-        margin var(--fold),
-        opacity var(--fold),
-        visibility 0s;
-    }
-    .site-header .wordmark__text > span,
-    .site-header__links {
-      min-width: 0;
-      min-height: 0;
-      overflow: hidden;
-      white-space: nowrap;
-    }
-    .site-header .wordmark__text {
-      margin-left: 0.3em;
-    }
-    .site-header__nav {
-      min-width: 0;
-      margin-left: 0.43em;
-    }
-    .site-header__links {
-      gap: 0;
-    }
-    .site-header__nav a {
-      min-height: 3em;
-      padding-inline: 0.42em;
-      font-size: 0.857em;
-      font-weight: 500;
-    }
-    /* overflow: hidden would clip the focus ring, so draw it inside. */
-    .site-header__nav a:focus-visible {
-      outline-offset: -3px;
-    }
-    .site-header__pill .site-header__cta {
-      min-height: 2.57em;
-      margin-left: 0.3em;
-      padding-inline: 0.9em;
-      color: var(--color-ink);
-      font-size: 1em;
-    }
-    .site-header__pill .site-header__cta::after {
-      content: none;
-    }
-    /* The darker hover orange would drop ink below 4.5:1, so hover lightens instead. */
-    .site-header__pill .site-header__cta:hover {
-      background: color-mix(in oklab, var(--color-accent) 85%, white);
-    }
+  }
+  @media (width < 64rem) {
     .is-scrolled .site-header .wordmark__text,
     .is-scrolled .site-header__nav {
       grid-template-columns: 0fr;
@@ -389,12 +372,34 @@ const hideFromSearch = noindex || showBuild;
       visibility: hidden;
       transition-delay: 0s, 0s, 0s, 0.3s;
     }
-    .is-scrolled .site-header__nav {
-      margin-left: 0;
-    }
     /* Closed, the empty word track keeps a gap so the arc sits as far from the button as from the edge. */
     .is-scrolled .site-header .wordmark__text {
       margin-left: 0.6em;
+    }
+  }
+  @media (width >= 64rem) {
+    .site-header {
+      padding-top: 20px;
+    }
+    .site-header__pill {
+      gap: 8px;
+      height: 56px;
+      padding: 0 8px;
+    }
+    .site-header .wordmark {
+      padding: 0 8px 0 12px;
+      font-size: 17.3px;
+    }
+    .site-header__links {
+      gap: 4px;
+    }
+    .site-header__nav a {
+      height: 36px;
+      padding-inline: 12px;
+      font-size: 14px;
+    }
+    .site-header__pill .site-header__cta {
+      min-height: 40px;
     }
   }
 
