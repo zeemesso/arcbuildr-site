@@ -1,5 +1,6 @@
 ---
 import "../styles/global.css";
+import "../styles/tailwind.css";
 import buildInfo from "../generated/build-info.json";
 import Logo from "../components/Logo.astro";
 import logo from "../data/logo.json";
@@ -179,21 +180,6 @@ const hideFromSearch = noindex || showBuild;
         const set = () => html.classList.toggle("is-scrolled", scrollY > 24);
         addEventListener("scroll", set, { passive: true });
         set();
-      })();
-      // Magnetic buttons: a page button leans toward the pointer (0.35 x the offset from its centre)
-      // and springs back on leave. Port of EasyUI's MagneticButton, with CSS translate instead of
-      // framer-motion. Mouse only; reduced motion never gets it. The header pill is left still.
-      (() => {
-        if (!matchMedia("(hover: hover) and (prefers-reduced-motion: no-preference)").matches)
-          return;
-        for (const btn of document.querySelectorAll("main .btn")) {
-          btn.classList.add("magnetic");
-          btn.addEventListener("pointermove", (e) => {
-            const r = btn.getBoundingClientRect();
-            btn.style.translate = `${(e.clientX - r.left - r.width / 2) * 0.35}px ${(e.clientY - r.top - r.height / 2) * 0.35}px`;
-          });
-          btn.addEventListener("pointerleave", () => (btn.style.translate = ""));
-        }
       })();
       // Reveal on scroll. Already on screen: shown at once, with no transition.
       (() => {
@@ -435,15 +421,9 @@ const hideFromSearch = noindex || showBuild;
     }
   }
 
-  /* Spring back is the token's overshoot curve; following the pointer is near-instant. */
-  .magnetic {
-    transition:
-      translate 0.5s var(--spring),
-      background-color var(--dur-fast) var(--ease-out),
-      transform var(--dur-fast) var(--ease-out);
-  }
-  .magnetic:hover {
-    transition-duration: 0.12s, var(--dur-fast), var(--dur-fast);
+  /* Framer Motion drives transform on these; a CSS transform transition would lag its spring. */
+  .btn.is-magnetic {
+    transition: background-color var(--dur-fast) var(--ease-out);
   }
 
   .site-footer {

@@ -1,4 +1,5 @@
 ---
+import { MagneticButton } from "@/components/ui/magnetic-button";
 import Base from "../layouts/Base.astro";
 import LeadForm from "../components/LeadForm.astro";
 import DeliverableArt from "../components/DeliverableArt.astro";
@@ -54,9 +55,9 @@ const faq = [
       fits you.
     </p>
     <div class="hero__action">
-      <a class="btn btn--lg" href="#start">
+      <MagneticButton client:visible className="btn btn--lg" href="#start">
         Book an intro call
-      </a>
+      </MagneticButton>
       <p class="note">Free, 30 minutes. We'll tell you on the call if we're a fit.</p>
     </div>
 

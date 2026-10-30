@@ -84,3 +84,10 @@ Added 2026-10-26 after Zyade: "we lack animations and motion, it doesn't feel li
 ## Verified
 
 See `PLAN.md`, "Visual layer v2" for the run that checked this design.
+
+## React and Tailwind (for EasyUI / shadcn components)
+
+- `@astrojs/react`, `tailwindcss` (utilities and theme only, no preflight: `src/styles/tailwind.css`), `framer-motion`, `clsx`, `tailwind-merge`. Alias `@/` is `src/`. `components.json` is hand-written, so `npx shadcn@latest add` works without `init` rewriting our CSS.
+- Our CSS is unlayered, so it beats Tailwind utilities on the same element. Style new components with our tokens first, utilities second.
+- Islands use `client:visible`. React plus framer-motion cost about 120 KB gzip on pages that have one, so add islands only where the motion earns it.
+- `src/components/ui/magnetic-button.tsx` drives the page buttons (mouse only, reduced motion off). The header pill stays still.

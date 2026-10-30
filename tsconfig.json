@@ -5,6 +5,8 @@
     "resolveJsonModule": true,
     "jsx": "react-jsx",
     "jsxImportSource": "react",
+    "baseUrl": ".",
+    "paths": { "@/*": ["src/*"] },
     "allowJs": true,
     "checkJs": false,
     "skipLibCheck": true

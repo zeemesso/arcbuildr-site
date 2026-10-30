@@ -1,4 +1,5 @@
 ---
+import { MagneticButton } from "@/components/ui/magnetic-button";
 import Base from "../layouts/Base.astro";
 import CallBand from "../components/CallBand.astro";
 ---
@@ -16,9 +17,9 @@ import CallBand from "../components/CallBand.astro";
     </h1>
     <p class="lede">Founded September 23, 2026.</p>
     <div class="hero__action">
-      <a class="btn btn--lg" href="/#start">
+      <MagneticButton client:visible className="btn btn--lg" href="/#start">
         Book an intro call
-      </a>
+      </MagneticButton>
     </div>
   </section>
 

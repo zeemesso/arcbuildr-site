@@ -1,4 +1,5 @@
 ---
+import { MagneticButton } from "@/components/ui/magnetic-button";
 interface Props {
   heading?: string;
 }
@@ -8,9 +9,9 @@ const { heading = "[Placeholder: call band heading]" } = Astro.props;
 
 <section class="card call-band">
   <h2>{heading}</h2>
-  <a class="btn btn--lg" href="/#start">
+  <MagneticButton client:visible className="btn btn--lg" href="/#start">
     Book an intro call
-  </a>
+  </MagneticButton>
 </section>
 
 <style>
