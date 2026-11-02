@@ -8,10 +8,28 @@ const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 export const FAILURE_MESSAGE =
   "We couldn't send your details. Try again, or DM us at @arcbuildr. What you typed is still here.";
 
+// Optional qualifying answers. Only these values are stored; anything else is dropped.
+export const CAMERA = ["Yes", "I can try", "I'd rather not"];
+export const START = ["This month", "In 1 to 2 months", "Just looking"];
+
 const field = (data: FormData, key: string, max: number) => {
   const value = data.get(key);
   return typeof value === "string" ? value.trim().slice(0, max) : "";
 };
+
+const pick = (data: FormData, key: string, allowed: string[]) => {
+  const value = field(data, key, 40);
+  return allowed.includes(value) ? value : "";
+};
+
+/** Folds the qualifying answers into the Goal text, so the Notion database needs no new columns. */
+function goalWithAnswers(data: FormData) {
+  const camera = pick(data, "camera", CAMERA);
+  const start = pick(data, "start", START);
+  return [field(data, "goal", 1000), camera && `On camera: ${camera}`, start && `Start: ${start}`]
+    .filter(Boolean)
+    .join("\n");
+}
 
 export type Parsed = { ok: true; lead: Lead } | { ok: false; errors: Record<string, string> };
 
@@ -37,7 +55,7 @@ export function parseLead(data: FormData, now = new Date()): Parsed {
       email,
       instagram: `@${handle}`,
       business,
-      goal: field(data, "goal", 1000),
+      goal: goalWithAnswers(data),
       source: SOURCES.includes(src) ? src : "direct",
       referrer: field(data, "referrer", 500),
       submittedAt: (Number.isNaN(sentAt.getTime()) ? now : sentAt).toISOString(),

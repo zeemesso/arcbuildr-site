@@ -138,4 +138,9 @@ describe("parseLead", () => {
     expect(r.ok && r.lead.instagram).toBe("@hanane");
     expect(r.ok && r.lead.submittedAt).toBe("2026-10-25T12:00:00.000Z");
   });
+
+  it("adds known qualifying answers to the goal and drops unknown ones", () => {
+    const r = parseLead(toForm({ ...valid, camera: "I can try", start: "<script>" }));
+    expect(r.ok && r.lead.goal).toBe("Be known.\nOn camera: I can try");
+  });
 });

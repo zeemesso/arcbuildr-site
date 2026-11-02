@@ -27,42 +27,6 @@ const approach = [
   },
 ];
 
-const timeline = [
-  {
-    when: "Day 1",
-    step: "You're in",
-    text: "Contract, invoice, your client page and the story intake.",
-  },
-  {
-    when: "Within 48 hours",
-    step: "Kickoff call",
-    text: "The sooner your intake is in, the sooner we start.",
-  },
-  {
-    when: "Days 3 to 8",
-    step: "Direction takes shape",
-    text: "We build your brand, visual identity and content direction, and check in with you as we go.",
-  },
-  {
-    when: "Day 8",
-    step: "Brand review",
-    text: "We walk you through the direction. You tell us what to change.",
-  },
-  {
-    when: "Day 9",
-    step: "Delivery",
-    text: "Brand strategy, visual identity, content strategy and your first batch of pieces.",
-  },
-  {
-    when: "Days 9 to 28",
-    step: "You film and post",
-    text: "We follow the replies and the numbers and note what works.",
-  },
-  { when: "Day 28", step: "First review", text: "What landed, what didn't, and what changes." },
-  { when: "Day 29", step: "Second batch", text: "New pieces, built from what we learned." },
-  { when: "Day 42", step: "Final review", text: "Where you stand, and what comes next." },
-];
-
 const fitFor = [
   "You run a business or sell what you know.",
   "You're willing to show your face and your work.",
@@ -83,11 +47,11 @@ const faq = [
   },
   {
     q: "How long does it take?",
-    a: "About six weeks from the first day to the final review.",
+    a: "About six weeks. The plan can shift with what you need.",
   },
   {
     q: "How much of my time does it take?",
-    a: "A kickoff call, a brand review, a review on day 28 and a final review, plus the time you spend filming. We prepare everything else.",
+    a: "A kickoff call, a few reviews along the way, and the time you spend filming. We prepare everything else.",
   },
   {
     q: "Do you post for me or edit my videos?",
@@ -254,23 +218,6 @@ const faq = [
     </div>
   </section>
 
-  <section class="section wrap" id="how" aria-labelledby="how-title">
-    <h2 id="how-title" class="section__title reveal">
-      How the <span class="hl">six weeks run</span>
-    </h2>
-    <ol class="card timeline reveal">
-      {timeline.map((t) => (
-        <li class="timeline__item">
-          <span class="timeline__when">{t.when}</span>
-          <div class="timeline__text">
-            <h3>{t.step}</h3>
-            <p>{t.text}</p>
-          </div>
-        </li>
-      ))}
-    </ol>
-  </section>
-
   <section class="section wrap" id="fit" aria-labelledby="fit-title">
     <h2 id="fit-title" class="section__title reveal">
       Who this <span class="hl">is for</span>
@@ -299,25 +246,27 @@ const faq = [
     <div class="card note-card reveal">
       <div class="polaroids">
         <div class="polaroid polaroid--back" aria-hidden="true"></div>
-        <div class="polaroid photo" role="img" aria-label="Photo of Zyade and Hanane, to come">
-          <span>[Photo of you both.]</span>
+        <div class="polaroid photo" role="img" aria-label="Photo of Zyade, to come">
+          <span>[Your photo.]</span>
         </div>
       </div>
       <h2 id="us-title">
-        Who <span class="hl">we are</span>
+        You work <span class="hl">directly with me</span>
       </h2>
       <div class="prose">
         <p>
-          Arcbuildr is Zyade and Hanane. We started it on September 23, 2026, and you work with the
-          two of us directly. We take a few clients at a time, so each one gets both of us.
+          I'm Zyade. I started Arcbuildr on September 23, 2026. It isn't an agency, and you don't
+          get handed off to a team. You work with me, from the first call to the last review.
         </p>
         <p>
-          We're new, so we won't show you results we don't have. The first brand going through this
-          system is Zyade's own. On the call, we open your profile together and show you what we'd
-          do with it.
+          I take a few clients at a time, so each one gets my full attention. The thinking we do
+          together on the calls is part of the work.
         </p>
-        <p class="todo">[Zyade: one line on who you are and what you do in Arcbuildr.]</p>
-        <p class="todo">[Hanane: one line on who she is and what she does in Arcbuildr.]</p>
+        <p>
+          I won't show you results I don't have. The first brand going through this system is my
+          own. On the call, we open your profile together and I show you what I'd do with it.
+        </p>
+        <p class="todo">[Zyade: one line on what you've done before Arcbuildr.]</p>
       </div>
     </div>
   </section>
@@ -343,8 +292,8 @@ const faq = [
           Start <span class="hl">with a call</span>
         </h2>
         <p>
-          Tell us about you and your business. On the next screen, you pick a time. We look at your
-          profile before we talk.
+          Tell me about you and your business. On the next screen, you pick a time. I read every
+          answer and look at your profile before we talk.
         </p>
       </div>
       <LeadForm />
@@ -622,54 +571,6 @@ const faq = [
     color: inherit;
   }
 
-  /* How the six weeks run */
-  .timeline {
-    width: 100%;
-    max-width: 46rem;
-    justify-self: center;
-    margin: 0;
-    padding: var(--space-lg);
-    list-style: none;
-  }
-  .timeline__item {
-    position: relative;
-    display: grid;
-    gap: var(--space-2xs);
-    padding: 0 0 var(--space-lg) var(--space-lg);
-    border-left: 2px solid var(--color-rule);
-  }
-  .timeline__item:last-child {
-    padding-bottom: 0;
-    border-left-color: transparent;
-  }
-  .timeline__item::before {
-    content: "";
-    position: absolute;
-    top: 0.3rem;
-    left: -0.4375rem;
-    width: 0.75rem;
-    height: 0.75rem;
-    border-radius: 50%;
-    background: var(--color-accent);
-    box-shadow: 0 0 0 3px var(--color-card);
-  }
-  .timeline__when {
-    color: var(--color-accent-text);
-    font-size: var(--text-sm);
-    font-weight: 700;
-    font-variant-numeric: tabular-nums;
-  }
-  .timeline__text {
-    display: grid;
-    gap: var(--space-2xs);
-  }
-  .timeline__text h3 {
-    font-size: var(--text-lg);
-  }
-  .timeline__text p {
-    color: var(--color-ink-muted);
-  }
-
   /* Who it's for */
   .fit {
     display: grid;
@@ -856,13 +757,6 @@ const faq = [
     .approach,
     .fit {
       grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
-    }
-    .timeline {
-      padding: var(--space-xl) var(--space-2xl);
-    }
-    .timeline__item {
-      grid-template-columns: 9rem 1fr;
-      gap: var(--space-lg);
     }
     .bento {
       grid-template-columns: repeat(6, minmax(0, 1fr));

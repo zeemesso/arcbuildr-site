@@ -1,6 +1,6 @@
 # COPY.md
 
-Step 2 (Copy). Draft 2, 2026-11-02. Replaces draft 1 (2026-10-24, in git history).
+Step 2 (Copy). Draft 2.1, 2026-11-02 (Zyade's answers applied: no Hanane on the site, no public timeline, six weeks confirmed and open to change). Replaces draft 1 (2026-10-24, in git history).
 
 Why draft 2: on 2026-11-02 Zyade made arcbuildr.co the hub of the business, with the home page as the landing page for the high-ticket service, and asked Claude to write the copy now. About, Method and Notes are removed.
 
@@ -17,16 +17,16 @@ Voice: Zyade's. Plain, direct, no hype, and no invented numbers or results.
 
 These go beyond what Zyade has confirmed. Each tag in the copy points to a number below.
 
-1. **Six weeks.** The length comes from the Client Journey frame (day 1 to day 42). The real length may vary by package.
-2. **Day-by-day timeline.** Taken from the Client Journey frame as it stands.
+1. **Six weeks.** CONFIRMED by Zyade, open to change.
+2. **Day-by-day timeline.** Removed. Zyade: the timeline isn't public. It stays in the Miro Client Journey frame.
 3. **The 5 deliverables.** They follow the Arcbuildr system: Brand Strategy, Visual Identity, Profile Audit & Optimization, Content Strategy, Content Pieces. Draft 1's "Ongoing Support" became the reviews and the second batch inside the six weeks.
-4. **No video editing.** The system README says Arcbuildr writes scripts and doesn't edit client videos. This replaces draft 1's "we sometimes edit".
-5. **Zyade's own brand as the first case.** Comes from the HANDOFF ("first test client: @messaoudizyade") and the Founder Example frame on the sales board.
-6. **"A few clients at a time."** True for a two-founder studio. No number is given.
+4. **No video editing.** CONFIRMED. The system README says Arcbuildr writes scripts and doesn't edit client videos. This replaces draft 1's "we sometimes edit".
+5. **Zyade's own brand as the first case.** CONFIRMED. Comes from the HANDOFF ("first test client: @messaoudizyade") and the Founder Example frame on the sales board.
+6. **"A few clients at a time."** CONFIRMED. No number is given.
 7. **Time asked of the client.** Kickoff, brand review, the day 28 review, the final review, plus filming.
 8. **Not a fit.** We say so on the call and name at least one thing to fix on the profile.
 9. **Who it's for and who it isn't.** Drawn from the brief and the call questions.
-10. **Founder lines and photo.** Still placeholders (draft 1, #10).
+10. **Founder line and photo.** Zyade only; Hanane isn't on the site. One line and a photo are still placeholders.
 11. **Price answer.** Shared after the call. Unchanged from draft 1.
 
 ## Page list
@@ -41,7 +41,7 @@ arcbuildr.co
 Hub later: the digital product gets its own page when Zyade starts it. Nothing links to it yet.
 
 Navigation:
-- Header pill: logo, three in-page links (Work `/#build`, Process `/#how`, FAQ `/#questions`), short so the pill fits a 320px screen and the "Book a call" button.
+- Header pill: logo, three in-page links (Work `/#build`, Process `/#approach`, FAQ `/#questions`), short so the pill fits a 320px screen and the "Book a call" button.
 - Footer: logo, Privacy.
 - One action across the whole page: book a call. The hero, the header and the form all lead to `#start`.
 
@@ -110,23 +110,7 @@ Navigation:
 
 **Line below:** We don't edit your videos or post for you.
 
-### 6. How the six weeks run (`#how`) [ASSUMED 1, 2]
-
-**Heading:** How the six weeks run
-
-| When | Step | What happens |
-|---|---|---|
-| Day 1 | You're in | Contract, invoice, your client page and the story intake. |
-| Within 48 hours | Kickoff call | The sooner your intake is in, the sooner we start. |
-| Days 3 to 8 | Direction takes shape | We build your brand, visual identity and content direction, and check in with you as we go. |
-| Day 8 | Brand review | We walk you through the direction. You tell us what to change. |
-| Day 9 | Delivery | Brand strategy, visual identity, content strategy and your first batch of pieces. |
-| Days 9 to 28 | You film and post | We follow the replies and the numbers and note what works. |
-| Day 28 | First review | What landed, what didn't, and what changes. |
-| Day 29 | Second batch | New pieces, built from what we learned. |
-| Day 42 | Final review | Where you stand, and what comes next. |
-
-### 7. Who it's for (`#fit`) [ASSUMED 9]
+### 6. Who it's for (`#fit`) [ASSUMED 9]
 
 **Heading:** Who this is for
 
@@ -142,20 +126,23 @@ Navigation:
 - You'd rather stay off camera.
 - Your main platform is LinkedIn or YouTube.
 
-### 8. Who we are (`#us`)
+### 7. Who you work with (`#us`)
 
-**Heading:** Who we are
+Mechanics from wojteklesinski.com/consulting: first person, "not an agency", you work with one person directly. See `docs/references/wojtek-lesinski.md`.
+
+**Heading:** You work directly with me
 
 **Body:**
-Arcbuildr is Zyade and Hanane. We started it on September 23, 2026, and you work with the two of us directly. We take a few clients at a time, so each one gets both of us. [ASSUMED 6]
+I'm Zyade. I started Arcbuildr on September 23, 2026. It isn't an agency, and you don't get handed off to a team. You work with me, from the first call to the last review.
 
-We're new, so we won't show you results we don't have. The first brand going through this system is Zyade's own. On the call, we open your profile together and show you what we'd do with it. [ASSUMED 5]
+I take a few clients at a time, so each one gets my full attention. The thinking we do together on the calls is part of the work.
 
-[Zyade: one line on who you are and what you do in Arcbuildr.] [ASSUMED 10]
-[Hanane: one line on who she is and what she does in Arcbuildr.] [ASSUMED 10]
-[Photo of you both.] [ASSUMED 10]
+I won't show you results I don't have. The first brand going through this system is my own. On the call, we open your profile together and I show you what I'd do with it.
 
-### 9. Questions (`#questions`)
+[Zyade: one line on what you've done before Arcbuildr.] [ASSUMED 10]
+[Photo of Zyade.] [ASSUMED 10]
+
+### 8. Questions (`#questions`)
 
 **Heading:** Questions
 
@@ -163,10 +150,10 @@ We're new, so we won't show you results we don't have. The first brand going thr
 It depends on what you need. We share the price after the call, once we both know it's a fit. [ASSUMED 11]
 
 **How long does it take?**
-About six weeks from the first day to the final review. [ASSUMED 1]
+About six weeks. The plan can shift with what you need.
 
 **How much of my time does it take?**
-A kickoff call, a brand review, a review on day 28 and a final review, plus the time you spend filming. We prepare everything else. [ASSUMED 7]
+A kickoff call, a few reviews along the way, and the time you spend filming. We prepare everything else. [ASSUMED 7]
 
 **Do you post for me or edit my videos?**
 No. We write what to say and show. You film, edit and post, or your team does. [ASSUMED 4]
@@ -186,13 +173,13 @@ We tell you on the call, and why. You still leave with at least one thing to fix
 **Can you guarantee followers or sales?**
 No. We agree on the work up front, deliver it, and review it with you. Followers and sales also depend on how often you post and what you do with the content.
 
-### 10. Book the call (`#start`)
+### 9. Book the call (`#start`)
 
 **Heading:** Start with a call
 
-**Body:** Tell us about you and your business. On the next screen, you pick a time. We look at your profile before we talk.
+**Body:** Tell me about you and your business. On the next screen, you pick a time. I read every answer and look at your profile before we talk.
 
-**Form** (unchanged from draft 1, except one label)
+**Form** (draft 1 fields, one new label, two optional qualifying questions from the Story ARC intake study, `docs/references/storyarc-intake.md`)
 
 | Field | Required | Helper text |
 |-------|----------|-------------|
@@ -200,6 +187,8 @@ No. We agree on the work up front, deliver it, and review it with you. Followers
 | Email | Yes | |
 | Instagram handle | Yes | So we can look at your profile before the call. |
 | Your business | Yes | One line is enough. |
+| Are you ready to be on camera? | No | Yes / I can try / I'd rather not |
+| When do you want to start? | No | This month / In 1 to 2 months / Just looking |
 | What do you want your content to do for you? | No | A sentence or two. |
 
 **Button:** Send and pick a time
@@ -232,7 +221,7 @@ Unchanged. It still needs a legal check before launch.
 
 1. **One action.** "Book a call" everywhere: header, hero, form. The draft 1 hero said "Book an intro call", and two phrasings for one action was the weak spot the reference study found.
 2. **Proof without results.** We have no approved results, so the page shows how we think (section 3), the full journey (section 6) and Zyade's own brand as the first case. Nothing is invented.
-3. **The timeline does the selling.** High-ticket buyers fear the unknown. A day-by-day plan with named meetings answers "what happens after I pay?"
+3. **No public timeline** (Zyade). The six weeks and the deliverable order answer "what happens after I pay?"; the day-by-day plan is shared after the call.
 4. **Who it isn't for.** It turns away the people who expect an agency to post for them, before they book.
 5. **Price stays off the page,** and the FAQ answers the price question directly.
 6. **Humanizer pass.** Checked for contrast reveals, forced triads, one-line closers, sales words and dashes. The visitor quotes in section 2 are written as things a founder would actually say.

@@ -62,6 +62,26 @@
   </div>
 
   <div class="field">
+    <label for="f-camera">Are you ready to be on camera? (optional)</label>
+    <select id="f-camera" name="camera">
+      <option value="">Choose one</option>
+      <option>Yes</option>
+      <option>I can try</option>
+      <option>I'd rather not</option>
+    </select>
+  </div>
+
+  <div class="field">
+    <label for="f-start">When do you want to start? (optional)</label>
+    <select id="f-start" name="start">
+      <option value="">Choose one</option>
+      <option>This month</option>
+      <option>In 1 to 2 months</option>
+      <option>Just looking</option>
+    </select>
+  </div>
+
+  <div class="field">
     <label for="f-goal">What do you want your content to do for you? (optional)</label>
     <textarea id="f-goal" name="goal" rows="3" aria-describedby="f-goal-help"></textarea>
     <p class="help" id="f-goal-help">
@@ -210,6 +230,7 @@
     font-weight: 600;
   }
   input:not([type="hidden"]),
+  select,
   textarea {
     width: 100%;
     min-height: var(--tap);
@@ -224,10 +245,12 @@
       background-color var(--dur-fast) var(--ease-out);
   }
   input:not([type="hidden"]):hover,
+  select:hover,
   textarea:hover {
     border-color: var(--color-ink-muted);
   }
   input:not([type="hidden"]):focus-visible,
+  select:focus-visible,
   textarea:focus-visible {
     outline-offset: 1px;
     border-color: var(--color-accent);

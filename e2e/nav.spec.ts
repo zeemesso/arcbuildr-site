@@ -3,7 +3,7 @@ import { expect, test, type Locator, type Page } from "@playwright/test";
 
 const links = [
   ["Work", "/#build"],
-  ["Process", "/#how"],
+  ["Process", "/#approach"],
   ["FAQ", "/#questions"],
 ] as const;
 const narrow = [320, 375, 390, 768];
