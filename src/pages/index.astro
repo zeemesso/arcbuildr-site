@@ -55,7 +55,11 @@ const faq = [
       fits you.
     </p>
     <div class="hero__action">
-      <MagneticButton client:visible className="btn btn--lg" href="#start">
+      <MagneticButton
+        client:media="(hover: hover) and (pointer: fine)"
+        className="btn btn--lg"
+        href="#start"
+      >
         Book an intro call
       </MagneticButton>
       <p class="note">Free, 30 minutes. We'll tell you on the call if we're a fit.</p>
