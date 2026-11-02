@@ -20,7 +20,7 @@ test("header stays on top while scrolling and the button jumps to the form", asy
   await expect(page.getByRole("link", { name: "Book a call" })).toHaveAttribute("href", "/#start");
 });
 
-for (const path of ["/", "/method/", "/about/"]) {
+for (const path of ["/", "/thanks", "/privacy"]) {
   test(`${path}: body text is at least 16px and tap targets at least 44px`, async ({ page }) => {
     await page.goto(path);
     const size = await page.evaluate(() => parseFloat(getComputedStyle(document.body).fontSize));

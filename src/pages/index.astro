@@ -5,18 +5,93 @@ import LeadForm from "../components/LeadForm.astro";
 import DeliverableArt from "../components/DeliverableArt.astro";
 import { deliverables } from "../data/deliverables";
 
+const pains = [
+  "I don't know what I should be known for.",
+  "I run out of ideas after a few posts.",
+  "I sit down to film and don't know what to say.",
+  "My profile doesn't look like the business I run.",
+];
+
+const approach = [
+  {
+    name: "Real material",
+    text: "Your work, your clients, your past, the way you think. The raw material is already there. We find it and sort it.",
+  },
+  {
+    name: "Direction",
+    text: "A few things you want to be known for, clear enough that people know what to expect from you, without turning you into a niche caricature.",
+  },
+  {
+    name: "Content",
+    text: "A real experience, one useful idea and a visual way to tell it. Something only you could post.",
+  },
+];
+
+const timeline = [
+  {
+    when: "Day 1",
+    step: "You're in",
+    text: "Contract, invoice, your client page and the story intake.",
+  },
+  {
+    when: "Within 48 hours",
+    step: "Kickoff call",
+    text: "The sooner your intake is in, the sooner we start.",
+  },
+  {
+    when: "Days 3 to 8",
+    step: "Direction takes shape",
+    text: "We build your brand, visual identity and content direction, and check in with you as we go.",
+  },
+  {
+    when: "Day 8",
+    step: "Brand review",
+    text: "We walk you through the direction. You tell us what to change.",
+  },
+  {
+    when: "Day 9",
+    step: "Delivery",
+    text: "Brand strategy, visual identity, content strategy and your first batch of pieces.",
+  },
+  {
+    when: "Days 9 to 28",
+    step: "You film and post",
+    text: "We follow the replies and the numbers and note what works.",
+  },
+  { when: "Day 28", step: "First review", text: "What landed, what didn't, and what changes." },
+  { when: "Day 29", step: "Second batch", text: "New pieces, built from what we learned." },
+  { when: "Day 42", step: "Final review", text: "Where you stand, and what comes next." },
+];
+
+const fitFor = [
+  "You run a business or sell what you know.",
+  "You're willing to show your face and your work.",
+  "Your clients are on Instagram, or that's where you want them to find you.",
+  "You'll film and post on a rhythm we agree on.",
+];
+const fitNot = [
+  "You want someone to run your account for you.",
+  "You want a follower number guaranteed.",
+  "You'd rather stay off camera.",
+  "Your main platform is LinkedIn or YouTube.",
+];
+
 const faq = [
   {
     q: "How much does it cost?",
-    a: "It depends on how much content you need. We'll give you a price after the call, once we know what you need.",
+    a: "It depends on what you need. We share the price after the call, once we both know it's a fit.",
   },
   {
-    q: "Do you post for me?",
-    a: "No. We hand you everything ready to post, and you publish it on your account.",
+    q: "How long does it take?",
+    a: "About six weeks from the first day to the final review.",
   },
   {
-    q: "Do you edit videos?",
-    a: "For some clients, yes. It depends on you and the content. We'll tell you on the call.",
+    q: "How much of my time does it take?",
+    a: "A kickoff call, a brand review, a review on day 28 and a final review, plus the time you spend filming. We prepare everything else.",
+  },
+  {
+    q: "Do you post for me or edit my videos?",
+    a: "No. We write what to say and show. You film, edit and post, or your team does.",
   },
   {
     q: "Which platforms do you work on?",
@@ -24,35 +99,35 @@ const faq = [
   },
   {
     q: "Do you work with my industry?",
-    a: "We work with business-driven people in any field. The work starts from you, whatever your industry.",
+    a: "If you run a business or sell what you know, yes. The work starts from you, whatever your field.",
   },
   {
     q: "What do I need to give you?",
-    a: "Time for a few conversations about your story and your work, and your current profile. You don't need anything ready before the call.",
+    a: "Your answers to the story intake, a few conversations about your work, and your current profile. Nothing needs to be ready before the call.",
+  },
+  {
+    q: "What if we're not a fit?",
+    a: "We tell you on the call, and why. You still leave with at least one thing to fix on your profile.",
   },
   {
     q: "Can you guarantee followers or sales?",
-    a: "No. We agree on the work up front, deliver it, and stay with you after. Followers and sales also depend on how often you post and what you do with the content.",
-  },
-  {
-    q: "How long does it take?",
-    a: "It depends on how much content we're making. You'll get a timeline on the call.",
+    a: "No. We agree on the work up front, deliver it, and review it with you. Followers and sales also depend on how often you post and what you do with the content.",
   },
 ];
 ---
 
 <Base
-  title="Arcbuildr | Personal brand service for business-driven people"
-  description="We build your personal brand and Instagram content from your real story and expertise. Brand strategy, visual identity, profile audit, content and ongoing support."
+  title="Arcbuildr | A personal brand built from your real story"
+  description="For founders and business owners on Instagram. In six weeks we build your brand strategy, visual identity, profile and content from your real story. You film and post. We tell you what to say and show."
 >
   <section class="hero wrap" id="top" aria-labelledby="hero-title">
+    <p class="kicker hero__kicker">For founders and business owners</p>
     <h1 id="hero-title">
-      We build your personal brand from your <span class="hl">real story.</span>
+      A personal brand built from your <span class="hl">real story,</span> in six weeks.
     </h1>
     <p class="lede">
-      Arcbuildr is a personal brand service for business-driven people. We take your story and what
-      you know, and build the brand and content that show it on Instagram, and on TikTok when it
-      fits you.
+      You know your work. Your Instagram doesn't show it yet. We decide with you what you should be
+      known for, shape how your profile looks, and write what to say and show in every piece.
     </p>
     <div class="hero__action">
       <MagneticButton
@@ -60,9 +135,11 @@ const faq = [
         className="btn btn--lg"
         href="#start"
       >
-        Book an intro call
+        Book a call
       </MagneticButton>
-      <p class="note">Free, 30 minutes. We'll tell you on the call if we're a fit.</p>
+      <p class="note">
+        Free, 30 minutes. We look at your profile together and tell you if we're a fit.
+      </p>
     </div>
 
     <div class="profile" aria-hidden="true">
@@ -110,23 +187,39 @@ const faq = [
 
   <section class="statement wrap reveal" id="for" aria-labelledby="for-title">
     <h2 id="for-title">
-      For people who <span class="hl">build businesses</span>
+      You know your work. <span class="hl">Your page doesn't show it.</span>
     </h2>
+    <ul class="pains">
+      {pains.map((line) => (
+        <li class="pains__item">“{line}”</li>
+      ))}
+    </ul>
     <div class="statement__body">
       <p>
-        You run a business, or you're building one. You know your field well. Your Instagram shows a
-        small part of that, or none of it, because your time goes into the work.
-      </p>
-      <p>
-        We don't split clients by industry. Each brand starts from the person behind it, so two
-        clients in the same field end up with different brands.
+        Each of these comes from a decision nobody has made yet: who you speak to, what you stand
+        for, how your page should look. We make those decisions with you first, so every piece has
+        somewhere to come from.
       </p>
     </div>
   </section>
 
+  <section class="section wrap" id="approach" aria-labelledby="approach-title">
+    <h2 id="approach-title" class="section__title reveal">
+      We start from what <span class="hl">you've already lived</span>
+    </h2>
+    <ol class="approach">
+      {approach.map((s, i) => (
+        <li class={`card approach__card reveal${i === 1 ? " approach__card--mid" : ""}`}>
+          <h3>{s.name}</h3>
+          <p>{s.text}</p>
+        </li>
+      ))}
+    </ol>
+  </section>
+
   <section class="section wrap" id="build" aria-labelledby="build-title">
     <h2 id="build-title" class="section__title reveal">
-      What we build, <span class="hl">in the order we build it</span>
+      What you get, <span class="hl">in the order we build it</span>
     </h2>
     <ol class="bento">
       {deliverables.map((s, i) => (
@@ -146,20 +239,59 @@ const faq = [
 
   <section class="section wrap" id="roles" aria-labelledby="roles-title">
     <h2 id="roles-title" class="section__title reveal">
-      Who does <span class="hl">what</span>
+      We decide and write. <span class="hl">You film and post.</span>
     </h2>
     <div class="roles">
       <p class="card roles__card roles__card--us reveal">
-        We build the strategy, the identity and the content, and hand it to you ready to post.
+        We make the decisions with you and write every piece: what to say, what to show, and how it
+        should look.
       </p>
       <p class="card roles__card reveal">
-        You publish it on your own account. We don't post for you. Your account stays yours, and the
-        conversations with your audience stay with you.
+        You film and post on your own account, with your team if you have one. Your account stays
+        yours, and the conversations with your audience stay with you.
       </p>
-      <p class="roles__video">
-        For some clients we also edit their videos. We'll tell you on the call whether that makes
-        sense for you.
-      </p>
+      <p class="roles__video">We don't edit your videos or post for you.</p>
+    </div>
+  </section>
+
+  <section class="section wrap" id="how" aria-labelledby="how-title">
+    <h2 id="how-title" class="section__title reveal">
+      How the <span class="hl">six weeks run</span>
+    </h2>
+    <ol class="card timeline reveal">
+      {timeline.map((t) => (
+        <li class="timeline__item">
+          <span class="timeline__when">{t.when}</span>
+          <div class="timeline__text">
+            <h3>{t.step}</h3>
+            <p>{t.text}</p>
+          </div>
+        </li>
+      ))}
+    </ol>
+  </section>
+
+  <section class="section wrap" id="fit" aria-labelledby="fit-title">
+    <h2 id="fit-title" class="section__title reveal">
+      Who this <span class="hl">is for</span>
+    </h2>
+    <div class="fit">
+      <div class="card fit__card fit__card--yes reveal">
+        <h3>For you if</h3>
+        <ul>
+          {fitFor.map((line) => (
+            <li>{line}</li>
+          ))}
+        </ul>
+      </div>
+      <div class="card fit__card reveal">
+        <h3>Not for you if</h3>
+        <ul>
+          {fitNot.map((line) => (
+            <li>{line}</li>
+          ))}
+        </ul>
+      </div>
     </div>
   </section>
 
@@ -177,11 +309,12 @@ const faq = [
       <div class="prose">
         <p>
           Arcbuildr is Zyade and Hanane. We started it on September 23, 2026, and you work with the
-          two of us directly.
+          two of us directly. We take a few clients at a time, so each one gets both of us.
         </p>
         <p>
-          We're new. That's why this page lays out every step of how we work. On the call, we open
-          your profile together and show you what we'd build for it.
+          We're new, so we won't show you results we don't have. The first brand going through this
+          system is Zyade's own. On the call, we open your profile together and show you what we'd
+          do with it.
         </p>
         <p class="todo">[Zyade: one line on who you are and what you do in Arcbuildr.]</p>
         <p class="todo">[Hanane: one line on who she is and what she does in Arcbuildr.]</p>
@@ -209,7 +342,10 @@ const faq = [
         <h2 id="start-title">
           Start <span class="hl">with a call</span>
         </h2>
-        <p>Tell us about you and your business. On the next screen, you pick a time.</p>
+        <p>
+          Tell us about you and your business. On the next screen, you pick a time. We look at your
+          profile before we talk.
+        </p>
       </div>
       <LeadForm />
     </div>
@@ -226,7 +362,10 @@ const faq = [
     text-align: center;
   }
   .hero h1 {
-    max-width: 14ch;
+    max-width: 17ch;
+  }
+  .hero__kicker {
+    color: var(--color-ink-muted);
   }
   .lede {
     font-size: var(--text-lg);
@@ -428,6 +567,147 @@ const faq = [
     color: var(--color-ink-muted);
   }
 
+  /* The problem, in the visitor's words */
+  .pains {
+    display: grid;
+    gap: var(--space-xs);
+    width: 100%;
+    max-width: 40rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .pains__item {
+    padding: var(--space-sm) var(--space-lg);
+    border: var(--rule-thin);
+    border-radius: var(--radius-md);
+    background: var(--color-card);
+    font-weight: 600;
+    text-wrap: pretty;
+  }
+
+  /* How we think: three cards */
+  .approach {
+    display: grid;
+    gap: var(--space-sm);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    counter-reset: step;
+  }
+  .approach__card {
+    counter-increment: step;
+    display: grid;
+    gap: var(--space-sm);
+    align-content: start;
+    padding: var(--space-xl) var(--space-lg);
+  }
+  .approach__card::before {
+    content: counter(step, decimal-leading-zero);
+    color: var(--color-accent-text);
+    font-size: var(--text-sm);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+  }
+  .approach__card p {
+    color: var(--color-ink-muted);
+  }
+  .approach__card--mid {
+    background: var(--color-sage);
+    border-color: var(--color-sage);
+    color: var(--color-paper);
+  }
+  .approach__card--mid::before,
+  .approach__card--mid p {
+    color: inherit;
+  }
+
+  /* How the six weeks run */
+  .timeline {
+    width: 100%;
+    max-width: 46rem;
+    justify-self: center;
+    margin: 0;
+    padding: var(--space-lg);
+    list-style: none;
+  }
+  .timeline__item {
+    position: relative;
+    display: grid;
+    gap: var(--space-2xs);
+    padding: 0 0 var(--space-lg) var(--space-lg);
+    border-left: 2px solid var(--color-rule);
+  }
+  .timeline__item:last-child {
+    padding-bottom: 0;
+    border-left-color: transparent;
+  }
+  .timeline__item::before {
+    content: "";
+    position: absolute;
+    top: 0.3rem;
+    left: -0.4375rem;
+    width: 0.75rem;
+    height: 0.75rem;
+    border-radius: 50%;
+    background: var(--color-accent);
+    box-shadow: 0 0 0 3px var(--color-card);
+  }
+  .timeline__when {
+    color: var(--color-accent-text);
+    font-size: var(--text-sm);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+  }
+  .timeline__text {
+    display: grid;
+    gap: var(--space-2xs);
+  }
+  .timeline__text h3 {
+    font-size: var(--text-lg);
+  }
+  .timeline__text p {
+    color: var(--color-ink-muted);
+  }
+
+  /* Who it's for */
+  .fit {
+    display: grid;
+    gap: var(--space-sm);
+  }
+  .fit__card {
+    display: grid;
+    gap: var(--space-md);
+    align-content: start;
+    padding: var(--space-xl) var(--space-lg);
+  }
+  .fit__card ul {
+    display: grid;
+    gap: var(--space-sm);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .fit__card li {
+    display: grid;
+    grid-template-columns: 1.25rem 1fr;
+    gap: var(--space-xs);
+  }
+  .fit__card li::before {
+    content: "\2715" / "";
+    color: var(--color-ink-muted);
+    font-weight: 700;
+  }
+  .fit__card--yes {
+    background: var(--color-sage);
+    border-color: var(--color-sage);
+    color: var(--color-paper);
+  }
+  .fit__card--yes li::before {
+    content: "\2713" / "";
+    color: inherit;
+  }
+
   /* Who does what */
   .roles {
     display: grid;
@@ -570,6 +850,20 @@ const faq = [
   }
 
   @media (min-width: 48rem) {
+    .pains {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .approach,
+    .fit {
+      grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
+    }
+    .timeline {
+      padding: var(--space-xl) var(--space-2xl);
+    }
+    .timeline__item {
+      grid-template-columns: 9rem 1fr;
+      gap: var(--space-lg);
+    }
     .bento {
       grid-template-columns: repeat(6, minmax(0, 1fr));
     }

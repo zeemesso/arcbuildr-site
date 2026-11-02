@@ -20,13 +20,13 @@ const analyticsToken = import.meta.env.PUBLIC_CF_ANALYTICS_TOKEN;
 const canonical = new URL(Astro.url.pathname, Astro.site);
 const isHome = Astro.url.pathname === "/";
 const navLinks = [
-  { label: "Method", href: "/method" },
-  { label: "Notes", href: "/notes" },
-  { label: "About", href: "/about" },
+  { label: "Work", href: "/#build" },
+  { label: "Process", href: "/#how" },
+  { label: "FAQ", href: "/#questions" },
 ];
 // Static builds give "/privacy/", dev gives "/privacy".
 const here = Astro.url.pathname.replace(/(.)\/$/, "$1");
-const currentPage = (href: string) => (here === href ? "page" : undefined);
+const currentPage = (href: string) => (!href.includes("#") && here === href ? "page" : undefined);
 
 // Preview-only build line. Unknown branch counts as main, so it stays hidden.
 const showBuild = !["main", "unknown", ""].includes(buildInfo.branch);
@@ -217,7 +217,7 @@ const hideFromSearch = noindex || showBuild;
   }
 
   /* Header: context-con's pill, measured at 390, 768, 1024 and 1280 px (docs/references/context-con.md).
-   * A dark pill sized by its content and centred: logo, Method / Notes / About, "Book a call →".
+   * A dark pill sized by its content and centred: logo, in-page links, "Book a call →".
    * Sizes are context-con's px written in em of a 14 px base, two steps: 48 px tall below 64rem,
    * 56 px from 64rem. Under ~412 px wide the base shrinks with the screen (our button text is longer
    * than theirs); under ~300 px the links track clips instead of pushing the button off screen.

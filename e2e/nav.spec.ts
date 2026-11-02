@@ -2,9 +2,9 @@ import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Locator, type Page } from "@playwright/test";
 
 const links = [
-  ["Method", "/method"],
-  ["Notes", "/notes"],
-  ["About", "/about"],
+  ["Work", "/#build"],
+  ["Process", "/#how"],
+  ["FAQ", "/#questions"],
 ] as const;
 const narrow = [320, 375, 390, 768];
 const accent = "rgb(232, 114, 46)";
@@ -51,14 +51,17 @@ async function settled(pill: Locator) {
 
 const centre = (page: Page) => page.evaluate(() => document.documentElement.clientWidth / 2);
 
-test("desktop header shows Method, Notes and About", async ({ page }, info) => {
+test("desktop header shows the three landing page anchor links", async ({ page }, info) => {
   test.skip(info.project.name !== "desktop", "Desktop navigation");
-  await page.goto("/");
-  const banner = page.getByRole("banner");
-  for (const [name, href] of links) {
-    const link = banner.getByRole("link", { name, exact: true });
-    await expect(link).toBeVisible();
-    await expect(link).toHaveAttribute("href", href);
+  for (const path of ["/", "/thanks", "/privacy", "/no-such-page"]) {
+    await page.goto(path);
+    const banner = page.getByRole("banner");
+    for (const [name, href] of links) {
+      const link = banner.getByRole("link", { name, exact: true });
+      await expect(link).toBeVisible();
+      await expect(link).toHaveAttribute("href", href);
+      await expect(link).not.toHaveAttribute("aria-current");
+    }
   }
 });
 
@@ -124,13 +127,13 @@ for (const width of narrow) {
   });
 }
 
-test("390px: the pill has the same width on Home and Method, open and closed", async ({
+test("390px: the pill has the same width on Home and Privacy, open and closed", async ({
   page,
 }, info) => {
   test.skip(info.project.name !== "mobile", "Phone width");
   await page.setViewportSize({ width: 390, height: 800 });
   const widths = [];
-  for (const path of ["/", "/method"]) {
+  for (const path of ["/", "/privacy"]) {
     await page.goto(path);
     await page.evaluate(() => document.fonts.ready);
     const { pill, links: ls } = header(page);
@@ -164,7 +167,7 @@ test("the logo is not a link on Home and links Home everywhere else", async ({ p
   await page.goto("/");
   await expect(page.getByRole("link", { name: "Arcbuildr", exact: true })).toHaveCount(0);
   await expect(page.getByRole("img", { name: "Arcbuildr", exact: true })).toHaveCount(2);
-  await page.goto("/method");
+  await page.goto("/privacy");
   const logos = page.getByRole("link", { name: "Arcbuildr", exact: true });
   await expect(logos).toHaveCount(2);
   for (const logo of await logos.all()) await expect(logo).toHaveAttribute("href", "/");
@@ -177,7 +180,7 @@ test("a reload starts at the top, a link to #start still lands on the form", asy
   await page.waitForLoadState("load");
   await page.waitForTimeout(300);
   expect(await page.evaluate(() => scrollY)).toBe(0);
-  await page.goto("/method");
+  await page.goto("/privacy");
   await page.goto("/#start");
   await expect(page.locator("#start")).toBeInViewport();
   expect(await page.evaluate(() => scrollY)).toBeGreaterThan(0);
@@ -199,7 +202,7 @@ test("Home is axe clean at the top and when scrolled", async ({ page }) => {
 // The pill uses context-con's compact targets: 36 px links, a 36 px button (40 px from 64rem).
 // WCAG 2.2 AA asks for 24 px.
 test("header navigation links and button have big enough tap targets", async ({ page }) => {
-  await page.goto("/method");
+  await page.goto("/privacy");
   const min = page.viewportSize()!.width < 1024 ? 32 : 36;
   const banner = page.getByRole("banner");
   for (const y of [0, 600]) {
@@ -216,7 +219,7 @@ test("header and footer links hover as a pill, never underlined", async ({ page 
   test.skip(info.project.name !== "desktop", "Pointer hover");
   await page.goto("/");
   for (const link of [
-    page.getByRole("banner").getByRole("link", { name: "Method", exact: true }),
+    page.getByRole("banner").getByRole("link", { name: "Process", exact: true }),
     page.getByRole("contentinfo").getByRole("link", { name: "Privacy", exact: true }),
   ]) {
     await link.hover();

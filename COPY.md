@@ -1,232 +1,238 @@
 # COPY.md
 
-Step 2 (Copy). Draft 1, 2026-10-24. Approved by Zyade 2026-10-24; #10 and #18 stay placeholders until launch.
+Step 2 (Copy). Draft 2, 2026-11-02. Replaces draft 1 (2026-10-24, in git history).
 
-Sources: Zyade's brief (see `.agents/product-marketing.md`). Skills used: product-marketing, site-architecture, copywriting, marketing-psychology, cro, humanizer.
+Why draft 2: on 2026-11-02 Zyade made arcbuildr.co the hub of the business, with the home page as the landing page for the high-ticket service, and asked Claude to write the copy now. About, Method and Notes are removed.
 
-Diagnosis (copywriting skill): situation A. Blank brief, no existing copy. Angle is open; facts come only from the brief.
+Sources:
+- The brief (`.agents/product-marketing.md`).
+- The Arcbuildr system (`~/Desktop/all/arcbuildr-architecture`): the 5 deliverables and their order.
+- Miro "ARCBUILDR | Package Roadmaps": the Deliverables frame (what we work out, what you receive, how you use it) and the Client Journey frame (day 1 to day 42). The packages in that board are outdated and not used.
+- Miro "Arcbuildr Sales Board — MVP": the call questions, "show the thinking, not a promise", the founder example, "no fake client results".
+- Reference study (`docs/references/SYNTHESIS.md`): section order, a single action, a short form, no prices, timeline, who it's for and who it isn't, FAQ before the form.
+
+Voice: Zyade's. Plain, direct, no hype, and no invented numbers or results.
 
 ## [ASSUMED] items
 
-Everything the brief does not cover. Each tag in the copy points to a number below. Confirm, change or cut each one.
+These go beyond what Zyade has confirmed. Each tag in the copy points to a number below.
 
-1. **Main call to action.** Book an intro call. The visitor fills a short form, then picks a time.
-2. **The call.** Free, 30 minutes, and we say on the call whether we're a fit.
-3. **Traffic sources.** Instagram bio link, links we send in DMs, TikTok bio link, direct links. Most visitors are on a phone and have seen at least one of our posts.
-4. **The visitor's problem.** They know their field, and their Instagram shows little of it because they've been busy doing the work.
-5. **Build order.** Strategy, then identity, then profile, then content, then support.
-6. **What three deliverables include.** The details under Brand Strategy, Visual Identity System and Profile Audit & Optimization. The brief names them but doesn't describe them.
-7. **Why the client posts.** Their account stays theirs, and they stay in the conversation with their audience.
-8. **Working with both founders.** The client works with Zyade and Hanane directly.
-9. **Proof.** With no approved client proof, the page says we're new, shows the full process, and offers to look at the visitor's profile together on the call.
-10. **Founder details.** One line on each of you, and a photo of you both. Placeholders below.
-11. **Price answer.** We give a price after the call.
-12. **What the client brings.** A few conversations about their story and work, and their current profile.
-13. **No guarantees.** We don't promise follower or sales numbers.
-14. **Timeline answer.** We give a timeline on the call.
-15. **Form fields.** Name, email, Instagram handle, business, and one optional question.
-16. **Thanks page.** After the form, a page with the booking calendar.
-17. **Data use and privacy.** The line under the form and the privacy page contents. Final wording depends on the tools picked in step 4.
-18. **Handles and email.** @arcbuildr on Instagram and TikTok, and an email address. Placeholders.
-19. **Page list.** One selling page, plus a thanks page and a privacy page. No menu links in the header.
+1. **Six weeks.** The length comes from the Client Journey frame (day 1 to day 42). The real length may vary by package.
+2. **Day-by-day timeline.** Taken from the Client Journey frame as it stands.
+3. **The 5 deliverables.** They follow the Arcbuildr system: Brand Strategy, Visual Identity, Profile Audit & Optimization, Content Strategy, Content Pieces. Draft 1's "Ongoing Support" became the reviews and the second batch inside the six weeks.
+4. **No video editing.** The system README says Arcbuildr writes scripts and doesn't edit client videos. This replaces draft 1's "we sometimes edit".
+5. **Zyade's own brand as the first case.** Comes from the HANDOFF ("first test client: @messaoudizyade") and the Founder Example frame on the sales board.
+6. **"A few clients at a time."** True for a two-founder studio. No number is given.
+7. **Time asked of the client.** Kickoff, brand review, the day 28 review, the final review, plus filming.
+8. **Not a fit.** We say so on the call and name at least one thing to fix on the profile.
+9. **Who it's for and who it isn't.** Drawn from the brief and the call questions.
+10. **Founder lines and photo.** Still placeholders (draft 1, #10).
+11. **Price answer.** Shared after the call. Unchanged from draft 1.
 
-## Page list (site-architecture)
-
-The fewest pages that sell: one. Everything that sells is on the home page. The two other pages exist because the form needs somewhere to land, and the form and any tracking need a privacy page. [ASSUMED 19]
+## Page list
 
 ```
 arcbuildr.co
-├── Home (/)           sells: the whole argument, the form
+├── Home (/)           the service landing page; ends in the form
 ├── Thanks (/thanks)   after the form: pick a call time
-└── Privacy (/privacy) required by the form and any tracking
+└── Privacy (/privacy) required by the form
 ```
 
-| Page | URL | Reached from | Purpose |
-|------|-----|--------------|---------|
-| Home | `/` | Instagram bio, DMs, TikTok bio, direct links [ASSUMED 3] | Explain the service and get the visitor to send the form |
-| Thanks | `/thanks` | Form submit only | Book the call, confirm next step [ASSUMED 16] |
-| Privacy | `/privacy` | Footer, link under the form | Say what we collect and why [ASSUMED 17] |
+Hub later: the digital product gets its own page when Zyade starts it. Nothing links to it yet.
 
 Navigation:
-- Header: wordmark (links to `/`) and one button, "Book a call", which jumps to the form. No other links, so the page has one path.
-- Footer: logo, Privacy. (Zyade, 2026-10-26: no handles or email in the footer.)
-
-The section order on the home page follows the argument below. Step 5 (ASCII prototype) will shape the layout around it.
+- Header pill: logo, three in-page links (Work `/#build`, Process `/#how`, FAQ `/#questions`), short so the pill fits a 320px screen and the "Book a call" button.
+- Footer: logo, Privacy.
+- One action across the whole page: book a call. The hero, the header and the form all lead to `#start`.
 
 ---
 
 ## Home (`/`)
 
-**Page title:** Arcbuildr | Personal brand service for business-driven people
-**Meta description:** We build your personal brand and Instagram content from your real story and expertise. Brand strategy, visual identity, profile audit, content and ongoing support.
+**Page title:** Arcbuildr | A personal brand built from your real story
+**Meta description:** For founders and business owners on Instagram. In six weeks we build your brand strategy, visual identity, profile and content from your real story. You film and post. We tell you what to say and show.
 
-### Header
+### 1. Hero (`#top`)
 
-Arcbuildr · [Book a call] [ASSUMED 1]
+**Kicker:** For founders and business owners
 
-### 1. Hero
+**Headline:** A personal brand built from your real story, in six weeks. [ASSUMED 1]
 
-**Headline:** We build your personal brand from your real story.
+**Subhead:** You know your work. Your Instagram doesn't show it yet. We decide with you what you should be known for, shape how your profile looks, and write what to say and show in every piece.
 
-**Subhead:** Arcbuildr is a personal brand service for business-driven people. We take your story and what you know, and build the brand and content that show it on Instagram, and on TikTok when it fits you.
+**Button:** Book a call
 
-**Button:** Book an intro call [ASSUMED 1]
+**Under the button:** Free, 30 minutes. We look at your profile together and tell you if we're a fit.
 
-**Under the button:** Free, 30 minutes. We'll tell you on the call if we're a fit. [ASSUMED 2]
+### 2. The problem (`#for`)
 
-Alternatives:
-- Headline B: "Your story and your expertise, built into a brand people remember." Rationale: puts the client first, but "remember" is a softer promise.
-- Headline C: "Personal brands for business-driven people, built from who you are." Rationale: names the audience in the headline, at the cost of a flatter line.
-- Button B: "Apply for an intro call." Rationale: signals we choose clients, which fits "business-driven people only". Adds friction.
-- Button C: "Send us a DM." Rationale: lowest effort for Instagram traffic, but we lose the form details and the tracking.
+**Heading:** You know your work. Your page doesn't show it.
 
-### 2. Who it's for
+**Lines (in the visitor's voice):** [ASSUMED 9]
+- "I don't know what I should be known for."
+- "I run out of ideas after a few posts."
+- "I sit down to film and don't know what to say."
+- "My profile doesn't look like the business I run."
 
-**Heading:** For people who build businesses
+**Body:** Each of these comes from a decision nobody has made yet: who you speak to, what you stand for, how your page should look. We make those decisions with you first, so every piece has somewhere to come from.
 
-**Body:**
-You run a business, or you're building one. You know your field well. Your Instagram shows a small part of that, or none of it, because your time goes into the work. [ASSUMED 4]
+### 3. How we think (`#approach`)
 
-We don't split clients by industry. Each brand starts from the person behind it, so two clients in the same field end up with different brands.
+**Heading:** We start from what you've already lived
 
-### 3. What we build
+**01 Real material:** Your work, your clients, your past, the way you think. The raw material is already there. We find it and sort it.
 
-**Heading:** What we build, in the order we build it [ASSUMED 5]
+**02 Direction:** A few things you want to be known for, clear enough that people know what to expect from you, without turning you into a niche caricature.
 
-**1. Brand Strategy**
-We start with your story and your expertise. Together we decide who you speak to, what you want to be known for, and what you have to say about it. [ASSUMED 6]
+**03 Content:** A real experience, one useful idea and a visual way to tell it. Something only you could post.
 
-**2. Visual Identity System**
-Your colors, type and templates for posts and stories, so everything you publish looks like it comes from the same person. [ASSUMED 6]
+### 4. What you get (`#build`) [ASSUMED 3]
 
-**3. Profile Audit & Optimization**
-We go through your Instagram profile as it is today and fix what gets in the way: your name field, bio, link and pinned posts. [ASSUMED 6]
+**Heading:** What you get, in the order we build it
 
-**4. Content Strategy & Production**
-A content plan, a story sequence system, suggested highlights, carousels and short-form pieces. We choose the format for each piece based on what it has to say.
+**1. Brand Strategy:** Who you want to reach, the questions they bring, and the position you can credibly own. We map your stories and proof to what each one should help people understand.
 
-**5. Ongoing Support**
-We stay with you after we deliver. When you have a question, you get an answer. When something needs to change, we revise it.
+**2. Visual Identity:** Colors, fonts, framing and lighting that fit your position and that you can repeat. A mockup of a filming setup in your own space, plus three to five real places to film.
 
-### 4. Who does what
+**3. Profile Audit & Optimization:** We look at your profile the way a new visitor sees it, then guide the changes to your photo, name, bio, highlights and link.
 
-**Heading:** Who does what
+**4. Content Strategy:** Topics, repeatable series and formats built from your audience's questions and your stories, plus the next step you want interested viewers to take.
 
-**Body:**
-We build the strategy, the identity and the content, and hand it to you ready to post.
+**5. Content Pieces:** Every piece written with what to say and what to show, and a production guide to keep next to you while you film. A second batch follows, shaped by how the first one did.
 
-You publish it on your own account. We don't post for you. Your account stays yours, and the conversations with your audience stay with you. [ASSUMED 7]
+### 5. Who does what (`#roles`) [ASSUMED 4]
 
-For some clients we also edit their videos. We'll tell you on the call whether that makes sense for you.
+**Heading:** We decide and write. You film and post.
 
-### 5. Who we are
+**Us:** We make the decisions with you and write every piece: what to say, what to show, and how it should look.
+
+**You:** You film and post on your own account, with your team if you have one. Your account stays yours, and the conversations with your audience stay with you.
+
+**Line below:** We don't edit your videos or post for you.
+
+### 6. How the six weeks run (`#how`) [ASSUMED 1, 2]
+
+**Heading:** How the six weeks run
+
+| When | Step | What happens |
+|---|---|---|
+| Day 1 | You're in | Contract, invoice, your client page and the story intake. |
+| Within 48 hours | Kickoff call | The sooner your intake is in, the sooner we start. |
+| Days 3 to 8 | Direction takes shape | We build your brand, visual identity and content direction, and check in with you as we go. |
+| Day 8 | Brand review | We walk you through the direction. You tell us what to change. |
+| Day 9 | Delivery | Brand strategy, visual identity, content strategy and your first batch of pieces. |
+| Days 9 to 28 | You film and post | We follow the replies and the numbers and note what works. |
+| Day 28 | First review | What landed, what didn't, and what changes. |
+| Day 29 | Second batch | New pieces, built from what we learned. |
+| Day 42 | Final review | Where you stand, and what comes next. |
+
+### 7. Who it's for (`#fit`) [ASSUMED 9]
+
+**Heading:** Who this is for
+
+**For you if:**
+- You run a business or sell what you know.
+- You're willing to show your face and your work.
+- Your clients are on Instagram, or that's where you want them to find you.
+- You'll film and post on a rhythm we agree on.
+
+**Not for you if:**
+- You want someone to run your account for you.
+- You want a follower number guaranteed.
+- You'd rather stay off camera.
+- Your main platform is LinkedIn or YouTube.
+
+### 8. Who we are (`#us`)
 
 **Heading:** Who we are
 
 **Body:**
-Arcbuildr is Zyade and Hanane. We started it on September 23, 2026, and you work with the two of us directly. [ASSUMED 8]
+Arcbuildr is Zyade and Hanane. We started it on September 23, 2026, and you work with the two of us directly. We take a few clients at a time, so each one gets both of us. [ASSUMED 6]
 
-We're new. That's why this page lays out every step of how we work. On the call, we open your profile together and show you what we'd build for it. [ASSUMED 9]
+We're new, so we won't show you results we don't have. The first brand going through this system is Zyade's own. On the call, we open your profile together and show you what we'd do with it. [ASSUMED 5]
 
 [Zyade: one line on who you are and what you do in Arcbuildr.] [ASSUMED 10]
 [Hanane: one line on who she is and what she does in Arcbuildr.] [ASSUMED 10]
 [Photo of you both.] [ASSUMED 10]
 
-### 6. Questions
+### 9. Questions (`#questions`)
 
 **Heading:** Questions
 
 **How much does it cost?**
-It depends on how much content you need. We'll give you a price after the call, once we know what you need. [ASSUMED 11]
+It depends on what you need. We share the price after the call, once we both know it's a fit. [ASSUMED 11]
 
-**Do you post for me?**
-No. We hand you everything ready to post, and you publish it on your account.
+**How long does it take?**
+About six weeks from the first day to the final review. [ASSUMED 1]
 
-**Do you edit videos?**
-For some clients, yes. It depends on you and the content. We'll tell you on the call.
+**How much of my time does it take?**
+A kickoff call, a brand review, a review on day 28 and a final review, plus the time you spend filming. We prepare everything else. [ASSUMED 7]
+
+**Do you post for me or edit my videos?**
+No. We write what to say and show. You film, edit and post, or your team does. [ASSUMED 4]
 
 **Which platforms do you work on?**
 Instagram first. TikTok for some clients, when it fits who you are and who you want to reach. We don't work on LinkedIn or YouTube.
 
 **Do you work with my industry?**
-We work with business-driven people in any field. The work starts from you, whatever your industry.
+If you run a business or sell what you know, yes. The work starts from you, whatever your field.
 
 **What do I need to give you?**
-Time for a few conversations about your story and your work, and your current profile. You don't need anything ready before the call. [ASSUMED 12]
+Your answers to the story intake, a few conversations about your work, and your current profile. Nothing needs to be ready before the call.
+
+**What if we're not a fit?**
+We tell you on the call, and why. You still leave with at least one thing to fix on your profile. [ASSUMED 8]
 
 **Can you guarantee followers or sales?**
-No. We agree on the work up front, deliver it, and stay with you after. Followers and sales also depend on how often you post and what you do with the content. [ASSUMED 13]
+No. We agree on the work up front, deliver it, and review it with you. Followers and sales also depend on how often you post and what you do with the content.
 
-**How long does it take?**
-It depends on how much content we're making. You'll get a timeline on the call. [ASSUMED 14]
-
-### 7. Book the call
+### 10. Book the call (`#start`)
 
 **Heading:** Start with a call
 
-**Body:** Tell us about you and your business. On the next screen, you pick a time. [ASSUMED 16]
+**Body:** Tell us about you and your business. On the next screen, you pick a time. We look at your profile before we talk.
 
-**Form** [ASSUMED 15]
+**Form** (unchanged from draft 1, except one label)
 
-| Field | Required | Helper text | Why we ask |
-|-------|----------|-------------|------------|
-| Your name | Yes | | So we know who we're talking to |
-| Email | Yes | | To confirm the call |
-| Instagram handle | Yes | So we can look at your profile before the call. | We prepare by reading the profile |
-| Your business | Yes | One line is enough. | Shows whether you're business-driven |
-| What should your personal brand do for your business? | No | A sentence or two. | Gives the call a starting point |
+| Field | Required | Helper text |
+|-------|----------|-------------|
+| Your name | Yes | |
+| Email | Yes | |
+| Instagram handle | Yes | So we can look at your profile before the call. |
+| Your business | Yes | One line is enough. |
+| What do you want your content to do for you? | No | A sentence or two. |
 
-**Button:** Send and pick a time [ASSUMED 16]
+**Button:** Send and pick a time
 
-**Under the button:** We use your details only to prepare for the call. [Privacy] [ASSUMED 17]
-
-**Below the form:** Prefer Instagram? Send us a DM at @arcbuildr. [ASSUMED 18]
+**Under the button:** We use your details only to prepare for the call. [Privacy]
 
 ### Footer
 
 [Logo] · Privacy
 © 2026 Arcbuildr
 
-Zyade, 2026-10-26 (Agentation): no "Personal brand service." line, and no Instagram, TikTok or email links in the footer.
-
 ---
 
-## Thanks (`/thanks`) [ASSUMED 16]
+## Thanks (`/thanks`)
+
+Unchanged from draft 1.
 
 **Page title:** Pick a time | Arcbuildr
-
 **Headline:** Thanks. We've got your details.
-
 **Body:** Pick a time for your call below. We'll look at your profile before we talk.
-
 [Booking calendar]
 
-**Below the calendar:** If no time works, email us at [email] or send a DM to @arcbuildr on Instagram. [ASSUMED 18]
+## Privacy (`/privacy`)
 
----
-
-## Privacy (`/privacy`) [ASSUMED 17]
-
-Outline only. The full text waits for step 4, because it has to name the tools we pick (form, booking, analytics, pixel). It needs a legal check before launch.
-
-**Headline:** Privacy
-
-Sections:
-1. Who we are: Arcbuildr, run by Zyade and Hanane, and how to contact us.
-2. What we collect: what you type in the form, and what the booking tool and any analytics or pixel record.
-3. Why: to prepare for and hold the call, and to measure the site.
-4. Who else sees it: the tools named in step 4.
-5. How long we keep it, and how to ask us to delete it.
+Unchanged. It still needs a legal check before launch.
 
 ---
 
 ## Notes for review
 
-Psychology and CRO choices behind the draft (marketing-psychology, cro):
-1. **One action.** One button, repeated in the header, the hero and the form, and no menu links. Fewer choices, fewer exits (Hick's Law).
-2. **Honest about being new.** With no approved proof, the page admits it and shows the full process instead. A plainly stated weakness tends to raise trust (Pratfall Effect). [ASSUMED 9]
-3. **Who does what.** "Do you post for me?" is likely the first question from someone who expects an agency, so it gets its own section as well as an FAQ entry.
-4. **Small form.** Four required fields, each with a reason. The Instagram handle lets us prepare, which also makes the call worth more to the visitor.
-5. **No prices on the page.** The price question is answered directly, without a number, so it doesn't read as hiding.
-
-Humanizer pass: checked for contrast reveals, negation lists, one-line closers, forced triads, staged openers, sales words and dashes. Each "don't" in the copy answers a question a visitor would ask.
+1. **One action.** "Book a call" everywhere: header, hero, form. The draft 1 hero said "Book an intro call", and two phrasings for one action was the weak spot the reference study found.
+2. **Proof without results.** We have no approved results, so the page shows how we think (section 3), the full journey (section 6) and Zyade's own brand as the first case. Nothing is invented.
+3. **The timeline does the selling.** High-ticket buyers fear the unknown. A day-by-day plan with named meetings answers "what happens after I pay?"
+4. **Who it isn't for.** It turns away the people who expect an agency to post for them, before they book.
+5. **Price stays off the page,** and the FAQ answers the price question directly.
+6. **Humanizer pass.** Checked for contrast reveals, forced triads, one-line closers, sales words and dashes. The visitor quotes in section 2 are written as things a founder would actually say.

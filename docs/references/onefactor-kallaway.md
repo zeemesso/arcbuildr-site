@@ -73,3 +73,66 @@ What it is: a creator's cohort sales page for a personal-brand program. Instagra
 - The pure-CSS reveal keeps us at zero animation dependencies.
 - Hold until real data exists: the member marquee, the case carousel, the view-count wall, follower stats (COPY.md #9: no approved proof yet).
 - Hold, per CLAUDE.md: the pricing value stack (no prices unless Zyade provides them) and the deadline countdown (no real deadline).
+
+---
+
+# Extension 2026-11-02 (structure and conversion mechanics)
+
+Re-checked with Playwright (desktop and 390 px). **VERIFIED** unless marked.
+
+## 1. Pages visited
+
+- `https://onefactor.ai/kallaway/launch` (single page; no sub-pages exist)
+- Only other link: `https://onefactor.ai/` ("Powered by onefactor" badge, footer). A "Back" button has no href (JS).
+- Contact: one mailto in the pricing block (founder's company address).
+- **State change:** the page is now in **waitlist mode**. A top pill reads "Doors are closed". Every CTA is "Join the waitlist". The 2026-10-26 capture was the open-cohort version.
+
+## 2. Section map as it is now (14 blocks, page height about 13k px)
+
+| # | Section | Purpose | Element type |
+|---|---|---|---|
+| 1 | Status pill, headline, subline, CTA | State outcome + time box ("in 4 weeks"), name what happens (live cohort + 5 calls), end with a concrete deliverable (next 10 videos) | Hero |
+| 2 | "By [founder]" + 3 numbers (views, followers, revenue) | Authority in one line | Proof bar |
+| 3 | Marquee of members: name + follower count | Volume of past members | Logo/name strip |
+| 4 | "Stop wasting hours on videos that will never work" | Founder confession, then "formula" claim, then his program as a speedrun | Problem letter |
+| 5 | "0 to 150k in 6 months" + 5 stats | Prove he did it under hard conditions (new channel, crowded niche, 5 h/week) | Founder proof card |
+| 6 | "Proven to work across any niche" + 6 cases | Each: niche label, "before" line, 3 view counts, follower result | Case cards |
+| 7 | What you get (4 items) | Lessons, live calls, community, tools | Offer stack (no prices) |
+| 8 | 4-week roadmap, 6 phases | Each phase: day range, name, pain line, outcome, and a count of videos live by day X | Roadmap |
+| 9 | Implementation calls | Show the live layer | Mock call visual |
+| 10 | Community wall | Social proof by niche + total views | Tile grid |
+| 11 | Bonuses (6) | Each has a price struck to FREE | Bonus stack |
+| 12 | Pricing "value stack" | Program lines, bonus lines, total value, then price **withheld**: "goes to the waitlist first" | Pricing (hidden) |
+| 13 | "Still deciding? email ..." + FAQ "Before you join" (9 Qs) | Human fallback, objection handling | Contact + FAQ |
+| 14 | Closing CTA + footer | | |
+
+## 3. Conversion mechanics
+
+- **CTA:** 7 or more placements: sticky header, hero, after cases, after roadmap, after community, pricing, closing, plus a fixed bottom bar. One wording ("Join the waitlist"). One action.
+- **Form:** one field, email. Plus a hidden honeypot text field named `website`. No name, no niche, no qualifying question.
+- **Qualification:** none by form. Done by FAQ ("too new or too advanced?", "never on camera?", "does it work for my niche?") and by case diversity (chef, gym designer, B2B sales).
+- **Urgency:** scarcity is the closed door itself ("The waitlist hears first when doors reopen"). Earlier version: deadline countdown.
+- **Proof types:** founder numbers, member names with follower counts, per-niche view-count tiles, "videos live by day N" milestones in the roadmap.
+- **Risk reversal:** FAQ "Refunds?" is the last question. Answer text not verified.
+- **Price:** the value stack shows every line price and the $11,225 total, but hides the actual price. Anchoring without committing.
+
+## 4. Copy patterns
+
+- Headline formula: `[Outcome] in [time box]`. Subline = format + what you leave with, counted ("your next 10 videos").
+- Phases are written as `Days X to Y: [verb phrase]`, then a pain line ("what kills most channels is..."), then a measurable result with a day number.
+- Bonuses: noun phrase name + what it removes ("Stop losing viewers in the first three seconds") + struck price.
+- First person from the founder, short sentences, concrete numbers in nearly every paragraph. Quote: "Doors are closed".
+
+## 5. Mobile (VERIFIED, 390 px)
+
+- Fixed bottom CTA bar plus fixed top pill/header. Marquee keeps scrolling. One column.
+
+## 6. Relevant to Arcbuildr (additions)
+
+- Roadmap with a measurable result per phase ("X assets live by day N") fits a done-for-you build: swap video counts for deliverables by week.
+- Waitlist or closed-door state is a legitimate high-ticket device when capacity is real: a one-field email form with a promise of first notice.
+- Show a value stack without the final price if prices are not yet approved (still needs Zyade's approval; CLAUDE.md says no prices).
+- Mixed-niche case set answers "does this work for me" without a long FAQ.
+- A human fallback line ("Still deciding? Email ...") next to the FAQ lowers friction for a high-ticket buyer.
+
+**Avoid:** invented "total value" numbers and fake FREE strikethroughs; a follower-count marquee we cannot fill honestly.

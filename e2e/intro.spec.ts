@@ -7,7 +7,7 @@ test("intro plays on entry and reload, not when coming back from inside the site
   await page.goto("/");
   await expect(html).toHaveClass(/\bintro\b/);
 
-  await page.goto("/method");
+  await page.goto("/privacy");
   await page.getByRole("banner").getByRole("link", { name: "Arcbuildr" }).click();
   await expect(page).toHaveURL("/");
   await expect(html).not.toHaveClass(/\bintro\b/);

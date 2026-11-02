@@ -5,9 +5,9 @@ const meta = (page: import("@playwright/test").Page, sel: string) =>
 
 test("home has the title, description and Open Graph tags from COPY.md", async ({ page }) => {
   await page.goto("/");
-  await expect(page).toHaveTitle("Arcbuildr | Personal brand service for business-driven people");
+  await expect(page).toHaveTitle("Arcbuildr | A personal brand built from your real story");
   const description =
-    "We build your personal brand and Instagram content from your real story and expertise. Brand strategy, visual identity, profile audit, content and ongoing support.";
+    "For founders and business owners on Instagram. In six weeks we build your brand strategy, visual identity, profile and content from your real story. You film and post. We tell you what to say and show.";
   expect(await meta(page, 'meta[name="description"]')).toBe(description);
   expect(await meta(page, 'meta[property="og:title"]')).toBe(await page.title());
   expect(await meta(page, 'meta[property="og:description"]')).toBe(description);
