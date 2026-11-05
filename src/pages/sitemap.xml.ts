@@ -1,7 +1,7 @@
 import type { APIRoute } from "astro";
 
 // /thanks is left out on purpose: it is noindex and only reached after the form.
-const paths = ["/", "/privacy"];
+const paths = ["/", "/privacy", "/fr/", "/fr/privacy"];
 
 export const GET: APIRoute = async ({ site }) => {
   return new Response(

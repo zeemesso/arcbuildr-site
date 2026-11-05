@@ -22,6 +22,7 @@ test("privacy page has the five sections and names the four tools", async ({ pag
 
 test("privacy is linked from the form and the footer", async ({ page }) => {
   await page.goto("/");
+  await page.locator(".start__write summary").click();
   await expect(page.locator("#lead-form").getByRole("link", { name: "Privacy" })).toHaveAttribute(
     "href",
     "/privacy",

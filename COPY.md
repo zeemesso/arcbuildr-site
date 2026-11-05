@@ -13,6 +13,8 @@ Sources:
 
 Voice: Zyade's. Plain, direct, no hype, and no invented numbers or results.
 
+**Languages (2026-11-05):** English at `/`, French at `/fr/`. The page text lives in `src/i18n/en.ts` and `src/i18n/fr.ts`; this file stays the English source, and a change here must be made in both. French uses "vous" for the visitor and "je" for Zyade. Visitors whose browser prefers French are sent from `/` (and `/ig`, `/dm`, `/tt`) to `/fr/`; the EN/FR switch (footer on phones, header from tablet width) saves the choice in a `lang` cookie. French leads get "Language: French" in the Notion Goal text.
+
 ## [ASSUMED] items
 
 These go beyond what Zyade has confirmed. Each tag in the copy points to a number below.

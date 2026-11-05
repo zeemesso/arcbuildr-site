@@ -75,6 +75,14 @@ describe("POST /api/lead", () => {
     expect(res.headers.get("Location")).toBe("/thanks?name=Hanane&email=hanane%40example.com");
   });
 
+  it("French form: 303 to /fr/thanks and the language is in the Goal", async () => {
+    stubFetch(notionOk(), resendOk());
+    const res = await handleLead(post({ ...valid, lang: "fr" }, false), env);
+    expect(res.status).toBe(303);
+    expect(res.headers.get("Location")).toMatch(/^\/fr\/thanks\?/);
+    expect(calls[0]!.body.properties.Goal.rich_text[0].text.content).toContain("Language: French");
+  });
+
   it("invalid: 400 with field errors and no outside call", async () => {
     stubFetch(notionOk(), resendOk());
     const res = await handleLead(post({ ...valid, email: "hanane@gmail", name: "" }), env);

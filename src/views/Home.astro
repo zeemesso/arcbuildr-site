@@ -1,0 +1,949 @@
+---
+import { MagneticButton } from "@/components/ui/magnetic-button";
+import Base from "../layouts/Base.astro";
+import LeadForm from "../components/LeadForm.astro";
+import CalEmbed from "../components/CalEmbed.astro";
+import DeliverableArt from "../components/DeliverableArt.astro";
+import { deliverables } from "../data/deliverables";
+import { dict, type Lang } from "../i18n";
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const t = dict(lang).home;
+const { pains, approach, fitYes: fitFor, fitNo: fitNot, faq } = t;
+const words = deliverables.map((d, i) => ({ ...d, ...t.deliverables[i] }));
+---
+
+<Base lang={lang} title={t.title} description={t.description}>
+  <section class="hero wrap" id="top" aria-labelledby="hero-title">
+    <p class="kicker hero__kicker">{t.kicker}</p>
+    <h1 id="hero-title">
+      {t.h1[0]}
+      <span class="hl">{t.h1[1]}</span>
+      {t.h1[2]}
+    </h1>
+    <p class="lede">{t.lede}</p>
+    <div class="hero__action">
+      <MagneticButton
+        client:media="(hover: hover) and (pointer: fine)"
+        className="btn btn--lg"
+        href="#start"
+      >
+        {t.cta}
+      </MagneticButton>
+      <p class="note">{t.ctaNote}</p>
+    </div>
+
+    <div class="profile" aria-hidden="true">
+      <div class="profile__card profile__card--before">
+        <div class="profile__head">
+          <span class="profile__avatar"></span>
+          <span class="bars">
+            <i></i>
+            <i></i>
+          </span>
+        </div>
+        <div class="profile__tiles">
+          {Array.from({ length: 6 }, () => (
+            <span></span>
+          ))}
+        </div>
+      </div>
+      <div class="profile__card profile__card--after">
+        <div class="profile__head">
+          <span class="profile__avatar"></span>
+          <span class="profile__stats">
+            <i></i>
+            <i></i>
+            <i></i>
+          </span>
+        </div>
+        <span class="bars">
+          <i></i>
+          <i></i>
+          <i></i>
+        </span>
+        <div class="profile__highlights">
+          {deliverables.map((s, i) => (
+            <span style={`--hue: var(--hue-${s.hue}); --i: ${i}`}></span>
+          ))}
+        </div>
+        <div class="profile__tiles">
+          {Array.from({ length: 6 }, (_, i) => (
+            <span style={`--hue: var(--hue-${deliverables[i % 5].hue}); --i: ${i}`}></span>
+          ))}
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="statement wrap reveal" id="for" aria-labelledby="for-title">
+    <h2 id="for-title">
+      {t.statement[0]}
+      <span class="hl">{t.statement[1]}</span>
+    </h2>
+    <ul class="pains">
+      {pains.map((line) => (
+        <li class="pains__item">
+          {t.quote[0]}
+          {line}
+          {t.quote[1]}
+        </li>
+      ))}
+    </ul>
+    <div class="statement__body">
+      <p>{t.statementBody}</p>
+    </div>
+  </section>
+
+  <section class="section wrap" id="approach" aria-labelledby="approach-title">
+    <h2 id="approach-title" class="section__title reveal">
+      {t.approachTitle[0]}
+      <span class="hl">{t.approachTitle[1]}</span>
+    </h2>
+    <ol class="approach">
+      {approach.map((s, i) => (
+        <li class={`card approach__card reveal${i === 1 ? " approach__card--mid" : ""}`}>
+          <h3>{s.name}</h3>
+          <p>{s.text}</p>
+        </li>
+      ))}
+    </ol>
+  </section>
+
+  <section class="section wrap" id="build" aria-labelledby="build-title">
+    <h2 id="build-title" class="section__title reveal">
+      {t.buildTitle[0]}
+      <span class="hl">{t.buildTitle[1]}</span>
+    </h2>
+    <ol class="bento">
+      {words.map((s, i) => (
+        <li
+          class="card bento__card reveal"
+          style={`--hue: var(--hue-${s.hue}); --d: ${(i < 2 ? i : i - 2) * 90}ms`}
+        >
+          <div class="bento__text">
+            <h3>{s.name}</h3>
+            <p>{s.text}</p>
+          </div>
+          <DeliverableArt art={s.art} />
+        </li>
+      ))}
+    </ol>
+  </section>
+
+  <section class="section wrap" id="roles" aria-labelledby="roles-title">
+    <h2 id="roles-title" class="section__title reveal">
+      {t.rolesTitle[0]}
+      <span class="hl">{t.rolesTitle[1]}</span>
+    </h2>
+    <div class="roles">
+      <p class="card roles__card roles__card--us reveal">{t.rolesUs}</p>
+      <p class="card roles__card reveal">{t.rolesYou}</p>
+      <p class="roles__video">{t.rolesVideo}</p>
+    </div>
+  </section>
+
+  <section class="section wrap" id="fit" aria-labelledby="fit-title">
+    <h2 id="fit-title" class="section__title reveal">
+      {t.fitTitle[0]}
+      <span class="hl">{t.fitTitle[1]}</span>
+    </h2>
+    <div class="fit">
+      <div class="card fit__card fit__card--yes reveal">
+        <h3>{t.fitYesTitle}</h3>
+        <ul>
+          {fitFor.map((line) => (
+            <li>{line}</li>
+          ))}
+        </ul>
+      </div>
+      <div class="card fit__card reveal">
+        <h3>{t.fitNoTitle}</h3>
+        <ul>
+          {fitNot.map((line) => (
+            <li>{line}</li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="section wrap" id="us" aria-labelledby="us-title">
+    <div class="card note-card reveal">
+      <div class="polaroids">
+        <div class="polaroid polaroid--back" aria-hidden="true"></div>
+        <div class="polaroid photo" role="img" aria-label={t.usPhotoLabel}>
+          <span>{t.usPhoto}</span>
+        </div>
+      </div>
+      <h2 id="us-title">
+        {t.usTitle[0]}
+        <span class="hl">{t.usTitle[1]}</span>
+      </h2>
+      <div class="prose">
+        {t.us.map((p) => (
+          <p>{p}</p>
+        ))}
+        <p class="todo">{t.usTodo}</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section wrap" id="questions" aria-labelledby="questions-title">
+    <h2 id="questions-title" class="section__title reveal">
+      {t.faqTitle}
+    </h2>
+    <div class="card faq reveal">
+      {faq.map((item, i) => (
+        <details open={i === 0}>
+          <summary>{item.q}</summary>
+          <p>{item.a}</p>
+        </details>
+      ))}
+    </div>
+  </section>
+
+  <section class="section wrap" id="start" aria-labelledby="start-title">
+    <div class="start__head reveal">
+      <p class="kicker pill">{t.startPill}</p>
+      <h2 id="start-title" class="section__title">
+        {t.startTitle[0]}
+        <span class="hl">{t.startTitle[1]}</span>
+      </h2>
+      <p>{t.startText}</p>
+    </div>
+    <div class="card start__cal">
+      <CalEmbed lazy />
+    </div>
+    <details class="card start__write">
+      <summary>{t.startWrite}</summary>
+      <LeadForm lang={lang} />
+    </details>
+  </section>
+</Base>
+
+<style>
+  /* Hero */
+  .hero {
+    display: grid;
+    justify-items: center;
+    gap: var(--space-lg);
+    padding-block: var(--space-xl) 0;
+    text-align: center;
+  }
+  .hero h1 {
+    max-width: 17ch;
+  }
+  .hero__kicker {
+    color: var(--color-ink-muted);
+  }
+  .lede {
+    font-size: var(--text-lg);
+    line-height: 1.55;
+    color: var(--color-ink-muted);
+    max-width: 34rem;
+  }
+  .hero__action {
+    display: grid;
+    gap: var(--space-sm);
+    justify-items: center;
+  }
+  .note {
+    color: var(--color-ink-muted);
+    font-size: var(--text-sm);
+  }
+
+  /* Hero visual: a scattered profile behind, the built one in front. */
+  /* Both cards share one grid cell, so the box always fits them whole: no clipping, no fade. */
+  .profile {
+    display: grid;
+    width: min(100%, 26rem);
+    margin-top: var(--space-xl);
+    padding: var(--space-lg) var(--space-sm) var(--space-xl);
+  }
+  .profile__card {
+    grid-area: 1 / 1;
+    display: grid;
+    gap: var(--space-md);
+    align-content: start;
+    padding: var(--space-lg);
+    border: var(--rule-thin);
+    border-radius: var(--radius-lg);
+    background: var(--color-card);
+    box-shadow: var(--shadow-lift);
+  }
+  .profile__card--before {
+    width: 74%;
+    justify-self: start;
+    align-self: start;
+    margin-top: 2.5rem;
+    rotate: -7deg;
+    opacity: 0.55;
+    box-shadow: var(--shadow-card);
+  }
+  .profile__card--after {
+    width: 80%;
+    justify-self: end;
+    rotate: 3deg;
+  }
+  .profile__head {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+  }
+  .profile__avatar {
+    flex: none;
+    width: 3.5rem;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    background: var(--color-paper-2);
+  }
+  .profile__card--after .profile__avatar {
+    border: 3px solid var(--color-card);
+    outline: 2.5px solid var(--color-accent);
+    background: linear-gradient(135deg, var(--color-accent), var(--hue-content));
+  }
+  .profile__stats {
+    flex: 1;
+    display: flex;
+    justify-content: space-around;
+  }
+  .profile__stats i {
+    width: 2rem;
+    height: 0.6rem;
+    border-radius: var(--radius-pill);
+    background: var(--color-ink);
+  }
+  .bars {
+    display: grid;
+    gap: 0.4rem;
+    flex: 1;
+  }
+  .bars i {
+    height: 0.5rem;
+    border-radius: var(--radius-pill);
+    background: var(--color-paper-2);
+  }
+  .bars i:first-child {
+    width: 45%;
+    background: var(--color-ink);
+  }
+  .bars i:nth-child(2) {
+    width: 85%;
+  }
+  .bars i:nth-child(3) {
+    width: 65%;
+  }
+  .profile__highlights {
+    display: flex;
+    justify-content: space-between;
+  }
+  .profile__highlights span {
+    width: min(2.6rem, 16%);
+    aspect-ratio: 1;
+    border-radius: 50%;
+    border: 2px solid var(--color-card);
+    outline: 2px solid var(--hue);
+    background: color-mix(in oklab, var(--hue) 18%, var(--color-card));
+  }
+  .profile__tiles {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 3px;
+  }
+  .profile__tiles span {
+    aspect-ratio: 4 / 5;
+    border-radius: 4px;
+    background: var(--color-paper-2);
+  }
+  .profile__card--after .profile__tiles span {
+    background:
+      linear-gradient(160deg, transparent 55%, oklch(100% 0 0 / 0.35)),
+      color-mix(in oklab, var(--hue) 70%, var(--color-card));
+  }
+  .profile__card--after .profile__tiles span:nth-child(3n + 2) {
+    background: color-mix(in oklab, var(--hue) 16%, var(--color-card));
+  }
+
+  /* Statement */
+  .statement {
+    display: grid;
+    justify-items: center;
+    gap: var(--space-lg);
+    padding-block: var(--space-2xl);
+    text-align: center;
+  }
+  .statement h2 {
+    max-width: 16ch;
+  }
+  .statement__body {
+    display: grid;
+    gap: var(--space-md);
+    max-width: 36rem;
+    color: var(--color-ink-muted);
+    font-size: var(--text-lg);
+  }
+
+  /* Shared section frame */
+  .section {
+    display: grid;
+    gap: var(--space-xl);
+    padding-block: var(--space-2xl) 0;
+  }
+  .section__title {
+    max-width: 18ch;
+    justify-self: center;
+    text-align: center;
+  }
+  .section__title .hl,
+  .statement h2 .hl {
+    display: block;
+  }
+
+  /* Bento of the five deliverables */
+  .bento {
+    display: grid;
+    gap: var(--space-sm);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    counter-reset: step;
+  }
+  .bento__card {
+    counter-increment: step;
+    display: grid;
+    grid-template-rows: auto 1fr;
+    gap: var(--space-lg);
+    padding: var(--space-lg);
+    overflow: hidden;
+  }
+  .bento__text {
+    display: grid;
+    gap: var(--space-sm);
+    align-content: start;
+  }
+  .bento__text::before {
+    content: counter(step, decimal-leading-zero);
+    justify-self: start;
+    padding: 0.2rem 0.65rem;
+    border-radius: var(--radius-pill);
+    background: color-mix(in oklab, var(--hue) 14%, var(--color-card));
+    color: var(--color-ink);
+    font-size: var(--text-sm);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+  }
+  .bento__text p {
+    color: var(--color-ink-muted);
+  }
+
+  /* The problem, in the visitor's words */
+  .pains {
+    display: grid;
+    gap: var(--space-xs);
+    width: 100%;
+    max-width: 40rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .pains__item {
+    padding: var(--space-sm) var(--space-lg);
+    border: var(--rule-thin);
+    border-radius: var(--radius-md);
+    background: var(--color-card);
+    font-weight: 600;
+    text-wrap: pretty;
+  }
+
+  /* How we think: three cards */
+  .approach {
+    display: grid;
+    gap: var(--space-sm);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    counter-reset: step;
+  }
+  .approach__card {
+    counter-increment: step;
+    display: grid;
+    gap: var(--space-sm);
+    align-content: start;
+    padding: var(--space-xl) var(--space-lg);
+  }
+  .approach__card::before {
+    content: counter(step, decimal-leading-zero);
+    color: var(--color-accent-text);
+    font-size: var(--text-sm);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+  }
+  .approach__card p {
+    color: var(--color-ink-muted);
+  }
+  .approach__card--mid {
+    background: var(--color-sage);
+    border-color: var(--color-sage);
+    color: var(--color-paper);
+  }
+  .approach__card--mid::before,
+  .approach__card--mid p {
+    color: inherit;
+  }
+
+  /* Who it's for */
+  .fit {
+    display: grid;
+    gap: var(--space-sm);
+  }
+  .fit__card {
+    display: grid;
+    gap: var(--space-md);
+    align-content: start;
+    padding: var(--space-xl) var(--space-lg);
+  }
+  .fit__card ul {
+    display: grid;
+    gap: var(--space-sm);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .fit__card li {
+    display: grid;
+    grid-template-columns: 1.25rem 1fr;
+    gap: var(--space-xs);
+  }
+  .fit__card li::before {
+    content: "\2715" / "";
+    color: var(--color-ink-muted);
+    font-weight: 700;
+  }
+  .fit__card--yes {
+    background: var(--color-sage);
+    border-color: var(--color-sage);
+    color: var(--color-paper);
+  }
+  .fit__card--yes li::before {
+    content: "\2713" / "";
+    color: inherit;
+  }
+
+  /* Who does what */
+  .roles {
+    display: grid;
+    gap: var(--space-sm);
+  }
+  .roles__card {
+    max-width: none;
+    padding: var(--space-xl) var(--space-lg);
+    font-size: var(--text-xl);
+    font-weight: 600;
+    line-height: 1.3;
+    letter-spacing: -0.02em;
+  }
+  .roles__card--us {
+    background: var(--color-sage);
+    border-color: var(--color-sage);
+    color: var(--color-paper);
+  }
+  .roles__video {
+    justify-self: center;
+    text-align: center;
+    color: var(--color-ink-muted);
+    padding-top: var(--space-sm);
+  }
+
+  /* Founder note */
+  .note-card {
+    position: relative;
+    display: grid;
+    gap: var(--space-lg);
+    width: 100%;
+    max-width: 46rem;
+    justify-self: center;
+    padding: var(--space-xl) var(--space-lg);
+  }
+  .prose {
+    display: grid;
+    gap: var(--space-md);
+  }
+  .polaroids {
+    position: relative;
+    height: 15rem;
+  }
+  .polaroid {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    width: 12rem;
+    height: 14rem;
+    padding: 0.6rem 0.6rem 2.4rem;
+    background: var(--color-card);
+    border-radius: 0.35rem;
+    box-shadow: var(--shadow-lift);
+  }
+  .polaroid--back {
+    translate: -80% 0.4rem;
+    rotate: -9deg;
+    background:
+      linear-gradient(var(--color-paper-2), var(--color-paper-2)) content-box,
+      var(--color-card);
+  }
+  .photo {
+    display: grid;
+    place-items: center;
+    translate: -30% 0;
+    rotate: 5deg;
+    color: var(--color-ink-muted);
+    font-size: var(--text-sm);
+    text-align: center;
+    background:
+      linear-gradient(var(--color-paper-2), var(--color-paper-2)) content-box,
+      var(--color-card);
+  }
+  .todo {
+    color: var(--color-ink-muted);
+  }
+
+  /* Questions */
+  .faq {
+    width: 100%;
+    max-width: 46rem;
+    justify-self: center;
+    padding: var(--space-xs) var(--space-lg);
+  }
+  .faq details + details {
+    border-top: var(--rule-thin);
+  }
+  .faq summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-md);
+    min-height: 3.5rem;
+    padding-block: var(--space-sm);
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    cursor: pointer;
+    list-style: none;
+  }
+  .faq summary::-webkit-details-marker {
+    display: none;
+  }
+  .faq summary::after {
+    content: "+" / "";
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 1.75rem;
+    height: 1.75rem;
+    border-radius: 50%;
+    background: var(--color-paper-2);
+    font-size: var(--text-lg);
+    line-height: 1;
+    transition: rotate var(--dur-fast) var(--ease-out);
+  }
+  .faq details[open] summary::after {
+    rotate: 45deg;
+    background: var(--color-accent-soft);
+    color: var(--color-accent);
+  }
+  .faq details p {
+    padding-bottom: var(--space-md);
+    color: var(--color-ink-muted);
+  }
+
+  /* Book the call: centered pill + heading, then the inline calendar full width. */
+  #start {
+    display: grid;
+    gap: var(--space-xl);
+  }
+  .start__head {
+    display: grid;
+    justify-items: center;
+    gap: var(--space-md);
+    text-align: center;
+  }
+  .start__head p:last-child {
+    color: var(--color-ink-muted);
+    font-size: var(--text-lg);
+    max-width: 34rem;
+  }
+  .pill {
+    padding: 0.25rem 1rem;
+    border-radius: 999px;
+    background: color-mix(in oklch, var(--color-accent) 18%, transparent);
+    color: var(--color-accent);
+  }
+  .start__cal {
+    overflow: hidden;
+    padding: var(--space-sm);
+  }
+  .start__write {
+    padding: var(--space-md) var(--space-lg);
+  }
+  .start__write summary {
+    min-height: var(--tap);
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    font-weight: 600;
+  }
+  .start__write[open] summary {
+    margin-bottom: var(--space-lg);
+  }
+
+  @media (min-width: 48rem) {
+    .pains {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .approach,
+    .fit {
+      grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
+    }
+    .bento {
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+    }
+    .bento__card {
+      grid-column: span 3;
+    }
+    .bento__card:nth-child(n + 3) {
+      grid-column: span 2;
+    }
+    .roles {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .roles__video {
+      grid-column: 1 / -1;
+    }
+    .polaroids {
+      position: absolute;
+      top: -2.5rem;
+      right: -3rem;
+      width: 16rem;
+      height: 14rem;
+    }
+    .note-card {
+      padding: var(--space-2xl) 16rem var(--space-2xl) var(--space-2xl);
+    }
+  }
+
+  @media (min-width: 64rem) {
+    .hero {
+      padding-top: var(--space-3xl);
+    }
+    .profile {
+      width: 30rem;
+    }
+    .statement {
+      padding-block: var(--space-3xl) var(--space-2xl);
+    }
+    .section {
+      padding-top: var(--space-3xl);
+    }
+    .bento__card,
+    .bento__card:nth-child(n + 3) {
+      grid-column: span 2;
+    }
+    .bento__card:nth-child(-n + 2) {
+      grid-column: span 3;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .faq summary::after {
+      transition: none;
+    }
+  }
+</style>
+
+<style>
+  /* Motion. Text moves by clip and translate only; it never sits half transparent on screen. */
+  @media (prefers-reduced-motion: no-preference) {
+    .hero {
+      --t0: 0s;
+    }
+    :global(.intro) .hero {
+      --t0: 1.45s;
+    }
+
+    /* Hero entrance */
+    .hero h1 {
+      animation: wipe-up 0.9s var(--ease-out) var(--t0) backwards;
+    }
+    .lede {
+      animation: wipe-up 0.9s var(--ease-out) calc(var(--t0) + 0.12s) backwards;
+    }
+    .hero__action .btn {
+      animation: pop 0.7s var(--spring) calc(var(--t0) + 0.3s) backwards;
+    }
+    .note {
+      animation: rise 0.7s var(--ease-out) calc(var(--t0) + 0.4s) backwards;
+    }
+    .profile__card--before {
+      animation:
+        fly-before 1s var(--spring) calc(var(--t0) + 0.45s) backwards,
+        float 6s ease-in-out calc(var(--t0) + 1.5s) infinite alternate;
+    }
+    .profile__card--after {
+      animation: fly-after 1.1s var(--spring) calc(var(--t0) + 0.55s) backwards;
+    }
+
+    /* The profile keeps building: story ring spins, highlights pop, tiles fill, a shine passes. */
+    .profile__card--after .profile__avatar {
+      position: relative;
+      outline: 0;
+    }
+    .profile__card--after .profile__avatar::before {
+      content: "";
+      position: absolute;
+      inset: -7px;
+      border-radius: 50%;
+      background: conic-gradient(
+        var(--color-accent),
+        var(--hue-content),
+        var(--color-sage),
+        var(--color-accent)
+      );
+      mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 2.5px));
+      animation: spin 4s linear infinite;
+    }
+    .profile__highlights span {
+      animation: pop 0.6s var(--spring) calc(var(--t0) + 1s + var(--i) * 80ms) backwards;
+    }
+    .profile__card--after .profile__tiles span {
+      animation: tile-in 0.6s var(--spring) calc(var(--t0) + 1.2s + var(--i) * 90ms) backwards;
+    }
+    .profile__card--after .profile__tiles {
+      position: relative;
+      overflow: clip;
+      border-radius: 4px;
+    }
+    .profile__card--after .profile__tiles::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(
+        105deg,
+        transparent 35%,
+        rgb(255 255 255 / 0.45) 50%,
+        transparent 65%
+      );
+      translate: -100% 0;
+      animation: shine 5s var(--ease-in-out) calc(var(--t0) + 2.4s) infinite;
+    }
+
+    /* Bento cards lift; each drawing moves in its own way once its card is in view. */
+    .bento__card:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-lift);
+    }
+    /* Polaroids drop and settle when the note arrives. */
+    .polaroid {
+      transition:
+        transform 0.9s var(--spring),
+        opacity 0.5s var(--ease-out);
+    }
+    .polaroid--back {
+      transition-delay: 0.15s;
+    }
+    .photo {
+      transition-delay: 0.3s;
+    }
+    :global(.js) .note-card:not(:global(.is-in)) .polaroid {
+      opacity: 0;
+      transform: translateY(-3rem) rotate(-10deg);
+    }
+    :global(.is-instant) .polaroid {
+      transition: none;
+    }
+    .polaroids:hover .photo {
+      transform: rotate(-4deg) scale(1.03);
+      transition-delay: 0s;
+    }
+
+    /* FAQ answers open smoothly where the browser can animate to auto. */
+    .faq details::details-content {
+      block-size: 0;
+      overflow: clip;
+      transition:
+        block-size 0.35s var(--ease-out),
+        content-visibility 0.35s allow-discrete;
+    }
+    .faq details[open]::details-content {
+      block-size: auto;
+    }
+  }
+
+  @supports (interpolate-size: allow-keywords) {
+    :global(:root) {
+      interpolate-size: allow-keywords;
+    }
+  }
+
+  @keyframes wipe-up {
+    from {
+      clip-path: inset(0 0 100% 0);
+      translate: 0 0.35em;
+    }
+    to {
+      clip-path: inset(0 0 -20% 0);
+      translate: 0 0;
+    }
+  }
+  @keyframes rise {
+    from {
+      translate: 0 0.75rem;
+    }
+  }
+  @keyframes pop {
+    from {
+      scale: 0;
+    }
+  }
+  @keyframes tile-in {
+    from {
+      scale: 0.4;
+      opacity: 0;
+    }
+  }
+  @keyframes fly-before {
+    from {
+      opacity: 0;
+      translate: -40% 15%;
+      rotate: -22deg;
+    }
+  }
+  @keyframes fly-after {
+    from {
+      opacity: 0;
+      translate: 25% 35%;
+      rotate: 16deg;
+    }
+  }
+  @keyframes float {
+    to {
+      transform: translateY(-10px) rotate(-1.5deg);
+    }
+  }
+  @keyframes spin {
+    to {
+      rotate: 1turn;
+    }
+  }
+  @keyframes shine {
+    0%,
+    100% {
+      translate: -100% 0;
+    }
+    35%,
+    99% {
+      translate: 100% 0;
+    }
+  }
+</style>

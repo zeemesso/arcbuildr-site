@@ -2,7 +2,8 @@
 // Cal.com inline booking calendar (month view: event details, month, time slots; stacks on
 // phones). `lazy` loads Cal.com's script only when the calendar nears the viewport, so phones
 // opening the page from Instagram don't pay for it up front. Name and email are prefilled
-// from ?name=&email= when present (the /thanks flow).
+// from ?name=&email= when present (the /thanks flow). Cal.com picks its own language from the
+// visitor's browser (checked 2026-11-05: a French browser gets French); it ignores a `lang` setting.
 import { CAL_LINK } from "../config";
 
 interface Props {

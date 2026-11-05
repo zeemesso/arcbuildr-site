@@ -1,0 +1,46 @@
+---
+import Base from "../layouts/Base.astro";
+import CalEmbed from "../components/CalEmbed.astro";
+import { dict, type Lang } from "../i18n";
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const t = dict(lang).thanks;
+---
+
+<Base lang={lang} title={t.title} noindex cta={false}>
+  <section class="wrap thanks" aria-labelledby="thanks-title">
+    <h1 id="thanks-title">{t.h1}</h1>
+    <p>{t.text}</p>
+    <div class="cal">
+      <CalEmbed />
+    </div>
+    <p class="fallback">{t.fallback}</p>
+  </section>
+</Base>
+
+<style>
+  .thanks {
+    display: grid;
+    gap: var(--space-lg);
+    padding-block: var(--space-xl) var(--space-2xl);
+    justify-items: start;
+  }
+  .cal {
+    width: 100%;
+    max-width: 47.5rem;
+  }
+  .fallback {
+    color: var(--color-ink-muted);
+  }
+  @media (min-width: 64rem) {
+    .thanks {
+      padding-block: var(--space-2xl) var(--space-3xl);
+    }
+    .thanks > .cal {
+      margin-inline: 0;
+    }
+  }
+</style>

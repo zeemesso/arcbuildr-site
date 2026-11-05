@@ -1,0 +1,62 @@
+---
+import Base from "../layouts/Base.astro";
+import { dict, type Lang } from "../i18n";
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const t = dict(lang).privacy;
+---
+
+<Base lang={lang} title={t.title} description={t.description}>
+  <article class="wrap privacy">
+    <h1>{t.h1}</h1>
+    <p class="updated">{t.updated}</p>
+    {t.sections.map((sec) => (
+      <section aria-labelledby={sec.id}>
+        <h2 id={sec.id}>{sec.title}</h2>
+        {sec.body.map((part) =>
+          Array.isArray(part) ? (
+            <ul>
+              {part.map((li) => (
+                <li>{li}</li>
+              ))}
+            </ul>
+          ) : (
+            <p>{part}</p>
+          ),
+        )}
+      </section>
+    ))}
+  </article>
+</Base>
+
+<style>
+  .privacy {
+    display: grid;
+    gap: var(--space-lg);
+    padding-block: var(--space-xl) var(--space-2xl);
+  }
+  .updated {
+    color: var(--color-ink-muted);
+    font-size: var(--text-sm);
+  }
+  section {
+    display: grid;
+    gap: var(--space-sm);
+    padding-top: var(--space-lg);
+    border-top: var(--rule-thin);
+  }
+  h2 {
+    font-size: var(--text-xl);
+  }
+  ul {
+    margin: 0;
+    padding-left: var(--space-lg);
+    max-width: var(--measure);
+  }
+  li + li {
+    margin-top: var(--space-xs);
+  }
+</style>

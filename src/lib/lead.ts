@@ -22,11 +22,21 @@ const pick = (data: FormData, key: string, allowed: string[]) => {
   return allowed.includes(value) ? value : "";
 };
 
+/** The page language the form was sent from. Anything unknown counts as English. */
+export const leadLang = (data: FormData): "en" | "fr" =>
+  field(data, "lang", 2) === "fr" ? "fr" : "en";
+
 /** Folds the qualifying answers into the Goal text, so the Notion database needs no new columns. */
 function goalWithAnswers(data: FormData) {
   const camera = pick(data, "camera", CAMERA);
   const start = pick(data, "start", START);
-  return [field(data, "goal", 1000), camera && `On camera: ${camera}`, start && `Start: ${start}`]
+  const french = leadLang(data) === "fr" && "Language: French";
+  return [
+    field(data, "goal", 1000),
+    camera && `On camera: ${camera}`,
+    start && `Start: ${start}`,
+    french,
+  ]
     .filter(Boolean)
     .join("\n");
 }
@@ -72,8 +82,26 @@ function json(body: unknown, status: number): Response {
   });
 }
 
-function page(message: string, status: number): Response {
-  const html = `<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex"><title>Arcbuildr</title><body style="font:1rem/1.6 system-ui;max-width:32rem;margin:3rem auto;padding:0 1.25rem"><p>${message}</p><p><a href="/#start">Back to the form</a></p></body></html>`;
+// The no-JavaScript fallback page, in the language of the form.
+const PAGE_TEXT = {
+  en: {
+    back: "Back to the form",
+    badForm: "That didn't look like a form.",
+    check: "Check the fields marked above.",
+    failure: FAILURE_MESSAGE,
+  },
+  fr: {
+    back: "Retour au formulaire",
+    badForm: "Ce formulaire n'a pas pu être lu.",
+    check: "Vérifiez les champs du formulaire.",
+    failure:
+      "Nous n'avons pas pu envoyer vos informations. Réessayez, ou écrivez-nous en DM sur @arcbuildr.",
+  },
+};
+
+function page(message: string, status: number, lang: "en" | "fr" = "en"): Response {
+  const home = lang === "fr" ? "/fr/" : "/";
+  const html = `<!doctype html><html lang="${lang}"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex"><title>Arcbuildr</title><body style="font:1rem/1.6 system-ui;max-width:32rem;margin:3rem auto;padding:0 1.25rem"><p>${message}</p><p><a href="${home}#start">${PAGE_TEXT[lang].back}</a></p></body></html>`;
   return new Response(html, {
     status,
     headers: { "content-type": "text/html; charset=UTF-8", "cache-control": "no-store" },
@@ -82,34 +110,39 @@ function page(message: string, status: number): Response {
 
 export async function handleLead(request: Request, env: Env): Promise<Response> {
   const wantsJson = (request.headers.get("Accept") ?? "").includes("application/json");
-  const fail = (message: string, status: number, extra: object = {}) =>
-    wantsJson ? json({ ok: false, error: message, ...extra }, status) : page(message, status);
+  let lang: "en" | "fr" = "en";
+  const fail = (key: keyof (typeof PAGE_TEXT)["en"], status: number, extra: object = {}) =>
+    wantsJson
+      ? json({ ok: false, error: PAGE_TEXT.en[key], ...extra }, status)
+      : page(PAGE_TEXT[lang][key], status, lang);
 
   let data: FormData;
   try {
     data = await request.formData();
   } catch {
-    return fail("That didn't look like a form.", 400);
+    return fail("badForm", 400);
   }
 
+  lang = leadLang(data);
+  const thanks = lang === "fr" ? "/fr/thanks" : "/thanks";
   const parsed = parseLead(data);
   const next = (lead: { name: string; email: string }) =>
-    `/thanks?${new URLSearchParams({ name: lead.name, email: lead.email })}`;
+    `${thanks}?${new URLSearchParams({ name: lead.name, email: lead.email })}`;
 
   // Spam trap: a filled hidden field gets the same answer as a real lead, and nothing is stored.
   if (field(data, "website", 200)) {
     return wantsJson
       ? json({ ok: true }, 200)
-      : new Response(null, { status: 303, headers: { Location: "/thanks" } });
+      : new Response(null, { status: 303, headers: { Location: thanks } });
   }
 
-  if (!parsed.ok) return fail("Check the fields marked above.", 400, { errors: parsed.errors });
+  if (!parsed.ok) return fail("check", 400, { errors: parsed.errors });
   const { lead } = parsed;
 
   const notion = await createLead(env, lead);
   if (!notion.ok) {
     console.error("lead: notion failed", notion.error);
-    return fail(FAILURE_MESSAGE, 502);
+    return fail("failure", 502);
   }
 
   // The lead is safe in Notion. A failed alert is logged and does not stop the visitor.

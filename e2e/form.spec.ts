@@ -1,9 +1,15 @@
-import { expect, test } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
 
 const fields = ["name", "email", "instagram", "business", "goal"];
 
+// The form sits folded under the booking calendar; open it the way a visitor does.
+async function openForm(page: Page, path: string) {
+  await page.goto(path);
+  await page.locator(".start__write summary").click();
+}
+
 test("form shows each error, then clears it when fixed", async ({ page }) => {
-  await page.goto("/");
+  await openForm(page, "/");
   await page.getByRole("button", { name: "Send and pick a time" }).click();
   await expect(page.locator("#f-name-error")).toHaveText("Add your name.");
   await expect(page.locator("#f-email-error")).toContainText("Check your email address.");
@@ -20,7 +26,7 @@ test("form shows each error, then clears it when fixed", async ({ page }) => {
 });
 
 test("keyboards and attributes fit the fields", async ({ page }) => {
-  await page.goto("/");
+  await openForm(page, "/");
   await expect(page.locator("#f-email")).toHaveAttribute("type", "email");
   const ig = page.locator("#f-instagram");
   await expect(ig).toHaveAttribute("autocapitalize", "none");
@@ -40,7 +46,7 @@ test("a valid submit sends every field once, shows Sending, then goes to /thanks
     await new Promise((r) => setTimeout(r, 400));
     await route.fulfill({ json: { ok: true } });
   });
-  await page.goto("/?src=ig");
+  await openForm(page, "/?src=ig");
   await page.fill("#f-name", "Hanane");
   await page.fill("#f-email", "hanane@example.com");
   await page.fill("#f-instagram", "@hanane");
@@ -54,7 +60,7 @@ test("a valid submit sends every field once, shows Sending, then goes to /thanks
 
   expect(bodies).toHaveLength(1);
   const body = bodies[0]!;
-  for (const key of [...fields, "src", "referrer", "sent_at", "website"]) {
+  for (const key of [...fields, "lang", "src", "referrer", "sent_at", "website"]) {
     expect(body.has(key), key).toBe(true);
   }
   expect(body.get("src")).toBe("ig");
@@ -71,7 +77,7 @@ test("an unknown src falls back to direct", async ({ page }) => {
     src = new URLSearchParams(route.request().postData() ?? "").get("src") ?? "";
     await route.fulfill({ json: { ok: true } });
   });
-  await page.goto("/?src=evil");
+  await openForm(page, "/?src=evil");
   await page.fill("#f-name", "A");
   await page.fill("#f-email", "a@example.com");
   await page.fill("#f-instagram", "@a");
@@ -83,7 +89,7 @@ test("an unknown src falls back to direct", async ({ page }) => {
 
 test("a server failure shows the message and keeps what was typed", async ({ page }) => {
   await page.route("**/api/lead", (route) => route.fulfill({ status: 502, json: { ok: false } }));
-  await page.goto("/");
+  await openForm(page, "/");
   await page.fill("#f-name", "Hanane");
   await page.fill("#f-email", "hanane@example.com");
   await page.fill("#f-instagram", "@hanane");
@@ -101,7 +107,7 @@ test("a server failure shows the message and keeps what was typed", async ({ pag
 test.describe("without JavaScript", () => {
   test.use({ javaScriptEnabled: false });
   test("the form is a plain POST with native required fields", async ({ page }) => {
-    await page.goto("/");
+    await openForm(page, "/");
     const form = page.locator("#lead-form");
     await expect(form).toHaveAttribute("method", "post");
     await expect(form).toHaveAttribute("action", "/api/lead");

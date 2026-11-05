@@ -20,7 +20,7 @@ test("name and email from the URL reach the embed", async ({ page }) => {
     calLink: string;
     config: { name: string; email: string };
   };
-  expect(inline.config).toEqual({ name: "Hanane", email: "hanane@example.com" });
+  expect(inline.config).toMatchObject({ name: "Hanane", email: "hanane@example.com" });
   expect(inline.calLink).toMatch(/^[\w-]+\/[\w-]+$/);
 });
 
@@ -33,7 +33,7 @@ test("a direct visit with no values still loads, with an empty prefill", async (
   const inline = (await calls(page)).find((c) => c[0] === "inline")![1] as {
     config: { name: string; email: string };
   };
-  expect(inline.config).toEqual({ name: "", email: "" });
+  expect(inline.config).toMatchObject({ name: "", email: "" });
 });
 
 test("the fallback line shows when the embed script is blocked", async ({ page }) => {

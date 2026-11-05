@@ -1,17 +1,33 @@
 ---
 // The lead form. Works as a plain POST without JavaScript. The script below adds
 // inline checks, a sending state and a server-failure message that keeps what was typed.
+import { dict, href, type Lang } from "../i18n";
+import { CAMERA, START } from "../lib/lead";
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const t = dict(lang).form;
 ---
 
-<form id="lead-form" method="post" action="/api/lead" class="form">
+<form
+  id="lead-form"
+  method="post"
+  action="/api/lead"
+  class="form"
+  data-checks={JSON.stringify(t.checks)}
+  data-sending={t.sending}
+  data-thanks={href(lang, "/thanks")}
+>
   <div class="field">
-    <label for="f-name">Your name</label>
+    <label for="f-name">{t.name}</label>
     <input id="f-name" name="name" type="text" autocomplete="name" required />
     <p class="error" id="f-name-error" hidden></p>
   </div>
 
   <div class="field">
-    <label for="f-email">Email</label>
+    <label for="f-email">{t.email}</label>
     <input
       id="f-email"
       name="email"
@@ -26,7 +42,7 @@
   </div>
 
   <div class="field">
-    <label for="f-instagram">Instagram handle</label>
+    <label for="f-instagram">{t.instagram}</label>
     <input
       id="f-instagram"
       name="instagram"
@@ -40,13 +56,13 @@
       required
     />
     <p class="help" id="f-instagram-help">
-      So we can look at your profile before the call.
+      {t.instagramHelp}
     </p>
     <p class="error" id="f-instagram-error" hidden></p>
   </div>
 
   <div class="field">
-    <label for="f-business">Your business</label>
+    <label for="f-business">{t.business}</label>
     <input
       id="f-business"
       name="business"
@@ -56,62 +72,62 @@
       required
     />
     <p class="help" id="f-business-help">
-      One line is enough.
+      {t.businessHelp}
     </p>
     <p class="error" id="f-business-error" hidden></p>
   </div>
 
   <div class="field">
-    <label for="f-camera">Are you ready to be on camera? (optional)</label>
+    <label for="f-camera">{t.camera}</label>
     <select id="f-camera" name="camera">
-      <option value="">Choose one</option>
-      <option>Yes</option>
-      <option>I can try</option>
-      <option>I'd rather not</option>
+      <option value="">{t.choose}</option>
+      {CAMERA.map((value, i) => (
+        <option value={value}>{t.cameraOptions[i]}</option>
+      ))}
     </select>
   </div>
 
   <div class="field">
-    <label for="f-start">When do you want to start? (optional)</label>
+    <label for="f-start">{t.start}</label>
     <select id="f-start" name="start">
-      <option value="">Choose one</option>
-      <option>This month</option>
-      <option>In 1 to 2 months</option>
-      <option>Just looking</option>
+      <option value="">{t.choose}</option>
+      {START.map((value, i) => (
+        <option value={value}>{t.startOptions[i]}</option>
+      ))}
     </select>
   </div>
 
   <div class="field">
-    <label for="f-goal">What do you want your content to do for you? (optional)</label>
+    <label for="f-goal">{t.goal}</label>
     <textarea id="f-goal" name="goal" rows="3" aria-describedby="f-goal-help"></textarea>
     <p class="help" id="f-goal-help">
-      A sentence or two.
+      {t.goalHelp}
     </p>
   </div>
 
+  <input type="hidden" name="lang" value={lang} />
   <input type="hidden" name="src" value="" />
   <input type="hidden" name="referrer" value="" />
   <input type="hidden" name="sent_at" value="" />
   <div class="trap" aria-hidden="true">
-    <label for="f-website">Leave this empty</label>
+    <label for="f-website">{t.trap}</label>
     <input id="f-website" name="website" type="text" tabindex="-1" autocomplete="off" />
   </div>
 
   <div class="form__action">
     <button class="btn btn--block" type="submit">
-      Send and pick a time
+      {t.submit}
     </button>
     <p class="note">
-      We use your details only to prepare for the call. <a href="/privacy">Privacy</a>
+      {t.note} <a href={href(lang, "/privacy")}>{dict(lang).nav.privacy}</a>
     </p>
     <p class="error error--form" id="form-error" role="alert" hidden>
-      We couldn't send your details. Try again, or DM us at @arcbuildr. What you typed is still
-      here.
+      {t.error}
     </p>
     <p class="visually-hidden" id="form-status" role="status"></p>
   </div>
 
-  <p class="dm">Prefer Instagram? Send us a DM at @arcbuildr.</p>
+  <p class="dm">{t.dm}</p>
 </form>
 
 <script>
@@ -130,14 +146,13 @@
   field("src").value = src && ["ig", "dm", "tt"].includes(src) ? src : "direct";
   field("referrer").value = document.referrer;
 
+  // Messages come from the page's language (data-checks, set from src/i18n).
+  const msg = JSON.parse(form.dataset.checks!) as Record<string, string>;
   const checks: Record<string, (v: string) => string> = {
-    name: (v) => (v ? "" : "Add your name."),
-    email: (v) =>
-      /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v)
-        ? ""
-        : "Check your email address. It needs a full domain, like name@gmail.com.",
-    instagram: (v) => (v.replace(/^@/, "") ? "" : "Add your Instagram handle, like @yourname."),
-    business: (v) => (v ? "" : "Add one line about your business."),
+    name: (v) => (v ? "" : msg.name!),
+    email: (v) => (/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v) ? "" : msg.email!),
+    instagram: (v) => (v.replace(/^@/, "") ? "" : msg.instagram!),
+    business: (v) => (v ? "" : msg.business!),
   };
 
   function show(name: string, message: string) {
@@ -186,8 +201,8 @@
     field("sent_at").value = new Date().toISOString();
     sending = true;
     button.disabled = true;
-    button.textContent = "Sending...";
-    status.textContent = "Sending...";
+    button.textContent = form.dataset.sending!;
+    status.textContent = form.dataset.sending!;
 
     try {
       const res = await fetch(form.action, {
@@ -204,7 +219,7 @@
         name: field("name").value.trim(),
         email: field("email").value.trim(),
       });
-      location.assign(`/thanks?${next}`);
+      location.assign(`${form.dataset.thanks}?${next}`);
     } catch {
       sending = false;
       button.disabled = false;
