@@ -2,6 +2,7 @@
 import { MagneticButton } from "@/components/ui/magnetic-button";
 import Base from "../layouts/Base.astro";
 import LeadForm from "../components/LeadForm.astro";
+import CalEmbed from "../components/CalEmbed.astro";
 import DeliverableArt from "../components/DeliverableArt.astro";
 import { deliverables } from "../data/deliverables";
 
@@ -286,18 +287,20 @@ const faq = [
   </section>
 
   <section class="section wrap" id="start" aria-labelledby="start-title">
-    <div class="card start reveal">
-      <div class="start__intro">
-        <h2 id="start-title">
-          Start <span class="hl">with a call</span>
-        </h2>
-        <p>
-          Tell me about you and your business. On the next screen, you pick a time. I read every
-          answer and look at your profile before we talk.
-        </p>
-      </div>
-      <LeadForm />
+    <div class="start__head reveal">
+      <p class="kicker pill">Get in touch</p>
+      <h2 id="start-title" class="section__title">
+        Start <span class="hl">with a call</span>
+      </h2>
+      <p>Pick a time that works for you. I look at your profile before we talk.</p>
     </div>
+    <div class="card start__cal">
+      <CalEmbed lazy />
+    </div>
+    <details class="card start__write">
+      <summary>Rather write first? Send me your details and pick a time after.</summary>
+      <LeadForm />
+    </details>
   </section>
 </Base>
 
@@ -734,20 +737,44 @@ const faq = [
     color: var(--color-ink-muted);
   }
 
-  /* Book the call */
-  .start {
+  /* Book the call: centered pill + heading, then the inline calendar full width. */
+  #start {
     display: grid;
     gap: var(--space-xl);
-    padding: var(--space-xl) var(--space-lg);
   }
-  .start__intro {
+  .start__head {
     display: grid;
+    justify-items: center;
     gap: var(--space-md);
-    align-content: start;
+    text-align: center;
   }
-  .start__intro p {
+  .start__head p:last-child {
     color: var(--color-ink-muted);
     font-size: var(--text-lg);
+    max-width: 34rem;
+  }
+  .pill {
+    padding: 0.25rem 1rem;
+    border-radius: 999px;
+    background: color-mix(in oklch, var(--color-accent) 18%, transparent);
+    color: var(--color-accent);
+  }
+  .start__cal {
+    overflow: hidden;
+    padding: var(--space-sm);
+  }
+  .start__write {
+    padding: var(--space-md) var(--space-lg);
+  }
+  .start__write summary {
+    min-height: var(--tap);
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    font-weight: 600;
+  }
+  .start__write[open] summary {
+    margin-bottom: var(--space-lg);
   }
 
   @media (min-width: 48rem) {
@@ -783,9 +810,6 @@ const faq = [
     .note-card {
       padding: var(--space-2xl) 16rem var(--space-2xl) var(--space-2xl);
     }
-    .start {
-      padding: var(--space-2xl);
-    }
   }
 
   @media (min-width: 64rem) {
@@ -807,10 +831,6 @@ const faq = [
     }
     .bento__card:nth-child(-n + 2) {
       grid-column: span 3;
-    }
-    .start {
-      grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
-      column-gap: var(--space-2xl);
     }
   }
 

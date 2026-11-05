@@ -1,0 +1,79 @@
+---
+// Cal.com inline booking calendar (month view: event details, month, time slots; stacks on
+// phones). `lazy` loads Cal.com's script only when the calendar nears the viewport, so phones
+// opening the page from Instagram don't pay for it up front. Name and email are prefilled
+// from ?name=&email= when present (the /thanks flow).
+import { CAL_LINK } from "../config";
+
+interface Props {
+  lazy?: boolean;
+}
+const { lazy = false } = Astro.props;
+---
+
+<div class="cal-embed" data-cal-link={CAL_LINK} data-lazy={lazy ? "" : undefined}></div>
+
+<script>
+  type CalFn = ((...args: unknown[]) => void) & { loaded?: boolean; ns?: object; q?: unknown[] };
+  const w = window as unknown as { Cal?: CalFn };
+
+  function load(el: HTMLElement) {
+    w.Cal =
+      w.Cal ||
+      function (this: unknown) {
+        const c = w.Cal!;
+        const args = arguments;
+        if (!c.loaded) {
+          c.ns = {};
+          c.q = c.q || [];
+          const s = document.createElement("script");
+          s.src = "https://app.cal.com/embed/embed.js";
+          s.async = true;
+          document.head.appendChild(s);
+          c.loaded = true;
+        }
+        (c.q = c.q || []).push(args);
+      };
+
+    const params = new URLSearchParams(location.search);
+    w.Cal("init", { origin: "https://app.cal.com" });
+    w.Cal("inline", {
+      elementOrSelector: el,
+      calLink: el.dataset.calLink,
+      layout: "month_view",
+      config: {
+        layout: "month_view",
+        useSlotsViewOnSmallScreen: "true",
+        theme: "light",
+        name: params.get("name") ?? "",
+        email: params.get("email") ?? "",
+      },
+    });
+    // Our page is light; without this Cal.com follows the visitor's OS dark mode.
+    w.Cal("ui", { theme: "light", hideEventTypeDetails: false, layout: "month_view" });
+  }
+
+  for (const el of document.querySelectorAll<HTMLElement>(".cal-embed")) {
+    if (!("lazy" in el.dataset) || !("IntersectionObserver" in window)) {
+      load(el);
+      continue;
+    }
+    const io = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((e) => e.isIntersecting)) {
+          io.disconnect();
+          load(el);
+        }
+      },
+      { rootMargin: "800px 0px" },
+    );
+    io.observe(el);
+  }
+</script>
+
+<style>
+  .cal-embed {
+    width: 100%;
+    min-height: 32rem;
+  }
+</style>

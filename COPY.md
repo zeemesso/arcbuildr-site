@@ -175,9 +175,17 @@ No. We agree on the work up front, deliver it, and review it with you. Followers
 
 ### 9. Book the call (`#start`)
 
+Layout from attentioncompound.com's "Get in Touch" section (`docs/references/attention-compound.md`): centered pill, heading, then the booking calendar inline on the page.
+
+**Pill:** Get in touch
+
 **Heading:** Start with a call
 
-**Body:** Tell me about you and your business. On the next screen, you pick a time. I read every answer and look at your profile before we talk.
+**Body:** Pick a time that works for you. I look at your profile before we talk.
+
+**Calendar:** Cal.com inline, month view (event details, month, time slots; stacked on phones).
+
+**Below the calendar, collapsed:** "Rather write first? Send me your details and pick a time after." It opens the form, which still writes to Notion and leads to `/thanks`.
 
 **Form** (draft 1 fields, one new label, two optional qualifying questions from the Story ARC intake study, `docs/references/storyarc-intake.md`)
 
