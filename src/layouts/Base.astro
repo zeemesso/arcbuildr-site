@@ -13,9 +13,18 @@ interface Props {
   noindex?: boolean;
   /** The sticky "Book a call" button. Off on /thanks, where the visitor is already booking. */
   cta?: boolean;
+  /** False for English-only pages with no /fr/ twin: no hreflang, and the switch goes to the other home. */
+  twin?: boolean;
 }
 
-const { lang = "en", title = "Arcbuildr", description, noindex = false, cta = true } = Astro.props;
+const {
+  lang = "en",
+  title = "Arcbuildr",
+  description,
+  noindex = false,
+  cta = true,
+  twin = true,
+} = Astro.props;
 const t = dict(lang);
 const other: Lang = lang === "en" ? "fr" : "en";
 
@@ -25,7 +34,7 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
 // The same page in each language. 404 has no twin, so its switch goes to the other home page.
 const enPath = stripLang(Astro.url.pathname);
 const is404 = /^\/404(\.html)?\/?$/.test(enPath);
-const alternates = is404 ? null : { en: enPath, fr: href("fr", enPath) };
+const alternates = is404 || !twin ? null : { en: enPath, fr: href("fr", enPath) };
 const switchHref = alternates ? alternates[other] : href(other, "/");
 const isHome = enPath === "/";
 const navLinks = [

@@ -1,0 +1,718 @@
+---
+// The Content Arc: Arcbuildr's low-ticket DIY product. Section order follows the reference in
+// docs/references/ryansterling-content-compass.md; copy is from
+// ~/Desktop/all/arcbuildr-architecture/products/content-arc/05-sales-page.md.
+// Draft: noindex, not in the sitemap or nav. English only.
+import Base from "../layouts/Base.astro";
+
+// Zyade sets these. Prices stay off the page until he gives them (CLAUDE.md).
+const price = null as { regular: string; launch: string } | null;
+const checkoutUrl = null as string | null;
+const refundPolicy = null as string | null;
+
+const buyHref = checkoutUrl ?? "#buy";
+
+const steps = [
+  {
+    n: 1,
+    title: "Say it.",
+    body: "Talk your idea into your AI app the moment you have it, on a walk or between calls. You get the whole thought down, so it still makes sense next week.",
+  },
+  {
+    n: 2,
+    title: "Sharpen it.",
+    body: "Your AI reads your Audience Profile in Notion and tells you if the idea is too narrow, too vague or on target. Then it gives you 3 to 5 angles: the same idea, aimed at something your viewers already care about.",
+  },
+  {
+    n: 3,
+    title: "Save it.",
+    body: "Pick an angle. It lands on your Content Ideas board on its own, with your original words saved underneath. Move it from Idea to Scripted to Filmed to Posted.",
+  },
+];
+
+const included = [
+  {
+    icon: "board",
+    title: "The Notion template",
+    body: "A ready workspace: a board that takes each idea from first thought to posted, a library of everything you've published, and a home for the pages your AI reads.",
+  },
+  {
+    icon: "person",
+    title: "The Audience Profile",
+    body: "A seven-part profile of who you're talking to: what they want, what frustrates them, what they already believe, and your content pillars. It's what turns generic AI advice into angles that fit your audience.",
+  },
+  {
+    icon: "chat",
+    title: "Three AI prompts",
+    body: "One sets up your AI as your content strategist. One interviews you and fills in your Audience Profile for you. One checks that everything is connected. You copy and paste each one once.",
+  },
+  {
+    icon: "play",
+    title: "Three setup videos",
+    body: "Short screen recordings that walk you through every click, from copying the template to saving your first idea.",
+  },
+];
+
+const videos = [
+  { title: "Copy the template and connect Claude or ChatGPT", length: "4 min" },
+  { title: "Fill in your Audience Profile", length: "4 min" },
+  { title: "Capture your first idea", length: "3 min" },
+];
+
+const faq = [
+  {
+    q: "Why not just ask ChatGPT for content ideas?",
+    a: "Because it doesn't know your audience, and it forgets your ideas the moment the chat scrolls away. The Content Arc gives your AI a profile of your viewers to work from, and gives every idea a permanent home in Notion.",
+  },
+  {
+    q: "Do I need a paid AI plan?",
+    a: "Yes. Connecting to Notion needs a paid Claude plan (Pro or higher) or a paid ChatGPT plan (Plus or higher). If you already pay for one, you're set. The videos cover both.",
+  },
+  { q: "Do I need a paid Notion plan?", a: "No. The free plan has everything this needs." },
+  {
+    q: "I'm not technical. Can I set this up?",
+    a: "If you can copy, paste and record a voice note, yes. The videos show every click.",
+  },
+  {
+    q: "I don't have an audience yet. Is this for me?",
+    a: "Yes. You'll aim every idea at a specific viewer from your first post instead of guessing what might land.",
+  },
+  {
+    q: "Does it work on my phone?",
+    a: "Yes. You capture ideas by voice in the AI app on your phone, and Notion has a mobile app for the board.",
+  },
+  {
+    q: "Which platforms is it for?",
+    a: "It's built for short videos on Instagram and TikTok. The board works for any platform.",
+  },
+  {
+    q: "What exactly do I get?",
+    a: "A Notion template you copy into your own account, three AI prompts, three setup videos, and email support. You get access right after you pay.",
+  },
+  { q: "Is it a subscription?", a: "No. You pay once and keep it. Updates are included." },
+  ...(refundPolicy ? [{ q: "What's your refund policy?", a: refundPolicy }] : []),
+];
+
+const angles = [
+  "Too narrow. Here are 3 angles:",
+  "1. The mistake your viewers make every week",
+  "2. What you'd tell yourself a year ago",
+  "3. The question clients ask on every call",
+];
+const board = [
+  { col: "Idea", cards: 3 },
+  { col: "Scripted", cards: 2 },
+  { col: "Filmed", cards: 1 },
+  { col: "Posted", cards: 2 },
+];
+---
+
+<Base
+  title="The Content Arc by Arcbuildr"
+  description="Say your idea out loud, let AI point it at what your viewers care about, and keep every idea on one board in Notion."
+  noindex
+  cta={false}
+  twin={false}
+>
+  <section class="hero wrap" aria-labelledby="hero-title">
+    <div class="hero__art" aria-hidden="true">
+      {board.map(({ col, cards }, i) => (
+        <div class="board__col" style={`--i: ${i}`}>
+          <span class="board__head">{col}</span>
+          {Array.from({ length: cards }, (_, j) => (
+            <span class="board__card" style={`--j: ${j}`} />
+          ))}
+        </div>
+      ))}
+    </div>
+    <p class="kicker product">The Content Arc · by Arcbuildr</p>
+    <h1 id="hero-title">
+      Your ideas aren't the problem. <span class="hl">The angle is.</span>
+    </h1>
+    <p class="lede">
+      Most ideas flop because they're aimed at you, not your audience. Say your idea out loud, let
+      AI point it at what your viewers care about, and keep every idea on one board in Notion.
+    </p>
+    {price && (
+      <p class="price">
+        <s>{price.regular}</s> <strong>{price.launch}</strong> <span>Launch price</span>
+      </p>
+    )}
+    <a class="btn btn--lg" href={buyHref}>
+      Get The Content Arc
+    </a>
+    <p class="scroll">
+      Scroll to see how it works <span aria-hidden="true">↓</span>
+    </p>
+  </section>
+
+  <section class="steps" aria-label="How it works">
+    {steps.map((s) => (
+      <article class="step wrap reveal" aria-labelledby={`step-${s.n}`}>
+        <div class={`art art--${s.n}`} aria-hidden="true">
+          {s.n === 1 && (
+            <>
+              <div class="mic">
+                <span class="mic__dot" />
+                {Array.from({ length: 14 }, (_, i) => (
+                  <span class="mic__bar" style={`--i: ${i}`} />
+                ))}
+                <span class="mic__time">0:45</span>
+              </div>
+              <div class="apps">
+                <span style="--i: 0">Claude</span>
+                <span style="--i: 1">ChatGPT</span>
+              </div>
+            </>
+          )}
+          {s.n === 2 && (
+            <div class="chat">
+              {angles.map((line, i) => (
+                <span class="chat__line" style={`--i: ${i}`}>
+                  {line}
+                </span>
+              ))}
+            </div>
+          )}
+          {s.n === 3 && (
+            <div class="toast">
+              <span class="toast__logo">N</span>
+              <span class="toast__text toast__text--saving">Saving to Notion…</span>
+              <span class="toast__text toast__text--saved">Idea saved to Notion</span>
+              <span class="toast__check">✓</span>
+            </div>
+          )}
+        </div>
+        <p class="kicker step__n">Step {s.n}</p>
+        <h2 id={`step-${s.n}`}>{s.title}</h2>
+        <p>{s.body}</p>
+        {s.n === 1 && <p class="works">Works with Claude · ChatGPT</p>}
+      </article>
+    ))}
+  </section>
+
+  <section class="block wrap reveal" aria-labelledby="problem-title">
+    <h2 id="problem-title">Your best ideas are scattered across chats, notes and voice memos.</h2>
+    <p>
+      Some are good. Most are pitched to people who already follow you. The Content Arc catches
+      every one and points it at the people who don't follow you yet.
+    </p>
+  </section>
+
+  <section class="block wrap reveal" aria-labelledby="included-title">
+    <h2 id="included-title">What's included</h2>
+    <ul class="included">
+      {included.map((item) => (
+        <li>
+          <span class={`icon icon--${item.icon}`} aria-hidden="true" />
+          <div>
+            <h3>{item.title}</h3>
+            <p>{item.body}</p>
+          </div>
+        </li>
+      ))}
+    </ul>
+  </section>
+
+  <section class="block block--wide wrap reveal" aria-labelledby="videos-title">
+    <h2 id="videos-title">Setup videos</h2>
+    <p class="center">Set up in about 15 minutes. Capture your first idea the same day.</p>
+    <ol class="videos">
+      {videos.map((v, i) => (
+        <li class="card">
+          <span class="videos__n">{i + 1}</span>
+          <span class="videos__title">{v.title}</span>
+          <span class="videos__len">{v.length}</span>
+        </li>
+      ))}
+    </ol>
+  </section>
+
+  <section class="block wrap reveal" aria-labelledby="faq-title">
+    <h2 id="faq-title">FAQ</h2>
+    <div class="card faq">
+      {faq.map((item, i) => (
+        <details open={i === 0}>
+          <summary>{item.q}</summary>
+          <p>{item.a}</p>
+        </details>
+      ))}
+    </div>
+  </section>
+
+  <section class="final wrap reveal" id="buy" aria-labelledby="buy-title">
+    <h2 id="buy-title">Stop losing your best ideas.</h2>
+    {price && (
+      <p class="price">
+        <s>{price.regular}</s> <strong>{price.launch}</strong> <span>Launch price</span>
+      </p>
+    )}
+    {checkoutUrl ? (
+      <>
+        <a class="btn btn--lg" href={checkoutUrl}>
+          Get The Content Arc
+        </a>
+        <p class="small">Instant access after purchase.</p>
+      </>
+    ) : (
+      <p class="small">Checkout opens soon.</p>
+    )}
+  </section>
+</Base>
+
+<style>
+  /* Fixed px sizes on this page (Zyade's rule), stepping up once at 48rem. */
+  h1 {
+    font-size: 40px;
+    line-height: 1;
+  }
+  h2 {
+    font-size: 28px;
+    line-height: 1.15;
+  }
+  h3 {
+    font-size: 19px;
+  }
+  @media (min-width: 48rem) {
+    h1 {
+      font-size: 64px;
+    }
+    h2 {
+      font-size: 36px;
+    }
+  }
+
+  .hero,
+  .step,
+  .final {
+    display: grid;
+    justify-items: center;
+    text-align: center;
+  }
+  .hero {
+    gap: 20px;
+    max-width: 48rem;
+    padding-top: 128px;
+    padding-bottom: 64px;
+  }
+  .hero h1 {
+    max-width: 14em;
+  }
+  .lede {
+    font-size: 19px;
+    color: var(--color-ink-muted);
+  }
+  .product {
+    color: var(--color-ink-muted);
+  }
+  .price {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+  }
+  .price s {
+    color: var(--color-ink-muted);
+    font-size: 18px;
+  }
+  .price strong {
+    font-size: 32px;
+  }
+  .price span {
+    color: var(--color-accent-text);
+    font-size: 14px;
+    font-weight: 600;
+  }
+  .scroll {
+    margin-top: 40px;
+    color: var(--color-ink-muted);
+    font-size: 14px;
+  }
+
+  /* Hero art: the board, four columns filling with cards. */
+  .hero__art {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    width: 100%;
+    max-width: 30rem;
+    padding: 12px;
+    margin-bottom: 12px;
+    border: var(--rule-thin);
+    border-radius: var(--radius-lg);
+    background: var(--color-card);
+    box-shadow: var(--shadow-lift);
+  }
+  .board__col {
+    display: grid;
+    align-content: start;
+    gap: 6px;
+    min-height: 140px;
+    padding: 8px;
+    border-radius: var(--radius-md);
+    background: var(--color-paper);
+  }
+  .board__head {
+    font-size: 12px;
+    font-weight: 600;
+    text-align: left;
+  }
+  .board__card {
+    height: 28px;
+    border-radius: 8px;
+    background: var(--color-card);
+    box-shadow: var(--shadow-card);
+  }
+  .board__col:last-child .board__card {
+    background: var(--color-accent-soft);
+  }
+
+  /* Steps */
+  .step {
+    gap: 12px;
+    max-width: 30rem;
+    padding-block: 64px;
+  }
+  .step p {
+    color: var(--color-ink-muted);
+  }
+  .step__n {
+    color: var(--color-ink-muted);
+  }
+  .works {
+    font-size: 14px;
+    font-style: italic;
+  }
+  .art {
+    display: grid;
+    justify-items: center;
+    gap: 16px;
+    width: 100%;
+    margin-bottom: 20px;
+  }
+
+  .mic {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    width: 100%;
+    max-width: 22rem;
+    height: 64px;
+    padding-inline: 20px;
+    border-radius: var(--radius-pill);
+    background: var(--color-ink);
+    color: var(--color-paper);
+  }
+  .mic__dot {
+    width: 10px;
+    height: 10px;
+    margin-right: 8px;
+    border-radius: 50%;
+    background: var(--color-accent);
+  }
+  .mic__bar {
+    flex: 1;
+    height: 30%;
+    border-radius: 2px;
+    background: currentColor;
+  }
+  .mic__time {
+    margin-left: 10px;
+    font-size: 14px;
+    font-variant-numeric: tabular-nums;
+  }
+  .apps {
+    display: flex;
+    gap: 8px;
+  }
+  .apps span {
+    padding: 6px 14px;
+    border: var(--rule-thin);
+    border-radius: var(--radius-pill);
+    background: var(--color-card);
+    font-size: 14px;
+    font-weight: 600;
+  }
+
+  .chat {
+    display: grid;
+    gap: 6px;
+    width: 100%;
+    max-width: 24rem;
+    padding: 18px 20px;
+    border: var(--rule-thin);
+    border-radius: var(--radius-lg) var(--radius-lg) var(--radius-lg) 8px;
+    background: var(--color-card);
+    box-shadow: var(--shadow-card);
+    text-align: left;
+    font-size: 15px;
+  }
+  .chat__line:first-child {
+    font-weight: 600;
+  }
+
+  .toast {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    max-width: 22rem;
+    padding: 12px 16px;
+    border: var(--rule-thin);
+    border-radius: var(--radius-md);
+    background: var(--color-card);
+    box-shadow: var(--shadow-lift);
+    text-align: left;
+    font-size: 15px;
+    font-weight: 600;
+  }
+  .toast__logo {
+    display: grid;
+    place-items: center;
+    width: 28px;
+    height: 28px;
+    border: 2px solid var(--color-ink);
+    border-radius: 6px;
+    font-weight: 700;
+  }
+  .toast__text {
+    grid-area: 1 / 2;
+  }
+  .toast__text--saving {
+    visibility: hidden;
+  }
+  .toast__check {
+    display: grid;
+    place-items: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--color-sage);
+    color: #fff;
+    font-size: 14px;
+  }
+
+  /* Reading blocks */
+  .block {
+    display: grid;
+    gap: 20px;
+    max-width: 48rem;
+    padding-block: 64px;
+  }
+  .block > p {
+    font-size: 19px;
+    color: var(--color-ink-muted);
+  }
+  .block--wide {
+    max-width: 56rem;
+  }
+  .block--wide h2,
+  .center {
+    justify-self: center;
+    text-align: center;
+  }
+
+  .included {
+    display: grid;
+    gap: 24px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .included li {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+  }
+  .included p {
+    margin-top: 4px;
+    color: var(--color-ink-muted);
+  }
+  .icon {
+    flex: none;
+    width: 32px;
+    height: 32px;
+    border-radius: 10px;
+    background: var(--color-accent-soft);
+    position: relative;
+  }
+  .icon::before {
+    content: "";
+    position: absolute;
+    inset: 9px;
+    border: 2px solid var(--color-accent-text);
+    border-radius: 3px;
+  }
+  .icon--person::before,
+  .icon--chat::before {
+    border-radius: 50%;
+  }
+  .icon--chat::before {
+    border-bottom-left-radius: 2px;
+  }
+  .icon--play::before {
+    inset: 9px 9px 9px 12px;
+    border: 0;
+    border-left: 11px solid var(--color-accent-text);
+    border-top: 7px solid transparent;
+    border-bottom: 7px solid transparent;
+    border-radius: 0;
+  }
+
+  .videos {
+    display: grid;
+    gap: 16px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  @media (min-width: 48rem) {
+    .videos {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+  .videos li {
+    display: grid;
+    gap: 8px;
+    padding: 20px;
+    align-content: start;
+  }
+  .videos__n {
+    display: grid;
+    place-items: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: var(--color-ink);
+    color: var(--color-paper);
+    font-weight: 700;
+  }
+  .videos__title {
+    font-weight: 600;
+  }
+  .videos__len {
+    color: var(--color-ink-muted);
+    font-size: 14px;
+  }
+
+  /* FAQ: same pattern as Home. */
+  .faq {
+    padding: 8px 24px;
+  }
+  .faq details + details {
+    border-top: var(--rule-thin);
+  }
+  .faq summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    min-height: 56px;
+    padding-block: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    list-style: none;
+  }
+  .faq summary::-webkit-details-marker {
+    display: none;
+  }
+  .faq summary::after {
+    content: "+" / "";
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--color-paper-2);
+    font-size: 19px;
+    line-height: 1;
+    transition: rotate var(--dur-fast) var(--ease-out);
+  }
+  .faq details[open] summary::after {
+    rotate: 45deg;
+    background: var(--color-accent-soft);
+    color: var(--color-accent);
+  }
+  .faq details p {
+    padding-bottom: 16px;
+    color: var(--color-ink-muted);
+  }
+
+  .final {
+    gap: 20px;
+    max-width: 48rem;
+    padding-top: 64px;
+    padding-bottom: 96px;
+  }
+  .small {
+    color: var(--color-ink-muted);
+    font-size: 14px;
+  }
+
+  /* Motion: each step's drawing loops once it's on screen. Off for reduced motion. */
+  @media (prefers-reduced-motion: no-preference) {
+    .board__card {
+      animation: drop 0.5s var(--spring) both;
+      animation-delay: calc(0.4s + var(--i) * 0.15s + var(--j) * 0.1s);
+    }
+    .mic__bar {
+      animation: wave 0.9s var(--ease-in-out) infinite alternate;
+      animation-delay: calc(var(--i) * -0.13s);
+    }
+    .apps span {
+      animation: drop 0.5s var(--spring) both;
+      animation-delay: calc(0.3s + var(--i) * 0.12s);
+    }
+    .chat__line {
+      animation: type 0.5s steps(24) both;
+      animation-delay: calc(var(--i) * 0.6s);
+    }
+    .toast__text--saving {
+      visibility: visible;
+      animation: saving 3s step-end infinite;
+    }
+    .toast__text--saved,
+    .toast__check {
+      animation: saved 3s step-end infinite;
+    }
+    .step:not(.is-in) * {
+      animation-play-state: paused;
+    }
+  }
+  @keyframes drop {
+    from {
+      opacity: 0;
+      translate: 0 -8px;
+    }
+  }
+  @keyframes wave {
+    to {
+      height: 90%;
+    }
+  }
+  @keyframes type {
+    from {
+      clip-path: inset(0 100% 0 0);
+    }
+    to {
+      clip-path: inset(0 0 0 0);
+    }
+  }
+  @keyframes saving {
+    0% {
+      visibility: visible;
+    }
+    50% {
+      visibility: hidden;
+    }
+  }
+  @keyframes saved {
+    0% {
+      visibility: hidden;
+    }
+    50% {
+      visibility: visible;
+    }
+  }
+</style>
