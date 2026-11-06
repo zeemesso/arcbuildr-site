@@ -1,0 +1,531 @@
+---
+// Drawings for /content-arc, all CSS and inline SVG, no image files. Decorative (aria-hidden).
+// Layout ideas from docs/references/ryansterling-content-compass.md; drawn from scratch.
+import Mark from "./Mark.astro";
+
+interface Props {
+  kind: "hero" | "voice" | "chat" | "board";
+}
+const { kind } = Astro.props;
+
+const bars = [38, 62, 46, 80, 54, 70, 42, 88, 58, 74, 48, 66, 40, 72, 52, 60];
+const reply =
+  "Your idea is too narrow for your audience. Here are 3 angles that could reach more of them. Pick one and I'll save it to your Notion.".split(
+    " ",
+  );
+const columns = [
+  { name: "Idea", tone: "gray", title: "Why your hooks all sound the same" },
+  { name: "Scripted", tone: "yellow", title: "You don't need more followers" },
+  { name: "Filmed", tone: "blue", title: "The post I almost didn't publish" },
+  { name: "Posted", tone: "green", title: "Why I stopped posting daily" },
+];
+---
+
+{kind === "hero" && (
+  <div class="tiles" aria-hidden="true">
+    <span class="tile tile--gpt">
+      <Mark name="openai" />
+    </span>
+    <span class="tile tile--notion">
+      <Mark name="notion" />
+    </span>
+    <span class="tile tile--claude">
+      <Mark name="claude" />
+    </span>
+  </div>
+)}
+
+{kind === "voice" && (
+  <div class="voice" aria-hidden="true">
+    <div class="voice__pill">
+      <span class="voice__pause" />
+      <span class="voice__bars">
+        {bars.map((h, i) => (
+          <span style={`--h: ${h}%; --i: ${i}`} />
+        ))}
+      </span>
+    </div>
+    <div class="voice__apps">
+      <span class="app app--claude" style="--i: 0">
+        <Mark name="claude" />
+      </span>
+      <span class="app app--gpt" style="--i: 1">
+        <Mark name="openai" />
+      </span>
+    </div>
+  </div>
+)}
+
+{kind === "chat" && (
+  <div class="chat" aria-hidden="true">
+    <div class="chat__bar">
+      <span class="chat__menu" />
+      <span class="chat__app">
+        Claude <span>›</span>
+      </span>
+      <svg class="chat__icon" viewBox="0 0 24 24">
+        <path d="M4 20h4L19 9l-4-4L4 16v4z" />
+      </svg>
+      <span class="chat__dots">···</span>
+    </div>
+    <p class="chat__text">
+      {reply.map((w, i) => (
+        <span style={`--i: ${i}`}>{w} </span>
+      ))}
+      <span class="chat__cursor" style={`--i: ${reply.length}`} />
+    </p>
+  </div>
+)}
+
+{kind === "board" && (
+  <div class="board" aria-hidden="true">
+    <div class="board__fan">
+      {columns.map((c, i) => (
+        <div class={`col col--${c.tone}`} style={`--i: ${i}`}>
+          <span class="col__tag">{c.name}</span>
+          <div class="col__card">
+            <svg class="col__doc" viewBox="0 0 16 16">
+              <path d="M4 1.5h5l3.5 3.5v9.5h-8.5z M9 1.5V5h3.5" />
+            </svg>
+            <span class="col__title">{c.title}</span>
+            <span class="col__pill">Audience growth</span>
+          </div>
+        </div>
+      ))}
+    </div>
+    <div class="saved">
+      <Mark name="notion" class="saved__logo" />
+      <span class="saved__text saved__text--wait">Saving to Notion…</span>
+      <span class="saved__text saved__text--done">Idea saved to Notion</span>
+      <span class="saved__check">
+        <svg viewBox="0 0 16 16">
+          <path d="M4 8.5l2.5 2.5L12 5.5" />
+        </svg>
+      </span>
+    </div>
+  </div>
+)}
+
+<style>
+  /* Hero: three app tiles, thick bottom edge and a soft drop shadow so they read as 3D. */
+  .tiles {
+    position: relative;
+    width: 320px;
+    height: 230px;
+    margin-bottom: 24px;
+  }
+  .tile {
+    position: absolute;
+    display: grid;
+    place-items: center;
+    border-radius: 28%;
+    box-shadow:
+      inset 0 -7px 0 rgb(0 0 0 / 0.14),
+      inset 0 2px 0 rgb(255 255 255 / 0.55),
+      0 26px 30px -14px rgb(26 26 26 / 0.45);
+    rotate: var(--r);
+  }
+  .tile :global(svg) {
+    width: 52%;
+    height: 52%;
+    filter: drop-shadow(0 1px 0 rgb(255 255 255 / 0.4));
+  }
+  .tile--notion {
+    --r: -3deg;
+    z-index: 2;
+    left: 92px;
+    top: 52px;
+    width: 140px;
+    height: 140px;
+    background: linear-gradient(160deg, #fbf8f1, #ece6da);
+    color: #111;
+  }
+  .tile--gpt {
+    --r: -11deg;
+    left: 4px;
+    top: 10px;
+    width: 104px;
+    height: 104px;
+    background: linear-gradient(160deg, #5cbf9b, #2e8a6a);
+    color: #fff;
+  }
+  .tile--claude {
+    --r: 9deg;
+    right: 4px;
+    top: 0;
+    width: 104px;
+    height: 104px;
+    background: linear-gradient(160deg, #fbf3e8, #efe2cf);
+    color: #d97757;
+  }
+
+  /* Step 1: recording pill and the two AI apps. */
+  .voice {
+    display: grid;
+    justify-items: center;
+    gap: 20px;
+    width: 100%;
+  }
+  .voice__pill {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    width: 100%;
+    max-width: 384px;
+    height: 72px;
+    padding-inline: 16px 28px;
+    border-radius: 999px;
+    background: #fff;
+    box-shadow: var(--shadow-card);
+  }
+  .voice__pause {
+    flex: none;
+    position: relative;
+    width: 46px;
+    height: 46px;
+    border: 3px solid #2f6be0;
+    border-radius: 50%;
+  }
+  .voice__pause::before,
+  .voice__pause::after {
+    content: "";
+    position: absolute;
+    top: 12px;
+    width: 5px;
+    height: 16px;
+    border-radius: 3px;
+    background: #2f6be0;
+  }
+  .voice__pause::before {
+    left: 12px;
+  }
+  .voice__pause::after {
+    right: 12px;
+  }
+  .voice__bars {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex: 1;
+    height: 44px;
+  }
+  .voice__bars span {
+    width: 3px;
+    height: var(--h);
+    border-radius: 2px;
+    background: #2f6be0;
+  }
+  .voice__apps {
+    display: flex;
+    gap: 12px;
+  }
+  .app {
+    display: grid;
+    place-items: center;
+    width: 56px;
+    height: 56px;
+    border-radius: 14px;
+    box-shadow: var(--shadow-card);
+  }
+  .app :global(svg) {
+    width: 30px;
+    height: 30px;
+  }
+  .app--claude {
+    background: #c96442;
+    color: #fff;
+  }
+  .app--gpt {
+    background: #fff;
+    color: #111;
+  }
+
+  /* Step 2: a chat app reply. */
+  .chat {
+    width: 100%;
+    max-width: 384px;
+    padding: 18px 24px 22px;
+    border-radius: 20px;
+    background: #fff;
+    box-shadow: var(--shadow-card);
+    text-align: left;
+  }
+  .chat__bar {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 18px;
+  }
+  .chat__menu {
+    width: 20px;
+    height: 10px;
+    border-block: 2px solid #111;
+  }
+  .chat__app {
+    flex: 1;
+    font-size: 17px;
+  }
+  .chat__app span {
+    color: #8a8a8a;
+  }
+  .chat__icon {
+    width: 20px;
+    height: 20px;
+    fill: none;
+    stroke: #111;
+    stroke-width: 1.8;
+    stroke-linejoin: round;
+  }
+  .chat__dots {
+    font-weight: 700;
+    letter-spacing: 1px;
+  }
+  .chat__text {
+    max-width: none;
+    font-size: 15px;
+    line-height: 1.45;
+    color: #111;
+  }
+  .chat__cursor {
+    display: inline-block;
+    width: 2px;
+    height: 1em;
+    margin-left: -2px;
+    vertical-align: -2px;
+    background: #111;
+  }
+
+  /* Step 3: Notion-style board columns fanned out, then the save notice. */
+  .board {
+    display: grid;
+    justify-items: center;
+    gap: 28px;
+    width: 100%;
+  }
+  .board__fan {
+    position: relative;
+    width: 100%;
+    max-width: 450px;
+    aspect-ratio: 450 / 210;
+  }
+  .col {
+    position: absolute;
+    width: 38%;
+    padding: 8px;
+    border: 1px solid rgb(0 0 0 / 0.06);
+    border-radius: 8px;
+    box-shadow: 0 6px 18px -8px rgb(0 0 0 / 0.18);
+    text-align: left;
+  }
+  .col--gray {
+    left: 0;
+    top: 44%;
+    background: #f7f6f3;
+    --tag: #e3e2e0;
+    --tag-ink: #32302c;
+  }
+  .col--yellow {
+    left: 17%;
+    top: 12%;
+    background: #fbf8ec;
+    --tag: #fdecc8;
+    --tag-ink: #402c1b;
+  }
+  .col--blue {
+    z-index: 2;
+    left: 41%;
+    top: 37%;
+    background: #f0f5fb;
+    --tag: #d3e5ef;
+    --tag-ink: #183347;
+  }
+  .col--green {
+    left: 61%;
+    top: 0;
+    background: #f1f7f0;
+    --tag: #dbeddb;
+    --tag-ink: #1c3829;
+  }
+  .col__tag {
+    display: inline-block;
+    margin-bottom: 6px;
+    padding: 1px 6px;
+    border-radius: 4px;
+    background: var(--tag);
+    color: var(--tag-ink);
+    font-size: 13px;
+    font-weight: 600;
+  }
+  .col__card {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 2px 6px;
+    padding: 7px 8px;
+    border-radius: 6px;
+    background: #fff;
+    box-shadow: 0 1px 2px rgb(0 0 0 / 0.08);
+  }
+  .col__doc {
+    width: 12px;
+    height: 12px;
+    margin-top: 2px;
+    fill: none;
+    stroke: #8a8a8a;
+    stroke-width: 1.3;
+    stroke-linejoin: round;
+  }
+  .col__title {
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 1.3;
+  }
+  .col__pill {
+    grid-column: 2;
+    width: fit-content;
+    padding: 0 4px;
+    border-radius: 3px;
+    background: #f1f0ee;
+    color: #5f5a54;
+    font-size: 9px;
+  }
+  .saved {
+    display: grid;
+    grid-template-columns: auto auto auto;
+    align-items: center;
+    gap: 10px;
+    font-size: 15px;
+  }
+  .saved :global(.saved__logo) {
+    width: 22px;
+    height: 22px;
+  }
+  .saved__text {
+    grid-area: 1 / 2;
+  }
+  .saved__text--wait {
+    visibility: hidden;
+  }
+  .saved__check {
+    display: grid;
+    place-items: center;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #4caf6a;
+  }
+  .saved__check svg {
+    width: 14px;
+    height: 14px;
+    fill: none;
+    stroke: #fff;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  @media (max-width: 30rem) {
+    .tiles {
+      scale: 0.85;
+      margin-block: -16px 8px;
+    }
+    .col__title {
+      font-size: 9px;
+    }
+    .col__pill {
+      display: none;
+    }
+    .col__tag {
+      font-size: 11px;
+    }
+  }
+
+  /* Motion. Step drawings wait until their step scrolls in (Base adds .is-in). */
+  @media (prefers-reduced-motion: no-preference) {
+    .tile {
+      animation:
+        pop 0.7s var(--spring) both,
+        float 5s var(--ease-in-out) 0.7s infinite alternate;
+    }
+    .tile--gpt {
+      animation-delay: 0.15s, 0.85s;
+    }
+    .tile--claude {
+      animation-delay: 0.3s, 1.3s;
+    }
+    .voice__bars span {
+      animation: wave 0.8s var(--ease-in-out) infinite alternate;
+      animation-delay: calc(var(--i) * -0.17s);
+    }
+    .app {
+      animation: pop 0.6s var(--spring) both;
+      animation-delay: calc(0.3s + var(--i) * 0.12s);
+    }
+    .chat__text span {
+      animation: word 0.2s linear both;
+      animation-delay: calc(0.4s + var(--i) * 0.07s);
+    }
+    .chat__text .chat__cursor {
+      animation:
+        word 0.2s linear both calc(0.4s + var(--i) * 0.07s),
+        blink 1s step-end infinite;
+    }
+    .col {
+      animation: pop 0.6s var(--spring) both;
+      animation-delay: calc(0.2s + var(--i) * 0.15s);
+    }
+    .saved__text--wait {
+      visibility: visible;
+      animation: first 4s step-end infinite;
+    }
+    .saved__text--done,
+    .saved__check {
+      animation: second 4s step-end infinite;
+    }
+    :global(.js .step:not(.is-in)) * {
+      animation-play-state: paused;
+    }
+  }
+  @keyframes pop {
+    from {
+      opacity: 0;
+      translate: 0 14px;
+      scale: 0.9;
+    }
+  }
+  @keyframes float {
+    to {
+      translate: 0 -8px;
+    }
+  }
+  @keyframes wave {
+    from {
+      scale: 1 0.35;
+    }
+  }
+  @keyframes word {
+    from {
+      opacity: 0;
+    }
+  }
+  @keyframes blink {
+    50% {
+      opacity: 0;
+    }
+  }
+  @keyframes first {
+    0% {
+      visibility: visible;
+    }
+    40% {
+      visibility: hidden;
+    }
+  }
+  @keyframes second {
+    0% {
+      visibility: hidden;
+    }
+    40% {
+      visibility: visible;
+    }
+  }
+</style>

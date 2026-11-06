@@ -4,6 +4,8 @@
 // ~/Desktop/all/arcbuildr-architecture/products/content-arc/05-sales-page.md.
 // Draft: noindex, not in the sitemap or nav. English only.
 import Base from "../layouts/Base.astro";
+import ArcArt from "../components/ArcArt.astro";
+import Mark from "../components/Mark.astro";
 
 // Zyade sets these. Prices stay off the page until he gives them (CLAUDE.md).
 const price = null as { regular: string; launch: string } | null;
@@ -32,26 +34,35 @@ const steps = [
 
 const included = [
   {
-    icon: "board",
+    icon: "notion",
     title: "The Notion template",
     body: "A ready workspace: a board that takes each idea from first thought to posted, a library of everything you've published, and a home for the pages your AI reads.",
   },
   {
-    icon: "person",
+    icon: "people",
     title: "The Audience Profile",
     body: "A seven-part profile of who you're talking to: what they want, what frustrates them, what they already believe, and your content pillars. It's what turns generic AI advice into angles that fit your audience.",
   },
   {
-    icon: "chat",
+    icon: "pen",
     title: "Three AI prompts",
     body: "One sets up your AI as your content strategist. One interviews you and fills in your Audience Profile for you. One checks that everything is connected. You copy and paste each one once.",
   },
   {
-    icon: "play",
+    icon: "video",
     title: "Three setup videos",
     body: "Short screen recordings that walk you through every click, from copying the template to saving your first idea.",
   },
 ];
+
+// Black glyphs for "What's included", drawn for this page (24x24, filled).
+const icons: Record<string, string> = {
+  people:
+    "M12 4a3 3 0 1 1 0 6 3 3 0 0 1 0-6zM5 7a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5zm14 0a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5zM12 11.5c3.3 0 6 1.8 6 4.5v2H6v-2c0-2.7 2.7-4.5 6-4.5zM4.6 13.4A6 6 0 0 0 4.5 16v2H1v-1.6c0-1.6 1.5-2.8 3.6-3zm14.8 0c2.1.2 3.6 1.4 3.6 3V18h-3.5v-2c0-.9-.1-1.8-.1-2.6z",
+  video:
+    "M6 2h12v2H6zM4 5.5h16a2 2 0 0 1 2 2V20a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V7.5a2 2 0 0 1 2-2zm6 4.5v8l6.5-4z",
+  pen: "M15.5 6.5l2 2L8 18l-3 1 1-3zM17 5l1.3-1.3a1 1 0 0 1 1.4 0l.6.6a1 1 0 0 1 0 1.4L19 7zM5 2l.8 1.7L7.5 4.5l-1.7.8L5 7l-.8-1.7L2.5 4.5l1.7-.8zM19.5 13l.6 1.4 1.4.6-1.4.6-.6 1.4-.6-1.4-1.4-.6 1.4-.6z",
+};
 
 const videos = [
   { title: "Copy the template and connect Claude or ChatGPT", length: "4 min" },
@@ -92,19 +103,6 @@ const faq = [
   { q: "Is it a subscription?", a: "No. You pay once and keep it. Updates are included." },
   ...(refundPolicy ? [{ q: "What's your refund policy?", a: refundPolicy }] : []),
 ];
-
-const angles = [
-  "Too narrow. Here are 3 angles:",
-  "1. The mistake your viewers make every week",
-  "2. What you'd tell yourself a year ago",
-  "3. The question clients ask on every call",
-];
-const board = [
-  { col: "Idea", cards: 3 },
-  { col: "Scripted", cards: 2 },
-  { col: "Filmed", cards: 1 },
-  { col: "Posted", cards: 2 },
-];
 ---
 
 <Base
@@ -115,16 +113,7 @@ const board = [
   twin={false}
 >
   <section class="hero wrap" aria-labelledby="hero-title">
-    <div class="hero__art" aria-hidden="true">
-      {board.map(({ col, cards }, i) => (
-        <div class="board__col" style={`--i: ${i}`}>
-          <span class="board__head">{col}</span>
-          {Array.from({ length: cards }, (_, j) => (
-            <span class="board__card" style={`--j: ${j}`} />
-          ))}
-        </div>
-      ))}
-    </div>
+    <ArcArt kind="hero" />
     <p class="kicker product">The Content Arc · by Arcbuildr</p>
     <h1 id="hero-title">
       Your ideas aren't the problem. <span class="hl">The angle is.</span>
@@ -149,39 +138,8 @@ const board = [
   <section class="steps" aria-label="How it works">
     {steps.map((s) => (
       <article class="step wrap reveal" aria-labelledby={`step-${s.n}`}>
-        <div class={`art art--${s.n}`} aria-hidden="true">
-          {s.n === 1 && (
-            <>
-              <div class="mic">
-                <span class="mic__dot" />
-                {Array.from({ length: 14 }, (_, i) => (
-                  <span class="mic__bar" style={`--i: ${i}`} />
-                ))}
-                <span class="mic__time">0:45</span>
-              </div>
-              <div class="apps">
-                <span style="--i: 0">Claude</span>
-                <span style="--i: 1">ChatGPT</span>
-              </div>
-            </>
-          )}
-          {s.n === 2 && (
-            <div class="chat">
-              {angles.map((line, i) => (
-                <span class="chat__line" style={`--i: ${i}`}>
-                  {line}
-                </span>
-              ))}
-            </div>
-          )}
-          {s.n === 3 && (
-            <div class="toast">
-              <span class="toast__logo">N</span>
-              <span class="toast__text toast__text--saving">Saving to Notion…</span>
-              <span class="toast__text toast__text--saved">Idea saved to Notion</span>
-              <span class="toast__check">✓</span>
-            </div>
-          )}
+        <div class="art">
+          <ArcArt kind={s.n === 1 ? "voice" : s.n === 2 ? "chat" : "board"} />
         </div>
         <p class="kicker step__n">Step {s.n}</p>
         <h2 id={`step-${s.n}`}>{s.title}</h2>
@@ -204,7 +162,13 @@ const board = [
     <ul class="included">
       {included.map((item) => (
         <li>
-          <span class={`icon icon--${item.icon}`} aria-hidden="true" />
+          {item.icon === "notion" ? (
+            <Mark name="notion" class="icon" />
+          ) : (
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+              <path d={icons[item.icon]} />
+            </svg>
+          )}
           <div>
             <h3>{item.title}</h3>
             <p>{item.body}</p>
@@ -328,44 +292,6 @@ const board = [
     font-size: 14px;
   }
 
-  /* Hero art: the board, four columns filling with cards. */
-  .hero__art {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 8px;
-    width: 100%;
-    max-width: 30rem;
-    padding: 12px;
-    margin-bottom: 12px;
-    border: var(--rule-thin);
-    border-radius: var(--radius-lg);
-    background: var(--color-card);
-    box-shadow: var(--shadow-lift);
-  }
-  .board__col {
-    display: grid;
-    align-content: start;
-    gap: 6px;
-    min-height: 140px;
-    padding: 8px;
-    border-radius: var(--radius-md);
-    background: var(--color-paper);
-  }
-  .board__head {
-    font-size: 12px;
-    font-weight: 600;
-    text-align: left;
-  }
-  .board__card {
-    height: 28px;
-    border-radius: 8px;
-    background: var(--color-card);
-    box-shadow: var(--shadow-card);
-  }
-  .board__col:last-child .board__card {
-    background: var(--color-accent-soft);
-  }
-
   /* Steps */
   .step {
     gap: 12px;
@@ -385,111 +311,8 @@ const board = [
   .art {
     display: grid;
     justify-items: center;
-    gap: 16px;
     width: 100%;
     margin-bottom: 20px;
-  }
-
-  .mic {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    width: 100%;
-    max-width: 22rem;
-    height: 64px;
-    padding-inline: 20px;
-    border-radius: var(--radius-pill);
-    background: var(--color-ink);
-    color: var(--color-paper);
-  }
-  .mic__dot {
-    width: 10px;
-    height: 10px;
-    margin-right: 8px;
-    border-radius: 50%;
-    background: var(--color-accent);
-  }
-  .mic__bar {
-    flex: 1;
-    height: 30%;
-    border-radius: 2px;
-    background: currentColor;
-  }
-  .mic__time {
-    margin-left: 10px;
-    font-size: 14px;
-    font-variant-numeric: tabular-nums;
-  }
-  .apps {
-    display: flex;
-    gap: 8px;
-  }
-  .apps span {
-    padding: 6px 14px;
-    border: var(--rule-thin);
-    border-radius: var(--radius-pill);
-    background: var(--color-card);
-    font-size: 14px;
-    font-weight: 600;
-  }
-
-  .chat {
-    display: grid;
-    gap: 6px;
-    width: 100%;
-    max-width: 24rem;
-    padding: 18px 20px;
-    border: var(--rule-thin);
-    border-radius: var(--radius-lg) var(--radius-lg) var(--radius-lg) 8px;
-    background: var(--color-card);
-    box-shadow: var(--shadow-card);
-    text-align: left;
-    font-size: 15px;
-  }
-  .chat__line:first-child {
-    font-weight: 600;
-  }
-
-  .toast {
-    display: grid;
-    grid-template-columns: auto 1fr auto;
-    align-items: center;
-    gap: 12px;
-    width: 100%;
-    max-width: 22rem;
-    padding: 12px 16px;
-    border: var(--rule-thin);
-    border-radius: var(--radius-md);
-    background: var(--color-card);
-    box-shadow: var(--shadow-lift);
-    text-align: left;
-    font-size: 15px;
-    font-weight: 600;
-  }
-  .toast__logo {
-    display: grid;
-    place-items: center;
-    width: 28px;
-    height: 28px;
-    border: 2px solid var(--color-ink);
-    border-radius: 6px;
-    font-weight: 700;
-  }
-  .toast__text {
-    grid-area: 1 / 2;
-  }
-  .toast__text--saving {
-    visibility: hidden;
-  }
-  .toast__check {
-    display: grid;
-    place-items: center;
-    width: 24px;
-    height: 24px;
-    border-radius: 50%;
-    background: var(--color-sage);
-    color: #fff;
-    font-size: 14px;
   }
 
   /* Reading blocks */
@@ -528,35 +351,14 @@ const board = [
     margin-top: 4px;
     color: var(--color-ink-muted);
   }
-  .icon {
+  /* :global so it also styles the Mark component's svg. */
+  .included :global(.icon) {
     flex: none;
-    width: 32px;
-    height: 32px;
-    border-radius: 10px;
-    background: var(--color-accent-soft);
-    position: relative;
-  }
-  .icon::before {
-    content: "";
-    position: absolute;
-    inset: 9px;
-    border: 2px solid var(--color-accent-text);
-    border-radius: 3px;
-  }
-  .icon--person::before,
-  .icon--chat::before {
-    border-radius: 50%;
-  }
-  .icon--chat::before {
-    border-bottom-left-radius: 2px;
-  }
-  .icon--play::before {
-    inset: 9px 9px 9px 12px;
-    border: 0;
-    border-left: 11px solid var(--color-accent-text);
-    border-top: 7px solid transparent;
-    border-bottom: 7px solid transparent;
-    border-radius: 0;
+    width: 30px;
+    height: 30px;
+    margin-top: 2px;
+    fill: var(--color-ink);
+    color: var(--color-ink);
   }
 
   .videos {
@@ -648,71 +450,5 @@ const board = [
   .small {
     color: var(--color-ink-muted);
     font-size: 14px;
-  }
-
-  /* Motion: each step's drawing loops once it's on screen. Off for reduced motion. */
-  @media (prefers-reduced-motion: no-preference) {
-    .board__card {
-      animation: drop 0.5s var(--spring) both;
-      animation-delay: calc(0.4s + var(--i) * 0.15s + var(--j) * 0.1s);
-    }
-    .mic__bar {
-      animation: wave 0.9s var(--ease-in-out) infinite alternate;
-      animation-delay: calc(var(--i) * -0.13s);
-    }
-    .apps span {
-      animation: drop 0.5s var(--spring) both;
-      animation-delay: calc(0.3s + var(--i) * 0.12s);
-    }
-    .chat__line {
-      animation: type 0.5s steps(24) both;
-      animation-delay: calc(var(--i) * 0.6s);
-    }
-    .toast__text--saving {
-      visibility: visible;
-      animation: saving 3s step-end infinite;
-    }
-    .toast__text--saved,
-    .toast__check {
-      animation: saved 3s step-end infinite;
-    }
-    .step:not(.is-in) * {
-      animation-play-state: paused;
-    }
-  }
-  @keyframes drop {
-    from {
-      opacity: 0;
-      translate: 0 -8px;
-    }
-  }
-  @keyframes wave {
-    to {
-      height: 90%;
-    }
-  }
-  @keyframes type {
-    from {
-      clip-path: inset(0 100% 0 0);
-    }
-    to {
-      clip-path: inset(0 0 0 0);
-    }
-  }
-  @keyframes saving {
-    0% {
-      visibility: visible;
-    }
-    50% {
-      visibility: hidden;
-    }
-  }
-  @keyframes saved {
-    0% {
-      visibility: hidden;
-    }
-    50% {
-      visibility: visible;
-    }
   }
 </style>

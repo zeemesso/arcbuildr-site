@@ -1,0 +1,14 @@
+---
+// A brand mark from src/data/marks.ts, drawn in currentColor. Decorative.
+import { marks } from "../data/marks";
+
+interface Props {
+  name: keyof typeof marks;
+  class?: string;
+}
+const { name, class: cls } = Astro.props;
+---
+
+<svg class={cls} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+  <path d={marks[name]}></path>
+</svg>
