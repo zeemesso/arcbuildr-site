@@ -2,7 +2,6 @@
 import { MagneticButton } from "@/components/ui/magnetic-button";
 import Base from "../layouts/Base.astro";
 import LeadForm from "../components/LeadForm.astro";
-import CalEmbed from "../components/CalEmbed.astro";
 import DeliverableArt from "../components/DeliverableArt.astro";
 import { deliverables } from "../data/deliverables";
 import { dict, type Lang } from "../i18n";
@@ -215,13 +214,9 @@ const words = deliverables.map((d, i) => ({ ...d, ...t.deliverables[i] }));
       </h2>
       <p>{t.startText}</p>
     </div>
-    <div class="card start__cal">
-      <CalEmbed lazy />
-    </div>
-    <details class="card start__write">
-      <summary>{t.startWrite}</summary>
+    <div class="card start__form">
       <LeadForm lang={lang} />
-    </details>
+    </div>
   </section>
 </Base>
 
@@ -658,7 +653,7 @@ const words = deliverables.map((d, i) => ({ ...d, ...t.deliverables[i] }));
     color: var(--color-ink-muted);
   }
 
-  /* Book the call: centered pill + heading, then the inline calendar full width. */
+  /* Book the call: centered pill + heading, then the application form. */
   #start {
     display: grid;
     gap: var(--space-xl);
@@ -680,22 +675,12 @@ const words = deliverables.map((d, i) => ({ ...d, ...t.deliverables[i] }));
     background: color-mix(in oklch, var(--color-accent) 18%, transparent);
     color: var(--color-accent);
   }
-  .start__cal {
-    overflow: hidden;
-    padding: var(--space-sm);
-  }
-  .start__write {
-    padding: var(--space-md) var(--space-lg);
-  }
-  .start__write summary {
-    min-height: var(--tap);
-    display: flex;
-    align-items: center;
-    cursor: pointer;
-    font-weight: 600;
-  }
-  .start__write[open] summary {
-    margin-bottom: var(--space-lg);
+  /* The application form; booking comes after it, on /thanks. */
+  .start__form {
+    justify-self: center;
+    width: 100%;
+    max-width: 40rem;
+    padding: var(--space-lg);
   }
 
   @media (min-width: 48rem) {

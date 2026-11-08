@@ -1,14 +1,20 @@
 ---
-// The lead form. Works as a plain POST without JavaScript. The script below adds
-// inline checks, a sending state and a server-failure message that keeps what was typed.
+// The application form. Works as a plain POST without JavaScript. The script below adds
+// inline checks, a sending state, one automatic retry, and a failure message that keeps
+// what was typed and offers WhatsApp. Question wording: src/data/application.ts.
 import { dict, href, type Lang } from "../i18n";
-import { CAMERA, START } from "../lib/lead";
+import { QUESTIONS, REQUIRED_CHOICES } from "../data/application";
+import { whatsappHref } from "../config";
 
 interface Props {
   lang: Lang;
 }
 const { lang } = Astro.props;
 const t = dict(lang).form;
+const q = QUESTIONS;
+const wa = whatsappHref(dict(lang).thanks.whatsappText);
+// The call language starts on the page's language, one less tap for most visitors.
+const preset: Record<string, string> = { language: lang === "fr" ? "French" : "English" };
 ---
 
 <form
@@ -18,16 +24,17 @@ const t = dict(lang).form;
   class="form"
   data-checks={JSON.stringify(t.checks)}
   data-sending={t.sending}
+  data-retrying={t.retrying}
   data-thanks={href(lang, "/thanks")}
 >
   <div class="field">
-    <label for="f-name">{t.name}</label>
+    <label for="f-name">{q.name.label[lang]}</label>
     <input id="f-name" name="name" type="text" autocomplete="name" required />
     <p class="error" id="f-name-error" hidden></p>
   </div>
 
   <div class="field">
-    <label for="f-email">{t.email}</label>
+    <label for="f-email">{q.email.label[lang]}</label>
     <input
       id="f-email"
       name="email"
@@ -42,12 +49,30 @@ const t = dict(lang).form;
   </div>
 
   <div class="field">
-    <label for="f-instagram">{t.instagram}</label>
+    <label for="f-phone">{q.phone.label[lang]}</label>
+    <input
+      id="f-phone"
+      name="phone"
+      type="tel"
+      inputmode="tel"
+      autocomplete="tel"
+      placeholder={q.phone.placeholder}
+      aria-describedby="f-phone-help"
+      required
+    />
+    <p class="help" id="f-phone-help">
+      {q.phone.help[lang]}
+    </p>
+    <p class="error" id="f-phone-error" hidden></p>
+  </div>
+
+  <div class="field">
+    <label for="f-instagram">{q.instagram.label[lang]}</label>
     <input
       id="f-instagram"
       name="instagram"
       type="text"
-      placeholder="@"
+      placeholder={q.instagram.placeholder}
       autocomplete="off"
       autocapitalize="none"
       autocorrect="off"
@@ -56,58 +81,64 @@ const t = dict(lang).form;
       required
     />
     <p class="help" id="f-instagram-help">
-      {t.instagramHelp}
+      {q.instagram.help[lang]}
     </p>
     <p class="error" id="f-instagram-error" hidden></p>
   </div>
 
-  <div class="field">
-    <label for="f-business">{t.business}</label>
-    <input
-      id="f-business"
-      name="business"
-      type="text"
-      autocomplete="organization"
-      aria-describedby="f-business-help"
-      required
-    />
-    <p class="help" id="f-business-help">
-      {t.businessHelp}
-    </p>
-    <p class="error" id="f-business-error" hidden></p>
-  </div>
+  {REQUIRED_CHOICES.map((name) => {
+    const question = q[name];
+    const help = "help" in question ? question.help[lang] : "";
+    return (
+      <fieldset
+        class="field choice"
+        id={`f-${name}`}
+        aria-describedby={help ? `f-${name}-help` : undefined}
+      >
+        <legend>{question.label[lang]}</legend>
+        {help && (
+          <p class="help" id={`f-${name}-help`}>
+            {help}
+          </p>
+        )}
+        <div class="choice__options">
+          {question.options.map((option, i) => (
+            <label class="chip">
+              <input
+                type="radio"
+                name={name}
+                value={option.value}
+                required={i === 0}
+                checked={preset[name] === option.value}
+              />
+              <span>{option[lang]}</span>
+            </label>
+          ))}
+        </div>
+        <p class="error" id={`f-${name}-error`} hidden />
+      </fieldset>
+    );
+  })}
 
   <div class="field">
-    <label for="f-camera">{t.camera}</label>
-    <select id="f-camera" name="camera">
-      <option value="">{t.choose}</option>
-      {CAMERA.map((value, i) => (
-        <option value={value}>{t.cameraOptions[i]}</option>
+    <label for="f-heard">{q.heard.label[lang]}</label>
+    <select id="f-heard" name="heard">
+      <option value="">-</option>
+      {q.heard.options.map((option) => (
+        <option value={option.value}>{option[lang]}</option>
       ))}
     </select>
   </div>
 
   <div class="field">
-    <label for="f-start">{t.start}</label>
-    <select id="f-start" name="start">
-      <option value="">{t.choose}</option>
-      {START.map((value, i) => (
-        <option value={value}>{t.startOptions[i]}</option>
-      ))}
-    </select>
-  </div>
-
-  <div class="field">
-    <label for="f-goal">{t.goal}</label>
-    <textarea id="f-goal" name="goal" rows="3" aria-describedby="f-goal-help"></textarea>
-    <p class="help" id="f-goal-help">
-      {t.goalHelp}
-    </p>
+    <label for="f-referred">{q.referredBy.label[lang]}</label>
+    <input id="f-referred" name="referred_by" type="text" autocomplete="off" />
   </div>
 
   <input type="hidden" name="lang" value={lang} />
-  <input type="hidden" name="src" value="" />
-  <input type="hidden" name="referrer" value="" />
+  <input type="hidden" name="tz" value="" />
+  <input type="hidden" name="page" value="" />
+  <input type="hidden" name="utm" value="" />
   <input type="hidden" name="sent_at" value="" />
   <div class="trap" aria-hidden="true">
     <label for="f-website">{t.trap}</label>
@@ -121,9 +152,15 @@ const t = dict(lang).form;
     <p class="note">
       {t.note} <a href={href(lang, "/privacy")}>{dict(lang).nav.privacy}</a>
     </p>
-    <p class="error error--form" id="form-error" role="alert" hidden>
-      {t.error}
-    </p>
+    <div class="error error--form" id="form-error" role="alert" hidden>
+      <p>{t.error}</p>
+      {wa && (
+        <a class="btn btn--block" href={wa}>
+          {t.errorWhatsapp}
+        </a>
+      )}
+      <p>{t.errorDm}</p>
+    </div>
     <p class="visually-hidden" id="form-status" role="status"></p>
   </div>
 
@@ -131,6 +168,9 @@ const t = dict(lang).form;
 </form>
 
 <script>
+  import { normalizePhone } from "../lib/phone";
+  import { REQUIRED_CHOICES as CHOICES } from "../data/application";
+
   const form = document.getElementById("lead-form") as HTMLFormElement;
   const button = form.querySelector<HTMLButtonElement>("button[type=submit]")!;
   const status = document.getElementById("form-status")!;
@@ -141,33 +181,49 @@ const t = dict(lang).form;
 
   const field = (name: string) => form.elements.namedItem(name) as HTMLInputElement;
 
-  // Attribution: the short links /ig, /dm and /tt redirect to /?src=...
-  const src = new URLSearchParams(location.search).get("src");
-  field("src").value = src && ["ig", "dm", "tt"].includes(src) ? src : "direct";
-  field("referrer").value = document.referrer;
+  // Hidden context for the sheet: time zone, page, campaign tags.
+  const params = new URLSearchParams(location.search);
+  const utm = new URLSearchParams();
+  for (const key of ["utm_source", "utm_medium", "utm_campaign", "utm_term", "utm_content"]) {
+    const value = params.get(key);
+    if (value) utm.set(key, value.slice(0, 100));
+  }
+  // The short links /ig, /dm and /tt redirect to /?src=...
+  const src = params.get("src");
+  if (src && ["ig", "dm", "tt"].includes(src)) utm.set("src", src);
+  field("tz").value = Intl.DateTimeFormat().resolvedOptions().timeZone ?? "";
+  field("page").value = location.href.slice(0, 500);
+  field("utm").value = utm.toString();
 
   // Messages come from the page's language (data-checks, set from src/i18n).
   const msg = JSON.parse(form.dataset.checks!) as Record<string, string>;
   const checks: Record<string, (v: string) => string> = {
     name: (v) => (v ? "" : msg.name!),
     email: (v) => (/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v) ? "" : msg.email!),
+    phone: (v) => (normalizePhone(v) ? "" : msg.phone!),
     instagram: (v) => (v.replace(/^@/, "") ? "" : msg.instagram!),
-    business: (v) => (v ? "" : msg.business!),
   };
+  const picked = (name: string) => !!form.querySelector(`input[name="${name}"]:checked`);
 
-  function show(name: string, message: string) {
-    const input = field(name);
+  function describe(el: HTMLElement, name: string, message: string) {
     const error = document.getElementById(`f-${name}-error`)!;
     error.textContent = message;
     error.hidden = !message;
-    input.toggleAttribute("aria-invalid", !!message);
-    if (message) input.setAttribute("aria-invalid", "true");
     const help = document.getElementById(`f-${name}-help`);
-    input.setAttribute(
-      "aria-describedby",
-      [help?.id, message ? error.id : ""].filter(Boolean).join(" "),
-    );
-    if (!input.getAttribute("aria-describedby")) input.removeAttribute("aria-describedby");
+    const ids = [help?.id, message ? error.id : ""].filter(Boolean).join(" ");
+    if (ids) el.setAttribute("aria-describedby", ids);
+    else el.removeAttribute("aria-describedby");
+  }
+
+  function show(name: string, message: string) {
+    const input = field(name);
+    if (message) input.setAttribute("aria-invalid", "true");
+    else input.removeAttribute("aria-invalid");
+    describe(input, name, message);
+  }
+
+  function showChoice(name: string, message: string) {
+    describe(document.getElementById(`f-${name}`)!, name, message);
   }
 
   for (const name of Object.keys(checks)) {
@@ -179,6 +235,27 @@ const t = dict(lang).form;
         show(name, checks[name]!(field(name).value.trim()));
     });
   }
+  for (const name of CHOICES) {
+    document.getElementById(`f-${name}`)!.addEventListener("change", () => showChoice(name, ""));
+  }
+
+  async function send(body: URLSearchParams): Promise<"ok" | "invalid" | "fail"> {
+    try {
+      const res = await fetch(form.action, {
+        method: "POST",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        body,
+      });
+      if (res.status === 400) return "invalid";
+      const json = (await res.json().catch(() => null)) as { ok?: boolean } | null;
+      return res.ok && json?.ok ? "ok" : "fail";
+    } catch {
+      return "fail";
+    }
+  }
 
   let sending = false;
 
@@ -187,14 +264,20 @@ const t = dict(lang).form;
     if (sending) return;
     formError.hidden = true;
 
-    let firstBad: string | null = null;
+    let firstBad: HTMLElement | null = null;
     for (const name of Object.keys(checks)) {
       const message = checks[name]!(field(name).value.trim());
       show(name, message);
-      if (message && !firstBad) firstBad = name;
+      if (message && !firstBad) firstBad = field(name);
+    }
+    for (const name of CHOICES) {
+      const message = picked(name) ? "" : msg.choice!;
+      showChoice(name, message);
+      if (message && !firstBad)
+        firstBad = form.querySelector<HTMLInputElement>(`input[name="${name}"]`);
     }
     if (firstBad) {
-      field(firstBad).focus();
+      firstBad.focus();
       return;
     }
 
@@ -204,29 +287,29 @@ const t = dict(lang).form;
     button.textContent = form.dataset.sending!;
     status.textContent = form.dataset.sending!;
 
-    try {
-      const res = await fetch(form.action, {
-        method: "POST",
-        headers: {
-          Accept: "application/json",
-          "Content-Type": "application/x-www-form-urlencoded",
-        },
-        body: new URLSearchParams(new FormData(form) as unknown as Record<string, string>),
-      });
-      const body = (await res.json().catch(() => null)) as { ok?: boolean } | null;
-      if (!res.ok || !body?.ok) throw new Error(String(res.status));
+    const body = new URLSearchParams(new FormData(form) as unknown as Record<string, string>);
+    let result = await send(body);
+    if (result === "fail") {
+      // One automatic retry, so a brief network drop doesn't lose the lead.
+      button.textContent = form.dataset.retrying!;
+      await new Promise((r) => setTimeout(r, 800));
+      result = await send(body);
+    }
+
+    if (result === "ok") {
       const next = new URLSearchParams({
         name: field("name").value.trim(),
         email: field("email").value.trim(),
       });
       location.assign(`${form.dataset.thanks}?${next}`);
-    } catch {
-      sending = false;
-      button.disabled = false;
-      button.textContent = label;
-      status.textContent = "";
-      formError.hidden = false;
+      return;
     }
+    sending = false;
+    button.disabled = false;
+    button.textContent = label;
+    status.textContent = "";
+    formError.hidden = false;
+    formError.scrollIntoView({ block: "center" });
   });
 </script>
 
@@ -241,10 +324,21 @@ const t = dict(lang).form;
     display: grid;
     gap: var(--space-xs);
   }
-  label {
+  fieldset {
+    border: 0;
+    margin: 0;
+    padding: 0;
+    min-width: 0;
+  }
+  label,
+  legend {
     font-weight: 600;
   }
-  input:not([type="hidden"]),
+  legend {
+    padding: 0;
+    margin-bottom: var(--space-xs);
+  }
+  input:not([type="hidden"]):not([type="radio"]),
   select,
   textarea {
     width: 100%;
@@ -259,25 +353,62 @@ const t = dict(lang).form;
       border-color var(--dur-fast) var(--ease-out),
       background-color var(--dur-fast) var(--ease-out);
   }
-  input:not([type="hidden"]):hover,
-  select:hover,
-  textarea:hover {
+  input:not([type="hidden"]):not([type="radio"]):hover,
+  select:hover {
     border-color: var(--color-ink-muted);
   }
-  input:not([type="hidden"]):focus-visible,
-  select:focus-visible,
-  textarea:focus-visible {
+  input:not([type="hidden"]):not([type="radio"]):focus-visible,
+  select:focus-visible {
     outline-offset: 1px;
     border-color: var(--color-accent);
     background: var(--color-card);
-  }
-  textarea {
-    resize: vertical;
   }
   input[aria-invalid="true"] {
     border-color: var(--color-error);
     border-width: 2px;
   }
+
+  /* Multiple choice: tap-sized chips that wrap; the real radio stays for keyboard and screen readers. */
+  .choice__options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-xs);
+  }
+  .chip {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--tap);
+    padding: var(--space-xs) var(--space-md);
+    border: 1px solid oklch(62% 0.01 70);
+    border-radius: 999px;
+    background: var(--color-field);
+    font-weight: 500;
+    cursor: pointer;
+    transition:
+      border-color var(--dur-fast) var(--ease-out),
+      background-color var(--dur-fast) var(--ease-out);
+  }
+  .chip input {
+    position: absolute;
+    opacity: 0;
+    inset: 0;
+    margin: 0;
+    cursor: pointer;
+  }
+  .chip:hover {
+    border-color: var(--color-ink-muted);
+  }
+  .chip:has(:checked) {
+    border-color: var(--color-accent);
+    background: color-mix(in oklch, var(--color-accent) 16%, var(--color-card));
+    font-weight: 600;
+  }
+  .chip:has(:focus-visible) {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+  }
+
   .help,
   .note,
   .dm {
@@ -288,6 +419,13 @@ const t = dict(lang).form;
     color: var(--color-error);
     font-size: var(--text-sm);
     font-weight: 600;
+  }
+  .error--form {
+    display: grid;
+    gap: var(--space-sm);
+  }
+  .error--form[hidden] {
+    display: none;
   }
   .form__action {
     display: grid;

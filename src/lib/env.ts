@@ -1,8 +1,8 @@
 /** Bindings the Worker reads. Secrets are set in Cloudflare, never in the repo. */
 export interface Env {
   ASSETS: Fetcher;
-  NOTION_TOKEN?: string;
-  NOTION_DATABASE_ID?: string;
+  SHEETS_URL?: string;
+  SHEETS_TOKEN?: string;
   RESEND_API_KEY?: string;
   ALERT_EMAIL?: string;
 }

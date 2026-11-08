@@ -46,22 +46,30 @@ test("the French form checks in French and sends the visitor to /fr/thanks", asy
     await route.fulfill({ json: { ok: true } });
   });
   await page.goto("/fr/");
-  await page.locator(".start__write summary").click();
-  await page.getByRole("button", { name: "Envoyer et choisir un créneau" }).click();
+  const submit = page.getByRole("button", { name: "Envoyer mes réponses" });
+  await submit.click();
   await expect(page.locator("#f-name-error")).toHaveText("Ajoutez votre nom.");
+  await expect(page.locator("#f-budget-error")).toHaveText("Choisissez une réponse.");
 
   await page.fill("#f-name", "TEST Zyade");
   await page.fill("#f-email", "test@example.com");
+  await page.fill("#f-phone", "+33 6 12 34 56 78");
   await page.fill("#f-instagram", "@test");
-  await page.fill("#f-business", "Studio");
-  await page.selectOption("#f-camera", { label: "Je peux essayer" });
-  await page.getByRole("button", { name: "Envoyer et choisir un créneau" }).click();
+  const choose = (q: string, label: string) =>
+    page.locator(`#f-${q}`).getByRole("radio", { name: label, exact: true }).check();
+  await choose("channel", "Appel téléphonique");
+  await choose("budget", "Je ne sais pas encore");
+  await choose("decision", "Je décide seul(e)");
+  await choose("need", "M'apporter plus de clients");
+  await choose("timing", "Ce mois-ci");
+  await submit.click();
   await page.waitForURL(/\/fr\/thanks\?/);
 
   expect(bodies[0]!.get("lang")).toBe("fr");
-  // Stored values stay English, so Notion reads the same in both languages.
-  expect(bodies[0]!.get("camera")).toBe("I can try");
+  // The call language starts on French; stored values stay English so the sheet reads the same.
+  expect(bodies[0]!.get("language")).toBe("French");
+  expect(bodies[0]!.get("channel")).toBe("Phone call");
   await expect(page.getByRole("heading", { level: 1 })).toHaveText(
-    "Merci. Nous avons bien reçu vos informations.",
+    "Merci. Vos réponses sont bien arrivées.",
   );
 });

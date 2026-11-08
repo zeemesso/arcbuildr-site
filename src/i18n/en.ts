@@ -142,42 +142,39 @@ export const en = {
     ],
     startPill: "Get in touch",
     startTitle: ["Start ", "with a call", ""],
-    startText: "Pick a time that works for you. I look at your profile before we talk.",
-    startWrite: "Rather write first? Send me your details and pick a time after.",
+    startText:
+      "Answer a few short questions. Then call me straight away or pick a time that suits you.",
   },
   form: {
-    name: "Your name",
-    email: "Email",
-    instagram: "Instagram handle",
-    instagramHelp: "So we can look at your profile before the call.",
-    business: "Your business",
-    businessHelp: "One line is enough.",
-    camera: "Are you ready to be on camera? (optional)",
-    // Labels shown to the visitor. The stored values stay the English ones in lib/lead.ts.
-    cameraOptions: ["Yes", "I can try", "I'd rather not"],
-    start: "When do you want to start? (optional)",
-    startOptions: ["This month", "In 1 to 2 months", "Just looking"],
-    choose: "Choose one",
-    goal: "What do you want your content to do for you? (optional)",
-    goalHelp: "A sentence or two.",
-    submit: "Send and pick a time",
+    // Question labels and options live in src/data/application.ts.
+    submit: "Send my answers",
     sending: "Sending...",
+    retrying: "Still sending...",
     note: "We use your details only to prepare for the call.",
-    error:
-      "We couldn't send your details. Try again, or DM us at @arcbuildr. What you typed is still here.",
+    error: "We couldn't save your answers. What you typed is still here.",
+    errorWhatsapp: "Message me on WhatsApp",
+    errorDm: "Or send a DM to @arcbuildr on Instagram.",
     dm: "Prefer Instagram? Send us a DM at @arcbuildr.",
     trap: "Leave this empty",
     checks: {
       name: "Add your name.",
       email: "Check your email address. It needs a full domain, like name@gmail.com.",
+      phone: "Add your number with the country code, like +212 6 12 34 56 78.",
       instagram: "Add your Instagram handle, like @yourname.",
-      business: "Add one line about your business.",
+      choice: "Pick one.",
     },
   },
   thanks: {
-    title: "Pick a time | Arcbuildr",
-    h1: "Thanks. We've got your details.",
-    text: "Pick a time for your call below. We'll look at your profile before we talk.",
+    title: "Talk now or pick a time | Arcbuildr",
+    h1: "Thanks. Your answers are in.",
+    text: "Talk to me now, or pick a time that suits you. I look at your profile before we talk.",
+    nowTitle: "Talk now",
+    nowText: "I answer during working hours.",
+    whatsapp: "Message on WhatsApp",
+    whatsappText: "Hi Zyade, I just sent my answers on arcbuildr.co.",
+    call: "Call me",
+    laterTitle: "Pick a time",
+    laterText: "Times show in your own time zone.",
     fallback: "If no time works, email us at [email] or send a DM to @arcbuildr on Instagram.",
   },
   privacy: {
@@ -185,7 +182,7 @@ export const en = {
     description:
       "What Arcbuildr collects when you use this site, why, who else sees it, and how to ask us to delete it.",
     h1: "Privacy",
-    updated: "Last updated: November 5, 2026",
+    updated: "Last updated: November 8, 2026",
     // A string is a paragraph; an array of strings is a bullet list.
     sections: [
       {
@@ -199,7 +196,7 @@ export const en = {
         id: "p-collect",
         title: "What we collect",
         body: [
-          "What you type in the form: your name, email, Instagram handle, business and, if you fill it in, what you want your personal brand to do for your business. We also save which link you came from (such as our Instagram bio), the page you came from, the language of the page and the time you sent the form.",
+          "What you type in the form: your name, email, phone number, Instagram handle, the language and way you prefer for the call, and your answers about budget, who decides, what you want your personal brand to do and when you want to start. If you fill them in, also how you heard about us and who referred you. We also save your time zone, the page you sent the form from, the campaign tags in its link (such as our Instagram bio link), the language of the page and the time you sent the form.",
           "The booking tool records the time you pick and the details you give it. Our site statistics count visits to each page and do not use cookies.",
           "If you switch the site's language, we save that choice in a small cookie named lang, so the site opens in that language next time. It holds nothing else and is not used for tracking.",
         ],
@@ -218,7 +215,7 @@ export const en = {
           "These services handle your details for us:",
           [
             "Cloudflare hosts this site and counts visits without cookies.",
-            "Notion stores what you type in the form.",
+            "Google Sheets (Google) stores what you type in the form.",
             "Resend sends us an email when a new form comes in.",
             "Cal.com runs the booking calendar.",
           ],
@@ -229,7 +226,7 @@ export const en = {
         id: "p-keep",
         title: "How long we keep it, and how to ask us to delete it",
         body: [
-          "We keep your details while we talk about working together and while we work with you. To have them deleted, email [email] or send us a DM, and we delete them from Notion and from our email.",
+          "We keep your details while we talk about working together and while we work with you. To have them deleted, email [email] or send us a DM, and we delete them from our spreadsheet and from our email.",
         ],
       },
     ],

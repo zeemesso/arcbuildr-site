@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { PHONE_NUMBER, WHATSAPP_NUMBER } from "../src/config";
 
 type Call = unknown[];
 
@@ -27,9 +28,7 @@ test("name and email from the URL reach the embed", async ({ page }) => {
 test("a direct visit with no values still loads, with an empty prefill", async ({ page }) => {
   await recordCal(page);
   await page.goto("/thanks");
-  await expect(page.getByRole("heading", { level: 1 })).toHaveText(
-    "Thanks. We've got your details.",
-  );
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText("Thanks. Your answers are in.");
   const inline = (await calls(page)).find((c) => c[0] === "inline")![1] as {
     config: { name: string; email: string };
   };
@@ -53,5 +52,21 @@ test("header has no Book a call button, page is noindex", async ({ page }) => {
   await expect(page.getByRole("link", { name: "Book a call" })).toHaveCount(0);
   await expect(page.getByRole("link", { name: "Arcbuildr", exact: true }).first()).toBeVisible();
   await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content", "noindex");
-  await expect(page).toHaveTitle("Pick a time | Arcbuildr");
+  await expect(page).toHaveTitle("Talk now or pick a time | Arcbuildr");
+});
+
+test("talk now shows WhatsApp and phone only when their numbers are set", async ({ page }) => {
+  await page.route("https://app.cal.com/**", (route) => route.abort());
+  await page.goto("/thanks?name=A&email=a%40example.com");
+  await expect(page.getByRole("heading", { name: "Pick a time" })).toBeVisible();
+  const wa = page.locator("#call-whatsapp");
+  if (WHATSAPP_NUMBER) {
+    await expect(wa).toHaveAttribute(
+      "href",
+      new RegExp(`^https://wa\\.me/${WHATSAPP_NUMBER}\\?text=`),
+    );
+  } else await expect(wa).toHaveCount(0);
+  const tel = page.locator("#call-phone");
+  if (PHONE_NUMBER) await expect(tel).toHaveAttribute("href", `tel:+${PHONE_NUMBER}`);
+  else await expect(tel).toHaveCount(0);
 });

@@ -13,7 +13,8 @@ test("privacy page has the five sections and names the four tools", async ({ pag
     "How long we keep it, and how to ask us to delete it",
   ]);
   const text = await page.locator("main").innerText();
-  for (const tool of ["Cloudflare", "Notion", "Resend", "Cal.com"]) expect(text).toContain(tool);
+  for (const tool of ["Cloudflare", "Google Sheets", "Resend", "Cal.com"])
+    expect(text).toContain(tool);
   const results = await new AxeBuilder({ page })
     .withTags(["wcag2a", "wcag2aa", "wcag22aa"])
     .analyze();
@@ -22,7 +23,6 @@ test("privacy page has the five sections and names the four tools", async ({ pag
 
 test("privacy is linked from the form and the footer", async ({ page }) => {
   await page.goto("/");
-  await page.locator(".start__write summary").click();
   await expect(page.locator("#lead-form").getByRole("link", { name: "Privacy" })).toHaveAttribute(
     "href",
     "/privacy",

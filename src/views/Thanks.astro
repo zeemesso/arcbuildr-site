@@ -1,22 +1,47 @@
 ---
+// After a saved application: talk now (WhatsApp, phone) or pick a time (Cal.com).
 import Base from "../layouts/Base.astro";
 import CalEmbed from "../components/CalEmbed.astro";
 import { dict, type Lang } from "../i18n";
+import { phoneHref, whatsappHref } from "../config";
 
 interface Props {
   lang: Lang;
 }
 const { lang } = Astro.props;
 const t = dict(lang).thanks;
+const wa = whatsappHref(t.whatsappText);
 ---
 
 <Base lang={lang} title={t.title} noindex cta={false}>
   <section class="wrap thanks" aria-labelledby="thanks-title">
     <h1 id="thanks-title">{t.h1}</h1>
     <p>{t.text}</p>
-    <div class="cal">
+
+    {(wa || phoneHref) && (
+      <section class="card choice" aria-labelledby="now-title">
+        <h2 id="now-title">{t.nowTitle}</h2>
+        <p class="muted">{t.nowText}</p>
+        <div class="choice__actions">
+          {wa && (
+            <a class="btn" href={wa} id="call-whatsapp">
+              {t.whatsapp}
+            </a>
+          )}
+          {phoneHref && (
+            <a class="btn btn--ghost" href={phoneHref} id="call-phone">
+              {t.call}
+            </a>
+          )}
+        </div>
+      </section>
+    )}
+
+    <section class="card choice cal" aria-labelledby="later-title">
+      <h2 id="later-title">{t.laterTitle}</h2>
+      <p class="muted">{t.laterText}</p>
       <CalEmbed />
-    </div>
+    </section>
     <p class="fallback">{t.fallback}</p>
   </section>
 </Base>
@@ -28,19 +53,42 @@ const t = dict(lang).thanks;
     padding-block: var(--space-xl) var(--space-2xl);
     justify-items: start;
   }
-  .cal {
+  .choice {
+    display: grid;
+    gap: var(--space-sm);
     width: 100%;
     max-width: 47.5rem;
+    padding: var(--space-lg);
   }
+  .choice h2 {
+    font-size: var(--text-xl);
+  }
+  .choice__actions {
+    display: grid;
+    gap: var(--space-sm);
+  }
+  /* Second action: same shape as .btn, outlined so WhatsApp stays the main one. */
+  .btn--ghost {
+    background: transparent;
+    color: var(--color-accent);
+    box-shadow: inset 0 0 0 2px var(--color-accent);
+  }
+  .btn--ghost:hover {
+    background: color-mix(in oklch, var(--color-accent) 12%, transparent);
+  }
+  .muted,
   .fallback {
     color: var(--color-ink-muted);
+  }
+  @media (min-width: 48rem) {
+    .choice__actions {
+      grid-auto-flow: column;
+      justify-content: start;
+    }
   }
   @media (min-width: 64rem) {
     .thanks {
       padding-block: var(--space-2xl) var(--space-3xl);
-    }
-    .thanks > .cal {
-      margin-inline: 0;
     }
   }
 </style>

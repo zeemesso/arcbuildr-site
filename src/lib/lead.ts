@@ -1,74 +1,66 @@
 import type { Env } from "./env";
-import { createLead, type Lead, type LeadSource } from "./notion";
+import { QUESTIONS, REQUIRED_CHOICES, values } from "../data/application";
+import { normalizePhone } from "./phone";
+import { saveLead, type SheetLead } from "./sheets";
 import { sendAlert } from "./resend";
 
-const SOURCES: LeadSource[] = ["ig", "dm", "tt", "direct"];
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 
 export const FAILURE_MESSAGE =
   "We couldn't send your details. Try again, or DM us at @arcbuildr. What you typed is still here.";
-
-// Optional qualifying answers. Only these values are stored; anything else is dropped.
-export const CAMERA = ["Yes", "I can try", "I'd rather not"];
-export const START = ["This month", "In 1 to 2 months", "Just looking"];
 
 const field = (data: FormData, key: string, max: number) => {
   const value = data.get(key);
   return typeof value === "string" ? value.trim().slice(0, max) : "";
 };
 
-const pick = (data: FormData, key: string, allowed: string[]) => {
-  const value = field(data, key, 40);
-  return allowed.includes(value) ? value : "";
+/** An answer counts only if it is one of the options in src/data/application.ts. */
+const pick = (data: FormData, key: keyof typeof QUESTIONS) => {
+  const value = field(data, key, 80);
+  return values(QUESTIONS[key]).includes(value) ? value : "";
 };
 
 /** The page language the form was sent from. Anything unknown counts as English. */
 export const leadLang = (data: FormData): "en" | "fr" =>
   field(data, "lang", 2) === "fr" ? "fr" : "en";
 
-/** Folds the qualifying answers into the Goal text, so the Notion database needs no new columns. */
-function goalWithAnswers(data: FormData) {
-  const camera = pick(data, "camera", CAMERA);
-  const start = pick(data, "start", START);
-  const french = leadLang(data) === "fr" && "Language: French";
-  return [
-    field(data, "goal", 1000),
-    camera && `On camera: ${camera}`,
-    start && `Start: ${start}`,
-    french,
-  ]
-    .filter(Boolean)
-    .join("\n");
-}
-
-export type Parsed = { ok: true; lead: Lead } | { ok: false; errors: Record<string, string> };
+export type Parsed = { ok: true; lead: SheetLead } | { ok: false; errors: Record<string, string> };
 
 /** Same rules as the script on the page, so a bypass of the script gets the same answer. */
 export function parseLead(data: FormData, now = new Date()): Parsed {
   const name = field(data, "name", 200);
   const email = field(data, "email", 320);
+  const phone = normalizePhone(field(data, "phone", 40));
   const handle = field(data, "instagram", 100).replace(/^@+/, "").replace(/\s+/g, "");
-  const business = field(data, "business", 300);
   const errors: Record<string, string> = {};
   if (!name) errors.name = "Add your name.";
   if (!EMAIL.test(email)) errors.email = "Check your email address.";
+  if (!phone) errors.phone = "Add your phone number with the country code.";
   if (!handle) errors.instagram = "Add your Instagram handle.";
-  if (!business) errors.business = "Add one line about your business.";
+  const choices = Object.fromEntries(REQUIRED_CHOICES.map((key) => [key, pick(data, key)]));
+  for (const key of REQUIRED_CHOICES) if (!choices[key]) errors[key] = "Pick one.";
   if (Object.keys(errors).length) return { ok: false, errors };
 
-  const src = field(data, "src", 10) as LeadSource;
   const sentAt = new Date(field(data, "sent_at", 40));
   return {
     ok: true,
     lead: {
+      timestamp: (Number.isNaN(sentAt.getTime()) ? now : sentAt).toISOString(),
       name,
       email,
+      phone,
       instagram: `@${handle}`,
-      business,
-      goal: goalWithAnswers(data),
-      source: SOURCES.includes(src) ? src : "direct",
-      referrer: field(data, "referrer", 500),
-      submittedAt: (Number.isNaN(sentAt.getTime()) ? now : sentAt).toISOString(),
+      language: choices.language!,
+      channel: choices.channel!,
+      budget: choices.budget!,
+      decisionMaker: choices.decision!,
+      need: choices.need!,
+      timing: choices.timing!,
+      heardAbout: pick(data, "heard"),
+      referredBy: field(data, "referred_by", 200),
+      timeZone: field(data, "tz", 64),
+      sourcePage: field(data, "page", 500),
+      utm: field(data, "utm", 500),
     },
   };
 }
@@ -139,23 +131,28 @@ export async function handleLead(request: Request, env: Env): Promise<Response> 
   if (!parsed.ok) return fail("check", 400, { errors: parsed.errors });
   const { lead } = parsed;
 
-  const notion = await createLead(env, lead);
-  if (!notion.ok) {
-    console.error("lead: notion failed", notion.error);
+  const saved = await saveLead(env, lead);
+  if (!saved.ok) {
+    console.error("lead: sheets failed", saved.error);
     return fail("failure", 502);
   }
 
-  // The lead is safe in Notion. A failed alert is logged and does not stop the visitor.
+  // The lead is safe in the sheet. A failed alert is logged and does not stop the visitor.
   const alert = await sendAlert(env, {
-    subject: oneLine(`New lead: ${lead.name} (${lead.source})`),
+    subject: oneLine(`New lead: ${lead.name} (${lead.timing}, ${lead.budget})`),
     text: [
       `Name: ${lead.name}`,
       `Email: ${lead.email}`,
+      `Phone: ${lead.phone}`,
       `Instagram: ${lead.instagram}`,
-      `Business: ${lead.business}`,
-      `Goal: ${lead.goal || "-"}`,
-      `Source: ${lead.source}`,
-      `Notion row: ${notion.pageId}`,
+      `Call: ${lead.channel}, in ${lead.language}`,
+      `Budget: ${lead.budget}`,
+      `Decides: ${lead.decisionMaker}`,
+      `Wants: ${lead.need}`,
+      `Start: ${lead.timing}`,
+      `Heard about us: ${lead.heardAbout || "-"}${lead.referredBy ? ` (referred by ${lead.referredBy})` : ""}`,
+      `Time zone: ${lead.timeZone || "-"}`,
+      `UTM: ${lead.utm || "-"}`,
     ].join("\n"),
   });
   if (!alert.ok) console.error("lead: resend failed", alert.error);
