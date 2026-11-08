@@ -134,7 +134,9 @@ export async function handleLead(request: Request, env: Env): Promise<Response> 
   const saved = await saveLead(env, lead);
   if (!saved.ok) {
     console.error("lead: sheets failed", saved.error);
-    return fail("failure", 502);
+    // Preview hosts (*.workers.dev) show the cause to help setup; it never holds a secret.
+    const preview = new URL(request.url).hostname.endsWith(".workers.dev");
+    return fail("failure", 502, preview ? { detail: saved.error } : {});
   }
 
   // The lead is safe in the sheet. A failed alert is logged and does not stop the visitor.
