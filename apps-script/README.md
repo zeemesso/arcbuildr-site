@@ -6,9 +6,9 @@ The site's Worker sends each lead to this script, which appends one row to the s
 
 1. Create a Google Sheet named "Arcbuildr leads".
 2. In the sheet: Extensions, Apps Script. Delete what is in `Code.gs` and paste [Code.gs](Code.gs). Save.
-3. Make a token. In a terminal, run `openssl rand -hex 24` and copy the result.
-4. In Apps Script: Project Settings (gear icon), Script Properties, Add script property. Property `TOKEN`, value = the token. Save.
-5. Back in the editor, choose the function `setup` in the toolbar and click Run. Allow access when Google asks: it is your own script and your own sheet. A tab named `Leads` appears, with the headers and the status dropdown.
+3. In the editor, choose the function `setup` in the toolbar and click Run. Allow access when Google asks: it is your own script and your own sheet. A tab named `Leads` appears, with the headers and the status dropdown. `setup` also creates the token (script property `TOKEN`).
+4. Project Settings (gear icon), Script Properties: copy the value of `TOKEN`. Don't paste it anywhere except step 7.
+5. (Nothing to do: the token already exists.)
 6. Deploy, New deployment, type Web app. Execute as: Me. Who has access: Anyone. Deploy, then copy the Web app URL. It ends in `/exec`.
 7. In Cloudflare: Workers & Pages, `arcbuildr`, Settings, Variables and Secrets. Add two secrets:
    - `SHEETS_URL` = the Web app URL

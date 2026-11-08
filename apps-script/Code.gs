@@ -71,7 +71,11 @@ function doPost(e) {
   return reply({ ok: true });
 }
 
-/** Run once from the editor: creates the Leads tab, headers and the status dropdown. */
+/**
+ * Run once from the editor: creates the Leads tab, headers, the status dropdown,
+ * and the TOKEN script property if it is missing. Copy TOKEN from Project Settings,
+ * Script Properties, into the Cloudflare secret SHEETS_TOKEN.
+ */
 function setup() {
   const sheet = leadsSheet();
   sheet.getRange(1, 1, 1, HEADERS.length).setValues([HEADERS]).setFontWeight("bold");
@@ -79,6 +83,13 @@ function setup() {
   // Keeps phone numbers like +212... as text.
   sheet.getRange(2, 1, sheet.getMaxRows() - 1, HEADERS.length).setNumberFormat("@");
   sheet.getRange(2, STATUS_COLUMN, sheet.getMaxRows() - 1, 1).setDataValidation(statusRule());
+  const props = PropertiesService.getScriptProperties();
+  if (!props.getProperty("TOKEN")) {
+    props.setProperty(
+      "TOKEN",
+      Utilities.getUuid().replace(/-/g, "") + Utilities.getUuid().replace(/-/g, ""),
+    );
+  }
 }
 
 function leadsSheet() {
