@@ -8,12 +8,12 @@ Branch: `sl-p1-lead-capture`, cut from `claude/build` at 8595d59. Written 2026-1
 - Today the lead goes to Notion (`src/lib/notion.ts`), then a Resend alert. The form is `src/components/LeadForm.astro`. It works without JavaScript (plain POST, 303 to `/thanks`). With JavaScript it does inline checks and a fetch.
 - The landing page (`src/views/Home.astro`, section `#start`) shows an inline Cal.com calendar first. The form sits folded underneath it.
 - `/thanks` (`src/views/Thanks.astro`) shows the Cal.com embed, prefilled with name and email from the URL.
-- The site is in English and French. UI strings are in `src/i18n/en.ts` and `fr.ts`. Design tokens are in `src/styles`, and classes `.card`, `.btn`, `.pill` are reused.
+- The site is in English only (French removed 2026-11-09). UI strings are in `src/i18n/en.ts`. Design tokens are in `src/styles`, and classes `.card`, `.btn`, `.pill` are reused.
 - Tests: Vitest for `lead.ts`, Playwright on mobile (Pixel 7) and desktop (1280 px). `npm run check` runs everything.
 
 ## Build plan
 
-1. `src/data/application.ts`: one config file with every question label, help line and answer option, in English and French, marked DRAFT. The form, the server check and the sheet all read it.
+1. `src/data/application.ts`: one config file with every question label, help line and answer option marked DRAFT. The form, the server check and the sheet all read it.
 2. `src/config.ts`: `WHATSAPP_NUMBER` and `PHONE_NUMBER` placeholders, next to `CAL_LINK`. While they are empty, the call-now buttons stay hidden.
 3. `src/lib/phone.ts`: one phone rule, shared by the page and the Worker. It accepts `+` or `00`, then the country code. Spaces, dots, dashes and brackets are allowed. It stores `+<8 to 15 digits>`.
 4. `src/lib/sheets.ts`: the Worker posts `{ token, lead }` to the Apps Script web app. `SHEETS_URL` and `SHEETS_TOKEN` are Worker secrets. The token never reaches the browser.

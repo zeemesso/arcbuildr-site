@@ -20,10 +20,6 @@ const pick = (data: FormData, key: keyof typeof QUESTIONS) => {
   return values(QUESTIONS[key]).includes(value) ? value : "";
 };
 
-/** The page language the form was sent from. Anything unknown counts as English. */
-export const leadLang = (data: FormData): "en" | "fr" =>
-  field(data, "lang", 2) === "fr" ? "fr" : "en";
-
 export type Parsed = { ok: true; lead: SheetLead } | { ok: false; errors: Record<string, string> };
 
 /** Same rules as the script on the page, so a bypass of the script gets the same answer. */
@@ -74,26 +70,16 @@ function json(body: unknown, status: number): Response {
   });
 }
 
-// The no-JavaScript fallback page, in the language of the form.
+// The no-JavaScript fallback page.
 const PAGE_TEXT = {
-  en: {
-    back: "Back to the form",
-    badForm: "That didn't look like a form.",
-    check: "Check the fields marked above.",
-    failure: FAILURE_MESSAGE,
-  },
-  fr: {
-    back: "Retour au formulaire",
-    badForm: "Ce formulaire n'a pas pu être lu.",
-    check: "Vérifiez les champs du formulaire.",
-    failure:
-      "Nous n'avons pas pu envoyer vos informations. Réessayez, ou écrivez-nous en DM sur @arcbuildr.",
-  },
+  back: "Back to the form",
+  badForm: "That didn't look like a form.",
+  check: "Check the fields marked above.",
+  failure: FAILURE_MESSAGE,
 };
 
-function page(message: string, status: number, lang: "en" | "fr" = "en"): Response {
-  const home = lang === "fr" ? "/fr/" : "/";
-  const html = `<!doctype html><html lang="${lang}"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex"><title>Arcbuildr</title><body style="font:1rem/1.6 system-ui;max-width:32rem;margin:3rem auto;padding:0 1.25rem"><p>${message}</p><p><a href="${home}#start">${PAGE_TEXT[lang].back}</a></p></body></html>`;
+function page(message: string, status: number): Response {
+  const html = `<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex"><title>Arcbuildr</title><body style="font:1rem/1.6 system-ui;max-width:32rem;margin:3rem auto;padding:0 1.25rem"><p>${message}</p><p><a href="/#start">${PAGE_TEXT.back}</a></p></body></html>`;
   return new Response(html, {
     status,
     headers: { "content-type": "text/html; charset=UTF-8", "cache-control": "no-store" },
@@ -102,11 +88,10 @@ function page(message: string, status: number, lang: "en" | "fr" = "en"): Respon
 
 export async function handleLead(request: Request, env: Env): Promise<Response> {
   const wantsJson = (request.headers.get("Accept") ?? "").includes("application/json");
-  let lang: "en" | "fr" = "en";
-  const fail = (key: keyof (typeof PAGE_TEXT)["en"], status: number, extra: object = {}) =>
+  const fail = (key: keyof typeof PAGE_TEXT, status: number, extra: object = {}) =>
     wantsJson
-      ? json({ ok: false, error: PAGE_TEXT.en[key], ...extra }, status)
-      : page(PAGE_TEXT[lang][key], status, lang);
+      ? json({ ok: false, error: PAGE_TEXT[key], ...extra }, status)
+      : page(PAGE_TEXT[key], status);
 
   let data: FormData;
   try {
@@ -115,8 +100,7 @@ export async function handleLead(request: Request, env: Env): Promise<Response> 
     return fail("badForm", 400);
   }
 
-  lang = leadLang(data);
-  const thanks = lang === "fr" ? "/fr/thanks" : "/thanks";
+  const thanks = "/thanks";
   const parsed = parseLead(data);
   const next = (lead: { name: string; email: string }) =>
     `${thanks}?${new URLSearchParams({ name: lead.name, email: lead.email })}`;

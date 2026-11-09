@@ -13,11 +13,6 @@ describe("short links", () => {
     expect(res.headers.get("Location")).toBe(`https://arcbuildr.test/?src=${src}`);
   });
 
-  it("French visitors land on /fr/", () => {
-    const res = shortLinkRedirect(new URL("https://arcbuildr.test/ig"), "fr")!;
-    expect(res.headers.get("Location")).toBe("https://arcbuildr.test/fr/?src=ig");
-  });
-
   it("ignores every other path", () => {
     for (const path of ["/", "/igg", "/thanks", "/api/lead"]) {
       expect(shortLinkRedirect(new URL(`https://arcbuildr.test${path}`))).toBeNull();

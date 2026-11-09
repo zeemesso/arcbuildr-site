@@ -1,15 +1,11 @@
 ---
 import Base from "../layouts/Base.astro";
-import { dict, type Lang } from "../i18n";
+import { en } from "../i18n/en";
 
-interface Props {
-  lang: Lang;
-}
-const { lang } = Astro.props;
-const t = dict(lang).privacy;
+const t = en.privacy;
 ---
 
-<Base lang={lang} title={t.title} description={t.description}>
+<Base title={t.title} description={t.description}>
   <article class="wrap privacy">
     <h1>{t.h1}</h1>
     <p class="updated">{t.updated}</p>

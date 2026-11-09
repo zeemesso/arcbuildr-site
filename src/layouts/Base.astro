@@ -4,43 +4,26 @@ import "../styles/tailwind.css";
 import buildInfo from "../generated/build-info.json";
 import Logo from "../components/Logo.astro";
 import logo from "../data/logo.json";
-import { dict, href, LANG_NAMES, stripLang, type Lang } from "../i18n";
+import { en as t } from "../i18n/en";
 
 interface Props {
-  lang?: Lang;
   title?: string;
   description?: string;
   noindex?: boolean;
   /** The sticky "Book a call" button. Off on /thanks, where the visitor is already booking. */
   cta?: boolean;
-  /** False for English-only pages with no /fr/ twin: no hreflang, and the switch goes to the other home. */
-  twin?: boolean;
 }
 
-const {
-  lang = "en",
-  title = "Arcbuildr",
-  description,
-  noindex = false,
-  cta = true,
-  twin = true,
-} = Astro.props;
-const t = dict(lang);
-const other: Lang = lang === "en" ? "fr" : "en";
+const { title = "Arcbuildr", description, noindex = false, cta = true } = Astro.props;
 
 // Cloudflare Web Analytics, cookieless. Needs the site token from the dashboard; without it, no beacon.
 const analyticsToken = import.meta.env.PUBLIC_CF_ANALYTICS_TOKEN;
 const canonical = new URL(Astro.url.pathname, Astro.site);
-// The same page in each language. 404 has no twin, so its switch goes to the other home page.
-const enPath = stripLang(Astro.url.pathname);
-const is404 = /^\/404(\.html)?\/?$/.test(enPath);
-const alternates = is404 || !twin ? null : { en: enPath, fr: href("fr", enPath) };
-const switchHref = alternates ? alternates[other] : href(other, "/");
-const isHome = enPath === "/";
+const isHome = Astro.url.pathname === "/";
 const navLinks = [
-  { label: t.nav.work, href: href(lang, "/#build") },
-  { label: t.nav.process, href: href(lang, "/#approach") },
-  { label: t.nav.faq, href: href(lang, "/#questions") },
+  { label: t.nav.work, href: "/#build" },
+  { label: t.nav.process, href: "/#approach" },
+  { label: t.nav.faq, href: "/#questions" },
 ];
 // Static builds give "/privacy/", dev gives "/privacy".
 const here = Astro.url.pathname.replace(/(.)\/$/, "$1");
@@ -53,7 +36,7 @@ const hideFromSearch = noindex || showBuild;
 ---
 
 <!doctype html>
-<html lang={lang}>
+<html lang="en">
   <head>
     <meta charset="utf-8" />
     <script is:inline>
@@ -73,7 +56,7 @@ const hideFromSearch = noindex || showBuild;
               !!document.referrer &&
               new URL(document.referrer).origin === location.origin);
           if (
-            (location.pathname === "/" || location.pathname === "/fr/") &&
+            location.pathname === "/" &&
             !calm &&
             !inside &&
             !sessionStorage.getItem("arc-intro")
@@ -93,13 +76,6 @@ const hideFromSearch = noindex || showBuild;
     {description && <meta property="og:description" content={description} />}
     <meta property="og:url" content={canonical} />
     <meta property="og:locale" content={t.ogLocale} />
-    {alternates && (
-      <>
-        <link rel="alternate" hreflang="en" href={new URL(alternates.en, Astro.site)} />
-        <link rel="alternate" hreflang="fr" href={new URL(alternates.fr, Astro.site)} />
-        <link rel="alternate" hreflang="x-default" href={new URL(alternates.en, Astro.site)} />
-      </>
-    )}
     <meta name="twitter:card" content="summary" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <title>{title}</title>
@@ -155,20 +131,10 @@ const hideFromSearch = noindex || showBuild;
                 {label}
               </a>
             ))}
-            <a
-              href={switchHref}
-              hreflang={other}
-              lang={other}
-              data-lang-switch={other}
-              aria-label={LANG_NAMES[other]}
-              class="site-header__lang"
-            >
-              {other.toUpperCase()}
-            </a>
           </div>
         </nav>
         {cta && (
-          <a class="btn site-header__cta" href={href(lang, "/#start")}>
+          <a class="btn site-header__cta" href="/#start">
             {t.nav.book}
           </a>
         )}
@@ -182,13 +148,8 @@ const hideFromSearch = noindex || showBuild;
         <Logo />
         <ul class="site-footer__links">
           <li>
-            <a href={href(lang, "/privacy")} aria-current={currentPage(href(lang, "/privacy"))}>
+            <a href="/privacy" aria-current={currentPage("/privacy")}>
               {t.nav.privacy}
-            </a>
-          </li>
-          <li>
-            <a href={switchHref} hreflang={other} lang={other} data-lang-switch={other}>
-              {LANG_NAMES[other]}
             </a>
           </li>
         </ul>
@@ -201,12 +162,6 @@ const hideFromSearch = noindex || showBuild;
       </div>
     </footer>
     <script is:inline>
-      // A chosen language is remembered, so arcbuildr.co/ opens in it next time (the Worker reads it).
-      document.addEventListener("click", (event) => {
-        const link = event.target.closest?.("[data-lang-switch]");
-        if (link)
-          document.cookie = `lang=${link.dataset.langSwitch}; path=/; max-age=31536000; samesite=lax`;
-      });
       // Tap or key skips the intro.
       (() => {
         const html = document.documentElement;
@@ -406,12 +361,6 @@ const hideFromSearch = noindex || showBuild;
     transition:
       color var(--dur-fast) var(--ease-out),
       background-color var(--dur-fast) var(--ease-out);
-  }
-  /* Phones have room for three links only; there the switch lives in the footer. */
-  @media (width < 48rem) {
-    .site-header__nav .site-header__lang {
-      display: none;
-    }
   }
   @media (width >= 40rem) {
     .site-header .wordmark {

@@ -2,7 +2,7 @@ import type { APIRoute } from "astro";
 
 // /thanks is left out on purpose: it is noindex and only reached after the form.
 // /content-arc too: a noindex draft until the product launches.
-const paths = ["/", "/privacy", "/fr/", "/fr/privacy"];
+const paths = ["/", "/privacy"];
 
 export const GET: APIRoute = async ({ site }) => {
   return new Response(

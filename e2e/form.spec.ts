@@ -15,7 +15,6 @@ const KEYS = [
   "timing",
   "heard",
   "referred_by",
-  "lang",
   "tz",
   "page",
   "utm",
@@ -63,7 +62,7 @@ test("form shows each error, then clears it when fixed", async ({ page }) => {
   for (const q of ["channel", "budget", "decision", "need", "timing"]) {
     await expect(page.locator(`#f-${q}-error`)).toHaveText("Pick one.");
   }
-  // The call language starts on the page's language, so it has no error.
+  // The call language starts on English, so it has no error.
   await expect(page.locator("#f-language-error")).toBeHidden();
   await expect(page.locator("#f-name")).toBeFocused();
 
@@ -187,7 +186,7 @@ test("the whole form works with the keyboard only", async ({ page }) => {
   await k.press("Tab");
   await k.type("@keys");
   await k.press("Tab"); // language: English is already chosen
-  await k.press("ArrowRight"); // French
+  await k.press("ArrowRight"); // Darija
   for (let i = 0; i < 5; i++) {
     await k.press("Tab"); // channel, budget, decision, need, timing
     await k.press("Space");
@@ -199,7 +198,7 @@ test("the whole form works with the keyboard only", async ({ page }) => {
   await k.press("Enter");
   await page.waitForURL(/\/thanks\?/);
   const body = bodies[0]!;
-  expect(body.get("language")).toBe("French");
+  expect(body.get("language")).toBe("Darija");
   expect(body.get("channel")).toBe("Phone call");
   expect(body.get("timing")).toBe("This month");
 });

@@ -2,18 +2,14 @@
 // After a saved application: talk now (WhatsApp, phone) or pick a time (Cal.com).
 import Base from "../layouts/Base.astro";
 import CalEmbed from "../components/CalEmbed.astro";
-import { dict, type Lang } from "../i18n";
+import { en } from "../i18n/en";
 import { phoneHref, whatsappHref } from "../config";
 
-interface Props {
-  lang: Lang;
-}
-const { lang } = Astro.props;
-const t = dict(lang).thanks;
+const t = en.thanks;
 const wa = whatsappHref(t.whatsappText);
 ---
 
-<Base lang={lang} title={t.title} noindex cta={false}>
+<Base title={t.title} noindex cta={false}>
   <section class="wrap thanks" aria-labelledby="thanks-title">
     <h1 id="thanks-title">{t.h1}</h1>
     <p>{t.text}</p>

@@ -1,8 +1,7 @@
-// All English copy. Source of truth: COPY.md. `fr.ts` must have the same shape (checked by TypeScript).
+// All page copy. Source of truth: COPY.md.
 // A heading written as [before, highlight, after] renders the middle part in the accent style.
 
 export const en = {
-  lang: "en",
   ogLocale: "en_US",
   nav: {
     work: "Work",
@@ -12,7 +11,6 @@ export const en = {
     skip: "Skip to content",
     main: "Main",
     privacy: "Privacy",
-    language: "Language",
   },
   home: {
     title: "Arcbuildr | A personal brand built from your real story",
@@ -196,9 +194,8 @@ export const en = {
         id: "p-collect",
         title: "What we collect",
         body: [
-          "What you type in the form: your name, email, phone number, Instagram handle, the language and way you prefer for the call, and your answers about budget, who decides, what you want your personal brand to do and when you want to start. If you fill them in, also how you heard about us and who referred you. We also save your time zone, the page you sent the form from, the campaign tags in its link (such as our Instagram bio link), the language of the page and the time you sent the form.",
+          "What you type in the form: your name, email, phone number, Instagram handle, the language and way you prefer for the call, and your answers about budget, who decides, what you want your personal brand to do and when you want to start. If you fill them in, also how you heard about us and who referred you. We also save your time zone, the page you sent the form from, the campaign tags in its link (such as our Instagram bio link) and the time you sent the form.",
           "The booking tool records the time you pick and the details you give it. Our site statistics count visits to each page and do not use cookies.",
-          "If you switch the site's language, we save that choice in a small cookie named lang, so the site opens in that language next time. It holds nothing else and is not used for tracking.",
         ],
       },
       {
@@ -232,13 +229,3 @@ export const en = {
     ],
   },
 };
-
-type Widen<T> = T extends string
-  ? string
-  : T extends readonly (infer U)[]
-    ? Widen<U>[]
-    : T extends object
-      ? { [K in keyof T]: Widen<T[K]> }
-      : T;
-
-export type Dict = Widen<typeof en>;

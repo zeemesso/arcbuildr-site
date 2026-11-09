@@ -4,18 +4,14 @@ import Base from "../layouts/Base.astro";
 import LeadForm from "../components/LeadForm.astro";
 import DeliverableArt from "../components/DeliverableArt.astro";
 import { deliverables } from "../data/deliverables";
-import { dict, type Lang } from "../i18n";
+import { en } from "../i18n/en";
 
-interface Props {
-  lang: Lang;
-}
-const { lang } = Astro.props;
-const t = dict(lang).home;
+const t = en.home;
 const { pains, approach, fitYes: fitFor, fitNo: fitNot, faq } = t;
 const words = deliverables.map((d, i) => ({ ...d, ...t.deliverables[i] }));
 ---
 
-<Base lang={lang} title={t.title} description={t.description}>
+<Base title={t.title} description={t.description}>
   <section class="hero wrap" id="top" aria-labelledby="hero-title">
     <p class="kicker hero__kicker">{t.kicker}</p>
     <h1 id="hero-title">
@@ -215,7 +211,7 @@ const words = deliverables.map((d, i) => ({ ...d, ...t.deliverables[i] }));
       <p>{t.startText}</p>
     </div>
     <div class="card start__form">
-      <LeadForm lang={lang} />
+      <LeadForm />
     </div>
   </section>
 </Base>

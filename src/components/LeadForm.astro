@@ -2,19 +2,15 @@
 // The application form. Works as a plain POST without JavaScript. The script below adds
 // inline checks, a sending state, one automatic retry, and a failure message that keeps
 // what was typed and offers WhatsApp. Question wording: src/data/application.ts.
-import { dict, href, type Lang } from "../i18n";
+import { en } from "../i18n/en";
 import { QUESTIONS, REQUIRED_CHOICES } from "../data/application";
 import { whatsappHref } from "../config";
 
-interface Props {
-  lang: Lang;
-}
-const { lang } = Astro.props;
-const t = dict(lang).form;
+const t = en.form;
 const q = QUESTIONS;
-const wa = whatsappHref(dict(lang).thanks.whatsappText);
-// The call language starts on the page's language, one less tap for most visitors.
-const preset: Record<string, string> = { language: lang === "fr" ? "French" : "English" };
+const wa = whatsappHref(en.thanks.whatsappText);
+// The call language starts on English, one less tap for most visitors.
+const preset: Record<string, string> = { language: "English" };
 ---
 
 <form
@@ -25,16 +21,16 @@ const preset: Record<string, string> = { language: lang === "fr" ? "French" : "E
   data-checks={JSON.stringify(t.checks)}
   data-sending={t.sending}
   data-retrying={t.retrying}
-  data-thanks={href(lang, "/thanks")}
+  data-thanks="/thanks"
 >
   <div class="field">
-    <label for="f-name">{q.name.label[lang]}</label>
+    <label for="f-name">{q.name.label}</label>
     <input id="f-name" name="name" type="text" autocomplete="name" required />
     <p class="error" id="f-name-error" hidden></p>
   </div>
 
   <div class="field">
-    <label for="f-email">{q.email.label[lang]}</label>
+    <label for="f-email">{q.email.label}</label>
     <input
       id="f-email"
       name="email"
@@ -49,7 +45,7 @@ const preset: Record<string, string> = { language: lang === "fr" ? "French" : "E
   </div>
 
   <div class="field">
-    <label for="f-phone">{q.phone.label[lang]}</label>
+    <label for="f-phone">{q.phone.label}</label>
     <input
       id="f-phone"
       name="phone"
@@ -61,13 +57,13 @@ const preset: Record<string, string> = { language: lang === "fr" ? "French" : "E
       required
     />
     <p class="help" id="f-phone-help">
-      {q.phone.help[lang]}
+      {q.phone.help}
     </p>
     <p class="error" id="f-phone-error" hidden></p>
   </div>
 
   <div class="field">
-    <label for="f-instagram">{q.instagram.label[lang]}</label>
+    <label for="f-instagram">{q.instagram.label}</label>
     <input
       id="f-instagram"
       name="instagram"
@@ -81,21 +77,21 @@ const preset: Record<string, string> = { language: lang === "fr" ? "French" : "E
       required
     />
     <p class="help" id="f-instagram-help">
-      {q.instagram.help[lang]}
+      {q.instagram.help}
     </p>
     <p class="error" id="f-instagram-error" hidden></p>
   </div>
 
   {REQUIRED_CHOICES.map((name) => {
     const question = q[name];
-    const help = "help" in question ? question.help[lang] : "";
+    const help = "help" in question ? question.help : "";
     return (
       <fieldset
         class="field choice"
         id={`f-${name}`}
         aria-describedby={help ? `f-${name}-help` : undefined}
       >
-        <legend>{question.label[lang]}</legend>
+        <legend>{question.label}</legend>
         {help && (
           <p class="help" id={`f-${name}-help`}>
             {help}
@@ -111,7 +107,7 @@ const preset: Record<string, string> = { language: lang === "fr" ? "French" : "E
                 required={i === 0}
                 checked={preset[name] === option.value}
               />
-              <span>{option[lang]}</span>
+              <span>{option.label}</span>
             </label>
           ))}
         </div>
@@ -121,21 +117,20 @@ const preset: Record<string, string> = { language: lang === "fr" ? "French" : "E
   })}
 
   <div class="field">
-    <label for="f-heard">{q.heard.label[lang]}</label>
+    <label for="f-heard">{q.heard.label}</label>
     <select id="f-heard" name="heard">
       <option value="">-</option>
       {q.heard.options.map((option) => (
-        <option value={option.value}>{option[lang]}</option>
+        <option value={option.value}>{option.label}</option>
       ))}
     </select>
   </div>
 
   <div class="field">
-    <label for="f-referred">{q.referredBy.label[lang]}</label>
+    <label for="f-referred">{q.referredBy.label}</label>
     <input id="f-referred" name="referred_by" type="text" autocomplete="off" />
   </div>
 
-  <input type="hidden" name="lang" value={lang} />
   <input type="hidden" name="tz" value="" />
   <input type="hidden" name="page" value="" />
   <input type="hidden" name="utm" value="" />
@@ -150,7 +145,7 @@ const preset: Record<string, string> = { language: lang === "fr" ? "French" : "E
       {t.submit}
     </button>
     <p class="note">
-      {t.note} <a href={href(lang, "/privacy")}>{dict(lang).nav.privacy}</a>
+      {t.note} <a href="/privacy">{en.nav.privacy}</a>
     </p>
     <div class="error error--form" id="form-error" role="alert" hidden>
       <p>{t.error}</p>
@@ -195,7 +190,7 @@ const preset: Record<string, string> = { language: lang === "fr" ? "French" : "E
   field("page").value = location.href.slice(0, 500);
   field("utm").value = utm.toString();
 
-  // Messages come from the page's language (data-checks, set from src/i18n).
+  // Messages come from src/i18n/en.ts (data-checks).
   const msg = JSON.parse(form.dataset.checks!) as Record<string, string>;
   const checks: Record<string, (v: string) => string> = {
     name: (v) => (v ? "" : msg.name!),

@@ -1,6 +1,5 @@
 import type { Env } from "./lib/env";
 import { handleLead } from "./lib/lead";
-import { preferredLang, rootRedirect } from "./lib/locale";
 import { shortLinkRedirect } from "./lib/shortlinks";
 
 /** Same answer for every unknown /api request, so nothing leaks. */
@@ -15,10 +14,8 @@ export default {
   async fetch(request, env): Promise<Response> {
     const url = new URL(request.url);
     const { pathname } = url;
-    const short = shortLinkRedirect(url, preferredLang(request));
+    const short = shortLinkRedirect(url);
     if (short) return short;
-    const root = rootRedirect(request);
-    if (root) return root;
     if (pathname === "/api/lead" && request.method === "POST") return handleLead(request, env);
     if (pathname.startsWith("/api/")) return notFound();
     return env.ASSETS.fetch(request);
