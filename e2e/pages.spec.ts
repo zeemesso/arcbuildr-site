@@ -40,7 +40,7 @@ test("every internal link and anchor on every page resolves", async ({ page }) =
       .locator("a[href]")
       .evaluateAll((as) => as.map((a) => a.getAttribute("href")!));
     for (const href of hrefs) {
-      if (/^(https?:|mailto:)/.test(href)) continue;
+      if (/^(https?:|mailto:|tel:)/.test(href)) continue;
       const key = `${path} -> ${href}`;
       if (seen.has(key)) continue;
       seen.add(key);
