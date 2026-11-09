@@ -227,7 +227,7 @@ Notes on item 4:
 
 | # | What | Time |
 |---|------|------|
-| 1 | ~~Cal.com booking link~~ DONE 2026-11-05: Claude created `arcbuildr/intro-call` (30 min, Cal Video, bilingual text, Instagram handle required, business optional, 12 h notice, 30-day window). Check the availability: Mon to Fri 9:00 to 17:00, time zone Asia/Shanghai. Connect a calendar in Cal.com so busy times are blocked | 5 min |
+| 1 | ~~Cal.com booking link~~ DONE 2026-11-05: Claude created `arcbuildr/intro-call` (30 min; Google Meet and English-only text since 2026-11-09; Instagram handle required, business optional, 12 h notice, 30-day window). Check the availability: Mon to Fri 9:00 to 17:00, time zone Asia/Shanghai. Connect a calendar in Cal.com so busy times are blocked | 5 min |
 | 2 | Cloudflare Web Analytics token as build variable `PUBLIC_CF_ANALYTICS_TOKEN` on the Worker | 5 min |
 | 3 | In Notion, delete the 3 test rows: `TEST lead`, `TEST browser lead`, `TEST selftest` | 2 min |
 | 4 | Delete the `SELFTEST_KEY` secret in Cloudflare and in the cloud Claude Code environment | 2 min |
