@@ -1,5 +1,7 @@
 # COPY.md
 
+> Superseded on 2026-11-18 by the Season One rebuild. The page's words now live in `src/content/site.ts` and the design spec in `DESIGN.md`. This file describes the earlier site and is kept for history.
+
 Step 2 (Copy). Draft 2.1, 2026-11-02 (Zyade's answers applied: no Hanane on the site, no public timeline, six weeks confirmed and open to change). Replaces draft 1 (2026-10-24, in git history).
 
 Why draft 2: on 2026-11-02 Zyade made arcbuildr.co the hub of the business, with the home page as the landing page for the high-ticket service, and asked Claude to write the copy now. About, Method and Notes are removed.

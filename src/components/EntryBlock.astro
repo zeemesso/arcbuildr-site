@@ -1,0 +1,68 @@
+---
+import { entry } from "../content/site";
+import { APPLICATION_URL } from "../config";
+import Arrow from "./Arrow.astro";
+interface Props {
+  id: "top" | "bottom";
+}
+const { id } = Astro.props;
+---
+
+<form
+  id={`${id}-entry`}
+  class="entry"
+  data-entry
+  method="get"
+  action={APPLICATION_URL}
+  data-opening={entry.opening}
+>
+  <div class="field">
+    <label id={`${id}-name-label`} for={`${id}-name`}>
+      {entry.nameLabel}
+    </label>
+    <input
+      id={`${id}-name`}
+      name="name"
+      type="text"
+      autocomplete="name"
+      autocapitalize="words"
+      enterkeyhint="next"
+      required
+      maxlength="200"
+      aria-describedby={`${id}-name-error`}
+    />
+    <p class="field-error small" id={`${id}-name-error`} hidden>
+      {entry.errors.name}
+    </p>
+  </div>
+  <div class="field">
+    <label id={`${id}-email-label`} for={`${id}-email`}>
+      {entry.emailLabel}
+    </label>
+    <input
+      id={`${id}-email`}
+      name="email"
+      type="email"
+      autocomplete="email"
+      inputmode="email"
+      autocapitalize="off"
+      spellcheck="false"
+      enterkeyhint="go"
+      required
+      maxlength="320"
+      aria-describedby={`${id}-email-error`}
+    />
+    <p class="field-error small" id={`${id}-email-error`} hidden>
+      {entry.errors.email}
+    </p>
+  </div>
+  <button class="action" type="submit">
+    <span aria-live="polite" data-submit-label>
+      {entry.button}
+    </span>
+    <Arrow />
+  </button>
+</form>
+<script>
+  import "../scripts/entry";
+</script>

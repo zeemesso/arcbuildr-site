@@ -1,5 +1,7 @@
 # PROTOTYPE.md
 
+> Superseded on 2026-11-18 by the Season One rebuild. The page's words now live in `src/content/site.ts` and the design spec in `DESIGN.md`. This file describes the earlier site and is kept for history.
+
 Step 5 (ASCII prototype). Draft 1, 2026-10-24. Waiting for Zyade's review.
 
 Structure only. No visual design yet: no colors, fonts or images are decided here. All text comes from `COPY.md`; where a frame is too narrow for a full line, it shows the start of the line and `...`.

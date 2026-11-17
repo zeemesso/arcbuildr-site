@@ -1,0 +1,27 @@
+---
+import Section from "../Section.astro";
+import { beforeYouPay as content } from "../../content/site";
+import type { SectionId } from "../../content/sections";
+
+interface Props {
+  id: SectionId;
+}
+const { id } = Astro.props;
+---
+
+<Section id={id} kicker={content.kicker} title={content.h2} shape="stack">
+  <div class="three-columns">
+    {content.items.map((item) => (
+      <div class="flow">
+        <p class="kicker">{item.label}</p>
+        <h3>{item.title}</h3>
+        <p>{item.body}</p>
+        {"link" in item && item.link && (
+          <p>
+            <a href={item.link.href}>{item.link.text}</a>
+          </p>
+        )}
+      </div>
+    ))}
+  </div>
+</Section>

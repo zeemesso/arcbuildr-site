@@ -1,0 +1,58 @@
+---
+import { problem } from "../content/site";
+const tiles = Array.from({ length: 12 }, (_, i) => i);
+---
+
+<figure class="posts-picture">
+  <svg
+    viewBox="0 0 304 112"
+    role="img"
+    aria-label={problem.picture.alt}
+    shape-rendering="crispEdges"
+  >
+    {tiles.map((i) => (
+      <g
+        transform={`translate(${(i % 4) * 33 + (i % 3)}, ${Math.floor(i / 4) * 36 + (i % 2) * 2})`}
+      >
+        <rect width="28" height="28" fill="currentColor" opacity={0.12 + (i % 4) * 0.16} />
+        {Array.from(
+          { length: 16 },
+          (_, k) =>
+            (k * (i + 1) + i) % 7 < 3 && (
+              <rect
+                x={(k % 4) * 7}
+                y={Math.floor(k / 4) * 7}
+                width={i % 2 ? 3 : 7}
+                height={i % 3 ? 3 : 7}
+                fill="currentColor"
+                opacity=".75"
+              />
+            ),
+        )}
+      </g>
+    ))}
+    {tiles.map((i) => (
+      <g transform={`translate(${172 + (i % 4) * 33}, ${Math.floor(i / 4) * 36})`}>
+        <rect width="28" height="28" fill="currentColor" />
+        <text
+          x="14"
+          y="18"
+          fill="var(--color-paper)"
+          text-anchor="middle"
+          font-family="var(--font-mono)"
+          font-size="10"
+        >
+          {String(i + 1).padStart(2, "0")}
+        </text>
+      </g>
+    ))}
+  </svg>
+  <figcaption>
+    {[problem.picture.left, problem.picture.right].map((side) => (
+      <div class="flow">
+        <p class="kicker">{side.code}</p>
+        <p class="small muted">{side.line}</p>
+      </div>
+    ))}
+  </figcaption>
+</figure>

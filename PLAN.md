@@ -1,5 +1,7 @@
 # PLAN.md
 
+> Superseded on 2026-11-18 by the Season One rebuild. The page's words now live in `src/content/site.ts` and the design spec in `DESIGN.md`. This file describes the earlier site and is kept for history.
+
 Step 6 (Plan), 2026-10-24. Approved under the working mode in `CLAUDE.md`. Revised 2026-10-24: single build branch, locked-down self-test, Notion version pinned.
 
 Sources: `COPY.md` (text), `PROTOTYPE.md` (structure), `CLAUDE.md` STACK (tools). Each task is small, is one commit and has its own test. From task 2 on, each ends with `npm run check` passing.

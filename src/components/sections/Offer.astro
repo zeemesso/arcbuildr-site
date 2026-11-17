@@ -1,0 +1,70 @@
+---
+import Section from "../Section.astro";
+import ActionLink from "../ActionLink.astro";
+import { founding, type offer as OfferContent } from "../../content/site";
+import { FOUNDING_PLACES_LEFT } from "../../config";
+import type { SectionId } from "../../content/sections";
+interface Props {
+  id: SectionId;
+  offer: typeof OfferContent;
+}
+const { id, offer } = Astro.props;
+---
+
+<Section id={id} kicker={offer.kicker} title={offer.h2} shape="stack">
+  <p>{offer.intro}</p>
+  <table class="sizes">
+    <thead>
+      <tr>
+        {offer.sizes.head.map((head) => (
+          <th scope="col">{head}</th>
+        ))}
+      </tr>
+    </thead>
+    <tbody>
+      {offer.sizes.rows.map((row) => (
+        <tr class:list={{ recommended: row.pick }}>
+          <th scope="row">
+            {row.size}
+            {row.pick && <span class="tag">{offer.sizes.pickTag}</span>}
+          </th>
+          <td data-label={offer.sizes.head[1]}>{row.rhythm}</td>
+          <td data-label={offer.sizes.head[2]} class="mono">
+            {row.by}
+          </td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+  <p class="small muted">{offer.sizes.note}</p>
+  <div class="flow">
+    <h3>{offer.timeline.title}</h3>
+    <dl class="timeline">
+      {offer.timeline.rows.map((row) => (
+        <div>
+          <dt>{row.when}</dt>
+          <dd>{row.what}</dd>
+        </div>
+      ))}
+    </dl>
+  </div>
+  <div class="two-columns">
+    {[offer.yourPart, offer.notIncluded].map((part) => (
+      <div class="flow">
+        <h3>{part.title}</h3>
+        <ul>
+          {part.items.map((item) => (
+            <li>{item}</li>
+          ))}
+        </ul>
+      </div>
+    ))}
+  </div>
+  <p>
+    {offer.price} <a href={offer.priceLink.href}>{offer.priceLink.text}</a>
+  </p>
+  <div class="flow">
+    <ActionLink />
+    <p class="small muted">{founding.replace("{n}", String(FOUNDING_PLACES_LEFT))}</p>
+  </div>
+</Section>

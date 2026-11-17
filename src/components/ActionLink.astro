@@ -1,0 +1,13 @@
+---
+import { action } from "../content/site";
+import Arrow from "./Arrow.astro";
+interface Props {
+  href?: string;
+}
+const { href = "#apply" } = Astro.props;
+---
+
+<a class="action" href={href} data-apply>
+  {action}
+  <Arrow />
+</a>

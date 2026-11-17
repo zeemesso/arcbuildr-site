@@ -1,0 +1,33 @@
+---
+import Section from "../Section.astro";
+import { sample as content } from "../../content/site";
+import type { SectionId } from "../../content/sections";
+import SampleScript from "../SampleScript.astro";
+import SeasonMap from "../SeasonMap.astro";
+import ActionLink from "../ActionLink.astro";
+interface Props {
+  id: SectionId;
+}
+const { id } = Astro.props;
+---
+
+<Section id={id} kicker={content.kicker} title={content.h2} shape="stack">
+  <p>{content.intro}</p>
+  <div class="sample-grid">
+    <SampleScript />
+    <aside class="flow place">
+      <p class="kicker">{content.place.label}</p>
+      <SeasonMap variant="mini" mark={1} alt={content.place.alt} />
+      <p class="mono">{content.place.code}</p>
+      <p>{content.place.job}</p>
+      {content.place.next.map((line) => (
+        <p class="small muted">{line}</p>
+      ))}
+    </aside>
+  </div>
+  <p>{content.after}</p>
+  <div class="flow">
+    <ActionLink />
+    <p class="small muted">{content.ctaNote}</p>
+  </div>
+</Section>

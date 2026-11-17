@@ -1,0 +1,26 @@
+---
+import { CONTACT_EMAIL } from "../config";
+import Logo from "./Logo.astro";
+import { footer } from "../content/site";
+---
+
+<footer class="wrap site-footer">
+  <Logo />
+  <a
+    href="/privacy"
+    aria-current={Astro.url.pathname.replace(/\/$/, "") === "/privacy" ? "page" : undefined}
+  >
+    {footer.privacy}
+  </a>
+  {CONTACT_EMAIL && (
+    <p>
+      {footer.contact.split("{email}").map((text, index) => (
+        <>
+          {index > 0 && <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>}
+          {text}
+        </>
+      ))}
+    </p>
+  )}
+  <p class="small">{footer.rights}</p>
+</footer>

@@ -51,9 +51,18 @@ Follow these steps in order. Do not skip a step. Copy comes first; the structure
 - No pixel and no cookie banner at launch.
 - Secrets (Notion, Resend) live in Cloudflare secrets, never in the repo.
 
+Changed on 2026-11-18 (Season One rebuild):
+
+- The page's words live in `src/content/site.ts`. Components hold no copy. `DESIGN.md` is the design spec.
+- Entry block: name and email, then the application (Tally, `APPLICATION_URL` in `src/config.ts`), which redirects to the booking page (Cal.com). There is no `/thanks` page and no embed.
+- `POST /api/lead` saves each opened application to a Google Sheet through an Apps Script web app (`apps-script/README.md`), with an optional Resend alert. Notion is no longer used. Secrets: `SHEETS_URL`, `SHEETS_TOKEN`, `RESEND_API_KEY`, `ALERT_EMAIL`.
+- Fonts: Geist and Geist Mono, self-hosted. No Tailwind, no framer-motion. React loads only for the feedback toolbar on preview builds.
+- Visit counting: Cloudflare Web Analytics, on when `PUBLIC_CF_ANALYTICS_TOKEN` is set at build time.
+
 ## STATUS
 
 - Steps 1 to 6 done. `COPY.md`, `PROTOTYPE.md` and `PLAN.md` approved.
 - 2026-10-26: the build moved from the cloud sandbox to a local Claude Code session in `~/arcbuildr-site`. Visual layer v2 (Direction A, `DESIGN.md`) replaced the task 3 design. All checks pass.
 - Current step: 9, visual feedback through Agentation on localhost. Then deploy (step 10) only when Zyade says so.
 - Waiting on Zyade: the open items list in `PLAN.md`.
+- 2026-11-18: the home page was rebuilt around one offer, Season One, on branch `l1-p6-season-one`. `COPY.md`, `PROTOTYPE.md`, `PLAN.md` and `SL-P1-PLAN.md` describe the earlier site and are kept for history. `npm run check` passes (128 unit tests, 84 browser tests). Next: Zyade reviews the branch preview; production deploy only when he says so. `CONTACT_EMAIL` in `src/config.ts` is still empty.

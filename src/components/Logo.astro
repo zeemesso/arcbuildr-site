@@ -1,5 +1,6 @@
 ---
 import logo from "../data/logo.json";
+import { meta } from "../content/site";
 
 /** The arc and wordmark are round-capped strokes drawn from brand/build.mjs.
  * On Home it is not a link: a link to the page you are on is a dead tab stop. */
@@ -11,7 +12,7 @@ const last = logo.word.letters.length - 1;
 
 <Tag
   class="wordmark"
-  aria-label="Arcbuildr"
+  aria-label={meta.title.split(" | ")[0]}
   role={isHome ? "img" : undefined}
   href={isHome ? undefined : "/"}
 >

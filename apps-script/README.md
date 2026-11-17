@@ -1,34 +1,36 @@
-# Lead tracker: Google Sheets + Apps Script
+# Application starts tracker
 
-The site's Worker sends each lead to this script, which appends one row to the sheet. The token lives in two places only: the script's properties and the Cloudflare secret. It is never in the browser or in the repo.
+The Worker sends one row when someone opens the application from the entry block. Rows count starts, including repeat starts by the same person. They do not confirm a completed application.
 
-## Set up (about 15 minutes)
+## Setup (about 15 minutes)
 
-1. Create a Google Sheet named "Arcbuildr leads".
-2. In the sheet: Extensions, Apps Script. Delete what is in `Code.gs` and paste [Code.gs](Code.gs). Save.
-3. In the editor, choose the function `setup` in the toolbar and click Run. Allow access when Google asks: it is your own script and your own sheet. A tab named `Leads` appears, with the headers and the status dropdown. `setup` also creates the token (script property `TOKEN`).
-4. Project Settings (gear icon), Script Properties: copy the value of `TOKEN`. Don't paste it anywhere except step 7.
-5. (Nothing to do: the token already exists.)
-6. Deploy, New deployment, type Web app. Execute as: Me. Who has access: Anyone. Deploy, then copy the Web app URL. It ends in `/exec`.
-7. In Cloudflare: Workers & Pages, `arcbuildr`, Settings, Variables and Secrets. Add two secrets:
-   - `SHEETS_URL` = the Web app URL
-   - `SHEETS_TOKEN` = the token
-8. Test from a terminal, with your own values:
-   ```bash
-   curl -sL -X POST "$SHEETS_URL" -H "Content-Type: application/json" -d '{"token":"'"$SHEETS_TOKEN"'","lead":{"name":"TEST setup"}}'
+1. Create a new spreadsheet named "Arcbuildr application starts". Use a fresh sheet for these columns rather than an old tracker with a different layout.
+2. Click **Extensions > Apps Script**. Select `Code.gs`, replace its contents with [Code.gs](Code.gs), and click **Save project**.
+3. In the toolbar function selector, choose `setup`, then click **Run**. Click **Review permissions**, select your account, and allow the requested spreadsheet access. If an unverified-app screen appears, review your own script before continuing through **Advanced**.
+4. Return to the spreadsheet. The `Leads` tab has these columns, in order: `received_at`, `name`, `email`, `src`, `tz`, `page`, `utm`, `status`. The header is frozen and the status dropdown contains `opened`, `applied`, `booked`, `held`, `won`, `lost`. New rows start as `opened`.
+5. In the script editor, click **Project Settings** (gear icon), then find **Script Properties**. Copy the generated `TOKEN` value privately for step 7.
+6. Click **Deploy > New deployment**. Click **Select type** (gear icon), choose **Web app**, set **Execute as** to **Me** and **Who has access** to **Anyone**, then click **Deploy**. Complete authorization if prompted. Copy the **Web app URL**, ending in `/exec`. The shared token is still required to write a row.
+7. From the site repository directory, run each command below. At each private prompt, paste the corresponding value. Use the web app URL for `SHEETS_URL` and the script property `TOKEN` for `SHEETS_TOKEN`. Never put either value in repository files, command arguments, or browser code.
+
+   ```sh
+   npx wrangler secret put SHEETS_URL
+   npx wrangler secret put SHEETS_TOKEN
    ```
-   It should print `{"ok":true}` and add a row named `TEST setup`. Delete that row.
 
-"Anyone" means anyone with the URL can reach the script. Without the token, the script answers `unauthorized` and writes nothing.
+   Or, without a terminal: in the Cloudflare dashboard open **Workers & Pages**, click `arcbuildr`, then **Settings > Variables and secrets > Add**. Choose type **Secret**, and add `SHEETS_URL` and `SHEETS_TOKEN` one at a time.
 
-## Editing the script later
+8. Submit the site's entry block with a test name and email. Confirm a row appears with `status` set to `opened`, then delete that test row. If storage is not configured, the entry block still opens the application and no row is saved.
 
-After any change to `Code.gs`: Deploy, Manage deployments, the pencil icon, Version: New version, Deploy. The URL stays the same.
+## Count starts for a date range
 
-## Columns
+`received_at` stores the server time as UTC ISO text. Each data row counts as one application start, regardless of its current status. To count starts from November 1 through November 7, 2026, put this formula in an empty cell outside columns A through H:
 
-timestamp, name, email, phone, Instagram, language, channel, budget, decision maker, need, timing, heard about us, referred by, time zone, source page, UTM, status, next call date, notes.
+```text
+=COUNTIFS(Leads!A2:A,">=2026-11-01T00:00:00.000Z",Leads!A2:A,"<2026-11-08T00:00:00.000Z")
+```
 
-- `status` starts as `new`. The dropdown allows: new, booked, showed, closed, no-show, follow-up.
-- You fill in `next call date` and `notes` by hand.
-- The answer options come from `src/data/application.ts`. Changing a `value` there changes what new rows show; old rows keep the old value.
+Replace the dates with the UTC start and the day after the final day you want to include. The upper bound is exclusive. Do not filter on status when counting starts: a person who later applied still opened the application.
+
+## Update the script
+
+After saving changes, click **Deploy > Manage deployments**, select the web app, click **Edit** (pencil icon), choose **Version > New version**, then click **Deploy**. The web app URL stays the same. Run `setup` again only when needed to restore the headers or dropdown.

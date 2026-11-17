@@ -11,12 +11,12 @@ function notFound(): Response {
 }
 
 export default {
-  async fetch(request, env): Promise<Response> {
+  async fetch(request, env, ctx): Promise<Response> {
     const url = new URL(request.url);
     const { pathname } = url;
     const short = shortLinkRedirect(url);
     if (short) return short;
-    if (pathname === "/api/lead" && request.method === "POST") return handleLead(request, env);
+    if (pathname === "/api/lead") return handleLead(request, env, ctx);
     if (pathname.startsWith("/api/")) return notFound();
     return env.ASSETS.fetch(request);
   },

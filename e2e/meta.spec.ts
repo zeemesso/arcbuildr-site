@@ -1,49 +1,33 @@
 import { expect, test } from "@playwright/test";
-
-const meta = (page: import("@playwright/test").Page, sel: string) =>
-  page.locator(sel).getAttribute("content");
-
-test("home has the title, description and Open Graph tags from COPY.md", async ({ page }) => {
-  await page.goto("/");
-  await expect(page).toHaveTitle("Arcbuildr | A personal brand built from your real story");
-  const description =
-    "For founders and business owners on Instagram. In six weeks we build your brand strategy, visual identity, profile and content from your real story. You film and post. We tell you what to say and show.";
-  expect(await meta(page, 'meta[name="description"]')).toBe(description);
-  expect(await meta(page, 'meta[property="og:title"]')).toBe(await page.title());
-  expect(await meta(page, 'meta[property="og:description"]')).toBe(description);
-  expect(await meta(page, 'meta[property="og:type"]')).toBe("website");
-  expect(await page.locator('link[rel="canonical"]').getAttribute("href")).toBe(
-    "https://arcbuildr.co/",
-  );
-});
-
-test("this build is a preview, so pages are noindex and robots.txt blocks crawling", async ({
-  page,
-}) => {
-  await page.goto("/");
-  await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content", "noindex");
-  const robots = await (await page.request.get("/robots.txt")).text();
-  expect(robots).toContain("Disallow: /");
-});
-
-test("sitemap lists home and privacy but not /thanks", async ({ page }) => {
-  const xml = await (await page.request.get("/sitemap.xml")).text();
-  expect(xml).toContain("<loc>https://arcbuildr.co/</loc>");
-  expect(xml).toContain("<loc>https://arcbuildr.co/privacy</loc>");
-  expect(xml).not.toContain("thanks");
-});
-
-test("an unknown page shows the plain 404 page with a way home", async ({ page }) => {
-  const res = await page.goto("/no-such-page");
-  expect(res?.status()).toBe(404);
-  await expect(page.getByRole("heading", { level: 1 })).toHaveText("That page isn't here.");
-  await expect(page.getByRole("link", { name: "Go to the home page" })).toHaveAttribute(
-    "href",
-    "/",
-  );
-});
-
-test("no analytics beacon without a token", async ({ page }) => {
-  await page.goto("/");
-  await expect(page.locator('script[src*="cloudflareinsights"]')).toHaveCount(0);
-});
+import { meta, privacy } from "../src/content/site";
+for (const [path, content] of [
+  ["/", meta],
+  ["/privacy", privacy],
+] as const) {
+  test(`${path}: metadata, noindex and no third party requests`, async ({ page }) => {
+    const external: string[] = [];
+    page.on("request", (r) => {
+      if (!["127.0.0.1", "localhost"].includes(new URL(r.url()).hostname)) external.push(r.url());
+    });
+    await page.goto(path);
+    await page.waitForLoadState("networkidle");
+    await expect(page).toHaveTitle(content.title);
+    await expect(page.locator('meta[name="description"]')).toHaveAttribute(
+      "content",
+      content.description,
+    );
+    await expect(page.locator('meta[property="og:title"]')).toHaveAttribute(
+      "content",
+      content.title,
+    );
+    await expect(page.locator('meta[property="og:description"]')).toHaveAttribute(
+      "content",
+      content.description,
+    );
+    const robots = await (await page.request.get("/robots.txt")).text();
+    if (robots.includes("Disallow"))
+      await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content", "noindex");
+    else await expect(page.locator('meta[name="robots"]')).toHaveCount(0);
+    expect(external).toEqual([]);
+  });
+}

@@ -1,165 +1,354 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { Env } from "../src/lib/env";
-import { FAILURE_MESSAGE, handleLead, parseLead } from "../src/lib/lead";
+import { handleLead, parseEntry } from "../src/lib/lead";
+import worker from "../src/worker";
 
-const SHEETS_URL = "https://script.google.com/macros/s/test/exec";
+const SHEETS_URL = "https://storage.example.test/exec";
 const env = {
   SHEETS_URL,
-  SHEETS_TOKEN: "sheet-secret",
-  RESEND_API_KEY: "re_test",
-  ALERT_EMAIL: "alerts@example.com",
+  SHEETS_TOKEN: "test-only-storage-value",
+  RESEND_API_KEY: "test-only-mail-value",
+  ALERT_EMAIL: "alerts@example.test",
 } as Env;
-
 const valid = {
-  name: "TEST Hanane",
-  email: "hanane@example.com",
-  phone: "+212 6 12 34 56 78",
-  instagram: "hanane",
-  language: "Darija",
-  channel: "WhatsApp",
-  budget: "Not sure yet",
-  decision: "Alone",
-  need: "More clients",
-  timing: "This month",
-  heard: "Instagram",
-  referred_by: "",
+  name: "Test Person",
+  email: "person@example.test",
+  src: "ig",
   tz: "Africa/Casablanca",
-  page: "https://arcbuildr.co/?utm_source=ig",
+  page: "/?src=ig",
   utm: "utm_source=ig",
-  sent_at: "2026-11-08T10:00:00.000Z",
-  website: "",
 };
-
-function post(fields: Record<string, string>, json = true) {
-  return new Request("https://x.test/api/lead", {
+const NOW = "2026-11-18T10:00:00.000Z";
+const parse = (fields: Record<string, string> = {}) =>
+  parseEntry(new URLSearchParams({ ...valid, ...fields }));
+function entry(fields: Record<string, string> = {}) {
+  const result = parse(fields);
+  if (!result.ok) throw new Error("Expected a valid entry");
+  return result.lead;
+}
+function post(fields: Record<string, string> = {}, headers: HeadersInit = {}) {
+  return new Request("https://site.test/api/lead", {
     method: "POST",
-    headers: {
-      "content-type": "application/x-www-form-urlencoded",
-      ...(json ? { Accept: "application/json" } : {}),
-    },
-    body: new URLSearchParams(fields),
+    headers: { "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8", ...headers },
+    body: new URLSearchParams({ ...valid, ...fields }),
   });
 }
-
-let calls: { url: string; body: any }[];
-function stubFetch(sheets: Response | "throw", resend: Response | "throw") {
-  calls = [];
-  vi.stubGlobal(
-    "fetch",
-    vi.fn(async (url: string, init: RequestInit) => {
-      calls.push({ url, body: JSON.parse(init.body as string) });
-      const answer = url === SHEETS_URL ? sheets : resend;
-      if (answer === "throw") throw new Error("down");
-      return answer.clone();
+function context() {
+  const pending: Promise<unknown>[] = [];
+  return {
+    pending,
+    waitUntil: vi.fn((promise: Promise<unknown>) => {
+      pending.push(promise);
     }),
-  );
+  };
 }
-const sheetsOk = () => Response.json({ ok: true });
-const resendOk = () => Response.json({ id: "mail-1" });
-
-beforeEach(() => vi.spyOn(console, "error").mockImplementation(() => {}));
-afterEach(() => vi.unstubAllGlobals());
-
-describe("POST /api/lead", () => {
-  it("valid: appends to the sheet with the token, sends the alert, answers ok", async () => {
-    stubFetch(sheetsOk(), resendOk());
-    const res = await handleLead(post(valid), env);
-    expect(res.status).toBe(200);
-    expect(await res.json()).toEqual({ ok: true });
-    expect(calls.map((c) => c.url)).toEqual([SHEETS_URL, "https://api.resend.com/emails"]);
-    const { token, lead } = calls[0]!.body;
-    expect(token).toBe("sheet-secret");
-    expect(lead).toEqual({
-      timestamp: "2026-11-08T10:00:00.000Z",
-      name: "TEST Hanane",
-      email: "hanane@example.com",
-      phone: "+212612345678",
-      instagram: "@hanane",
-      language: "Darija",
-      channel: "WhatsApp",
-      budget: "Not sure yet",
-      decisionMaker: "Alone",
-      need: "More clients",
-      timing: "This month",
-      heardAbout: "Instagram",
-      referredBy: "",
-      timeZone: "Africa/Casablanca",
-      sourcePage: "https://arcbuildr.co/?utm_source=ig",
-      utm: "utm_source=ig",
-    });
-    expect(calls[1]!.body.text).toContain("Phone: +212612345678");
-  });
-
-  it("valid, no JavaScript: 303 to /thanks with name and email", async () => {
-    stubFetch(sheetsOk(), resendOk());
-    const res = await handleLead(post(valid, false), env);
-    expect(res.status).toBe(303);
-    expect(res.headers.get("Location")).toBe("/thanks?name=TEST+Hanane&email=hanane%40example.com");
-  });
-
-  it("invalid: 400 with field errors and no outside call", async () => {
-    stubFetch(sheetsOk(), resendOk());
-    const res = await handleLead(
-      post({ ...valid, email: "hanane@gmail", phone: "0612345678", budget: "a million" }),
-      env,
-    );
-    expect(res.status).toBe(400);
-    const body = (await res.json()) as { errors: Record<string, string> };
-    expect(Object.keys(body.errors).sort()).toEqual(["budget", "email", "phone"]);
-    expect(calls).toEqual([]);
-  });
-
-  it("spam trap: looks like success, stores nothing", async () => {
-    stubFetch(sheetsOk(), resendOk());
-    const res = await handleLead(post({ ...valid, website: "http://spam.test" }), env);
-    expect(await res.json()).toEqual({ ok: true });
-    expect(calls).toEqual([]);
-  });
-
-  it("sheet refuses (bad token): failure state, no redirect, no alert", async () => {
-    stubFetch(Response.json({ ok: false, error: "unauthorized" }), resendOk());
-    const res = await handleLead(post(valid), env);
-    expect(res.status).toBe(502);
-    expect(await res.json()).toEqual({ ok: false, error: FAILURE_MESSAGE });
-    expect(calls.map((c) => c.url)).toEqual([SHEETS_URL]);
-    const html = await handleLead(post(valid, false), env);
-    expect(html.status).toBe(502);
-    expect(html.headers.get("Location")).toBeNull();
-  });
-
-  it("sheet request throws or is not configured: failure state", async () => {
-    stubFetch("throw", resendOk());
-    expect((await handleLead(post(valid), env)).status).toBe(502);
-    stubFetch(sheetsOk(), resendOk());
-    expect((await handleLead(post(valid), { ...env, SHEETS_TOKEN: "" })).status).toBe(502);
-    expect(calls).toEqual([]);
-  });
-
-  it("Resend down: still ok, the lead is in the sheet", async () => {
-    stubFetch(sheetsOk(), "throw");
-    expect((await handleLead(post(valid), env)).status).toBe(200);
-  });
+const fetchMock = vi.fn<typeof fetch>();
+async function emptyResponse(response: Response, status: number) {
+  expect(response.status).toBe(status);
+  expect(await response.text()).toBe("");
+  expect([...response.headers.keys()].some((key) => key.startsWith("access-control-"))).toBe(false);
+}
+function callBody(index: number) {
+  return JSON.parse(fetchMock.mock.calls[index]![1]!.body as string);
+}
+beforeEach(() => {
+  vi.useFakeTimers();
+  vi.setSystemTime(new Date(NOW));
+  fetchMock.mockReset();
+  fetchMock.mockImplementation(async () => Response.json({ ok: true, id: "test-alert" }));
+  vi.stubGlobal("fetch", fetchMock);
+  vi.spyOn(console, "log").mockImplementation(() => {});
+});
+afterEach(() => {
+  vi.useRealTimers();
+  vi.restoreAllMocks();
+  vi.unstubAllGlobals();
 });
 
-describe("parseLead", () => {
-  function toForm(o: Record<string, string>) {
-    const f = new FormData();
-    for (const [k, v] of Object.entries(o)) f.set(k, v);
-    return f;
-  }
-
-  it("handle gets one @; bad date uses now; unknown optional answer is dropped", () => {
-    const r = parseLead(
-      toForm({ ...valid, instagram: "@@ han ane", sent_at: "nope", heard: "<script>" }),
-      new Date("2026-11-08T12:00:00Z"),
-    );
-    expect(r.ok && r.lead.instagram).toBe("@hanane");
-    expect(r.ok && r.lead.timestamp).toBe("2026-11-08T12:00:00.000Z");
-    expect(r.ok && r.lead.heardAbout).toBe("");
+describe("parseEntry", () => {
+  it("keeps only the entry columns and ignores client time and unknown fields", () => {
+    expect(
+      entry({ sent_at: "1999-01-01", received_at: "1999-01-01", phone: "ignored", status: "won" }),
+    ).toEqual({
+      ...valid,
+      status: "opened",
+    });
   });
+  it("trims name and email, collapses whitespace and controls, and lowercases email", () => {
+    expect(
+      entry({ name: " \t Test\u0000\u0085\n  Person \r", email: " PERSON@Example.TEST \n" }),
+    ).toMatchObject({
+      name: "Test Person",
+      email: "person@example.test",
+    });
+  });
+  it("accepts a minimal name and the 200 character bound", () => {
+    expect(entry({ name: "X" }).name).toBe("X");
+    expect(entry({ name: "x".repeat(200) }).name).toHaveLength(200);
+    expect(parse({ name: "x".repeat(201) }).ok).toBe(false);
+  });
+  it.each(["", " \n\t ", "\u0000\u007f"])("rejects empty normalized name %j", (name) => {
+    expect(parse({ name }).ok).toBe(false);
+  });
+  it("rejects missing required fields", () => {
+    expect(parseEntry(new URLSearchParams({ email: valid.email })).ok).toBe(false);
+    expect(parseEntry(new URLSearchParams({ name: valid.name })).ok).toBe(false);
+  });
+  it("enforces the 320 character email bound without truncating", () => {
+    expect(entry({ email: `${"a".repeat(315)}@b.co` }).email).toHaveLength(320);
+    expect(parse({ email: `${"a".repeat(316)}@b.co` }).ok).toBe(false);
+    expect(entry({ email: "a@b.co" }).email).toBe("a@b.co");
+  });
+  it.each([
+    "",
+    "no-at.test",
+    "a@@b.test",
+    "@b.test",
+    "a@.test",
+    "a@b",
+    "a@b.c",
+    "a b@c.test",
+    "a@b. t",
+    "a@b.test\nx",
+  ])("rejects bad email %j", (email) => {
+    expect(parse({ email }).ok).toBe(false);
+  });
+  it("normalizes src and accepts its bounds", () => {
+    expect(entry({ src: "AB_1-z" }).src).toBe("ab_1-z");
+    expect(entry({ src: "a" }).src).toBe("a");
+    expect(entry({ src: "x".repeat(32) }).src).toHaveLength(32);
+  });
+  it.each(["", "a".repeat(33), "with space", "a/b", "a.b", "é"])("falls back for src %j", (src) => {
+    expect(entry({ src }).src).toBe("direct");
+  });
+  it("accepts timezone characters and length bound", () => {
+    expect(entry({ tz: "Etc/GMT+5_-" }).tz).toBe("Etc/GMT+5_-");
+    expect(entry({ tz: "A".repeat(64) }).tz).toHaveLength(64);
+  });
+  it.each(["", "A".repeat(65), "Africa/City Name", "UTC:1", "UTC\n", "中文"])(
+    "drops invalid timezone %j",
+    (tz) => {
+      expect(entry({ tz }).tz).toBe("");
+    },
+  );
+  it("accepts relative pages through 200 characters", () => {
+    expect(entry({ page: "/" }).page).toBe("/");
+    expect(entry({ page: "/" + "x".repeat(199) }).page).toHaveLength(200);
+  });
+  it.each([
+    "",
+    "https://site.test/",
+    "relative",
+    "/" + "x".repeat(200),
+    "/\n",
+    "/\u0000",
+    "/\u007f",
+    "/\u0085",
+  ])("defaults invalid page %j", (page) => {
+    expect(entry({ page }).page).toBe("/");
+  });
+  it("filters UTM keys, truncates values, retains duplicates and serializes", () => {
+    const utm = new URLSearchParams([
+      ["other", "drop"],
+      ["utm_", "drop"],
+      ["utm_UPPER", "drop"],
+      ["utm_source1", "drop"],
+      ["utm_" + "a".repeat(21), "drop"],
+      ["utm_a", "a b&c"],
+      ["utm_" + "z".repeat(20), "x".repeat(101)],
+      ["utm_a", "repeat"],
+      ["utm_b", ""],
+      ["utm_c", "yes"],
+      ["utm_d", "yes"],
+      ["utm_e", "drop"],
+    ]);
+    expect([...new URLSearchParams(entry({ utm: utm.toString() }).utm)]).toEqual([
+      ["utm_a", "a b&c"],
+      ["utm_" + "z".repeat(20), "x".repeat(100)],
+      ["utm_a", "repeat"],
+      ["utm_b", ""],
+      ["utm_c", "yes"],
+      ["utm_d", "yes"],
+    ]);
+    expect(entry({ utm: "utm_a=a%20b" }).utm).toBe("utm_a=a+b");
+  });
+  it("defaults absent optional fields", () => {
+    const result = parseEntry(new URLSearchParams({ name: "Test", email: valid.email }));
+    expect(result.ok && result.lead).toMatchObject({ src: "direct", tz: "", page: "/", utm: "" });
+  });
+  it.each(["=SUM(1,2)", "+Test", "-Test", "@Test"])(
+    "keeps formula-looking name %s for script-side escaping",
+    (name) => {
+      expect(entry({ name }).name).toBe(name);
+    },
+  );
+});
 
-  it("every required choice must be one of the options", () => {
-    const r = parseLead(toForm({ ...valid, language: "", channel: "Fax" }));
-    expect(!r.ok && Object.keys(r.errors).sort()).toEqual(["channel", "language"]);
+describe("lead handler", () => {
+  it.each(["GET", "PUT", "DELETE", "OPTIONS", "HEAD"])(
+    "returns 405 for %s through the Worker route",
+    async (method) => {
+      const response = await worker.fetch(
+        new Request("https://site.test/api/lead", { method }) as Parameters<typeof worker.fetch>[0],
+        env,
+        context() as unknown as ExecutionContext,
+      );
+      await emptyResponse(response, 405);
+      expect(response.headers.get("Allow")).toBe("POST");
+      expect(fetchMock).not.toHaveBeenCalled();
+    },
+  );
+  it.each([
+    "application/json",
+    "multipart/form-data",
+    "text/plain",
+    "application/x-www-form-urlencoded-evil",
+    "",
+  ])("returns 415 for %j", async (type) => {
+    await emptyResponse(await handleLead(post({}, { "Content-Type": type }), env, context()), 415);
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+  it("checks actual UTF-8 bytes despite a false Content-Length", async () => {
+    for (const body of ["x".repeat(4097), "é".repeat(2049)]) {
+      const request = new Request("https://site.test/api/lead", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded", "Content-Length": "1" },
+        body,
+      });
+      await emptyResponse(await handleLead(request, env, context()), 413);
+    }
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+  it("accepts exactly 4096 bytes and ignores an inflated Content-Length", async () => {
+    const base = new URLSearchParams(valid).toString() + "&ignored=";
+    const request = new Request("https://site.test/api/lead", {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded", "Content-Length": "9999" },
+      body: base + "x".repeat(4096 - base.length),
+    });
+    const ctx = context();
+    await emptyResponse(await handleLead(request, env, ctx), 204);
+    await Promise.all(ctx.pending);
+  });
+  it.each(["https://foreign.test", "null", "", "https://site.test/"])(
+    "rejects foreign Origin %j",
+    async (origin) => {
+      await emptyResponse(await handleLead(post({}, { Origin: origin }), env, context()), 403);
+      expect(fetchMock).not.toHaveBeenCalled();
+    },
+  );
+  it.each([{ name: "" }, { email: "bad" }] as Record<string, string>[])(
+    "rejects invalid required fields %j",
+    async (fields) => {
+      await emptyResponse(await handleLead(post(fields), env, context()), 400);
+      expect(fetchMock).not.toHaveBeenCalled();
+    },
+  );
+  it("handles unreadable request bodies", async () => {
+    const request = post();
+    vi.spyOn(request, "text").mockRejectedValue(new Error("read failed"));
+    await emptyResponse(await handleLead(request, env, context()), 400);
+  });
+  it.each([
+    { SHEETS_URL: "" },
+    { SHEETS_TOKEN: "" },
+    { SHEETS_URL: undefined, SHEETS_TOKEN: undefined },
+  ])("silently skips unconfigured storage %j", async (missing) => {
+    const ctx = context();
+    await emptyResponse(await handleLead(post(), { ...env, ...missing }, ctx), 204);
+    expect(fetchMock).not.toHaveBeenCalled();
+    expect(ctx.waitUntil).not.toHaveBeenCalled();
+    expect(console.log).toHaveBeenCalledExactlyOnceWith("lead: storage not configured");
+  });
+  it("sends exactly one Sheets call with the token and eight ordered columns", async () => {
+    const ctx = context();
+    await emptyResponse(
+      await handleLead(
+        post({ received_at: "client-time" }, { Origin: "https://site.test" }),
+        { ...env, RESEND_API_KEY: undefined },
+        ctx,
+      ),
+      204,
+    );
+    expect(ctx.waitUntil).toHaveBeenCalledTimes(1);
+    await Promise.all(ctx.pending);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(fetchMock.mock.calls[0]![0]).toBe(SHEETS_URL);
+    expect(callBody(0)).toEqual({
+      token: env.SHEETS_TOKEN,
+      lead: { received_at: NOW, ...valid, status: "opened" },
+    });
+    expect(Object.keys(callBody(0).lead)).toEqual([
+      "received_at",
+      "name",
+      "email",
+      "src",
+      "tz",
+      "page",
+      "utm",
+      "status",
+    ]);
+  });
+  it("responds before storage resolves and alerts only after a successful save", async () => {
+    let finish!: (response: Response) => void;
+    fetchMock.mockImplementationOnce(
+      () =>
+        new Promise<Response>((resolve) => {
+          finish = resolve;
+        }),
+    );
+    const ctx = context();
+    await emptyResponse(await handleLead(post(), env, ctx), 204);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    finish(Response.json({ ok: true }));
+    await Promise.all(ctx.pending);
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(fetchMock.mock.calls[1]![0]).toBe("https://api.resend.com/emails");
+    expect(callBody(1)).toMatchObject({
+      subject: `Application started: ${valid.name}`,
+      text: [
+        `Name: ${valid.name}`,
+        `Email: ${valid.email}`,
+        `Src: ${valid.src}`,
+        `Tz: ${valid.tz}`,
+        `Page: ${valid.page}`,
+        `Utm: ${valid.utm}`,
+        `Time: ${NOW}`,
+      ].join("\n"),
+    });
+  });
+  it.each([
+    { RESEND_API_KEY: undefined },
+    { ALERT_EMAIL: undefined },
+    { RESEND_API_KEY: "", ALERT_EMAIL: "" },
+  ])("requires both alert variables %j", async (missing) => {
+    const ctx = context();
+    await emptyResponse(await handleLead(post(), { ...env, ...missing }, ctx), 204);
+    await Promise.all(ctx.pending);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+  it.each(["rejected", "http", "throw", "malformed"])(
+    "keeps 204 and sends no alert on Sheets failure: %s",
+    async (failure) => {
+      fetchMock.mockImplementationOnce(async () => {
+        if (failure === "throw") throw new Error("offline");
+        if (failure === "http") return Response.json({ ok: true }, { status: 500 });
+        if (failure === "malformed") return new Response("not JSON");
+        return Response.json({ ok: false });
+      });
+      const ctx = context();
+      await emptyResponse(await handleLead(post(), env, ctx), 204);
+      await expect(Promise.all(ctx.pending)).resolves.toEqual([undefined]);
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+    },
+  );
+  it("contains alert failures in the background task", async () => {
+    fetchMock
+      .mockResolvedValueOnce(Response.json({ ok: true }))
+      .mockRejectedValueOnce(new Error("offline"));
+    const ctx = context();
+    await emptyResponse(await handleLead(post(), env, ctx), 204);
+    await expect(Promise.all(ctx.pending)).resolves.toEqual([undefined]);
+    expect(fetchMock).toHaveBeenCalledTimes(2);
   });
 });

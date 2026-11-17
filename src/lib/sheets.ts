@@ -2,22 +2,14 @@ import type { Failure } from "./env";
 
 /** One row of the lead tracker. Keys match KEYS in apps-script/Code.gs. */
 export interface SheetLead {
-  timestamp: string;
+  received_at: string;
   name: string;
   email: string;
-  phone: string;
-  instagram: string;
-  language: string;
-  channel: string;
-  budget: string;
-  decisionMaker: string;
-  need: string;
-  timing: string;
-  heardAbout: string;
-  referredBy: string;
-  timeZone: string;
-  sourcePage: string;
+  src: string;
+  tz: string;
+  page: string;
   utm: string;
+  status: "opened";
 }
 
 /** Appends the lead through the Apps Script web app. The token stays on the server. */
@@ -35,10 +27,10 @@ export async function saveLead(
       body: JSON.stringify({ token: env.SHEETS_TOKEN, lead }),
       signal: AbortSignal.timeout(10000),
     });
-    const body = (await res.json().catch(() => ({}))) as { ok?: boolean; error?: string };
-    if (res.ok && body.ok) return { ok: true };
-    return { ok: false, error: `sheets ${res.status} ${body.error ?? "no_error"}` };
-  } catch (err) {
-    return { ok: false, error: `sheets request failed: ${(err as Error).name}` };
+    const body = (await res.json().catch(() => ({}))) as { ok?: boolean };
+    if (res.ok && body.ok === true) return { ok: true };
+    return { ok: false, error: "sheets save failed" };
+  } catch {
+    return { ok: false, error: "sheets request failed" };
   }
 }

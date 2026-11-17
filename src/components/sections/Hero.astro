@@ -1,0 +1,27 @@
+---
+import { hero } from "../../content/site";
+import type { SectionId } from "../../content/sections";
+import EntryBlock from "../EntryBlock.astro";
+import SeasonMap from "../SeasonMap.astro";
+interface Props {
+  id: SectionId;
+}
+const { id } = Astro.props;
+---
+
+<section id={id} class="wrap hero" aria-labelledby="hero-title">
+  <div class="hero-copy">
+    <p class="kicker">{hero.kicker}</p>
+    <h1 id="hero-title">{hero.h1}</h1>
+    <p class="lede">{hero.lede}</p>
+    <EntryBlock id="top" />
+    <div class="notes">
+      {hero.notes.map((note) => (
+        <p>{note}</p>
+      ))}
+    </div>
+  </div>
+  <div class="hero-map">
+    <SeasonMap variant="hero" />
+  </div>
+</section>

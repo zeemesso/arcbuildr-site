@@ -1,23 +1,16 @@
 ---
-import { MagneticButton } from "@/components/ui/magnetic-button";
 import Base from "../layouts/Base.astro";
+import { notFound } from "../content/site";
 ---
 
-<Base title="Page not found | Arcbuildr" noindex>
-  <section class="wrap lost">
-    <h1>That page isn't here.</h1>
-    <p>The link may be old or mistyped.</p>
-    <MagneticButton client:media="(hover: hover) and (pointer: fine)" className="btn" href="/">
-      Go to the home page
-    </MagneticButton>
+<Base title={notFound.title} noindex>
+  <section class="wrap legal flow">
+    <h1>{notFound.h1}</h1>
+    <p>{notFound.body}</p>
+    <p>
+      <a class="text-link" href="/">
+        {notFound.link}
+      </a>
+    </p>
   </section>
 </Base>
-
-<style>
-  .lost {
-    display: grid;
-    gap: var(--space-lg);
-    justify-items: start;
-    padding-block: var(--space-2xl);
-  }
-</style>

@@ -1,5 +1,40 @@
 ---
-import Privacy from "../views/Privacy.astro";
+import Base from "../layouts/Base.astro";
+import { privacy } from "../content/site";
+import { CONTACT_EMAIL } from "../config";
 ---
 
-<Privacy />
+<Base title={privacy.title} description={privacy.description}>
+  <article class="wrap legal flow">
+    <h1>{privacy.h1}</h1>
+    <p class="small muted">{privacy.updated}</p>
+    {privacy.sections.map((section) => (
+      <section class="flow" aria-labelledby={section.id}>
+        <h2 id={section.id}>{section.title}</h2>
+        {section.body.map((part) =>
+          Array.isArray(part) ? (
+            <ul>
+              {part.map((line) => (
+                <li>{line}</li>
+              ))}
+            </ul>
+          ) : (
+            <p>
+              {part.split("{email}").map((text, index) => (
+                <>
+                  {index > 0 &&
+                    (CONTACT_EMAIL ? (
+                      <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>
+                    ) : (
+                      "[contact email]"
+                    ))}
+                  {text}
+                </>
+              ))}
+            </p>
+          ),
+        )}
+      </section>
+    ))}
+  </article>
+</Base>

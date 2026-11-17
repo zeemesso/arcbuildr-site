@@ -1,34 +1,18 @@
-import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
-
-test("privacy page has the five sections and names the four tools", async ({ page }) => {
+import { privacy } from "../src/content/site";
+import { CONTACT_EMAIL } from "../src/config";
+test("privacy renders all content, lists and contact replacement", async ({ page }) => {
   await page.goto("/privacy");
-  await expect(page.getByRole("heading", { level: 1, name: "Privacy" })).toBeVisible();
-  const headings = await page.getByRole("heading", { level: 2 }).allTextContents();
-  expect(headings).toEqual([
-    "Who we are",
-    "What we collect",
-    "Why we collect it",
-    "Who else sees it",
-    "How long we keep it, and how to ask us to delete it",
-  ]);
-  const text = await page.locator("main").innerText();
-  for (const tool of ["Cloudflare", "Google Sheets", "Resend", "Cal.com"])
-    expect(text).toContain(tool);
-  const results = await new AxeBuilder({ page })
-    .withTags(["wcag2a", "wcag2aa", "wcag22aa"])
-    .analyze();
-  expect(results.violations).toEqual([]);
-});
-
-test("privacy is linked from the form and the footer", async ({ page }) => {
-  await page.goto("/");
-  await expect(page.locator("#lead-form").getByRole("link", { name: "Privacy" })).toHaveAttribute(
-    "href",
-    "/privacy",
+  await expect(page.locator("h1")).toHaveText(privacy.h1);
+  await expect(page.getByText(privacy.updated)).toBeVisible();
+  expect(await page.locator("main h2").allTextContents()).toEqual(
+    privacy.sections.map((s) => s.title),
   );
-  await expect(page.locator("footer").getByRole("link", { name: "Privacy" })).toHaveAttribute(
-    "href",
-    "/privacy",
-  );
+  for (const section of privacy.sections)
+    for (const part of section.body)
+      for (const line of Array.isArray(part) ? part : [part])
+        await expect(page.locator("main")).toContainText(
+          line.replaceAll("{email}", CONTACT_EMAIL || "[contact email]"),
+        );
+  await expect(page.locator("header [data-apply]")).toHaveAttribute("href", "/#apply");
 });

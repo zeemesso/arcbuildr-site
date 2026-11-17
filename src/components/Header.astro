@@ -1,0 +1,11 @@
+---
+import Logo from "./Logo.astro";
+import ActionLink from "./ActionLink.astro";
+---
+
+<header class="site-header">
+  <div class="wrap header-inner">
+    <Logo />
+    <ActionLink href={Astro.url.pathname === "/" ? "#apply" : "/#apply"} />
+  </div>
+</header>

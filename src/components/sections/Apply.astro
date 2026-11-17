@@ -1,0 +1,29 @@
+---
+import { apply, founding } from "../../content/site";
+import { FOUNDING_PLACES_LEFT } from "../../config";
+import type { SectionId } from "../../content/sections";
+import EntryBlock from "../EntryBlock.astro";
+interface Props {
+  id: SectionId;
+}
+const { id } = Astro.props;
+---
+
+<section id={id} class="closing" aria-labelledby="apply-title">
+  <div class="wrap closing-grid">
+    <div class="flow">
+      <p class="kicker">{apply.kicker}</p>
+      <h2 id="apply-title">{apply.h2}</h2>
+      <p>{apply.body}</p>
+    </div>
+    <div class="flow">
+      <EntryBlock id="bottom" />
+      <div class="notes">
+        {apply.notes.map((note) => (
+          <p>{note}</p>
+        ))}
+      </div>
+      <p class="small muted">{founding.replace("{n}", String(FOUNDING_PLACES_LEFT))}</p>
+    </div>
+  </div>
+</section>

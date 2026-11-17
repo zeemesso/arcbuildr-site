@@ -2,7 +2,8 @@
 // feedback toolbar is in the first build and nowhere in the second.
 import { execFileSync } from "node:child_process";
 import { readdirSync, readFileSync, rmSync, statSync } from "node:fs";
-import { join } from "node:path";
+import { dirname, join } from "node:path";
+import { gzipSync } from "node:zlib";
 
 const run = (cmd, args, env) =>
   execFileSync(cmd, args, { stdio: "pipe", env: { ...process.env, ...env } });
@@ -30,12 +31,53 @@ try {
   const robots = readFileSync("dist-main/robots.txt", "utf8");
   if (robots.includes("Disallow") || !robots.includes("Sitemap:"))
     throw new Error("main robots.txt is wrong");
-  if (readFileSync("dist-main/sitemap.xml", "utf8").includes("thanks"))
-    throw new Error("sitemap lists /thanks");
   const home = readFileSync("dist-main/index.html", "utf8");
   if (home.includes('content="noindex"')) throw new Error("main home page is noindex");
-  if (!readFileSync("dist-main/thanks/index.html", "utf8").includes('content="noindex"'))
-    throw new Error("/thanks is not noindex");
+  const sitemap = readFileSync("dist-main/sitemap.xml", "utf8");
+  const urls = [...sitemap.matchAll(/<loc>(.*?)<\/loc>/g)].map((match) => match[1]);
+  if (
+    JSON.stringify(urls) !==
+    JSON.stringify(["https://arcbuildr.co/", "https://arcbuildr.co/privacy"])
+  )
+    throw new Error("sitemap must list only / and /privacy");
+  // Count scripts reachable from the page. React's unused integration asset is not loaded.
+  const scriptTags = [...home.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/g)];
+  const reachable = new Set();
+  function scriptSize(source, directory = "dist-main") {
+    let bytes = source ? gzipSync(source).length : 0;
+    for (const match of source.matchAll(/["']((?:\.\.?\/|\/_astro\/)[^"']+\.js)["']/g)) {
+      const path = match[1].startsWith("/")
+        ? join("dist-main", match[1])
+        : join(directory, match[1]);
+      if (reachable.has(path)) continue;
+      reachable.add(path);
+      bytes += scriptSize(readFileSync(path, "utf8"), dirname(path));
+    }
+    return bytes;
+  }
+  let scriptBytes = 0;
+  for (const [, attributes, body] of scriptTags) {
+    const src = attributes.match(/src="([^" ]+)"/);
+    if (src && src[1].startsWith("/")) {
+      const path = join("dist-main", src[1]);
+      if (!reachable.has(path)) {
+        reachable.add(path);
+        scriptBytes += scriptSize(readFileSync(path, "utf8"), dirname(path));
+      }
+    }
+    scriptBytes += scriptSize(body);
+  }
+  if (scriptBytes >= 3 * 1024)
+    throw new Error(`Main JavaScript reaches 3 KB gzipped: ${scriptBytes} bytes`);
+  console.log(`main JavaScript: ${scriptBytes} bytes gzipped (including the map)`);
+  // Remove ALLOW_NO_CONTACT_EMAIL=1 from test:main-build once the address is set.
+  if (
+    process.env.ALLOW_NO_CONTACT_EMAIL !== "1" &&
+    readFileSync("dist-main/privacy/index.html", "utf8").includes("[contact email]")
+  )
+    throw new Error(
+      "CONTACT_EMAIL is empty. Set src/config.ts before the main build, or temporarily use ALLOW_NO_CONTACT_EMAIL=1.",
+    );
   if (onMain.length > 0)
     throw new Error(`main build contains Agentation code: ${onMain.join(", ")}`);
   console.log(

@@ -1,5 +1,36 @@
 ---
-import Home from "../views/Home.astro";
+import Base from "../layouts/Base.astro";
+import BottomBar from "../components/BottomBar.astro";
+import { SECTION_IDS } from "../content/sections";
+import { offer } from "../content/site";
+import Hero from "../components/sections/Hero.astro";
+import Before from "../components/sections/Before.astro";
+import Problem from "../components/sections/Problem.astro";
+import Evidence from "../components/sections/Evidence.astro";
+import Method from "../components/sections/Method.astro";
+import Sample from "../components/sections/Sample.astro";
+import Ai from "../components/sections/Ai.astro";
+import Offer from "../components/sections/Offer.astro";
+import Guarantee from "../components/sections/Guarantee.astro";
+import Fit from "../components/sections/Fit.astro";
+import Founder from "../components/sections/Founder.astro";
+import Questions from "../components/sections/Questions.astro";
+import Apply from "../components/sections/Apply.astro";
 ---
 
-<Home />
+<Base>
+  <Hero id={SECTION_IDS[0]} />
+  <Before id={SECTION_IDS[1]} />
+  <Problem id={SECTION_IDS[2]} />
+  <Evidence id={SECTION_IDS[3]} />
+  <Method id={SECTION_IDS[4]} />
+  <Sample id={SECTION_IDS[5]} />
+  <Ai id={SECTION_IDS[6]} />
+  <Offer id={SECTION_IDS[7]} offer={offer} />
+  <Guarantee id={SECTION_IDS[8]} />
+  <Fit id={SECTION_IDS[9]} />
+  <Founder id={SECTION_IDS[10]} />
+  <Questions id={SECTION_IDS[11]} />
+  <Apply id={SECTION_IDS[12]} />
+  <BottomBar />
+</Base>

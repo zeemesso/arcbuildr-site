@@ -1,0 +1,409 @@
+---
+import { seasonMap } from "../content/site";
+import { wideCells, tallCells, point, walkerPoint, tagPoint } from "../lib/seasonMap";
+interface Props {
+  variant?: "hero" | "mini";
+  mark?: number;
+  alt?: string;
+}
+const { variant = "hero", mark = 1, alt = seasonMap.alt } = Astro.props;
+const selected = Math.max(1, Math.min(24, Math.round(mark) || 1));
+const mini = variant === "mini";
+const frames = [
+  [
+    "..ooooo..",
+    "..ooooo..",
+    "..ooopo..",
+    "..ooooo..",
+    ".ooooooo.",
+    ".ooooooo.",
+    ".ooooooo.",
+    "..ooooo..",
+    "..oo.oo..",
+    ".oo...oo.",
+    ".oo...oo.",
+  ],
+  [
+    "..ooooo..",
+    "..ooooo..",
+    "..ooopo..",
+    "..ooooo..",
+    ".ooooooo.",
+    ".ooooooo.",
+    ".ooooooo.",
+    "..ooooo..",
+    "...ooo...",
+    "...ooo...",
+    "...oo....",
+  ],
+];
+const position = (wide: readonly number[], tall: readonly number[]) =>
+  `--wx:${wide[0]}px;--wy:${wide[1]}px;--tx:${tall[0]}px;--ty:${tall[1]}px`;
+---
+
+<figure class="season-map" data-season-map={variant} data-state="done" data-step="25">
+  {!mini && <p class="title">{seasonMap.title}</p>}
+  <div class="picture">
+    <div role="img" aria-label={alt} class="art">
+      <svg
+        viewBox="0 0 612 714"
+        preserveAspectRatio="none"
+        aria-hidden="true"
+        shape-rendering="crispEdges"
+      >
+        <g class="geometry">
+          {wideCells.map((cell, i) => (
+            <g
+              class="tile"
+              data-tile={i + 1}
+              data-written={!mini || selected === i + 1 ? "true" : "false"}
+              style={position(point(cell), point(tallCells[i]))}
+            >
+              <rect width="30" height="30" />
+              {!mini && (
+                <text x="15" y="15" dy=".35em" text-anchor="middle">
+                  {String(i + 1).padStart(2, "0")}
+                </text>
+              )}
+            </g>
+          ))}
+          <rect class="ground" x="2" y="306" width="608" height="2" />
+          {mini ? (
+            <text
+              class="tag"
+              x={tagPoint(wideCells, selected)[0]}
+              y={tagPoint(wideCells, selected)[1]}
+              dy=".35em"
+              text-anchor="middle"
+            >{`${seasonMap.tag} ${selected}`}</text>
+          ) : (
+            <g
+              class="walker"
+              style={position(walkerPoint(wideCells, 25), walkerPoint(tallCells, 25))}
+              data-points={JSON.stringify(
+                Array.from({ length: 26 }, (_, i) => [
+                  walkerPoint(wideCells, i),
+                  walkerPoint(tallCells, i),
+                ]),
+              )}
+            >
+              {frames.map((frame, i) => (
+                <g data-frame={i}>
+                  {frame.flatMap((row, y) =>
+                    [...row].map(
+                      (pixel, x) =>
+                        pixel !== "." && (
+                          <rect
+                            x={x * 2}
+                            y={y * 2}
+                            width="2"
+                            height="2"
+                            class:list={{ eye: pixel === "p" }}
+                          />
+                        ),
+                    ),
+                  )}
+                </g>
+              ))}
+            </g>
+          )}
+        </g>
+      </svg>
+    </div>
+    {!mini && (
+      <div class="controls">
+        <div class="readout" aria-hidden="true">
+          <span class="day">
+            {seasonMap.day} <span data-day>42</span>
+          </span>
+          <span>
+            <span data-count>24</span> {seasonMap.of} 24 {seasonMap.written}
+          </span>
+        </div>
+        <button type="button" hidden aria-label={seasonMap.replayLabel}>
+          {seasonMap.replay}
+        </button>
+      </div>
+    )}
+  </div>
+  {!mini && (
+    <figcaption>
+      {seasonMap.caption.map((line) => (
+        <span>{line}</span>
+      ))}
+    </figcaption>
+  )}
+</figure>
+<style>
+  .season-map {
+    margin: 0;
+    container-type: inline-size;
+    color: var(--color-ink, #1a1a1a);
+    font-family: var(--font-mono, ui-monospace, "SF Mono", Menlo, monospace);
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+  }
+  .title {
+    font: 600 1rem/1.4 var(--font-sans);
+    color: var(--color-ink);
+    margin-bottom: 1rem;
+    text-wrap: balance;
+  }
+  .picture {
+    position: relative;
+  }
+  .art {
+    aspect-ratio: 340 / 400;
+  }
+  svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    inset: 0;
+  }
+  .geometry {
+    transform: scale(1.8, 1.785);
+  }
+  .tile,
+  .walker {
+    transform: translate(var(--tx), var(--ty));
+  }
+  .tile rect {
+    fill: var(--color-sheet, #fff);
+    stroke: var(--color-rule-strong, rgb(26 26 26 / 0.55));
+    stroke-width: 1.5;
+  }
+  .tile text,
+  .tag {
+    fill: var(--color-ink, #1a1a1a);
+    font-size: 11px;
+  }
+  .tile[data-written="true"] rect {
+    fill: var(--color-ink, #1a1a1a);
+    stroke: var(--color-ink, #1a1a1a);
+  }
+  .tile[data-written="true"] text {
+    fill: var(--color-paper, #fafaf8);
+  }
+  .ground {
+    fill: var(--color-ink, #1a1a1a);
+    transform: translateY(68px) scaleX(0.5526);
+  }
+  .walker {
+    fill: var(--color-accent, #e8722e);
+  }
+  .eye {
+    fill: var(--color-paper, #fafaf8);
+  }
+  [data-frame="1"] {
+    display: none;
+  }
+  .walker[data-pose="1"] [data-frame="0"] {
+    display: none;
+  }
+  .walker[data-pose="1"] [data-frame="1"] {
+    display: inline;
+  }
+  .controls {
+    position: absolute;
+    top: 57%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: grid;
+    justify-items: center;
+    gap: 0.5rem;
+    white-space: nowrap;
+  }
+  .readout {
+    text-align: center;
+    font-size: 11px;
+    line-height: 1.6;
+  }
+  .readout > span {
+    display: block;
+  }
+  figcaption {
+    color: var(--color-ink-muted, #5f5a54);
+  }
+  .day {
+    font-size: 32px;
+    line-height: 1.5;
+  }
+  button {
+    min-height: 44px;
+    padding: 0 12px;
+    background: var(--color-paper, #fafaf8);
+    border: 1px solid var(--color-rule-strong, rgb(26 26 26 / 0.55));
+    color: inherit;
+    font: inherit;
+    font-size: 11px;
+    cursor: pointer;
+  }
+  button:focus-visible {
+    outline: 2px solid var(--color-ink, #1a1a1a);
+    outline-offset: 2px;
+  }
+  [hidden] {
+    display: none !important;
+  }
+  figcaption {
+    font-size: 11px;
+    line-height: 1.6;
+    margin-top: 12px;
+  }
+  figcaption span {
+    display: block;
+    text-wrap: balance;
+  }
+  [data-season-map="mini"] .art {
+    aspect-ratio: 612 / 330;
+  }
+  [data-season-map="mini"] .geometry {
+    transform: scale(1, 2.163636);
+  }
+  [data-season-map="mini"] .tile {
+    transform: translate(var(--wx), var(--wy));
+  }
+  [data-season-map="mini"] .ground {
+    transform: none;
+  }
+  [data-season-map="mini"] .tag {
+    font-size: 20px;
+  }
+  @container (min-width:34rem) {
+    .art {
+      aspect-ratio: 612 / 330;
+    }
+    .geometry {
+      transform: scale(1, 2.163636);
+    }
+    .tile,
+    .walker {
+      transform: translate(var(--wx), var(--wy));
+    }
+    .ground {
+      transform: none;
+    }
+    .readout {
+      font-size: 12px;
+    }
+    .day {
+      font-size: 40px;
+    }
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    :global(html.js) [data-season-map="hero"]:not([data-ready]) .art,
+    :global(html.js) [data-season-map="hero"]:not([data-ready]) .readout {
+      opacity: 0;
+    }
+  }
+</style>
+<script>
+  import { timeline } from "../lib/seasonMap";
+  document.querySelectorAll<HTMLElement>('[data-season-map="hero"]').forEach((root) => {
+    const tiles = [...root.querySelectorAll<SVGElement>("[data-tile]")];
+    const walker = root.querySelector<SVGElement>(".walker")!;
+    const points = JSON.parse(walker.dataset.points!) as number[][][];
+    const day = root.querySelector("[data-day]")!;
+    const count = root.querySelector("[data-count]")!;
+    const button = root.querySelector("button")!;
+    const motion = matchMedia("(prefers-reduced-motion: reduce)");
+    let timer = 0,
+      elapsed = 0,
+      start = 0,
+      index = 0;
+    function stop() {
+      clearTimeout(timer);
+      timer = 0;
+    }
+    function draw(time: number) {
+      index = timeline.findLastIndex((s) => s.at <= time);
+      const s = timeline[index],
+        next = timeline[index + 1];
+      root.dataset.step = String(s.tile);
+      day.textContent = String(s.day);
+      count.textContent = String(s.written);
+      tiles.forEach((tile, i) => (tile.dataset.written = String(i < s.written)));
+      walker.dataset.pose = String((s.tile || Math.floor(time / 100)) % 2);
+      const fraction =
+        next && next.tile !== s.tile && time >= next.at - 120
+          ? time < next.at - 60
+            ? 0.33
+            : 0.67
+          : 0;
+      points[s.tile].forEach((p, l) => {
+        const target = next ? points[next.tile][l] : p;
+        ["x", "y"].forEach((axis, a) =>
+          walker.style.setProperty(
+            `--${l ? "t" : "w"}${axis}`,
+            `${Math.round(p[a] + (target[a] - p[a]) * fraction - (a === 1 && fraction ? 6 : 0))}px`,
+          ),
+        );
+      });
+    }
+    function tick() {
+      stop();
+      if (!root.isConnected || document.hidden) return;
+      elapsed = performance.now() - start;
+      draw(elapsed);
+      if (index === timeline.length - 1) {
+        root.dataset.state = "done";
+        button.hidden = motion.matches;
+      } else timer = window.setTimeout(tick, 30);
+    }
+    function play() {
+      if (motion.matches || root.dataset.state === "playing") return;
+      elapsed = 0;
+      start = performance.now();
+      root.dataset.state = "playing";
+      button.hidden = true;
+      tick();
+    }
+    function reset() {
+      stop();
+      button.hidden = true;
+      root.dataset.state = motion.matches ? "done" : "idle";
+      draw(motion.matches ? 6200 : 0);
+      root.dataset.ready = "";
+    }
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((e) => e.intersectionRatio >= 0.5) && root.dataset.state === "idle")
+          play();
+      },
+      { threshold: 0.5 },
+    );
+    const visibility = () => {
+      if (document.hidden) {
+        if (timer) elapsed = performance.now() - start;
+        stop();
+      } else if (root.dataset.state === "playing") {
+        start = performance.now() - elapsed;
+        tick();
+      }
+    };
+    const preference = () => {
+      reset();
+      observer.unobserve(root);
+      observer.observe(root);
+    };
+    const removal = new MutationObserver(() => {
+      if (!root.isConnected) {
+        stop();
+        observer.disconnect();
+        removal.disconnect();
+        document.removeEventListener("visibilitychange", visibility);
+        motion.removeEventListener("change", preference);
+      }
+    });
+    root.addEventListener("click", () => {
+      if (root.dataset.state === "done") play();
+    });
+    document.addEventListener("visibilitychange", visibility);
+    motion.addEventListener("change", preference);
+    reset();
+    observer.observe(root);
+    removal.observe(document.body, { childList: true, subtree: true });
+  });
+</script>

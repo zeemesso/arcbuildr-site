@@ -1,0 +1,32 @@
+---
+import Section from "../Section.astro";
+import { problem as content } from "../../content/site";
+import type { SectionId } from "../../content/sections";
+import PostsVsSeason from "../PostsVsSeason.astro";
+interface Props {
+  id: SectionId;
+}
+const { id } = Astro.props;
+---
+
+<Section id={id} kicker={content.kicker} title={content.h2} shape="split">
+  <PostsVsSeason slot="picture" />
+  <div class="quotes">
+    {content.quotes.map((quote) => (
+      <p class="quote">{quote}</p>
+    ))}
+  </div>
+  <p>{content.cause}</p>
+  <ol class="numbered">
+    {content.undecided.map((item) => (
+      <li>
+        <span class="mono">{item.n}</span>
+        <div>
+          <h3>{item.what}</h3>
+          <p class="muted">{item.example}</p>
+        </div>
+      </li>
+    ))}
+  </ol>
+  <p>{content.close}</p>
+</Section>
