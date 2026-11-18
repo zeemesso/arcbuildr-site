@@ -122,7 +122,7 @@ export const offer = {
     {
       day: 14,
       title: "Visual Identity System",
-      body: "3 to 5 colours, 1 or 2 fonts, how to film where you already work. A one-page guide to filming on a phone.",
+      body: "3 to 5 colours, 1 or 2 fonts, how to film where you already work. Your filming plan: about 6 episodes a session, with a one-page guide to filming on a phone.",
       art: "swatches",
       hue: "accent",
       decides: 2,
@@ -267,7 +267,7 @@ export const evidence = {
       id: "zajonc",
       figure: "72 people",
       claim:
-        "saw invented words, some once, others up to 25 times. The more often a word had come up, the better the meaning they guessed for it.",
+        "saw invented words, some once, others up to 25 times. The more often a word had come up, the better the meaning they guessed.",
       source: "Zajonc, Journal of Personality and Social Psychology, 1968",
     },
     {
@@ -282,14 +282,14 @@ export const evidence = {
       figure: "7 to 8 writers",
       claim:
         "typically write a streaming series. Today you are the whole team. We take the writing.",
-      source: "Writers Guild of America East, July 2025",
+      source: "Writers Guild of America East, Staff Size Guide, July 2025",
     },
     {
       id: "edelman",
       figure: "9 in 10",
       claim:
         "decision-makers said they are more open to sales or marketing messages from a company that regularly publishes high-quality expert content.",
-      source: "Edelman, 2024. 3,484 executives surveyed",
+      source: "Edelman, B2B Thought Leadership Impact Report, 2024. 3,484 executives",
     },
   ],
   limit:
@@ -323,7 +323,7 @@ export const questions = {
     {
       id: "q-time",
       q: "How much of my time does it take?",
-      a: "A 45-minute interview. Reading each document and script, and telling us within 3 days what to change. About 4 filming sessions of 6 episodes. Two 15-minute calls, in weeks 4 and 8. Editing and posting are yours, or someone who helps you.",
+      a: "A 45-minute interview. Reading each document and script, and telling us within 3 days what to change. About 4 filming sessions. Two 15-minute calls, in weeks 4 and 8. Editing and posting are yours, or someone who helps you.",
     },
     {
       id: "q-camera",
