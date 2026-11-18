@@ -64,6 +64,7 @@ Changed on 2026-11-18 (L1-P8 redesign, branch `l1-p8-redesign`):
 - Look: Direction A2 with the dark pill header (`DESIGN.md`). Font: Open Runde, self-hosted. Geist is gone.
 - Styles: `tokens.css`, `base.css`, `look.css`, `sections.css`. No raw colour outside `tokens.css`.
 - Pages: `/`, `/sample` (the full sample script), `/booked` (the page after booking: set it as the Cal.com redirect), `/privacy`, 404.
+- `/booked` with `via=chat` or `eventTypeSlug=15-minute-call-chat` in its address is a booking made from a chat: it shows a button to the 8 questions (`APPLICATION_AFTER_BOOKING_URL` and `CHAT_EVENT_SLUG` in `src/config.ts`), with the checked first name and email. Without those parameters the page is unchanged.
 - "Choose your season" is CSS only. Its sprites are built by `scripts/sprites/build.mjs`. No photo is ever in the repo.
 - Video slots: `FOUNDER_VIDEO` and `CONFIRMATION_VIDEO` in `src/config.ts`. Empty shows a poster.
 - `CONTACT_EMAIL` is `hello@arcbuildr.co`.
@@ -76,4 +77,4 @@ Changed on 2026-11-18 (L1-P8 redesign, branch `l1-p8-redesign`):
 - Current step: 9, visual feedback through Agentation on localhost. Then deploy (step 10) only when Zyade says so.
 - Waiting on Zyade: the open items list in `PLAN.md`.
 - 2026-11-18: the home page was rebuilt around one offer, Season One, on branch `l1-p6-season-one`. `COPY.md`, `PROTOTYPE.md`, `PLAN.md` and `SL-P1-PLAN.md` describe the earlier site and are kept for history. `npm run check` passes (128 unit tests, 84 browser tests). Next: Zyade reviews the branch preview; production deploy only when he says so. `CONTACT_EMAIL` in `src/config.ts` is still empty.
-- 2026-11-18, later: Zyade rejected that preview's look. Branch `l1-p8-redesign` rebuilds it in Direction A2: 1,100 words on the home page (2,985 before), motion, the pixel character, `/sample` and `/booked`. `npm run check` passes (102 unit tests; 132 browser tests, 1 skipped on desktop by design). `CONTACT_EMAIL` is set. Next: Zyade reviews the branch preview; production only when he says "ship it".
+- 2026-11-18, later: Zyade rejected that preview's look. Branch `l1-p8-redesign` rebuilds it in Direction A2: 1,100 words on the home page (2,985 before), motion, the pixel character, `/sample` and `/booked`. L1-P8b added the chat state of `/booked`. `npm run check` passes (103 unit tests; 146 browser tests, 1 skipped on desktop by design). `CONTACT_EMAIL` is set. Next: Zyade reviews the branch preview; production only when he says "ship it".

@@ -388,13 +388,15 @@ export const booked = {
   refund:
     "A full refund on the first delivery. If your Brand Strategy is not you, tell us within 3 days. We refund every dollar, and you keep the document.",
   /**
-   * `body` always shows. `ask` and `link` show only when APPLICATION_AFTER_BOOKING_URL is set,
-   * for someone who booked before answering the 8 questions.
+   * `body` shows to everyone except a visitor who booked from a chat (see APPLICATION_AFTER_BOOKING_URL):
+   * they have not answered the 8 questions yet, so `first` takes its place and `link` is their button.
+   * `link` has two parts. Each stays on one line; on a phone the button breaks between them.
    */
   application: {
     body: "We prepare your Show Audit from your account and your answers to the 8 questions.",
-    ask: "Not answered yet? It takes about 3 minutes.",
-    link: "Answer the 8 questions",
+    first:
+      "The 8 questions come first: we prepare your Show Audit from your answers and your account.",
+    link: ["Answer the 8 questions", "(3 minutes)"],
   },
 };
 

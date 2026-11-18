@@ -69,6 +69,8 @@ Ten sections, in this order (`src/content/sections.ts`):
 
 Other pages: `/sample` (one full script), `/booked` (after the booking: the invite line, the confirmation video slot, the call's agenda), `/privacy`, 404.
 
+`/booked` has one more state, for a booking made from a chat (`via=chat` or the chat event's slug in the address): the note under "Have ready" becomes one line saying the 8 questions come first, with a button to them. The button carries the first name and the email from the address, and only when each passes its check. Without those parameters, or without JavaScript, the page is the standard one.
+
 Header: a dark pill, sticky. The logo alone at first. "Start your application" slides into the pill once neither form's button is on screen, so there is one action on screen at a time. Without JavaScript it is a plain link to `#apply`.
 
 ## 5. The character module

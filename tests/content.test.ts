@@ -1,7 +1,12 @@
 import { describe, expect, it } from "vitest";
 import * as content from "../src/content/site";
 import { SECTION_IDS } from "../src/content/sections";
-import { CONTACT_EMAIL } from "../src/config";
+import {
+  APPLICATION_AFTER_BOOKING_URL,
+  APPLICATION_URL,
+  CHAT_EVENT_SLUG,
+  CONTACT_EMAIL,
+} from "../src/config";
 function strings(value: unknown, path = ""): [string, string][] {
   if (typeof value === "string") return [[path, value]];
   if (value && typeof value === "object")
@@ -56,6 +61,13 @@ describe("content contract", () => {
     expect(content.offer.price).toMatchObject({ from: "750", to: "1,750", unit: "USD" });
     expect(content.offer.price.line).toContain("One fixed price per size, paid once.");
     expect(CONTACT_EMAIL).toBe("hello@arcbuildr.co");
+  });
+  it("sends a booking made from a chat to the 8 questions that do not lead back to the booking page", () => {
+    expect(content.booked.application.link.join(" ")).toBe("Answer the 8 questions (3 minutes)");
+    expect(content.booked.application.first).toContain("The 8 questions come first");
+    expect(APPLICATION_AFTER_BOOKING_URL).toBe("https://tally.so/r/9NZpVV");
+    expect(APPLICATION_AFTER_BOOKING_URL).not.toBe(APPLICATION_URL);
+    expect(CHAT_EVENT_SLUG).toBe("15-minute-call-chat");
   });
   it("offers four seasons with original, generic names", () => {
     expect(content.season.seasons.map((s) => s.id)).toEqual([

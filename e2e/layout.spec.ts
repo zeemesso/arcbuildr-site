@@ -10,7 +10,7 @@ const overflow = () => document.documentElement.scrollWidth - document.documentE
 for (const width of [320, 360, 375, 390, 414, 768, 1024, 1280, 1440]) {
   test(`${width}px has no horizontal overflow`, async ({ page }) => {
     await page.setViewportSize({ width, height: 900 });
-    for (const path of ["/", "/sample", "/booked", "/privacy"]) {
+    for (const path of ["/", "/sample", "/booked", "/booked?via=chat", "/privacy"]) {
       await page.goto(path);
       await page.evaluate(() => document.fonts.ready);
       await page.locator("details").evaluateAll((els) => els.forEach((el) => (el.open = true)));
@@ -53,7 +53,7 @@ test("the first screen holds the form on a tall phone and on a desktop", async (
 
 test("mobile interactive targets are at least 44px", async ({ page }, info) => {
   test.skip(info.project.name !== "mobile", "Phone targets");
-  for (const path of ["/", "/sample", "/booked", "/privacy", "/no-such-page"]) {
+  for (const path of ["/", "/sample", "/booked", "/booked?via=chat", "/privacy", "/no-such-page"]) {
     await page.goto(path);
     await page.locator("details").evaluateAll((els) => els.forEach((el) => (el.open = true)));
     for (const target of await page

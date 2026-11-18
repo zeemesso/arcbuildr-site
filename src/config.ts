@@ -9,7 +9,10 @@ export const CONTACT_EMAIL = "hello@arcbuildr.co";
 export const FOUNDER_VIDEO = "";
 // The 75-second video on /booked. Same rule.
 export const CONFIRMATION_VIDEO = "";
-// Only for visitors who book the call before they answer the 8 questions:
+// Only for visitors who book the call from a chat, before they answer the 8 questions:
 // the address of the same application with no redirect to the booking page at its end.
-// While this is empty, /booked does not link to the application.
-export const APPLICATION_AFTER_BOOKING_URL = "";
+// /booked shows its button only when the address says the booking came from a chat:
+// `via=chat`, or `eventTypeSlug` equal to CHAT_EVENT_SLUG. While this is empty, there is no button.
+export const APPLICATION_AFTER_BOOKING_URL = "https://tally.so/r/9NZpVV";
+// The Cal.com event that is booked from a chat.
+export const CHAT_EVENT_SLUG = "15-minute-call-chat";

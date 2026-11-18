@@ -3,7 +3,7 @@ import Base from "../layouts/Base.astro";
 import VideoCard from "../components/VideoCard.astro";
 import Mark from "../components/Mark.astro";
 import { booked } from "../content/site";
-import { APPLICATION_AFTER_BOOKING_URL, CONFIRMATION_VIDEO } from "../config";
+import { APPLICATION_AFTER_BOOKING_URL, CHAT_EVENT_SLUG, CONFIRMATION_VIDEO } from "../config";
 ---
 
 <Base title={booked.title} description={booked.description} noindex apply={false}>
@@ -39,12 +39,16 @@ import { APPLICATION_AFTER_BOOKING_URL, CONFIRMATION_VIDEO } from "../config";
           </li>
         ))}
       </ul>
-      <p class="muted">{booked.application.body}</p>
+      <p class="muted" data-note>
+        {booked.application.body}
+      </p>
       {APPLICATION_AFTER_BOOKING_URL && (
-        <p>
-          {booked.application.ask}{" "}
-          <a href={APPLICATION_AFTER_BOOKING_URL}>{booked.application.link}</a>
-        </p>
+        <div class="doc__block" data-chat hidden>
+          <p>{booked.application.first}</p>
+          <a class="btn btn--parts" href={APPLICATION_AFTER_BOOKING_URL}>
+            <span>{booked.application.link[0]}</span> <span>{booked.application.link[1]}</span>
+          </a>
+        </div>
       )}
     </section>
     <section class="doc__block" aria-labelledby="booked-before">
@@ -62,20 +66,34 @@ import { APPLICATION_AFTER_BOOKING_URL, CONFIRMATION_VIDEO } from "../config";
     <p class="muted">{booked.refund}</p>
   </article>
 </Base>
-<script is:inline>
-  // The booking page can send the first name along. A name is letters only, so nothing else can be shown here.
-  {
-    const query = new URLSearchParams(location.search);
-    const given = (
-      query.get("attendeeFirstName") ||
-      query.get("attendeeName") ||
-      query.get("name") ||
-      ""
-    )
-      .trim()
-      .split(/\s+/)[0];
-    const heading = document.querySelector("[data-booked]");
-    if (heading && /^[\p{L}'’-]{1,40}$/u.test(given))
-      heading.textContent = heading.dataset.booked.replace("{name}", given);
+<script is:inline define:vars={{ chatSlug: CHAT_EVENT_SLUG }}>
+  // The booking page can send the first name and the email along. A name is letters only and
+  // an email is a plain address, so nothing else can be shown here or passed on.
+  const query = new URLSearchParams(location.search);
+  const given = (
+    query.get("attendeeFirstName") ||
+    query.get("attendeeName") ||
+    query.get("name") ||
+    ""
+  )
+    .trim()
+    .split(/\s+/)[0];
+  const name = /^[\p{L}'’-]{1,40}$/u.test(given) ? given : "";
+  const heading = document.querySelector("[data-booked]");
+  if (heading && name) heading.textContent = heading.dataset.booked.replace("{name}", name);
+
+  // Booked from a chat: the 8 questions are not answered yet, so they come first.
+  // The button's address is ours; only the checked name and email are added to it.
+  const chat = document.querySelector("[data-chat]");
+  if (chat && (query.get("via") === "chat" || query.get("eventTypeSlug") === chatSlug)) {
+    const email = (query.get("email") || "").trim();
+    const link = chat.querySelector("a");
+    const address = new URL(link.href);
+    if (name) address.searchParams.set("name", name);
+    if (email.length <= 254 && /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/.test(email))
+      address.searchParams.set("email", email);
+    link.href = address.href;
+    document.querySelector("[data-note]").hidden = true;
+    chat.hidden = false;
   }
 </script>

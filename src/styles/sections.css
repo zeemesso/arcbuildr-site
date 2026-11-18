@@ -854,6 +854,14 @@ summary::-webkit-details-marker {
 .doc .btn {
   justify-self: start;
 }
+/* A label too long for a phone: it breaks between its two parts, never inside one. */
+.btn--parts {
+  flex-wrap: wrap;
+  column-gap: 0.3em;
+  max-width: 100%;
+  white-space: normal;
+  text-align: center;
+}
 .muted {
   color: var(--color-ink-muted);
 }

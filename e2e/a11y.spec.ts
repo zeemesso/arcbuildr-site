@@ -3,7 +3,7 @@ import { expect, test } from "@playwright/test";
 import { meta } from "../src/content/site";
 // Reduced motion puts every section in its final state, which is the state to check.
 test.use({ reducedMotion: "reduce" });
-for (const path of ["/", "/sample", "/booked", "/privacy"]) {
+for (const path of ["/", "/sample", "/booked", "/booked?via=chat", "/privacy"]) {
   test(`${path}: axe, open details and heading hierarchy`, async ({ page, browserName }) => {
     await page.goto(path);
     const skip = page.locator(".skip");
