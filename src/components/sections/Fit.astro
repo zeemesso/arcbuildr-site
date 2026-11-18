@@ -1,46 +1,34 @@
 ---
-import Section from "../Section.astro";
-import { fit as content } from "../../content/site";
-import type { SectionId } from "../../content/sections";
-
-interface Props {
-  id: SectionId;
-}
-const icons = [
-  ["......X", ".....XX", "X...XX.", "XX.XX..", ".XXX...", "..X....", "......."],
-  ["X.....X", "XX...XX", ".XX.XX.", "..XXX..", ".XX.XX.", "XX...XX", "X.....X"],
-];
-const { id } = Astro.props;
+import { fit } from "../../content/site";
+import Mark from "../Mark.astro";
 ---
 
-<Section id={id} kicker={content.kicker} title={content.h2} shape="stack">
-  <div class="two-columns">
-    {[content.yes, content.no].map((part, index) => (
-      <div class:list={["flow", { muted: index === 1 }]}>
-        <h3>{part.title}</h3>
-        <ul class="fit-list">
-          {part.items.map((item) => (
-            <li>
-              <svg
-                width="14"
-                height="14"
-                viewBox="0 0 14 14"
-                aria-hidden="true"
-                shape-rendering="crispEdges"
-                fill="currentColor"
-              >
-                {icons[index].map((row, y) =>
-                  [...row].map(
-                    (pixel, x) =>
-                      pixel === "X" && <rect x={x * 2} y={y * 2} width="2" height="2" />,
-                  ),
-                )}
-              </svg>
-              <span>{item}</span>
-            </li>
-          ))}
-        </ul>
-      </div>
-    ))}
+<section class="sec" id="fit" aria-labelledby="fit-title">
+  <h2 class="title" id="fit-title">
+    {fit.h2}
+  </h2>
+  <div class="fit__grid">
+    <div class="fitcard fitcard--yes" data-reveal>
+      <h3>{fit.yes.title}</h3>
+      <ul>
+        {fit.yes.items.map((item) => (
+          <li>
+            <Mark />
+            {item}
+          </li>
+        ))}
+      </ul>
+    </div>
+    <div class="fitcard fitcard--no" data-reveal style="--i:1">
+      <h3>{fit.no.title}</h3>
+      <ul>
+        {fit.no.items.map((item) => (
+          <li>
+            <Mark no />
+            {item}
+          </li>
+        ))}
+      </ul>
+    </div>
   </div>
-</Section>
+</section>

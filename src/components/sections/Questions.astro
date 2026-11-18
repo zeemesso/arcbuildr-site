@@ -1,24 +1,20 @@
 ---
-import Section from "../Section.astro";
-import { questions as content } from "../../content/site";
-import type { SectionId } from "../../content/sections";
-
-interface Props {
-  id: SectionId;
-}
-const { id } = Astro.props;
+import { questions } from "../../content/site";
 ---
 
-<Section id={id} kicker={content.kicker} title={content.h2} shape="split">
-  <div class="questions">
-    {content.items.map((item, index) => (
-      <details id={item.id} open={index === 0}>
+<section class="sec faq" id="questions" aria-labelledby="questions-title">
+  <h2 class="title" id="questions-title">
+    {questions.h2}
+  </h2>
+  <div class="faq__list">
+    {questions.items.map((item) => (
+      <details class="qa card" id={item.id}>
         <summary>
           {item.q}
-          <span class="plus" aria-hidden="true"></span>
+          <span class="plus" aria-hidden="true" />
         </summary>
         <p>{item.a}</p>
       </details>
     ))}
   </div>
-</Section>
+</section>

@@ -1,31 +1,27 @@
 ---
-import Section from "../Section.astro";
-import { evidence as content } from "../../content/site";
-import type { SectionId } from "../../content/sections";
-
-interface Props {
-  id: SectionId;
-}
-const { id } = Astro.props;
+import { evidence } from "../../content/site";
+const hues = ["sage", "clay", "ink", "accent"];
 ---
 
-<Section id={id} kicker={content.kicker} title={content.h2} shape="split">
-  <p>{content.intro}</p>
-  <div>
-    {content.findings.map((item) => (
-      <article class="finding flow">
-        <h3>{item.claim}</h3>
-        <p>{item.detail}</p>
-        <p class="why">
-          <span class="kicker">{content.whyLabel}</span> {item.why}
-        </p>
-        <p class="kicker muted">{item.source}</p>
-      </article>
-    ))}
-  </div>
-  <div class="limit flow">
-    <h3>{content.limit.title}</h3>
-    <p>{content.limit.body}</p>
-  </div>
-  <p>{content.role}</p>
-</Section>
+<section class="sec" id="evidence" aria-labelledby="evidence-title">
+  <h2 class="title" id="evidence-title">
+    {evidence.h2}
+  </h2>
+  <p class="evidence__line">{evidence.line}</p>
+  <details class="research">
+    <summary>
+      <span class="plus" aria-hidden="true"></span>
+      {evidence.summary}
+    </summary>
+    <ul class="findings">
+      {evidence.findings.map((finding, i) => (
+        <li class="finding card" id={finding.id} style={`--hue:var(--hue-${hues[i]})`}>
+          <b>{finding.figure}</b>
+          <p>{finding.claim}</p>
+          <cite>{finding.source}</cite>
+        </li>
+      ))}
+    </ul>
+    <p class="limit">{evidence.limit}</p>
+  </details>
+</section>

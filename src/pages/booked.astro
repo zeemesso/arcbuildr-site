@@ -1,0 +1,81 @@
+---
+import Base from "../layouts/Base.astro";
+import VideoCard from "../components/VideoCard.astro";
+import Mark from "../components/Mark.astro";
+import { booked } from "../content/site";
+import { APPLICATION_AFTER_BOOKING_URL, CONFIRMATION_VIDEO } from "../config";
+---
+
+<Base title={booked.title} description={booked.description} noindex apply={false}>
+  <article class="doc">
+    <h1 data-booked={booked.h1Named}>{booked.h1}</h1>
+    <div class="doc__block">
+      <p class="lead">{booked.invite}</p>
+      <p>{booked.calendar}</p>
+    </div>
+    <VideoCard
+      src={CONFIRMATION_VIDEO}
+      alt={booked.video.alt}
+      title={booked.video.title}
+      length={booked.video.length}
+      play={booked.video.play}
+    />
+    <section class="card card--sage" aria-labelledby="booked-call">
+      <h2 id="booked-call">{booked.call.title}</h2>
+      <p class="small">{booked.call.meta}</p>
+      <ol class="steplist">
+        {booked.call.items.map((item) => (
+          <li>{item}</li>
+        ))}
+      </ol>
+    </section>
+    <section class="card" aria-labelledby="booked-ready">
+      <h2 id="booked-ready">{booked.ready.title}</h2>
+      <ul class="ticklist">
+        {booked.ready.items.map((item) => (
+          <li>
+            <Mark />
+            {item}
+          </li>
+        ))}
+      </ul>
+      <p class="muted">{booked.application.body}</p>
+      {APPLICATION_AFTER_BOOKING_URL && (
+        <p>
+          {booked.application.ask}{" "}
+          <a href={APPLICATION_AFTER_BOOKING_URL}>{booked.application.link}</a>
+        </p>
+      )}
+    </section>
+    <section class="doc__block" aria-labelledby="booked-before">
+      <h2 id="booked-before">{booked.before.title}</h2>
+      <ul class="doc__block">
+        {booked.before.items.map((item) => (
+          <li>
+            <a class="more" href={item.href}>
+              {item.text}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </section>
+    <p class="muted">{booked.refund}</p>
+  </article>
+</Base>
+<script is:inline>
+  // The booking page can send the first name along. A name is letters only, so nothing else can be shown here.
+  {
+    const query = new URLSearchParams(location.search);
+    const given = (
+      query.get("attendeeFirstName") ||
+      query.get("attendeeName") ||
+      query.get("name") ||
+      ""
+    )
+      .trim()
+      .split(/\s+/)[0];
+    const heading = document.querySelector("[data-booked]");
+    if (heading && /^[\p{L}'’-]{1,40}$/u.test(given))
+      heading.textContent = heading.dataset.booked.replace("{name}", given);
+  }
+</script>

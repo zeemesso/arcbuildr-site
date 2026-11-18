@@ -1,29 +1,24 @@
 ---
-import { apply, founding } from "../../content/site";
-import { FOUNDING_PLACES_LEFT } from "../../config";
-import type { SectionId } from "../../content/sections";
+import logo from "../../data/logo.json";
+import { apply } from "../../content/site";
 import EntryBlock from "../EntryBlock.astro";
-interface Props {
-  id: SectionId;
-}
-const { id } = Astro.props;
 ---
 
-<section id={id} class="closing" aria-labelledby="apply-title">
-  <div class="wrap closing-grid">
-    <div class="flow">
-      <p class="kicker">{apply.kicker}</p>
-      <h2 id="apply-title">{apply.h2}</h2>
-      <p>{apply.body}</p>
-    </div>
-    <div class="flow">
-      <EntryBlock id="bottom" />
-      <div class="notes">
-        {apply.notes.map((note) => (
-          <p>{note}</p>
-        ))}
-      </div>
-      <p class="small muted">{founding.replace("{n}", String(FOUNDING_PLACES_LEFT))}</p>
-    </div>
+<section class="sec apply" id="apply" aria-labelledby="apply-title">
+  <h2 class="title" id="apply-title">
+    {apply.h2}
+  </h2>
+  <div class="apply__stack" data-reveal>
+    <svg class="apply__arc" viewBox={logo.arc.viewBox} aria-hidden="true">
+      <path
+        d={logo.arc.d}
+        pathLength="1"
+        fill="none"
+        stroke="currentColor"
+        stroke-width={logo.arc.stroke}
+        stroke-linecap="round"
+      ></path>
+    </svg>
+    <EntryBlock id="bottom" />
   </div>
 </section>

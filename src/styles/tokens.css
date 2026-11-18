@@ -1,38 +1,83 @@
+/* Hallmark · design.md-managed · Direction A2 ("Daylight bento, bolder") · see DESIGN.md
+ * Every colour, size and curve on the site is named here. Components use the names. */
+
 @font-face {
-  font-family: Geist;
-  src: url("/fonts/geist-latin-wght.woff2") format("woff2");
-  font-weight: 100 900;
+  font-family: "Open Runde";
+  src: url("/fonts/open-runde-400.woff2") format("woff2");
+  font-weight: 400;
   font-display: swap;
 }
 @font-face {
-  font-family: "Geist Mono";
-  src: url("/fonts/geist-mono-latin-wght.woff2") format("woff2");
-  font-weight: 100 900;
+  font-family: "Open Runde";
+  src: url("/fonts/open-runde-600.woff2") format("woff2");
+  font-weight: 500 600;
   font-display: swap;
 }
+@font-face {
+  font-family: "Open Runde";
+  src: url("/fonts/open-runde-700.woff2") format("woff2");
+  font-weight: 700;
+  font-display: swap;
+}
+
+@property --ep {
+  syntax: "<integer>";
+  inherits: true;
+  initial-value: 24;
+}
+@property --day {
+  syntax: "<integer>";
+  inherits: true;
+  initial-value: 42;
+}
+
 :root {
-  --color-paper: #fafaf8;
-  --color-sheet: #ffffff;
+  --color-paper: oklch(96.2% 0.004 85);
+  --color-paper-2: oklch(93% 0.006 85);
+  --color-card: #ffffff;
+  --color-field: #fafaf8;
   --color-ink: #1a1a1a;
   --color-ink-muted: #5f5a54;
-  --color-rule: rgb(26 26 26 / 0.14);
-  --color-rule-strong: rgb(26 26 26 / 0.55);
+  --color-rule: oklch(90% 0.006 85);
   --color-accent: #e8722e;
-  --color-accent-hover: #f08a4b;
-  --color-on-accent: #1a1a1a;
-  --color-error: #b3261e;
-  --color-focus: #1a1a1a;
-  --font-sans: Geist, system-ui, -apple-system, "Segoe UI", sans-serif;
-  --font-mono: "Geist Mono", ui-monospace, "SF Mono", Menlo, monospace;
-  --space-2xs: 0.25rem;
-  --space-xs: 0.5rem;
-  --space-sm: 0.75rem;
-  --space-md: 1rem;
-  --space-lg: 1.5rem;
-  --space-xl: 2.5rem;
-  --space-2xl: 4rem;
-  --space-3xl: 6rem;
+  --color-accent-hover: #d45e00;
+  --color-accent-text: #d45e00;
+  --color-on-accent: #ffffff;
+  --color-sage: #597058;
+  --color-clay: #a34945;
+  --color-taupe: #8c7b6b;
+  --color-focus: #c65100;
+  --color-on-block-line: rgb(255 255 255 / 0.6);
+  --color-taupe-deep: #6f6154;
+  --color-error: var(--color-clay);
+  --shine-button: rgb(255 255 255 / 0.3);
+  --shine-poster: rgb(255 255 255 / 0.16);
+  --shine-tile: rgb(255 255 255 / 0.28);
+  --shade-tile: rgb(0 0 0 / 0.28);
+
+  --hue-sage: var(--color-sage);
+  --hue-clay: var(--color-clay);
+  --hue-taupe: var(--color-taupe);
+  --hue-ink: var(--color-ink);
+  --hue-accent: var(--color-accent-text);
+
+  --font-display: "Open Runde", ui-rounded, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1.0625rem;
+  --text-lg: 1.1875rem;
+  --text-xl: 1.5rem;
+  --text-2xl: clamp(2.25rem, 1.3rem + 4.6vw, 4.5rem);
+  --text-display: clamp(3rem, 12.4vw, 7.25rem);
+
   --page-max: 72rem;
   --gutter: clamp(1.25rem, 5vw, 3rem);
-  --tap: 2.75rem;
+  --radius-md: 1rem;
+  --radius-lg: 1.75rem;
+  --radius-pill: 999px;
+  --shadow-card: 0 1px 2px rgb(26 26 26 / 0.04), 0 8px 24px -12px rgb(26 26 26 / 0.12);
+  --shadow-lift: 0 2px 4px rgb(26 26 26 / 0.06), 0 24px 48px -20px rgb(26 26 26 / 0.28);
+  --ease-out: cubic-bezier(0.2, 0.6, 0.2, 1);
+  --spring: linear(0, 0.25 8%, 0.7 20%, 1.04 36%, 1.06 44%, 1.01 62%, 0.995 78%, 1);
+  --dur-fast: 150ms;
 }

@@ -1,7 +1,9 @@
 import { expect, test } from "@playwright/test";
-import { meta, privacy } from "../src/content/site";
+import { booked, meta, privacy, sample } from "../src/content/site";
 for (const [path, content] of [
   ["/", meta],
+  ["/sample", sample],
+  ["/booked", booked],
   ["/privacy", privacy],
 ] as const) {
   test(`${path}: metadata, noindex and no third party requests`, async ({ page }) => {
@@ -25,7 +27,8 @@ for (const [path, content] of [
       content.description,
     );
     const robots = await (await page.request.get("/robots.txt")).text();
-    if (robots.includes("Disallow"))
+    // The confirmation page is for people who booked: never in a search engine.
+    if (robots.includes("Disallow") || path === "/booked")
       await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content", "noindex");
     else await expect(page.locator('meta[name="robots"]')).toHaveCount(0);
     expect(external).toEqual([]);

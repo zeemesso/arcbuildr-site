@@ -15,7 +15,7 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "test:e2e": "playwright test",
-    "test:main-build": "ALLOW_NO_CONTACT_EMAIL=1 node scripts/verify-main-build.mjs",
+    "test:main-build": "node scripts/verify-main-build.mjs",
     "check": "npm run format:check && npm run typecheck && npm test && npm run build && npm run test:main-build && npm run test:e2e"
   },
   "devDependencies": {

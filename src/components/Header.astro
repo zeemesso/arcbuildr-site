@@ -1,11 +1,19 @@
 ---
 import Logo from "./Logo.astro";
-import ActionLink from "./ActionLink.astro";
+import { action } from "../content/site";
+interface Props {
+  apply?: boolean;
+}
+const { apply = true } = Astro.props;
 ---
 
-<header class="site-header">
-  <div class="wrap header-inner">
+<header class="top">
+  <div class="top__pill">
     <Logo />
-    <ActionLink href={Astro.url.pathname === "/" ? "#apply" : "/#apply"} />
+    {apply && (
+      <a class="btn btn--small" href={Astro.url.pathname === "/" ? "#apply" : "/#apply"} data-apply>
+        {action}
+      </a>
+    )}
   </div>
 </header>

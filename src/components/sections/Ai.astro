@@ -1,23 +1,18 @@
 ---
-import Section from "../Section.astro";
-import { whyNotAi as content } from "../../content/site";
-import type { SectionId } from "../../content/sections";
-
-interface Props {
-  id: SectionId;
-}
-const { id } = Astro.props;
+import { ai } from "../../content/site";
+const pages = Array.from({ length: 24 });
 ---
 
-<Section id={id} kicker={content.kicker} title={content.h2} shape="split">
-  <p>{content.intro}</p>
-  <ol class="two-columns points">
-    {content.points.map((item) => (
-      <li class="flow">
-        <span class="mono">{item.n}</span>
-        <h3>{item.title}</h3>
-        <p>{item.body}</p>
-      </li>
-    ))}
-  </ol>
-</Section>
+<section class="sec" id="ai" aria-labelledby="ai-title">
+  <div class="ai__block" data-reveal>
+    <h2 class="title" id="ai-title">
+      {ai.h2}
+    </h2>
+    <p>{ai.body}</p>
+    <div class="ai__same" aria-hidden="true">
+      {pages.map((_, i) => (
+        <i style={`--i:${i}`} />
+      ))}
+    </div>
+  </div>
+</section>

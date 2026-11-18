@@ -1,27 +1,42 @@
 ---
-import { hero } from "../../content/site";
-import type { SectionId } from "../../content/sections";
+import logo from "../../data/logo.json";
+import { founder, hero } from "../../content/site";
+import { FOUNDER_VIDEO } from "../../config";
 import EntryBlock from "../EntryBlock.astro";
-import SeasonMap from "../SeasonMap.astro";
-interface Props {
-  id: SectionId;
-}
-const { id } = Astro.props;
+import VideoCard from "../VideoCard.astro";
 ---
 
-<section id={id} class="wrap hero" aria-labelledby="hero-title">
-  <div class="hero-copy">
-    <p class="kicker">{hero.kicker}</p>
-    <h1 id="hero-title">{hero.h1}</h1>
-    <p class="lede">{hero.lede}</p>
-    <EntryBlock id="top" />
-    <div class="notes">
-      {hero.notes.map((note) => (
-        <p>{note}</p>
+<section class="hero" id="top">
+  <svg class="hero__arc" viewBox={logo.arc.viewBox} aria-hidden="true">
+    <path
+      d={logo.arc.d}
+      pathLength="1"
+      fill="none"
+      stroke="currentColor"
+      stroke-width={logo.arc.stroke}
+      stroke-linecap="round"
+    ></path>
+  </svg>
+  <div class="hero__copy">
+    <p class="who">{hero.who}</p>
+    <h1>
+      {hero.h1.map((line) => (
+        <span class="line">
+          <span>{line}</span>{" "}
+        </span>
       ))}
-    </div>
+    </h1>
+    <p class="lede">{hero.lede}</p>
   </div>
-  <div class="hero-map">
-    <SeasonMap variant="hero" />
-  </div>
+  <EntryBlock id="top" />
+  <VideoCard
+    src={FOUNDER_VIDEO}
+    alt={founder.alt}
+    title={founder.video.title}
+    length={founder.video.length}
+    play={founder.video.play}
+  >
+    <h2>{founder.title}</h2>
+    <p>{founder.body}</p>
+  </VideoCard>
 </section>

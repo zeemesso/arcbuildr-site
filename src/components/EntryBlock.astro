@@ -1,25 +1,28 @@
 ---
-import { entry } from "../content/site";
-import { APPLICATION_URL } from "../config";
-import Arrow from "./Arrow.astro";
+import { entry, founding } from "../content/site";
+import { APPLICATION_URL, FOUNDING_PLACES_LEFT } from "../config";
 interface Props {
   id: "top" | "bottom";
 }
 const { id } = Astro.props;
+/** One drawing per step, in the order of entry.steps: the questions, the call, no payment. */
+const stepIcons = [
+  '<rect x="4" y="3" width="16" height="18" rx="4"/><path d="M8.5 8.5h7M8.5 12h7M8.5 15.5h4"/>',
+  '<path d="M4 7.5A3.5 3.5 0 0 1 7.5 4h9A3.5 3.5 0 0 1 20 7.5v5a3.5 3.5 0 0 1-3.5 3.5H12l-4.5 4v-4A3.5 3.5 0 0 1 4 12.5z"/>',
+  '<rect x="3" y="6" width="18" height="12" rx="3.5"/><path d="M3 10.5h18M5 21 19 3"/>',
+];
 ---
 
 <form
   id={`${id}-entry`}
-  class="entry"
+  class="entry card"
   data-entry
   method="get"
   action={APPLICATION_URL}
   data-opening={entry.opening}
 >
-  <div class="field">
-    <label id={`${id}-name-label`} for={`${id}-name`}>
-      {entry.nameLabel}
-    </label>
+  <label class="field" for={`${id}-name`}>
+    <span>{entry.nameLabel}</span>
     <input
       id={`${id}-name`}
       name="name"
@@ -31,14 +34,12 @@ const { id } = Astro.props;
       maxlength="200"
       aria-describedby={`${id}-name-error`}
     />
-    <p class="field-error small" id={`${id}-name-error`} hidden>
-      {entry.errors.name}
-    </p>
-  </div>
-  <div class="field">
-    <label id={`${id}-email-label`} for={`${id}-email`}>
-      {entry.emailLabel}
-    </label>
+  </label>
+  <p class="field-error" id={`${id}-name-error`} hidden>
+    {entry.errors.name}
+  </p>
+  <label class="field" for={`${id}-email`}>
+    <span>{entry.emailLabel}</span>
     <input
       id={`${id}-email`}
       name="email"
@@ -52,16 +53,34 @@ const { id } = Astro.props;
       maxlength="320"
       aria-describedby={`${id}-email-error`}
     />
-    <p class="field-error small" id={`${id}-email-error`} hidden>
-      {entry.errors.email}
-    </p>
-  </div>
-  <button class="action" type="submit">
+  </label>
+  <p class="field-error" id={`${id}-email-error`} hidden>
+    {entry.errors.email}
+  </p>
+  <button class="btn" type="submit">
     <span aria-live="polite" data-submit-label>
       {entry.button}
     </span>
-    <Arrow />
   </button>
+  <ol class="steps">
+    {entry.steps.map((step, i) => (
+      <li>
+        <svg viewBox="0 0 24 24" aria-hidden="true" set:html={stepIcons[i]} />
+        {step}
+      </li>
+    ))}
+  </ol>
+  {id === "top" && (
+    <p class="founding">
+      <span class="seats" aria-hidden="true">
+        {[0, 1, 2].map((seat) => (
+          <i class={seat < FOUNDING_PLACES_LEFT ? "is-free" : undefined} />
+        ))}
+      </span>
+      <b>{founding.count.replace("{n}", String(FOUNDING_PLACES_LEFT))}</b>
+      {founding.label}
+    </p>
+  )}
 </form>
 <script>
   import "../scripts/entry";

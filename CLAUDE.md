@@ -59,6 +59,16 @@ Changed on 2026-11-18 (Season One rebuild):
 - Fonts: Geist and Geist Mono, self-hosted. No Tailwind, no framer-motion. React loads only for the feedback toolbar on preview builds.
 - Visit counting: Cloudflare Web Analytics, on when `PUBLIC_CF_ANALYTICS_TOKEN` is set at build time.
 
+Changed on 2026-11-18 (L1-P8 redesign, branch `l1-p8-redesign`):
+
+- Look: Direction A2 with the dark pill header (`DESIGN.md`). Font: Open Runde, self-hosted. Geist is gone.
+- Styles: `tokens.css`, `base.css`, `look.css`, `sections.css`. No raw colour outside `tokens.css`.
+- Pages: `/`, `/sample` (the full sample script), `/booked` (the page after booking: set it as the Cal.com redirect), `/privacy`, 404.
+- "Choose your season" is CSS only. Its sprites are built by `scripts/sprites/build.mjs`. No photo is ever in the repo.
+- Video slots: `FOUNDER_VIDEO` and `CONFIRMATION_VIDEO` in `src/config.ts`. Empty shows a poster.
+- `CONTACT_EMAIL` is `hello@arcbuildr.co`.
+- iPhone engine tests are opt-in: `npx playwright install webkit`, then `PW_WEBKIT=1 npx playwright test --project=iphone`.
+
 ## STATUS
 
 - Steps 1 to 6 done. `COPY.md`, `PROTOTYPE.md` and `PLAN.md` approved.
@@ -66,3 +76,4 @@ Changed on 2026-11-18 (Season One rebuild):
 - Current step: 9, visual feedback through Agentation on localhost. Then deploy (step 10) only when Zyade says so.
 - Waiting on Zyade: the open items list in `PLAN.md`.
 - 2026-11-18: the home page was rebuilt around one offer, Season One, on branch `l1-p6-season-one`. `COPY.md`, `PROTOTYPE.md`, `PLAN.md` and `SL-P1-PLAN.md` describe the earlier site and are kept for history. `npm run check` passes (128 unit tests, 84 browser tests). Next: Zyade reviews the branch preview; production deploy only when he says so. `CONTACT_EMAIL` in `src/config.ts` is still empty.
+- 2026-11-18, later: Zyade rejected that preview's look. Branch `l1-p8-redesign` rebuilds it in Direction A2: 1,089 words on the home page (2,985 before), motion, the pixel character, `/sample` and `/booked`. `npm run check` passes (102 unit tests; 132 browser tests, 1 skipped on desktop by design). `CONTACT_EMAIL` is set. Next: Zyade reviews the branch preview; production only when he says "ship it".

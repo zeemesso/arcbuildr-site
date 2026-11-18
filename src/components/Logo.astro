@@ -3,6 +3,7 @@ import logo from "../data/logo.json";
 import { meta } from "../content/site";
 
 /** The arc and wordmark are round-capped strokes drawn from brand/build.mjs.
+ * Each path has a length of 1, so the logo can draw itself on: the arc, the letters, the orange "r" last.
  * On Home it is not a link: a link to the page you are on is a dead tab stop. */
 const here = Astro.url.pathname.replace(/(.)\/$/, "$1");
 const isHome = here === "/";
@@ -11,39 +12,39 @@ const last = logo.word.letters.length - 1;
 ---
 
 <Tag
-  class="wordmark"
+  class="logo"
+  translate="no"
   aria-label={meta.title.split(" | ")[0]}
   role={isHome ? "img" : undefined}
   href={isHome ? undefined : "/"}
 >
-  <svg class="wordmark__arc" viewBox={logo.arc.viewBox} aria-hidden="true">
+  <svg class="logo__arc" viewBox={logo.arc.viewBox} aria-hidden="true">
     <path
       d={logo.arc.d}
+      pathLength="1"
       fill="none"
       stroke="currentColor"
       stroke-width={logo.arc.stroke}
       stroke-linecap="round"
     ></path>
   </svg>
-  <span class="wordmark__text" aria-hidden="true">
-    <span>
-      <svg
-        class="wordmark__word"
-        viewBox={logo.word.viewBox}
-        aria-hidden="true"
-        fill="none"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-        stroke-width={logo.stroke}
-      >
-        {logo.word.letters.map((d, i) => (
-          <path
-            class={i === last ? "wordmark__r" : undefined}
-            d={d}
-            stroke={i === last ? "var(--color-accent)" : "currentColor"}
-          />
-        ))}
-      </svg>
-    </span>
-  </span>
+  <svg
+    class="logo__word"
+    viewBox={logo.word.viewBox}
+    aria-hidden="true"
+    fill="none"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    stroke-width={logo.stroke}
+  >
+    {logo.word.letters.map((d, i) => (
+      <path
+        class={i === last ? "logo__r" : undefined}
+        d={d}
+        pathLength="1"
+        style={`--i:${i}`}
+        stroke="currentColor"
+      />
+    ))}
+  </svg>
 </Tag>

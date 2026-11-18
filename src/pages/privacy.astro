@@ -5,15 +5,15 @@ import { CONTACT_EMAIL } from "../config";
 ---
 
 <Base title={privacy.title} description={privacy.description}>
-  <article class="wrap legal flow">
+  <article class="doc">
     <h1>{privacy.h1}</h1>
     <p class="small muted">{privacy.updated}</p>
     {privacy.sections.map((section) => (
-      <section class="flow" aria-labelledby={section.id}>
+      <section aria-labelledby={section.id}>
         <h2 id={section.id}>{section.title}</h2>
         {section.body.map((part) =>
           Array.isArray(part) ? (
-            <ul>
+            <ul class="bullets">
               {part.map((line) => (
                 <li>{line}</li>
               ))}

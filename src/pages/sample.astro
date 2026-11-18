@@ -1,0 +1,28 @@
+---
+import Base from "../layouts/Base.astro";
+import ScriptDoc from "../components/ScriptDoc.astro";
+import { action, sample } from "../content/site";
+---
+
+<Base title={sample.title} description={sample.description}>
+  <article class="doc">
+    <h1>{sample.h1}</h1>
+    <p class="lead">{sample.intro}</p>
+    <ScriptDoc full />
+    <section class="card" aria-labelledby="sample-place">
+      <h2 id="sample-place">{sample.place.label}</h2>
+      <p class="small muted">{sample.place.code}</p>
+      <p>{sample.place.job}</p>
+      <ul class="place__next">
+        {sample.place.next.map((line) => (
+          <li>{line}</li>
+        ))}
+      </ul>
+    </section>
+    <p>{sample.after}</p>
+    <p class="lead">{sample.cta}</p>
+    <a class="btn" href="/#apply">
+      {action}
+    </a>
+  </article>
+</Base>

@@ -1,32 +1,46 @@
 ---
-import Section from "../Section.astro";
-import { problem as content } from "../../content/site";
-import type { SectionId } from "../../content/sections";
-import PostsVsSeason from "../PostsVsSeason.astro";
-interface Props {
-  id: SectionId;
-}
-const { id } = Astro.props;
+import { problem } from "../../content/site";
+const tiles = Array.from({ length: 12 });
 ---
 
-<Section id={id} kicker={content.kicker} title={content.h2} shape="split">
-  <PostsVsSeason slot="picture" />
-  <div class="quotes">
-    {content.quotes.map((quote) => (
-      <p class="quote">{quote}</p>
-    ))}
-  </div>
-  <p>{content.cause}</p>
-  <ol class="numbered">
-    {content.undecided.map((item) => (
-      <li>
-        <span class="mono">{item.n}</span>
-        <div>
-          <h3>{item.what}</h3>
-          <p class="muted">{item.example}</p>
+<section class="sec problem" id="problem" aria-labelledby="problem-title">
+  <h2 class="title title--long" id="problem-title">
+    {problem.h2}
+  </h2>
+  <div class="problem__grid">
+    <ul class="quotes">
+      {problem.quotes.map((quote) => (
+        <li class="quote" data-reveal>
+          {quote}
+        </li>
+      ))}
+    </ul>
+    <div class="versus card" data-reveal role="img" aria-label={problem.picture.alt}>
+      <div class="versus__side versus__side--posts">
+        <div class="minigrid">
+          {tiles.map(() => (
+            <i />
+          ))}
         </div>
-      </li>
-    ))}
-  </ol>
-  <p>{content.close}</p>
-</Section>
+        <p>{problem.picture.left}</p>
+      </div>
+      <div class="versus__side versus__side--season">
+        <div class="minigrid">
+          {tiles.map(() => (
+            <i />
+          ))}
+        </div>
+        <p>{problem.picture.right}</p>
+      </div>
+    </div>
+  </div>
+  <div class="cause" data-reveal>
+    <p class="cause__lead">{problem.cause}</p>
+    <ol class="cause__list">
+      {problem.undecided.map((thing, i) => (
+        <li style={`--i:${i}`}>{thing}</li>
+      ))}
+    </ol>
+    <p class="cause__close">{problem.close}</p>
+  </div>
+</section>

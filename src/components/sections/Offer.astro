@@ -1,70 +1,93 @@
 ---
-import Section from "../Section.astro";
-import ActionLink from "../ActionLink.astro";
-import { founding, type offer as OfferContent } from "../../content/site";
-import { FOUNDING_PLACES_LEFT } from "../../config";
-import type { SectionId } from "../../content/sections";
-interface Props {
-  id: SectionId;
-  offer: typeof OfferContent;
-}
-const { id, offer } = Astro.props;
+import { offer } from "../../content/site";
+const weeks = Array.from({ length: 12 }, (_, i) => i + 1);
+const callWeeks = [4, 8];
+const pinsIn = (week: number) => offer.cards.filter((card) => Math.ceil(card.day / 7) === week);
+/** The legend's three keys, in the order of offer.strip.legend. */
+const keys = ["pin", "mon", "call"];
+const marks = Array.from({ length: 6 });
 ---
 
-<Section id={id} kicker={offer.kicker} title={offer.h2} shape="stack">
-  <p>{offer.intro}</p>
-  <table class="sizes">
-    <thead>
-      <tr>
-        {offer.sizes.head.map((head) => (
-          <th scope="col">{head}</th>
+<section class="sec" id="offer" aria-labelledby="offer-title">
+  <h2 class="title" id="offer-title">
+    {offer.h2}
+  </h2>
+  <div class="weeks card" data-reveal>
+    <div role="img" aria-label={offer.strip.alt}>
+      <ol class="weeks__row">
+        {weeks.map((week, i) => (
+          <li style={`--i:${i}`}>
+            <span class="weeks__n" />
+            <span class="weeks__pins">
+              {pinsIn(week).map((card) => (
+                <i style={`--hue:var(--hue-${card.hue})`} />
+              ))}
+              {callWeeks.includes(week) && <i class="is-call" />}
+            </span>
+            <span class="weeks__mon" />
+          </li>
         ))}
-      </tr>
-    </thead>
-    <tbody>
-      {offer.sizes.rows.map((row) => (
-        <tr class:list={{ recommended: row.pick }}>
-          <th scope="row">
-            {row.size}
-            {row.pick && <span class="tag">{offer.sizes.pickTag}</span>}
-          </th>
-          <td data-label={offer.sizes.head[1]}>{row.rhythm}</td>
-          <td data-label={offer.sizes.head[2]} class="mono">
-            {row.by}
-          </td>
-        </tr>
+      </ol>
+    </div>
+    <ul class="weeks__legend">
+      {offer.strip.legend.map((text, i) => (
+        <li>
+          <i class={`key key--${keys[i]}`} />
+          {text}
+        </li>
       ))}
-    </tbody>
-  </table>
-  <p class="small muted">{offer.sizes.note}</p>
-  <div class="flow">
-    <h3>{offer.timeline.title}</h3>
-    <dl class="timeline">
-      {offer.timeline.rows.map((row) => (
-        <div>
-          <dt>{row.when}</dt>
-          <dd>{row.what}</dd>
-        </div>
-      ))}
-    </dl>
+    </ul>
   </div>
-  <div class="two-columns">
-    {[offer.yourPart, offer.notIncluded].map((part) => (
-      <div class="flow">
-        <h3>{part.title}</h3>
-        <ul>
-          {part.items.map((item) => (
-            <li>{item}</li>
+  <ol class="deliver">
+    {offer.cards.map((card, i) => (
+      <li
+        class={`dcard card dcard--${card.art}`}
+        data-reveal
+        style={`--hue:var(--hue-${card.hue});--i:${i % 3}`}
+      >
+        <p class="when">
+          <span>{offer.when}</span>
+          <b>{card.day}</b>
+        </p>
+        <h3>
+          {card.decides && <i class="dcard__n" data-n={card.decides} aria-hidden="true" />}
+          {card.title}
+        </h3>
+        <p class="dcard__body">{card.body}</p>
+        <div class={`art art--${card.art}`} aria-hidden="true">
+          {marks.map(() => (
+            <i />
           ))}
-        </ul>
-      </div>
+        </div>
+      </li>
     ))}
+  </ol>
+  <div class="offer">
+    <div class="sizebox card" data-reveal>
+      <ul class="sizes">
+        {offer.sizes.rows.map((row, i) => (
+          <li class:list={["size", row.pick && "is-pick"]} style={`--i:${i}`}>
+            {row.pick && <p class="size__pick">{offer.sizes.pickTag}</p>}
+            <p class="size__n">
+              <b>{row.n}</b>
+              <span>{offer.sizes.unit}</span>
+            </p>
+            <p class="size__rhythm">{row.rhythm}</p>
+            <p class="size__by">{row.by}</p>
+          </li>
+        ))}
+      </ul>
+      <p class="sizes__note">{offer.sizes.note}</p>
+    </div>
+    <div class="price card" data-reveal>
+      <p class="price__label">{offer.price.label}</p>
+      <p class="price__fig">
+        <b>{offer.price.from}</b>
+        <span>{offer.price.join}</span>
+        <b>{offer.price.to}</b>
+        <span>{offer.price.unit}</span>
+      </p>
+      <p class="price__line">{offer.price.line}</p>
+    </div>
   </div>
-  <p>
-    {offer.price} <a href={offer.priceLink.href}>{offer.priceLink.text}</a>
-  </p>
-  <div class="flow">
-    <ActionLink />
-    <p class="small muted">{founding.replace("{n}", String(FOUNDING_PLACES_LEFT))}</p>
-  </div>
-</Section>
+</section>

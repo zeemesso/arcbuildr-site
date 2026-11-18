@@ -27,5 +27,8 @@ export default defineConfig({
       name: "desktop",
       use: { viewport: { width: 1280, height: 800 }, launchOptions: { executablePath } },
     },
+    // The iPhone engine, where most visitors are. Opt in, because it needs
+    // `npx playwright install webkit`: PW_WEBKIT=1 npx playwright test --project=iphone
+    ...(process.env.PW_WEBKIT ? [{ name: "iphone", use: { ...devices["iPhone 13"] } }] : []),
   ],
 });

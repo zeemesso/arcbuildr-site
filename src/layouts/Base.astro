@@ -1,5 +1,8 @@
 ---
-import "../styles/global.css";
+import "../styles/tokens.css";
+import "../styles/base.css";
+import "../styles/look.css";
+import "../styles/sections.css";
 import { meta } from "../content/site";
 import Header from "../components/Header.astro";
 import Footer from "../components/Footer.astro";
@@ -7,8 +10,15 @@ interface Props {
   title?: string;
   description?: string;
   noindex?: boolean;
+  /** False on the booking confirmation: someone who has booked is not asked to apply again. */
+  apply?: boolean;
 }
-const { title = meta.title, description = meta.description, noindex = false } = Astro.props;
+const {
+  title = meta.title,
+  description = meta.description,
+  noindex = false,
+  apply = true,
+} = Astro.props;
 const analyticsToken = import.meta.env.PUBLIC_CF_ANALYTICS_TOKEN;
 const canonical = new URL(Astro.url.pathname, Astro.site);
 ---
@@ -18,10 +28,14 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
   <head>
     <meta charset="utf-8" />
     <script is:inline>
-      document.documentElement.classList.add("js");
+      // Motion is extra. If the page script has not started after 3 seconds, show everything as if there were no script.
+      ((root) => {
+        root.classList.add("js");
+        setTimeout(() => root.classList.contains("ready") || root.classList.remove("js"), 3000);
+      })(document.documentElement);
     </script>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#FAFAF8" />
+    <meta name="theme-color" content="#f4f3f0" />
     {(noindex || __PREVIEW__) && <meta name="robots" content="noindex" />}
     <title>{title}</title>
     <meta name="description" content={description} />
@@ -33,7 +47,14 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link
       rel="preload"
-      href="/fonts/geist-latin-wght.woff2"
+      href="/fonts/open-runde-700.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+    <link
+      rel="preload"
+      href="/fonts/open-runde-600.woff2"
       as="font"
       type="font/woff2"
       crossorigin
@@ -43,7 +64,7 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
     <a class="skip" href="#main">
       {meta.skip}
     </a>
-    <Header />
+    <Header apply={apply} />
     <main id="main" tabindex="-1">
       <slot />
     </main>
@@ -59,5 +80,6 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
   </body>
 </html>
 <script>
+  import "../scripts/motion";
   if (__PREVIEW__) import("../components/mountFeedback");
 </script>
