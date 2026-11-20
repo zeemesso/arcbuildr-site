@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { Env } from "../src/lib/env";
 import { handleLead, parseEntry } from "../src/lib/lead";
+import { LEAD_KEYS } from "../src/lib/sheets";
 import worker from "../src/worker";
 
 const SHEETS_URL = "https://storage.example.test/exec";
@@ -17,6 +18,24 @@ const valid = {
   tz: "Africa/Casablanca",
   page: "/?src=ig",
   utm: "utm_source=ig",
+};
+/** The same entry, named as the sheet's script reads it. */
+const saved = {
+  name: valid.name,
+  email: valid.email,
+  phone: "",
+  instagram: "",
+  language: "",
+  channel: valid.src,
+  budget: "",
+  decisionMaker: "",
+  need: "",
+  timing: "",
+  heardAbout: "",
+  referredBy: "",
+  timeZone: valid.tz,
+  sourcePage: valid.page,
+  utm: valid.utm,
 };
 const NOW = "2026-11-18T10:00:00.000Z";
 const parse = (fields: Record<string, string> = {}) =>
@@ -66,13 +85,42 @@ afterEach(() => {
 });
 
 describe("parseEntry", () => {
-  it("keeps only the entry columns and ignores client time and unknown fields", () => {
+  it("names the fields as the sheet's script reads them and ignores client time and unknown fields", () => {
     expect(
-      entry({ sent_at: "1999-01-01", received_at: "1999-01-01", phone: "ignored", status: "won" }),
-    ).toEqual({
-      ...valid,
-      status: "opened",
+      entry({ sent_at: "1999-01-01", received_at: "1999-01-01", timestamp: "1999", status: "won" }),
+    ).toEqual(saved);
+  });
+  it("has every key the script reads, and no other, once the server adds the time", () => {
+    expect(["timestamp", ...Object.keys(entry())].sort()).toEqual([...LEAD_KEYS].sort());
+  });
+  it("passes the optional fields through under the script's names", () => {
+    expect(
+      entry({
+        phone: "+1 555 0100",
+        profile: "@test.person",
+        language: "English",
+        budget: "Under 750 USD",
+        decides: "Me",
+        need: "Scripts",
+        timing: "January",
+        heard: "A friend",
+        referred: "Test Friend",
+      }),
+    ).toMatchObject({
+      phone: "+1 555 0100",
+      instagram: "@test.person",
+      language: "English",
+      budget: "Under 750 USD",
+      decisionMaker: "Me",
+      need: "Scripts",
+      timing: "January",
+      heardAbout: "A friend",
+      referredBy: "Test Friend",
     });
+  });
+  it("cuts an optional field to 300 characters on one line", () => {
+    expect(entry({ need: "a\nb" + "x".repeat(400) }).need).toHaveLength(300);
+    expect(entry({ need: "a\n\tb" }).need).toBe("a b");
   });
   it("trims name and email, collapses whitespace and controls, and lowercases email", () => {
     expect(
@@ -114,26 +162,26 @@ describe("parseEntry", () => {
     expect(parse({ email }).ok).toBe(false);
   });
   it("normalizes src and accepts its bounds", () => {
-    expect(entry({ src: "AB_1-z" }).src).toBe("ab_1-z");
-    expect(entry({ src: "a" }).src).toBe("a");
-    expect(entry({ src: "x".repeat(32) }).src).toHaveLength(32);
+    expect(entry({ src: "AB_1-z" }).channel).toBe("ab_1-z");
+    expect(entry({ src: "a" }).channel).toBe("a");
+    expect(entry({ src: "x".repeat(32) }).channel).toHaveLength(32);
   });
   it.each(["", "a".repeat(33), "with space", "a/b", "a.b", "é"])("falls back for src %j", (src) => {
-    expect(entry({ src }).src).toBe("direct");
+    expect(entry({ src }).channel).toBe("direct");
   });
   it("accepts timezone characters and length bound", () => {
-    expect(entry({ tz: "Etc/GMT+5_-" }).tz).toBe("Etc/GMT+5_-");
-    expect(entry({ tz: "A".repeat(64) }).tz).toHaveLength(64);
+    expect(entry({ tz: "Etc/GMT+5_-" }).timeZone).toBe("Etc/GMT+5_-");
+    expect(entry({ tz: "A".repeat(64) }).timeZone).toHaveLength(64);
   });
   it.each(["", "A".repeat(65), "Africa/City Name", "UTC:1", "UTC\n", "中文"])(
     "drops invalid timezone %j",
     (tz) => {
-      expect(entry({ tz }).tz).toBe("");
+      expect(entry({ tz }).timeZone).toBe("");
     },
   );
   it("accepts relative pages through 200 characters", () => {
-    expect(entry({ page: "/" }).page).toBe("/");
-    expect(entry({ page: "/" + "x".repeat(199) }).page).toHaveLength(200);
+    expect(entry({ page: "/" }).sourcePage).toBe("/");
+    expect(entry({ page: "/" + "x".repeat(199) }).sourcePage).toHaveLength(200);
   });
   it.each([
     "",
@@ -145,7 +193,7 @@ describe("parseEntry", () => {
     "/\u007f",
     "/\u0085",
   ])("defaults invalid page %j", (page) => {
-    expect(entry({ page }).page).toBe("/");
+    expect(entry({ page }).sourcePage).toBe("/");
   });
   it("filters UTM keys, truncates values, retains duplicates and serializes", () => {
     const utm = new URLSearchParams([
@@ -174,7 +222,12 @@ describe("parseEntry", () => {
   });
   it("defaults absent optional fields", () => {
     const result = parseEntry(new URLSearchParams({ name: "Test", email: valid.email }));
-    expect(result.ok && result.lead).toMatchObject({ src: "direct", tz: "", page: "/", utm: "" });
+    expect(result.ok && result.lead).toMatchObject({
+      channel: "direct",
+      timeZone: "",
+      sourcePage: "/",
+      utm: "",
+    });
   });
   it.each(["=SUM(1,2)", "+Test", "-Test", "@Test"])(
     "keeps formula-looking name %s for script-side escaping",
@@ -260,7 +313,7 @@ describe("lead handler", () => {
     expect(ctx.waitUntil).not.toHaveBeenCalled();
     expect(console.log).toHaveBeenCalledExactlyOnceWith("lead: storage not configured");
   });
-  it("sends exactly one Sheets call with the token and eight ordered columns", async () => {
+  it("sends exactly one Sheets call with the token and the keys the script reads", async () => {
     const ctx = context();
     await emptyResponse(
       await handleLead(
@@ -276,18 +329,9 @@ describe("lead handler", () => {
     expect(fetchMock.mock.calls[0]![0]).toBe(SHEETS_URL);
     expect(callBody(0)).toEqual({
       token: env.SHEETS_TOKEN,
-      lead: { received_at: NOW, ...valid, status: "opened" },
+      lead: { timestamp: NOW, ...saved },
     });
-    expect(Object.keys(callBody(0).lead)).toEqual([
-      "received_at",
-      "name",
-      "email",
-      "src",
-      "tz",
-      "page",
-      "utm",
-      "status",
-    ]);
+    expect(Object.keys(callBody(0).lead).sort()).toEqual([...LEAD_KEYS].sort());
   });
   it("responds before storage resolves and alerts only after a successful save", async () => {
     let finish!: (response: Response) => void;
@@ -309,8 +353,8 @@ describe("lead handler", () => {
       text: [
         `Name: ${valid.name}`,
         `Email: ${valid.email}`,
-        `Src: ${valid.src}`,
-        `Tz: ${valid.tz}`,
+        `Channel: ${valid.src}`,
+        `Time zone: ${valid.tz}`,
         `Page: ${valid.page}`,
         `Utm: ${valid.utm}`,
         `Time: ${NOW}`,

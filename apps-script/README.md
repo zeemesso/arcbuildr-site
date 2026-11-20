@@ -1,36 +1,42 @@
-# Application starts tracker
+# The leads sheet
 
-The Worker sends one row when someone opens the application from the entry block. Rows count starts, including repeat starts by the same person. They do not confirm a completed application.
+What the site sends to the Google Sheet "Arcbuildr leads", and what the sheet's script answers. The script is bound to the sheet and is kept outside this public repository. The Worker follows the script, not the other way round: change `src/lib/sheets.ts` when the script's columns change.
 
-## Setup (about 15 minutes)
+## What the Worker posts
 
-1. Create a new spreadsheet named "Arcbuildr application starts". Use a fresh sheet for these columns rather than an old tracker with a different layout.
-2. Click **Extensions > Apps Script**. Select `Code.gs`, replace its contents with [Code.gs](Code.gs), and click **Save project**.
-3. In the toolbar function selector, choose `setup`, then click **Run**. Click **Review permissions**, select your account, and allow the requested spreadsheet access. If an unverified-app screen appears, review your own script before continuing through **Advanced**.
-4. Return to the spreadsheet. The `Leads` tab has these columns, in order: `received_at`, `name`, `email`, `src`, `tz`, `page`, `utm`, `status`. The header is frozen and the status dropdown contains `opened`, `applied`, `booked`, `held`, `won`, `lost`. New rows start as `opened`.
-5. In the script editor, click **Project Settings** (gear icon), then find **Script Properties**. Copy the generated `TOKEN` value privately for step 7.
-6. Click **Deploy > New deployment**. Click **Select type** (gear icon), choose **Web app**, set **Execute as** to **Me** and **Who has access** to **Anyone**, then click **Deploy**. Complete authorization if prompted. Copy the **Web app URL**, ending in `/exec`. The shared token is still required to write a row.
-7. From the site repository directory, run each command below. At each private prompt, paste the corresponding value. Use the web app URL for `SHEETS_URL` and the script property `TOKEN` for `SHEETS_TOKEN`. Never put either value in repository files, command arguments, or browser code.
+Both endpoints post JSON to the Apps Script web app at `SHEETS_URL`. The body carries `token`, which must equal the script property `TOKEN` (`SHEETS_TOKEN` on the Worker).
 
-   ```sh
-   npx wrangler secret put SHEETS_URL
-   npx wrangler secret put SHEETS_TOKEN
-   ```
+**`POST /api/lead`**, when someone gives a name and an email: `{ token, lead }`.
 
-   Or, without a terminal: in the Cloudflare dashboard open **Workers & Pages**, click `arcbuildr`, then **Settings > Variables and secrets > Add**. Choose type **Secret**, and add `SHEETS_URL` and `SHEETS_TOKEN` one at a time.
+- `lead` holds 16 text values, in the order of the Leads tab: `timestamp`, `name`, `email`, `phone`, `instagram`, `language`, `channel`, `budget`, `decisionMaker`, `need`, `timing`, `heardAbout`, `referredBy`, `timeZone`, `sourcePage`, `utm`.
+- The script adds one row to the Leads tab with the status `new` and answers `{ "ok": true }`.
 
-8. Submit the site's entry block with a test name and email. Confirm a row appears with `status` set to `opened`, then delete that test row. If storage is not configured, the entry block still opens the application and no row is saved.
+**`POST /api/apply`**, when someone answers the 8 questions: `{ token, lead, application }`.
 
-## Count starts for a date range
+- `application` holds `kind` (`application`, or `prep` for the form answered after a booking made from a chat), `id`, `submittedAt`, `name`, `email`, `timeZone`, `sourcePage`, `utm` and `answers`, a list of `{ id, question, answer }` in the form's order.
+- A script that knows applications adds one row to the answers tab ("Tally application", or "Tally prep" for `prep`), under the headings already there. An `id` it already has adds nothing. It answers `{ "ok": true, "application": true }`. Its own sync then adds the Leads row with the status `applied`.
+- A script that does not know applications saves `lead` as a Leads row with the status `new` and answers `{ "ok": true }`. `lead` carries the same answers, so nothing is lost.
+- Any other answer means not saved. The form then says so, keeps what was typed on the visitor's device and offers another try with the same `id`.
 
-`received_at` stores the server time as UTC ISO text. Each data row counts as one application start, regardless of its current status. To count starts from November 1 through November 7, 2026, put this formula in an empty cell outside columns A through H:
+## Dates
 
-```text
-=COUNTIFS(Leads!A2:A,">=2026-11-01T00:00:00.000Z",Leads!A2:A,"<2026-11-08T00:00:00.000Z")
+`timestamp` and `submittedAt` are the Worker's time, in UTC, as ISO text (`2026-11-21T10:00:00.000Z`). The Leads tab keeps its columns as text, so they show exactly like that.
+
+## Secrets
+
+Set once per Worker. Paste each value at the private prompt. Never put them in a file of this repository, in a command argument or in browser code.
+
+```sh
+npx wrangler secret put SHEETS_URL
+npx wrangler secret put SHEETS_TOKEN
 ```
 
-Replace the dates with the UTC start and the day after the final day you want to include. The upper bound is exclusive. Do not filter on status when counting starts: a person who later applied still opened the application.
+`SHEETS_URL` is the web app URL of the deployment "Site lead form v1", ending in `/exec`. `SHEETS_TOKEN` is the script property `TOKEN`.
 
-## Update the script
+## After a change to the script
 
-After saving changes, click **Deploy > Manage deployments**, select the web app, click **Edit** (pencil icon), choose **Version > New version**, then click **Deploy**. The web app URL stays the same. Run `setup` again only when needed to restore the headers or dropdown.
+In the script editor: **Deploy > Manage deployments**, select the deployment, **Edit** (pencil icon), **Version > New version**, **Deploy**. The web app URL stays the same, so the Worker's secrets do not change.
+
+## Test leads
+
+Use a name starting with `TEST`, send it from a preview address, never from the live domain, and delete the row afterwards.
