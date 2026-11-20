@@ -1,0 +1,42 @@
+---
+/**
+ * The home page's own layout (L1-P9). It shares the head with Base.astro and loads only tokens.css and
+ * the home styles: its class names (.btn, .hero, .chip, .sheet, .entry) would collide with the other pages' styles.
+ */
+import "../styles/tokens.css";
+import "../styles/home/frame.css";
+import "../styles/home/feature.css";
+import "../styles/home/rest.css";
+import Head from "./Head.astro";
+import { meta } from "../content/site";
+const analyticsToken = import.meta.env.PUBLIC_CF_ANALYTICS_TOKEN;
+---
+
+<!doctype html>
+<html lang="en" class="home">
+  <head>
+    <Head />
+  </head>
+  <body>
+    <a class="skip" href="#main">
+      {meta.skip}
+    </a>
+    <slot name="bar" />
+    <main id="main" tabindex="-1">
+      <slot />
+    </main>
+    <slot name="after" />
+    {analyticsToken && (
+      <script
+        defer
+        is:inline
+        src="https://static.cloudflareinsights.com/beacon.min.js"
+        data-cf-beacon={JSON.stringify({ token: analyticsToken })}
+      />
+    )}
+  </body>
+</html>
+<script>
+  import "../scripts/home";
+  if (__PREVIEW__) import("../components/mountFeedback");
+</script>

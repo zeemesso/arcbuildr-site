@@ -1,0 +1,1111 @@
+/* The home page (L1-P9): structure and motion. Grey canvas, rounded windows, a dark diagram band,
+ * a spine, mono labels, a cursor trail. Painted with the names in tokens.css only.
+ * Motion follows the 20 rules; numbers in comments are the rule numbers. */
+
+:root {
+  --f-canvas: var(--color-paper-2);
+  --f-sheet: var(--color-card);
+  --f-ink: var(--color-ink);
+  --f-muted: var(--color-ink-muted);
+  /* Small sage text on a sage tint: darkened to keep 4.5:1. */
+  --f-ok-ink: color-mix(in oklch, var(--color-sage) 72%, var(--color-ink));
+  --f-chip: var(--color-paper-2);
+  --f-dark: var(--color-ink);
+  --f-on-dark: var(--color-card);
+  --f-node: var(--color-paper);
+  --f-node-ink: var(--color-ink);
+  --f-wire: var(--color-on-block-line);
+  --f-bar: var(--color-ink);
+  --f-on-bar: var(--color-card);
+  --f-head: var(--font-display);
+  --f-head-weight: 700;
+  --f-head-track: -0.045em;
+  --f-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --f-radius: 1.75rem;
+  --f-radius-in: 1rem;
+  --f-gap: 0.75rem;
+  --f-berg-light: color-mix(in oklch, var(--color-sage) 30%, var(--color-card));
+  --f-berg-deep: var(--color-ink);
+  --f-water: color-mix(in oklch, var(--color-sage) 9%, var(--color-card));
+  --f-waterline: var(--color-accent-text);
+  --trail-1: var(--color-accent);
+  --trail-2: var(--color-sage);
+  --trail-3: var(--color-clay);
+  --trail-4: var(--color-taupe);
+  --f-h1: clamp(2.75rem, 1.5rem + 5.4vw, 6.25rem);
+  /* Two curves only: entrances ease out (1), moves between two places ease in and out (9). */
+  --f-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --f-inout: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+html {
+  -webkit-text-size-adjust: 100%;
+}
+body {
+  margin: 0;
+  background: var(--f-canvas);
+  color: var(--f-ink);
+  font-family: var(--font-display);
+  font-size: var(--text-base);
+  line-height: 1.45;
+  -webkit-font-smoothing: antialiased;
+}
+h1,
+h2,
+h3,
+p,
+ol,
+ul,
+dl,
+dd,
+figure {
+  margin: 0;
+}
+main:focus {
+  outline: none;
+}
+.skip {
+  position: fixed;
+  top: 0.5rem;
+  left: 0.5rem;
+  z-index: 20;
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius-pill);
+  background: var(--color-ink);
+  color: var(--color-card);
+  font-weight: 600;
+  translate: 0 -200%;
+}
+.skip:focus {
+  translate: none;
+}
+ol,
+ul {
+  padding: 0;
+  list-style: none;
+}
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 3px;
+}
+
+/* Logo (same drawing as the site). */
+.logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3em;
+  font-size: 1.0625rem;
+  color: inherit;
+}
+.logo__arc {
+  width: 1.35em;
+  height: auto;
+  color: var(--color-accent);
+  translate: 0 -0.06em;
+}
+.logo__word {
+  display: block;
+  height: 1.1em;
+  width: auto;
+}
+.logo__r {
+  color: var(--color-accent);
+}
+.logo path {
+  stroke-dasharray: 1 2;
+}
+
+/* Sheets: rounded windows on the canvas. */
+.sheet {
+  position: relative;
+  margin: var(--f-gap);
+  border-radius: var(--f-radius);
+  background: var(--f-sheet);
+  padding: clamp(3.5rem, 8vw, 6rem) var(--gutter);
+}
+.sheet--top {
+  min-height: calc(100svh - 2 * var(--f-gap));
+  display: flex;
+  flex-direction: column;
+  padding-top: 0;
+}
+.sheet--dark {
+  background: var(--f-dark);
+  color: var(--f-on-dark);
+}
+@media (min-width: 64rem) {
+  .sheet {
+    max-width: 85rem;
+    margin-inline: auto;
+    margin-block: var(--f-gap);
+  }
+}
+
+/* The header: a pill that follows the page. Its button appears once the first form has gone (11, 12, 15). */
+.bar {
+  position: fixed;
+  top: calc(var(--f-gap) * 2);
+  left: 0;
+  right: 0;
+  z-index: 10;
+  display: flex;
+  justify-content: center;
+  pointer-events: none;
+}
+.bar__pill {
+  pointer-events: auto;
+}
+.bar__pill {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-height: 3.25rem;
+  padding: 0.25rem 0.25rem 0.25rem 1.125rem;
+  border-radius: var(--radius-pill);
+  background: var(--f-bar);
+  color: var(--f-on-bar);
+  box-shadow:
+    var(--shadow-card),
+    0 0 0 1px color-mix(in oklch, var(--color-card) 16%, transparent);
+}
+.bar__cta {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.75rem;
+  padding: 0 1rem;
+  border-radius: var(--radius-pill);
+  background: var(--color-accent);
+  color: var(--color-ink);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.js .bar__cta {
+  display: none;
+}
+.js .bar.has-cta .bar__cta {
+  display: inline-flex;
+}
+
+/* First screen. */
+.hero {
+  position: relative;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.25rem;
+  padding-block: 6rem 4rem;
+  text-align: center;
+  isolation: isolate;
+}
+.hero__trail {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+  filter: blur(14px) saturate(1.2);
+}
+.hero__trail i {
+  position: absolute;
+  width: 3rem;
+  height: 3rem;
+  border-radius: 0.5rem;
+}
+.hero__h {
+  max-width: 18ch;
+  font-family: var(--f-head);
+  font-weight: var(--f-head-weight);
+  letter-spacing: var(--f-head-track);
+  font-size: var(--f-h1);
+  line-height: 0.95;
+}
+.hero__line {
+  display: block;
+  text-wrap: balance;
+  overflow: hidden;
+  padding-bottom: 0.12em;
+  margin-bottom: -0.12em;
+}
+.hero__lede {
+  max-width: 30rem;
+  font-size: var(--text-lg);
+  line-height: 1.9;
+  color: var(--f-ink);
+}
+.chip {
+  display: inline-block;
+  padding: 0.05em 0.45em;
+  border-radius: 0.5rem;
+  background: var(--f-chip);
+  line-height: 1.5;
+}
+.hero__lede .chip {
+  --f-chip: color-mix(in oklch, var(--color-accent) 18%, var(--color-card));
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* The two fields and the button. */
+.entry {
+  display: grid;
+  gap: 0.5rem;
+  width: min(100%, 22rem);
+  margin-top: 0.5rem;
+}
+.entry__field input {
+  width: 100%;
+  min-height: 3.25rem;
+  padding: 0 1.25rem;
+  border: 1px solid var(--color-rule);
+  border-radius: var(--radius-pill);
+  background: var(--color-field);
+  color: var(--f-ink);
+  font: inherit;
+  transition: border-color var(--dur-fast) var(--f-inout);
+}
+.entry__field input:focus {
+  border-color: var(--f-ink);
+  outline: none;
+}
+.entry__field input::placeholder {
+  color: var(--f-muted);
+}
+/* The two fields say what is wrong next to the field. */
+.entry__field {
+  position: relative;
+  display: block;
+}
+.entry__err {
+  display: block;
+  padding: 0.375rem 1.25rem 0;
+  color: var(--color-error);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  text-align: left;
+}
+.entry__err:empty {
+  display: none;
+}
+.entry .entry__field input[aria-invalid="true"] {
+  border-color: var(--color-error);
+}
+.btn {
+  position: relative;
+  min-height: 3.25rem;
+  padding: 0 1.5rem;
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: var(--color-accent);
+  color: var(--color-on-accent);
+  /* White on the orange needs large, bold type to stay readable (3:1). */
+  font: inherit;
+  font-size: var(--text-lg);
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    scale 120ms var(--f-out),
+    background-color var(--dur-fast) var(--f-inout);
+}
+.btn:hover {
+  background: var(--color-accent-hover);
+}
+.btn:active {
+  scale: 0.97; /* 4. No bounce on release (13). */
+}
+.btn.is-sent::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: 0 0 0 0 var(--color-accent);
+  animation: pulse 600ms var(--f-out) 1; /* 8 */
+}
+@keyframes pulse {
+  to {
+    box-shadow: 0 0 0 14px transparent;
+  }
+}
+@media (min-width: 48rem) {
+  .entry {
+    grid-template-columns: 1fr 1fr auto;
+    width: min(100%, 44rem);
+    padding: 0.375rem;
+    border-radius: var(--radius-pill);
+    background: var(--color-field);
+    border: 1px solid var(--color-rule);
+  }
+  .entry__field input {
+    min-height: 3rem;
+    border-color: transparent;
+    background: transparent;
+  }
+  .entry__field + .entry__field input {
+    border-left: 1px solid var(--color-rule);
+    border-radius: 0;
+  }
+  .btn {
+    min-height: 3rem;
+  }
+  .entry__err {
+    position: absolute;
+    top: calc(100% + 0.875rem);
+    left: 0;
+    width: max-content;
+    max-width: 20rem;
+    padding: 0 1.25rem;
+  }
+}
+
+/* The spine: a thin line that runs from the form into the diagram and on to the iceberg. */
+.spine {
+  position: absolute;
+  left: 50%;
+  width: 2px;
+  margin-left: -1px;
+  background: currentColor;
+  opacity: 0.18;
+  transform-origin: top;
+}
+.spine--start {
+  bottom: 0;
+  height: 3rem;
+}
+.spine--through {
+  top: 0;
+  height: clamp(2.5rem, 6vw, 4.5rem);
+}
+
+/* Section headings. */
+.h2 {
+  max-width: 22ch;
+  margin: 0 auto clamp(2rem, 5vw, 3.5rem);
+  font-family: var(--f-head);
+  font-weight: var(--f-head-weight);
+  letter-spacing: var(--f-head-track);
+  font-size: clamp(1.75rem, 1.1rem + 2.6vw, 3.25rem);
+  line-height: 1;
+  text-align: center;
+  text-wrap: balance;
+}
+
+/* A line under a heading. */
+.lede {
+  max-width: 34rem;
+  margin: 0 auto clamp(2rem, 5vw, 3.5rem);
+  color: var(--f-muted);
+  font-size: var(--text-lg);
+  text-align: center;
+  text-wrap: balance;
+}
+.h2:has(+ .lede) {
+  margin-bottom: 0.875rem;
+}
+.sheet--dark .lede {
+  color: color-mix(in oklch, var(--f-on-dark) 72%, transparent);
+}
+
+/* The diagram: four documents in, your profile in the middle, three uses out. */
+.hub__map {
+  position: relative;
+  display: grid;
+  gap: 2.5rem;
+  max-width: 68rem;
+  margin-inline: auto;
+}
+.h2:has(+ .hub__body) {
+  margin-bottom: 0.875rem;
+}
+.hub__body {
+  max-width: 34ch;
+  margin: 0 auto clamp(2rem, 5vw, 3.5rem);
+  color: color-mix(in oklch, var(--f-on-dark) 72%, transparent);
+  text-align: center;
+  text-wrap: balance;
+}
+.hub__wires {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+}
+.hub__wires path {
+  fill: none;
+  stroke: var(--f-wire);
+  stroke-width: var(--f-wire-w, 1.5px);
+  stroke-linecap: round;
+}
+.hub__side {
+  position: relative;
+}
+.hub__tag {
+  margin-bottom: 0.5rem;
+  font-family: var(--f-mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: color-mix(in oklch, var(--f-on-dark) 60%, transparent);
+}
+.hub__col {
+  position: relative;
+  display: grid;
+  gap: 0.625rem;
+}
+.hub__col--in {
+  grid-template-columns: 1fr 1fr;
+}
+.node {
+  position: relative;
+  display: grid;
+  gap: 0.2rem;
+  padding: 0.875rem 1rem 1rem;
+  border-radius: var(--f-radius-in);
+  background: var(--f-node);
+  color: var(--f-node-ink);
+}
+.node__title {
+  font-weight: 600;
+  line-height: 1.2;
+}
+.node--in:nth-child(1) {
+  border-top: 4px solid var(--color-accent);
+}
+.node--in:nth-child(2) {
+  border-top: 4px solid var(--color-taupe);
+}
+.node--in:nth-child(3) {
+  border-top: 4px solid var(--color-sage);
+}
+.node--in:nth-child(4) {
+  border-top: 4px solid var(--color-clay);
+}
+.hub__core {
+  position: relative;
+  justify-self: center;
+  display: grid;
+  justify-items: center;
+  gap: 0.625rem;
+  width: min(100%, 17rem);
+  padding: 1.5rem 1.25rem;
+  overflow: hidden;
+  border-radius: 1.5rem;
+  background: var(--color-card);
+  color: var(--f-node-ink);
+  box-shadow: 0 0 0 6px color-mix(in oklch, var(--color-card) 14%, transparent);
+  text-align: center;
+}
+.hub__core svg {
+  width: 2rem;
+  height: 2rem;
+  fill: none;
+  stroke: var(--color-accent-text);
+  stroke-width: 1.75;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.hub__core-title {
+  position: relative;
+  font-weight: 700;
+  font-size: var(--text-xl);
+  letter-spacing: -0.02em;
+}
+/* The profile "fills" when the wires arrive: a colour layer revealed by a mask (17). */
+.hub__core::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: color-mix(in oklch, var(--color-accent) 16%, transparent);
+  pointer-events: none;
+}
+.hub__core > * {
+  position: relative;
+  z-index: 1;
+}
+.js .hub__core::after {
+  clip-path: inset(100% 0 0 0);
+}
+.js .hub__core.is-on::after {
+  clip-path: inset(0 0 0 0);
+}
+@media (min-width: 64rem) {
+  .hub__map {
+    grid-template-columns: minmax(0, 22rem) minmax(16rem, 19rem) minmax(0, 22rem);
+    justify-content: space-between;
+    align-items: center;
+    gap: clamp(3rem, 7vw, 6.5rem);
+  }
+  .hub__col--in {
+    grid-template-columns: 1fr;
+  }
+  .hub__col {
+    gap: 0.875rem;
+  }
+  .node {
+    padding: 1.125rem 1.375rem 1.25rem;
+  }
+  .node__title {
+    font-size: var(--text-lg);
+  }
+  .hub__core {
+    width: 100%;
+    padding: 2.25rem 1.25rem;
+  }
+  .hub__tag {
+    position: absolute;
+    bottom: calc(100% + 0.25rem);
+    margin: 0;
+  }
+}
+
+/* The iceberg. Depth is time: the free tip above the line, Season One below it, day by day. */
+.berg {
+  --berg-col: clamp(5rem, 26vw, 22rem);
+  position: relative;
+  max-width: 64rem;
+  margin-inline: auto;
+}
+.berg__tip,
+.berg__row {
+  display: grid;
+  grid-template-columns: var(--berg-col) 1fr;
+  column-gap: clamp(1rem, 4vw, 3rem);
+}
+.berg__tip {
+  align-items: end;
+}
+.berg__peak {
+  display: block;
+  overflow: hidden;
+  height: clamp(4.5rem, 12vw, 9rem);
+}
+.berg__peak span {
+  display: block;
+  height: 100%;
+  background: linear-gradient(
+    100deg,
+    var(--f-berg-lit, var(--f-water)) 0 46%,
+    var(--f-berg-light) 46% 100%
+  );
+  clip-path: polygon(0 100%, 22% 52%, 34% 60%, 52% 0, 68% 42%, 80% 36%, 100% 100%);
+  filter: drop-shadow(0 0 0.5px var(--f-muted));
+}
+.berg__free {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-family: var(--f-mono);
+  font-size: var(--text-xs);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--f-muted);
+}
+.berg__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.375rem;
+  padding-bottom: 1rem;
+}
+.chip--free {
+  margin: 0;
+  padding: 0.3rem 0.75rem;
+  border-radius: var(--radius-pill);
+  background: var(--f-chip);
+  font-size: var(--text-sm);
+}
+/* The link reaches past the chip, so a thumb has 44 px to land on. */
+.chip--free a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.75rem;
+  margin-block: -0.75rem;
+  color: inherit;
+  text-underline-offset: 0.2em;
+}
+.berg__water {
+  position: relative;
+  height: 0;
+}
+.berg__water::before {
+  content: "";
+  position: absolute;
+  left: calc(-1 * var(--gutter));
+  right: calc(-1 * var(--gutter));
+  top: 0;
+  height: 2px;
+  background: var(--f-waterline);
+  transform-origin: left;
+}
+.berg__line {
+  position: absolute;
+  right: 0;
+  top: 0;
+  translate: 0 -120%;
+  font-family: var(--f-mono);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--f-waterline);
+}
+.berg__mass {
+  position: relative;
+  padding-bottom: 1rem;
+}
+.berg__mass::before {
+  content: "";
+  position: absolute;
+  inset: 0 calc(-1 * var(--gutter)) 0;
+  background: linear-gradient(var(--f-water), transparent);
+  z-index: -1;
+}
+.berg__row {
+  position: relative;
+  min-height: 3.25rem;
+  align-items: center;
+}
+/* The band: a trapezoid whose top edge matches the band above. */
+.berg__row::before {
+  content: "";
+  grid-column: 1;
+  grid-row: 1;
+  align-self: stretch;
+  background:
+    linear-gradient(
+      100deg,
+      transparent 0 calc(var(--c) + 3%),
+      var(--shade-berg) calc(var(--c) + 3%)
+    ),
+    color-mix(in oklch, var(--f-berg-deep) var(--d), var(--f-berg-light));
+  clip-path: polygon(
+    calc(var(--c) - var(--t)) 0,
+    calc(var(--c) + var(--t)) 0,
+    calc(var(--c2) + var(--b)) 100%,
+    calc(var(--c2) - var(--b)) 100%
+  );
+  -webkit-mask: linear-gradient(var(--color-ink), var(--color-ink)) top / 100% 100% no-repeat;
+  mask: linear-gradient(var(--color-ink), var(--color-ink)) top / 100% 100% no-repeat;
+}
+/* The leader: a dot on the band and a hairline to the words. */
+.berg__row::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: calc(var(--berg-col) * 0.5);
+  width: calc(var(--berg-col) * 0.5 + clamp(1rem, 4vw, 3rem) - 0.5rem);
+  height: 1px;
+  background: currentColor;
+  opacity: 0.35;
+  transform-origin: left;
+}
+.berg__when,
+.berg__what {
+  grid-column: 2;
+  grid-row: 1;
+  padding-block: 0.5rem;
+}
+.berg__when {
+  font-family: var(--f-mono);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--f-muted);
+  align-self: center;
+  width: 9.5rem;
+  white-space: nowrap;
+}
+.berg__what {
+  padding-left: 10rem;
+  line-height: 1.3;
+}
+.berg__art,
+.berg__below {
+  display: none;
+}
+/* Phones: one picture of the iceberg, then the list under it, each row keyed to its band by colour. */
+@media (max-width: 47.99rem) {
+  .berg {
+    --berg-peak: 9.5rem;
+    --berg-band: 2.5rem;
+  }
+  .berg__tip {
+    display: block;
+  }
+  .berg__peak,
+  .berg__water,
+  .berg__mass::before,
+  .berg__row::after {
+    display: none;
+  }
+  .berg__chips {
+    padding-bottom: 1.5rem;
+  }
+  .berg__art {
+    display: block;
+    position: relative;
+    isolation: isolate;
+    margin-inline: calc(-1 * var(--gutter));
+    padding: 0 var(--gutter) 2rem;
+  }
+  /* The sea, edge to edge, and the waterline on top of it. */
+  .berg__art::before,
+  .berg__art::after {
+    content: "";
+    position: absolute;
+    inset: var(--berg-peak) 0 0;
+    z-index: -1;
+  }
+  .berg__art::before {
+    background: linear-gradient(var(--f-water) 60%, transparent);
+  }
+  .berg__art::after {
+    bottom: auto;
+    height: 2px;
+    background: var(--f-waterline);
+    transform-origin: left;
+  }
+  .berg__art-peak,
+  .berg__art-mass {
+    display: block;
+    max-width: 21rem;
+    margin-inline: auto;
+  }
+  .berg__art-peak {
+    overflow: hidden;
+    height: var(--berg-peak);
+  }
+  .berg__art-peak span {
+    display: block;
+    height: 100%;
+    background: linear-gradient(
+      100deg,
+      var(--f-berg-lit, var(--f-water)) 0 46%,
+      var(--f-berg-light) 46% 100%
+    );
+    clip-path: polygon(0 100%, 22% 52%, 34% 60%, 52% 0, 68% 42%, 80% 36%, 100% 100%);
+    filter: drop-shadow(0 0 0.5px var(--f-muted));
+  }
+  .berg__art-mass {
+    padding-top: 0.5rem;
+  }
+  .berg__art-mass i {
+    display: block;
+    height: var(--berg-band);
+    background:
+      linear-gradient(
+        100deg,
+        transparent 0 calc(var(--c) + 3%),
+        var(--shade-berg) calc(var(--c) + 3%)
+      ),
+      color-mix(in oklch, var(--f-berg-deep) var(--d), var(--f-berg-light));
+    clip-path: polygon(
+      calc(var(--c) - var(--t)) 0,
+      calc(var(--c) + var(--t)) 0,
+      calc(var(--c2) + var(--b)) 100%,
+      calc(var(--c2) - var(--b)) 100%
+    );
+    -webkit-mask: linear-gradient(var(--color-ink), var(--color-ink)) top / 100% 100% no-repeat;
+    mask: linear-gradient(var(--color-ink), var(--color-ink)) top / 100% 100% no-repeat;
+  }
+  .berg__below {
+    display: block;
+    margin: 0 0 0.75rem;
+  }
+  .berg__below span {
+    display: block;
+    margin-bottom: 0.25rem;
+    font-family: var(--f-mono);
+    font-size: var(--text-xs);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--f-muted);
+  }
+  .berg__below strong {
+    font-family: var(--font-display);
+    font-size: var(--text-2xl);
+    font-weight: 700;
+    line-height: 1.1;
+  }
+  .berg__mass {
+    padding-bottom: 0;
+  }
+  .berg__row {
+    grid-template-columns: 0.875rem 1fr;
+    column-gap: 0.75rem;
+    align-items: start;
+    min-height: 0;
+    padding-block: 0.625rem;
+  }
+  /* The band becomes its colour key. */
+  .berg__row::before {
+    width: 0.875rem;
+    height: 0.875rem;
+    margin-top: 0.2rem;
+    border-radius: 3px;
+    background: color-mix(in oklch, var(--f-berg-deep) var(--d), var(--f-berg-light));
+    box-shadow: inset 0 0 0 1px color-mix(in oklch, var(--f-berg-deep) 22%, transparent);
+    clip-path: none;
+    -webkit-mask: none;
+    mask: none;
+  }
+  .berg__when,
+  .berg__what {
+    padding: 0;
+  }
+  .berg__when {
+    display: block;
+    width: auto;
+  }
+  .berg__what {
+    grid-row: 2;
+    font-size: var(--text-base);
+  }
+}
+
+/* ---------- Motion. Hidden states exist only with JS on and motion allowed. ---------- */
+@media (prefers-reduced-motion: no-preference) {
+  .logo path {
+    animation: draw 0.5s var(--f-out) calc(0.3s + var(--i, 0) * 60ms) backwards;
+  }
+  @keyframes draw {
+    from {
+      stroke-dashoffset: 1;
+    }
+  }
+
+  /* Bar button: enters from the pill at 0.95 (10, 11) in 200 ms, leaves in 160 ms (12, 15). */
+  .js .bar__cta {
+    display: inline-flex;
+    max-width: 0;
+    padding-inline: 0;
+    opacity: 0;
+    scale: 0.95;
+    overflow: hidden;
+    transition:
+      max-width 160ms var(--f-inout),
+      padding 160ms var(--f-inout),
+      opacity 120ms var(--f-inout),
+      scale 160ms var(--f-inout);
+  }
+  .js .bar.has-cta .bar__cta {
+    max-width: 16rem;
+    padding-inline: 1rem;
+    opacity: 1;
+    scale: 1;
+    transition:
+      max-width 200ms var(--f-out),
+      padding 200ms var(--f-out),
+      opacity 150ms var(--f-out) 50ms,
+      scale 200ms var(--f-out);
+  }
+
+  /* First screen: lines rise out of a mask (17), then the details settle one after another (6). */
+  .js [data-enter] {
+    opacity: 0;
+    translate: 0 6px;
+    transition:
+      opacity 0.4s var(--f-out) calc(var(--i, 0) * 90ms + 0.1s),
+      translate 0.5s var(--f-out) calc(var(--i, 0) * 90ms + 0.1s);
+  }
+  .js .hero__line[data-enter] {
+    opacity: 1;
+    translate: none;
+  }
+  .js .hero__line[data-enter] {
+    clip-path: inset(0 0 100% 0);
+    transition: clip-path 0.7s var(--f-out) calc(var(--i, 0) * 110ms);
+  }
+  .js.ready [data-enter] {
+    opacity: 1;
+    translate: none;
+  }
+  .js.ready .hero__line[data-enter] {
+    clip-path: inset(0 0 -0.2em 0);
+  }
+  .js .hero__lede .chip {
+    background: transparent;
+    transition: background-color 0.3s var(--f-out) calc(0.75s + var(--c, 0) * 120ms);
+  }
+  .js.ready .hero__lede .chip {
+    background: var(--f-chip);
+  }
+
+  .js .spine {
+    scale: 1 0;
+    transition: scale 0.6s var(--f-out) 0.9s;
+  }
+  .js .is-in .spine,
+  .js.ready .spine--start {
+    scale: 1;
+  }
+
+  /* Sections: the heading first, then their object. */
+  .js [data-reveal] .h2 {
+    opacity: 0;
+    translate: 0 6px;
+    transition:
+      opacity 0.4s var(--f-out),
+      translate 0.5s var(--f-out);
+  }
+  .js [data-reveal].is-in .h2 {
+    opacity: 1;
+    translate: none;
+  }
+
+  /* Diagram: inputs arrive from the left, outputs from the right (11), 30 ms apart (3);
+   * then the wires draw in, a dot runs each wire into the hub, and each file fills as its dot lands (6, 7, 17). */
+  .js .node {
+    opacity: 0;
+    translate: var(--from, -12px) 0;
+    transition:
+      opacity 0.35s var(--f-out) calc(0.2s + var(--i) * 30ms),
+      translate 0.5s var(--f-out) calc(0.2s + var(--i) * 30ms);
+  }
+  .js .node--out {
+    --from: 12px;
+    transition-delay: calc(1.6s + var(--i) * 30ms);
+  }
+  .js .hub__core {
+    opacity: 0;
+    scale: 0.95;
+    transition:
+      opacity 0.35s var(--f-out) 0.35s,
+      scale 0.45s var(--f-out) 0.35s;
+  }
+  .js .hub__core::after {
+    transition: clip-path 0.6s var(--f-out);
+  }
+  .js .is-in .node,
+  .js .is-in .hub__core {
+    opacity: 1;
+    translate: none;
+    scale: 1;
+  }
+  .js .hub__wires path {
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+    transition: stroke-dashoffset 0.6s var(--f-inout) calc(0.5s + var(--w, 0) * 60ms);
+  }
+  .js .hub__wires path.out {
+    transition-delay: calc(1.45s + var(--w, 0) * 60ms);
+  }
+  .js .is-in .hub__wires path {
+    stroke-dashoffset: 0;
+  }
+
+  /* Iceberg: the waterline draws, the tip rises out of the water, the bands drop in under a mask (17),
+   * then the words (3) and the leaders (6). */
+  .js .berg__water::before {
+    scale: 0 1;
+    transition: scale 0.7s var(--f-out) 0.15s;
+  }
+  .js .berg__peak span {
+    translate: 0 100%;
+    transition: translate 0.6s var(--f-out) 0.45s;
+  }
+  .js .berg__row::before {
+    -webkit-mask-size: 100% 0%;
+    mask-size: 100% 0%;
+    transition:
+      -webkit-mask-size 0.32s var(--f-out) calc(0.7s + var(--i) * 95ms),
+      mask-size 0.32s var(--f-out) calc(0.7s + var(--i) * 95ms);
+  }
+  .js .berg__when,
+  .js .berg__what,
+  .js .chip--free,
+  .js .berg__line,
+  .js .berg__free {
+    opacity: 0;
+    translate: 0 4px;
+    transition:
+      opacity 0.3s var(--f-out) calc(0.9s + var(--i, 0) * 30ms),
+      translate 0.3s var(--f-out) calc(0.9s + var(--i, 0) * 30ms);
+  }
+  .js .chip--free,
+  .js .berg__free {
+    transition-delay: calc(0.6s + var(--i, 0) * 30ms);
+  }
+  .js .berg__row::after {
+    scale: 0 1;
+    transition: scale 0.35s var(--f-out) calc(1.25s + var(--i) * 30ms);
+  }
+  .js .is-in .berg__water::before,
+  .js .is-in .berg__row::after {
+    scale: 1;
+  }
+  .js .is-in .berg__peak span,
+  .js .is-in .berg__when,
+  .js .is-in .berg__what,
+  .js .is-in .chip--free,
+  .js .is-in .berg__line,
+  .js .is-in .berg__free {
+    opacity: 1;
+    translate: none;
+  }
+  .js .is-in .berg__row::before {
+    -webkit-mask-size: 100% 100%;
+    mask-size: 100% 100%;
+  }
+
+  /* Phone picture: the line draws, the tip rises, each band drops in under its mask, then the list. */
+  .js .berg__art::after {
+    scale: 0 1;
+    transition: scale 0.7s var(--f-out) 0.15s;
+  }
+  .js .berg__art-peak span {
+    translate: 0 100%;
+    transition: translate 0.6s var(--f-out) 0.45s;
+  }
+  .js .berg__art-mass i {
+    -webkit-mask-size: 100% 0%;
+    mask-size: 100% 0%;
+    transition:
+      -webkit-mask-size 0.32s var(--f-out) calc(0.7s + var(--i) * 95ms),
+      mask-size 0.32s var(--f-out) calc(0.7s + var(--i) * 95ms);
+  }
+  .js .berg__below {
+    opacity: 0;
+    translate: 0 4px;
+    transition:
+      opacity 0.3s var(--f-out) 0.85s,
+      translate 0.3s var(--f-out) 0.85s;
+  }
+  .js .is-in .berg__art::after {
+    scale: 1;
+  }
+  .js .is-in .berg__art-peak span,
+  .js .is-in .berg__below {
+    opacity: 1;
+    translate: none;
+  }
+  .js .is-in .berg__art-mass i {
+    -webkit-mask-size: 100% 100%;
+    mask-size: 100% 100%;
+  }
+}
+
+@media (min-width: 48rem) {
+  .berg__row {
+    min-height: 3.75rem;
+  }
+  .berg__what {
+    font-size: var(--text-lg);
+  }
+}

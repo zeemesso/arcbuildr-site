@@ -1,0 +1,33 @@
+---
+/** What every page puts in its head. Base.astro and Home.astro share it. */
+import { meta } from "../content/site";
+interface Props {
+  title?: string;
+  description?: string;
+  noindex?: boolean;
+}
+const { title = meta.title, description = meta.description, noindex = false } = Astro.props;
+const canonical = new URL(Astro.url.pathname, Astro.site);
+---
+
+<meta charset="utf-8" />
+<script is:inline>
+  // Motion is extra. If the page script has not started after 3 seconds, show everything as if there were no script.
+  ((root) => {
+    root.classList.add("js");
+    setTimeout(() => root.classList.contains("ready") || root.classList.remove("js"), 3000);
+  })(document.documentElement);
+</script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="theme-color" content="#f4f3f0" />
+{(noindex || __PREVIEW__) && <meta name="robots" content="noindex" />}
+<title>{title}</title>
+<meta name="description" content={description} />
+<link rel="canonical" href={canonical} />
+<meta property="og:type" content="website" />
+<meta property="og:title" content={title} />
+<meta property="og:description" content={description} />
+<meta property="og:url" content={canonical} />
+<link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+<link rel="preload" href="/fonts/open-runde-700.woff2" as="font" type="font/woff2" crossorigin />
+<link rel="preload" href="/fonts/open-runde-600.woff2" as="font" type="font/woff2" crossorigin />

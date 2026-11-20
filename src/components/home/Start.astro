@@ -1,0 +1,31 @@
+---
+/** The first screen: the headline, one line, the price, and the two fields. 25 words. */
+import Entry from "./Entry.astro";
+import { home } from "../../content/site";
+const { start } = home;
+const parts = start.lede
+  .split(/(\[[^\]]+\])/)
+  .map((part) =>
+    part.startsWith("[") ? { chip: true, text: part.slice(1, -1) } : { chip: false, text: part },
+  );
+---
+
+<div class="sheet sheet--top">
+  <section class="hero" id="start" aria-labelledby="hero-h">
+    <div class="hero__trail" aria-hidden="true"></div>
+    <h1 class="hero__h" id="hero-h">
+      {start.h1.map((line, i) => (
+        <>
+          <span class="hero__line" data-enter style={`--i:${i + 1}`}>
+            {line}
+          </span>{" "}
+        </>
+      ))}
+    </h1>
+    <p class="hero__lede" data-enter style="--i:3">
+      {parts.map((p) => (p.chip ? <span class="chip">{p.text}</span> : p.text))}
+    </p>
+    <Entry enter={4} />
+    <div class="spine spine--start" aria-hidden="true"></div>
+  </section>
+</div>

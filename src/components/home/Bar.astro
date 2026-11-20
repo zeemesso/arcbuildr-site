@@ -1,0 +1,14 @@
+---
+/** The header: a pill that follows the page. Its button shows once the first form has left the screen. */
+import Logo from "../Logo.astro";
+import { home } from "../../content/site";
+---
+
+<header class="bar">
+  <div class="bar__pill">
+    <Logo />
+    <a class="bar__cta" href="#apply" data-bar-cta data-apply-open>
+      {home.pill}
+    </a>
+  </div>
+</header>

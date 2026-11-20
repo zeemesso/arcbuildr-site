@@ -1,29 +1,28 @@
 ---
-import Base from "../layouts/Base.astro";
-import Hero from "../components/sections/Hero.astro";
-import Problem from "../components/sections/Problem.astro";
-import Season from "../components/sections/Season.astro";
-import Offer from "../components/sections/Offer.astro";
-import Ai from "../components/sections/Ai.astro";
-import Proof from "../components/sections/Proof.astro";
-import Evidence from "../components/sections/Evidence.astro";
-import Fit from "../components/sections/Fit.astro";
-import Questions from "../components/sections/Questions.astro";
-import Apply from "../components/sections/Apply.astro";
+import Home from "../layouts/Home.astro";
+import Bar from "../components/home/Bar.astro";
+import Start from "../components/home/Start.astro";
+import Features from "../components/home/Features.astro";
+import Hub from "../components/home/Hub.astro";
+import Iceberg from "../components/home/Iceberg.astro";
+import Install from "../components/home/Install.astro";
+import Price from "../components/home/Price.astro";
+import Faq from "../components/home/Faq.astro";
+import Book from "../components/home/Book.astro";
+import Foot from "../components/home/Foot.astro";
+import Application from "../components/application/Application.astro";
 ---
 
-<Base>
-  <Hero />
-  <Problem />
-  <Season />
-  <Offer />
-  <Ai />
-  <Proof />
-  <Evidence />
-  <Fit />
-  <Questions />
-  <Apply />
-</Base>
-<script>
-  import "../scripts/actions";
-</script>
+<Home>
+  <Bar slot="bar" />
+  <Start />
+  <Features />
+  <Hub />
+  <Iceberg />
+  <Install />
+  <Price />
+  <Faq />
+  <Book />
+  <Foot slot="after" />
+  <Application slot="after" />
+</Home>

@@ -1,8 +1,9 @@
 import { expect, test, type Page } from "@playwright/test";
+import { press } from "./press";
 /** The first screen's entrance has played: every element is where it stays. */
 const settled = (page: Page) =>
   page
-    .locator("#top")
+    .locator("#start")
     .evaluate((hero) =>
       Promise.all(hero.getAnimations({ subtree: true }).map((a) => a.finished.catch(() => {}))),
     );
@@ -28,7 +29,11 @@ for (const width of [360, 375, 390, 414]) {
     await settled(page);
     const h1 = (await page.locator("h1").boundingBox())!;
     expect(h1.y).toBeGreaterThanOrEqual(0);
-    for (const selector of ["#top-name", "#top-email", "#top-entry button"]) {
+    for (const selector of [
+      "#start input[name=name]",
+      "#start input[name=email]",
+      "#start form button",
+    ]) {
       const box = (await page.locator(selector).boundingBox())!;
       expect(box.y, selector).toBeGreaterThan(h1.y + h1.height);
       expect(box.y + box.height, selector).toBeLessThanOrEqual(650);
@@ -46,7 +51,7 @@ test("the first screen holds the form on a tall phone and on a desktop", async (
     await page.goto("/");
     await page.evaluate(() => document.fonts.ready);
     await settled(page);
-    const box = (await page.locator("#top-entry button").boundingBox())!;
+    const box = (await page.locator("#start form button").boundingBox())!;
     expect(box.y + box.height).toBeLessThanOrEqual(viewport.height);
   }
 });
@@ -59,7 +64,7 @@ test("mobile interactive targets are at least 44px", async ({ page }, info) => {
     for (const target of await page
       .locator("header, main, footer")
       .locator(
-        "a:visible, button:visible, label.field:visible, summary:visible, label.chip:visible",
+        "a:visible, button:visible, label.field:visible, summary:visible, label.chip:visible, input:visible",
       )
       .all()) {
       if (await target.evaluate((el) => el.matches("p a, .skip"))) continue;
@@ -69,27 +74,50 @@ test("mobile interactive targets are at least 44px", async ({ page }, info) => {
   }
 });
 
-test("sections enter as you scroll, and stay put with reduced motion", async ({ page }) => {
-  await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto("/");
-  const card = page.locator(".dcard").first();
-  await expect(card).not.toHaveClass(/is-in/);
-  await card.scrollIntoViewIfNeeded();
-  await expect(card).toHaveClass(/is-in/);
-  await page.emulateMedia({ reducedMotion: "reduce" });
-  await page.goto("/");
-  const still = page.locator(".price");
-  expect(await still.evaluate((el) => getComputedStyle(el).opacity)).toBe("1");
-  expect(await still.evaluate((el) => getComputedStyle(el).translate)).toBe("none");
-});
-
-test.describe("without JavaScript", () => {
-  test.use({ javaScriptEnabled: false });
-  test("every section shows", async ({ page }) => {
-    await page.goto("/");
-    for (const el of await page.locator("[data-reveal]").all()) {
-      expect(await el.evaluate((node) => getComputedStyle(node).opacity)).toBe("1");
-      expect(await el.evaluate((node) => getComputedStyle(node).translate)).toBe("none");
+// On /booked the order is the same at every width: heading, invite, video, the call, what to have ready.
+for (const width of [390, 1280, 1440]) {
+  test(`${width}px: /booked reads heading, invite, video, On the call, Have ready`, async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width, height: 900 });
+    await page.goto("/booked?via=chat");
+    await page.evaluate(() => document.fonts.ready);
+    const tops: number[] = [];
+    for (const selector of [
+      "main h1",
+      "main .lead",
+      "main .video",
+      "#booked-call",
+      "#booked-ready",
+    ]) {
+      const box = (await page.locator(selector).first().boundingBox())!;
+      expect(box.width, selector).toBeGreaterThan(0);
+      tops.push(box.y);
     }
+    expect(tops).toEqual([...tops].sort((a, b) => a - b));
+    expect(new Set(tops).size).toBe(tops.length);
   });
+}
+
+test("the open application fits the screen at every phone width, with no sideways scroll", async ({
+  page,
+}) => {
+  await page.route("**/api/lead", (route) => route.fulfill({ status: 204 }));
+  for (const width of [320, 375, 414, 768]) {
+    await page.setViewportSize({ width, height: 650 });
+    await page.goto("/");
+    await page.evaluate(() => localStorage.clear());
+    await page.locator("#start input[name=name]").fill("TEST Visitor");
+    await page.locator("#start input[name=email]").fill("test@example.com");
+    await press(page.locator("#start form button"));
+    const field = page.locator(".q.is-current #a-profile");
+    await expect(field).toBeVisible();
+    for (const selector of [".q.is-current .q__label", ".q.is-current #a-profile", "[data-ok]"]) {
+      const box = (await page.locator(selector).boundingBox())!;
+      expect(box.x, `${width} ${selector}`).toBeGreaterThanOrEqual(0);
+      expect(box.x + box.width, `${width} ${selector}`).toBeLessThanOrEqual(width);
+      expect(box.y + box.height, `${width} ${selector}`).toBeLessThanOrEqual(650);
+    }
+    expect(await page.evaluate(overflow), `${width}`).toBeLessThanOrEqual(0);
+  }
 });

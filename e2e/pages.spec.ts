@@ -1,6 +1,8 @@
-import { expect, test, type Page } from "@playwright/test";
-import { booked, notFound, sample } from "../src/content/site";
-import { CONFIRMATION_VIDEO, FOUNDER_VIDEO } from "../src/config";
+import { expect, test, type Page, type Request } from "@playwright/test";
+import { existsSync } from "node:fs";
+import { application as form, booked, notFound, sample } from "../src/content/site";
+import { CONFIRMATION_VIDEO } from "../src/config";
+import { answer, press } from "./press";
 
 test("404 renders content and a home link", async ({ page }) => {
   const response = await page.goto("/no-such-page");
@@ -37,22 +39,27 @@ test.describe("the confirmation page", () => {
   test("says the invite line, the agenda and what to have ready", async ({ page }) => {
     await page.goto("/booked");
     await expect(page.locator("h1")).toHaveText(booked.h1);
+    await expect(page.locator("main .lead").first()).toHaveText(booked.invite);
     await expect(page.locator("main")).toContainText(
-      "The invite comes by email. If it is not in your inbox in 2 minutes, check spam.",
+      "If your email shows it as from an unknown sender, confirm that you know the sender, then accept it.",
     );
     for (const item of [...booked.call.items, ...booked.ready.items])
       await expect(page.locator("main")).toContainText(item);
     // No other offer on this page, and no way to start a second application.
     await expect(page.locator("main form")).toHaveCount(0);
     await expect(page.locator("header [data-apply]")).toHaveCount(0);
+    // The chat line is for chat bookings only.
+    await expect(page.getByText(booked.chat)).toBeHidden();
   });
 
   test("does not assume the application is done", async ({ page }) => {
     await page.goto("/booked");
     await expect(page.locator("main")).toContainText(booked.application.body);
-    await expect(page.locator("main")).not.toContainText(
+    // What the visitor can see: the lines for a chat booking and for unsaved answers stay hidden.
+    expect(await page.locator("main").innerText()).not.toMatch(
       /your answers are|you answered|thanks for/i,
     );
+    await expect(page.locator("[data-resend]")).toBeHidden();
   });
 
   test("greets by first name when the booking passes one, and only a plain name", async ({
@@ -71,14 +78,33 @@ test.describe("the confirmation page", () => {
 // Someone who booked from a chat has not answered the 8 questions yet. The address says so:
 // `via=chat`, or the chat event's slug. Nobody else sees the button.
 test.describe("the confirmation page after a booking from a chat", () => {
-  const application = "https://tally.so/r/9NZpVV";
   const label = "Answer the 8 questions (3 minutes)";
-  const button = (page: Page) => page.getByRole("link", { name: label, exact: true });
-  /** The button's address without its query, then its query as pairs. */
-  const address = async (page: Page) => {
-    const url = new URL((await button(page).getAttribute("href"))!);
-    return [url.origin + url.pathname, [...url.searchParams]] as const;
+  const button = (page: Page) => page.getByRole("button", { name: label, exact: true });
+  const layer = (page: Page) => page.locator("[data-apply]");
+  const current = (page: Page) => page.locator(".q.is-current");
+  const answers: Record<string, string> = {
+    profile: "@test.visitor",
+    sell: "TEST: bookkeeping",
+    stranger: "TEST: the books",
+    film: form.questions[3].options[1],
+    count: form.questions[4].options[0],
+    decides: form.questions[5].options[0],
+    start: form.questions[6].options[1],
   };
+  /** Stand-ins: no test writes a row. */
+  async function stub(page: Page) {
+    const applies: Request[] = [];
+    const leads: Request[] = [];
+    await page.route("**/api/lead", (route) => {
+      leads.push(route.request());
+      return route.fulfill({ status: 204 });
+    });
+    await page.route("**/api/apply", (route) => {
+      applies.push(route.request());
+      return route.fulfill({ json: { ok: true } });
+    });
+    return { applies, leads };
+  }
 
   test("without a chat booking the page stays as it is", async ({ page }) => {
     for (const query of [
@@ -91,62 +117,81 @@ test.describe("the confirmation page after a booking from a chat", () => {
       await page.goto("/booked" + query);
       await expect(page.getByText(booked.application.body), query).toBeVisible();
       await expect(page.getByText(booked.application.first), query).toBeHidden();
+      await expect(page.getByText(booked.chat), query).toBeHidden();
       await expect(button(page), query).toHaveCount(0);
-      await expect(page.locator('main a[href*="tally.so"]:visible'), query).toHaveCount(0);
+      await expect(page.locator('main a[href*="tally.so"]'), query).toHaveCount(0);
     }
   });
 
   for (const sign of ["via=chat", "eventTypeSlug=15-minute-call-chat"]) {
-    test(`${sign}: the 8 questions come first, with name and email filled`, async ({ page }) => {
+    test(`${sign}: the 8 questions come first and are answered on this page`, async ({ page }) => {
+      const calls = await stub(page);
       await page.goto(`/booked?${sign}&attendeeName=TEST+Visitor&email=test%2Bchat%40example.com`);
       await expect(button(page)).toBeVisible();
-      expect(await address(page)).toEqual([
-        application,
-        [
-          ["name", "TEST"],
-          ["email", "test+chat@example.com"],
-        ],
-      ]);
       await expect(page.getByText(booked.application.first)).toBeVisible();
       await expect(page.getByText(booked.application.body)).toBeHidden();
+      // Who writes to them, and where.
+      await expect(page.getByText(booked.chat)).toBeVisible();
       // The rest of the page is the same: the greeting, the invite line, no second application.
       await expect(page.locator("h1")).toHaveText(booked.h1Named.replace("{name}", "TEST"));
       await expect(page.locator("main")).toContainText(booked.invite);
       for (const item of booked.ready.items) await expect(page.getByText(item)).toBeVisible();
       await expect(page.locator("main form")).toHaveCount(0);
       await expect(page.locator("header [data-apply]")).toHaveCount(0);
+
+      // The name and email are known, so the form starts at the first question.
+      await press(button(page));
+      await expect(layer(page)).toBeVisible();
+      await expect(layer(page)).toHaveAttribute("data-kind", "prep");
+      await expect(page.locator("[data-hi]")).toHaveText(form.hiPrep.replace("{name}", "TEST"));
+      for (const [id, value] of Object.entries(answers)) await answer(page, id, value);
+      await expect(page.locator('.q.is-current[data-id="budget"]')).toBeVisible();
+      await expect(page.locator("[data-ok-label]")).toHaveText(form.finishPrep);
+      await press(current(page).locator(".choice").first());
+
+      // Saved: the layer closes, the page says so, and nobody is sent to a calendar.
+      await expect(page.getByText(booked.application.saved)).toBeVisible();
+      await expect(layer(page)).toBeHidden();
+      await expect(button(page)).toBeHidden();
+      await expect(page).toHaveURL(/\/booked\?/);
+      expect(calls.applies).toHaveLength(1);
+      expect(calls.applies[0]!.postDataJSON()).toMatchObject({
+        kind: "prep",
+        name: "TEST",
+        email: "test+chat@example.com",
+        page: "/booked",
+        answers: { ...answers, budget: form.questions[7].options[0] },
+      });
+      // They are already a lead: the booking made the row.
+      expect(calls.leads).toHaveLength(0);
     });
   }
 
-  test("only a plain name and a plain email are passed on", async ({ page }) => {
+  test("only a plain name and a plain email are taken from the address", async ({ page }) => {
+    await stub(page);
     const dialogs: string[] = [];
     page.on("dialog", (dialog) => {
       dialogs.push(dialog.message());
       void dialog.dismiss();
     });
     const markup = '"><img src=x onerror=alert(1)>';
-    for (const [query, passed] of [
-      ["", []],
-      [
-        `&attendeeName=${encodeURIComponent(markup)}&email=test%40example.com`,
-        [["email", "test@example.com"]],
-      ],
-      [`&name=${"a".repeat(60)}&email=not-an-email`, []],
-      [`&attendeeName=TEST&email=${encodeURIComponent("x@y.zz" + markup)}`, [["name", "TEST"]]],
-      [`&attendeeName=TEST&email=${encodeURIComponent("javascript:alert(1)")}`, [["name", "TEST"]]],
-      [`&attendeeName=TEST&email=${"a".repeat(250)}%40example.com`, [["name", "TEST"]]],
-      [
-        "&attendeeName=TEST&email=test%40example.com&url=https%3A%2F%2Fexample.org&redirect=1",
-        [
-          ["name", "TEST"],
-          ["email", "test@example.com"],
-        ],
-      ],
+    for (const [query, first] of [
+      ["", "name"],
+      [`&attendeeName=${encodeURIComponent(markup)}&email=test%40example.com`, "name"],
+      [`&name=${"a".repeat(60)}&email=not-an-email`, "name"],
+      [`&attendeeName=TEST&email=${encodeURIComponent("x@y.zz" + markup)}`, "email"],
+      [`&attendeeName=TEST&email=${encodeURIComponent("javascript:alert(1)")}`, "email"],
+      [`&attendeeName=TEST&email=${"a".repeat(250)}%40example.com`, "email"],
+      ["&attendeeName=TEST&email=test%40example.com&url=https%3A%2F%2Fexample.org", "profile"],
     ] as const) {
       await page.goto("/booked?via=chat" + query);
+      await page.evaluate(() => localStorage.clear());
+      await page.reload();
       await expect(button(page), query).toBeVisible();
-      expect(await address(page), query).toEqual([application, passed]);
-      await expect(page.locator("main img"), query).toHaveCount(0);
+      await press(button(page));
+      // The form asks for whatever the address did not give in a plain form.
+      await expect(current(page).locator(`#a-${first}`), query).toBeVisible();
+      await expect(page.locator("main img, [data-apply] img"), query).toHaveCount(0);
     }
     expect(dialogs).toEqual([]);
   });
@@ -175,21 +220,20 @@ test.describe("the confirmation page after a booking from a chat", () => {
   });
 });
 
-test("video slots show a poster and load no video until one is set", async ({ page }) => {
+test("the /booked video slot takes the confirmation video, and loads none before a press", async ({
+  page,
+}) => {
   const media: string[] = [];
   page.on("request", (r) => r.resourceType() === "media" && media.push(r.url()));
-  for (const [path, src] of [
-    ["/", FOUNDER_VIDEO],
-    ["/booked", CONFIRMATION_VIDEO],
-  ] as const) {
-    await page.goto(path);
-    await page.waitForLoadState("networkidle");
-    await expect(page.locator(".video .video__zyade")).toHaveCount(1);
-    // The video element is made on the first press, so there is none before it.
-    await expect(page.locator(".video video")).toHaveCount(0);
-    const play = page.locator(".video [data-play]");
-    if (src) await expect(play).toHaveAttribute("href", src);
-    else await expect(play).toHaveCount(0);
-  }
+  await page.goto("/booked");
+  await page.waitForLoadState("networkidle");
+  await expect(page.locator(".video .video__zyade")).toHaveCount(1);
+  // The video element is made on the first press, so there is none before it.
+  await expect(page.locator(".video video")).toHaveCount(0);
+  const play = page.locator(".video [data-play]");
+  // Until the file is in public/, the slot shows its poster and no play button.
+  if (existsSync(`public${CONFIRMATION_VIDEO}`))
+    await expect(play).toHaveAttribute("href", CONFIRMATION_VIDEO);
+  else await expect(play).toHaveCount(0);
   expect(media).toEqual([]);
 });

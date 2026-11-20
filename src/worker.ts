@@ -1,4 +1,5 @@
 import type { Env } from "./lib/env";
+import { handleApply } from "./lib/apply";
 import { handleLead } from "./lib/lead";
 import { shortLinkRedirect } from "./lib/shortlinks";
 
@@ -17,6 +18,7 @@ export default {
     const short = shortLinkRedirect(url);
     if (short) return short;
     if (pathname === "/api/lead") return handleLead(request, env, ctx);
+    if (pathname === "/api/apply") return handleApply(request, env);
     if (pathname.startsWith("/api/")) return notFound();
     return env.ASSETS.fetch(request);
   },

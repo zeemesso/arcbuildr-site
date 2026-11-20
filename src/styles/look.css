@@ -58,7 +58,6 @@ h1 .line {
 }
 .video {
   --poster: var(--color-clay);
-  grid-row: 3;
 }
 
 .title {
@@ -274,10 +273,6 @@ h1 .line {
     grid-row: 1;
     margin-bottom: -0.75rem;
   }
-  h1 {
-    grid-column: 1 / -1;
-    grid-row: 2;
-  }
   .lede {
     grid-column: 1;
     grid-row: 3;
@@ -286,10 +281,6 @@ h1 .line {
     font-size: 2.25rem;
     line-height: 1.15;
     letter-spacing: -0.025em;
-  }
-  .video {
-    grid-column: 1;
-    grid-row: 4;
   }
   .hero__arc {
     grid-column: 2;

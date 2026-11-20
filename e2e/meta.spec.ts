@@ -8,8 +8,15 @@ for (const [path, content] of [
 ] as const) {
   test(`${path}: metadata, noindex and no third party requests`, async ({ page }) => {
     const external: string[] = [];
+    // The visit counter is the one outside service, and only on a build that was given its token.
+    const own = [
+      "127.0.0.1",
+      "localhost",
+      "static.cloudflareinsights.com",
+      "cloudflareinsights.com",
+    ];
     page.on("request", (r) => {
-      if (!["127.0.0.1", "localhost"].includes(new URL(r.url()).hostname)) external.push(r.url());
+      if (!own.includes(new URL(r.url()).hostname)) external.push(r.url());
     });
     await page.goto(path);
     await page.waitForLoadState("networkidle");

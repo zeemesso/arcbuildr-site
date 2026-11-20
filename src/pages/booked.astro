@@ -1,9 +1,19 @@
 ---
+import { existsSync } from "node:fs";
 import Base from "../layouts/Base.astro";
 import VideoCard from "../components/VideoCard.astro";
 import Mark from "../components/Mark.astro";
+import Application from "../components/application/Application.astro";
 import { booked } from "../content/site";
-import { APPLICATION_AFTER_BOOKING_URL, CHAT_EVENT_SLUG, CONFIRMATION_VIDEO } from "../config";
+import { APPLICATION_AFTER_BOOKING_URL, APPLICATION_MODE, CONFIRMATION_VIDEO } from "../config";
+
+// The slot takes the confirmation video. Until its file is in public/, the card shows the poster.
+const video =
+  CONFIRMATION_VIDEO && existsSync(new URL(`../../public${CONFIRMATION_VIDEO}`, import.meta.url))
+    ? CONFIRMATION_VIDEO
+    : "";
+const native = APPLICATION_MODE === "native";
+const words = booked.application;
 ---
 
 <Base title={booked.title} description={booked.description} noindex apply={false}>
@@ -12,9 +22,12 @@ import { APPLICATION_AFTER_BOOKING_URL, CHAT_EVENT_SLUG, CONFIRMATION_VIDEO } fr
     <div class="doc__block">
       <p class="lead">{booked.invite}</p>
       <p>{booked.calendar}</p>
+      <p data-chat-line hidden>
+        {booked.chat}
+      </p>
     </div>
     <VideoCard
-      src={CONFIRMATION_VIDEO}
+      src={video}
       alt={booked.video.alt}
       title={booked.video.title}
       length={booked.video.length}
@@ -40,16 +53,30 @@ import { APPLICATION_AFTER_BOOKING_URL, CHAT_EVENT_SLUG, CONFIRMATION_VIDEO } fr
         ))}
       </ul>
       <p class="muted" data-note>
-        {booked.application.body}
+        {words.body}
       </p>
-      {APPLICATION_AFTER_BOOKING_URL && (
-        <div class="doc__block" data-chat hidden>
-          <p>{booked.application.first}</p>
-          <a class="btn btn--parts" href={APPLICATION_AFTER_BOOKING_URL}>
-            <span>{booked.application.link[0]}</span> <span>{booked.application.link[1]}</span>
+      <div class="doc__block" data-chat hidden>
+        <p data-chat-first>{words.first}</p>
+        {native ? (
+          <button class="btn btn--parts" type="button" data-apply-open data-chat-action>
+            <span>{words.link[0]}</span> <span>{words.link[1]}</span>
+          </button>
+        ) : (
+          <a class="btn btn--parts" href={APPLICATION_AFTER_BOOKING_URL} data-chat-action>
+            <span>{words.link[0]}</span> <span>{words.link[1]}</span>
           </a>
-        </div>
-      )}
+        )}
+        <p class="lead" data-chat-saved role="status" hidden>
+          {words.saved}
+        </p>
+      </div>
+      {/* Answers typed before the booking that had not saved are sent once more from here. */}
+      <div class="doc__block" data-resend hidden>
+        <p role="status" data-resend-note data-saved={words.resent} data-failed={words.unsent}></p>
+        <button class="btn btn--small" type="button" data-resend-retry hidden>
+          {words.retry}
+        </button>
+      </div>
     </section>
     <section class="doc__block" aria-labelledby="booked-before">
       <h2 id="booked-before">{booked.before.title}</h2>
@@ -66,34 +93,7 @@ import { APPLICATION_AFTER_BOOKING_URL, CHAT_EVENT_SLUG, CONFIRMATION_VIDEO } fr
     <p class="muted">{booked.refund}</p>
   </article>
 </Base>
-<script is:inline define:vars={{ chatSlug: CHAT_EVENT_SLUG }}>
-  // The booking page can send the first name and the email along. A name is letters only and
-  // an email is a plain address, so nothing else can be shown here or passed on.
-  const query = new URLSearchParams(location.search);
-  const given = (
-    query.get("attendeeFirstName") ||
-    query.get("attendeeName") ||
-    query.get("name") ||
-    ""
-  )
-    .trim()
-    .split(/\s+/)[0];
-  const name = /^[\p{L}'’-]{1,40}$/u.test(given) ? given : "";
-  const heading = document.querySelector("[data-booked]");
-  if (heading && name) heading.textContent = heading.dataset.booked.replace("{name}", name);
-
-  // Booked from a chat: the 8 questions are not answered yet, so they come first.
-  // The button's address is ours; only the checked name and email are added to it.
-  const chat = document.querySelector("[data-chat]");
-  if (chat && (query.get("via") === "chat" || query.get("eventTypeSlug") === chatSlug)) {
-    const email = (query.get("email") || "").trim();
-    const link = chat.querySelector("a");
-    const address = new URL(link.href);
-    if (name) address.searchParams.set("name", name);
-    if (email.length <= 254 && /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/.test(email))
-      address.searchParams.set("email", email);
-    link.href = address.href;
-    document.querySelector("[data-note]").hidden = true;
-    chat.hidden = false;
-  }
+{native && <Application kind="prep" />}
+<script>
+  import "../scripts/booked";
 </script>

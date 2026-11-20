@@ -755,39 +755,6 @@ summary::-webkit-details-marker {
   color: var(--color-ink-muted);
 }
 
-/* Apply: the same card, on the same arc. */
-.apply {
-  display: grid;
-  justify-items: center;
-  gap: 0.75rem;
-  text-align: center;
-}
-.apply .title {
-  margin: 0;
-}
-.apply__stack {
-  display: grid;
-  width: min(100%, 28rem);
-}
-.apply__arc,
-.apply .entry {
-  grid-area: 1 / 1;
-}
-.apply__arc {
-  justify-self: center;
-  width: 132%;
-  max-width: none;
-  color: var(--color-accent);
-  pointer-events: none;
-}
-.apply__arc path {
-  stroke-dasharray: 1 2;
-}
-.apply .entry {
-  margin-top: 4.25rem;
-  text-align: left;
-}
-
 /* Footer. */
 .foot {
   display: flex;
@@ -1141,9 +1108,5 @@ summary::-webkit-details-marker {
   }
   .faq__list {
     max-width: none;
-  }
-  .apply .entry {
-    grid-area: 1 / 1;
-    margin-top: 5.5rem;
   }
 }

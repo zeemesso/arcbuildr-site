@@ -54,6 +54,11 @@
   --shine-poster: rgb(255 255 255 / 0.16);
   --shine-tile: rgb(255 255 255 / 0.28);
   --shade-tile: rgb(0 0 0 / 0.28);
+  --shade-berg: rgb(0 0 0 / 0.14);
+  /* The drawn photo in the filming-check sample: a plain grey-blue wall. */
+  --scene-wall: #b9c4cc;
+  --scene-floor: #8d8378;
+  --scene-thing: #5d6770;
 
   --hue-sage: var(--color-sage);
   --hue-clay: var(--color-clay);

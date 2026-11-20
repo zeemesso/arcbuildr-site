@@ -1,0 +1,47 @@
+---
+/** The price range, the three sizes, the founding places, and the refund. */
+import { founding, home } from "../../content/site";
+import { FOUNDING_PLACES_LEFT } from "../../config";
+const { price, refund } = home;
+---
+
+<section class="sheet price" aria-labelledby="price-h" data-reveal>
+  <h2 class="h2" id="price-h">
+    {price.h2}
+  </h2>
+  <p class="lede">{price.body}</p>
+  <table class="sizes">
+    <thead>
+      <tr>
+        {price.cols.map((col) => (
+          <th scope="col">{col}</th>
+        ))}
+      </tr>
+    </thead>
+    <tbody>
+      {price.rows.map((row, i) => (
+        <tr style={`--i:${i}`}>
+          {row.map((value, k) => (k === 0 ? <th scope="row">{value}</th> : <td>{value}</td>))}
+        </tr>
+      ))}
+    </tbody>
+  </table>
+  <p class="places">
+    <span class="places__seats" aria-hidden="true">
+      {[0, 1, 2].map((seat) => (
+        <i class={seat < FOUNDING_PLACES_LEFT ? "is-free" : undefined} />
+      ))}
+    </span>
+    {founding.count.replace("{n}", String(FOUNDING_PLACES_LEFT))}
+  </p>
+  <div class="refund" aria-labelledby="refund-h" role="group">
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M12 3l7 3v5.5c0 4.2-2.9 7.6-7 9.5-4.1-1.9-7-5.3-7-9.5V6z"></path>
+      <path d="M8.5 12.2l2.5 2.5 4.5-5"></path>
+    </svg>
+    <h3 class="refund__h" id="refund-h">
+      {refund.h2}
+    </h3>
+    <p>{refund.body}</p>
+  </div>
+</section>

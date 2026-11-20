@@ -1,0 +1,34 @@
+---
+/**
+ * The frame every sample screen sits in: where the input comes from, a window, and the "Sample" tag.
+ * Steps inside are timed by data-at (milliseconds into the loop); src/scripts/home.ts plays them while
+ * the screen is on screen. Without JS, or with reduced motion, the finished state shows.
+ */
+import { home } from "../../../content/site";
+interface Props {
+  loop: number;
+  alt: string;
+  source: string;
+  length: string;
+  /** How long the top line runs, in ms. */
+  meter?: number;
+}
+const { loop, alt, source, length, meter = 2500 } = Astro.props;
+---
+
+<div class="shot" data-loop={loop} role="img" aria-label={alt} style={`--meter:${meter}ms`}>
+  <div class="shot__src" aria-hidden="true">
+    <span class="shot__rec"></span>
+    <span class="shot__src-name">{source}</span>
+    <span class="shot__meter">
+      <i data-at="400"></i>
+    </span>
+    <span class="shot__src-len">{length}</span>
+  </div>
+  <div class="shot__win" aria-hidden="true">
+    <slot />
+  </div>
+  <span class="shot__tag" aria-hidden="true">
+    {home.features.sample}
+  </span>
+</div>

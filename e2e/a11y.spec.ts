@@ -1,6 +1,7 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
 import { meta } from "../src/content/site";
+import { press } from "./press";
 // Reduced motion puts every section in its final state, which is the state to check.
 test.use({ reducedMotion: "reduce" });
 for (const path of ["/", "/sample", "/booked", "/booked?via=chat", "/privacy"]) {
@@ -22,11 +23,32 @@ for (const path of ["/", "/sample", "/booked", "/booked?via=chat", "/privacy"]) 
     expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
   });
 }
-test("every costume keeps its text readable", async ({ page }) => {
+test("the application passes axe on a text question, on the choices and on an error", async ({
+  page,
+}) => {
+  await page.route("**/api/lead", (route) => route.fulfill({ status: 204 }));
   await page.goto("/");
-  for (const id of ["anime", "scifi", "western", "detective"]) {
-    await page.locator(`.chips input[value="${id}"]`).check({ force: true });
-    const result = await new AxeBuilder({ page }).include(".season__play").analyze();
-    expect(result.violations, id).toEqual([]);
+  await page.locator("#start input[name=name]").fill("TEST Visitor");
+  await page.locator("#start input[name=email]").fill("test@example.com");
+  await press(page.locator("#start form button"));
+  const layer = page.locator("[data-apply]");
+  await expect(layer).toBeVisible();
+  await expect(page.locator(".q.is-current #a-profile")).toBeVisible();
+  expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
+  await press(page.locator("[data-ok]"));
+  await expect(page.locator(".q.is-current [data-err]")).toBeVisible();
+  expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
+  for (const id of ["profile", "sell", "stranger"]) {
+    await page.locator(`.q.is-current #a-${id}`).fill("4");
+    await page.locator(`.q.is-current #a-${id}`).press("Enter");
+  }
+  await expect(page.locator('.q.is-current[data-id="film"]')).toBeVisible();
+  expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
+});
+test("every install tab passes axe", async ({ page }) => {
+  await page.goto("/");
+  for (const tab of await page.getByRole("tab").all()) {
+    await press(tab);
+    expect((await new AxeBuilder({ page }).include(".install").analyze()).violations).toEqual([]);
   }
 });

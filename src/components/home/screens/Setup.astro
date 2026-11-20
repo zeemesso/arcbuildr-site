@@ -1,0 +1,49 @@
+---
+/** Screen 3: a photo of the filming setup is checked, and one fix is named. The picture is drawn, with no person in it. */
+import Shot from "./Shot.astro";
+import Tick from "./Tick.astro";
+import Typed from "./Typed.astro";
+import { home } from "../../../content/site";
+const s = home.features.screens.setup;
+---
+
+<Shot loop={10000} alt={s.alt} source={s.source} length={s.length} meter={2200}>
+  <div class="snap">
+    <div class="photo" data-at="500" data-fx="pop">
+      <i class="photo__wall"></i>
+      <i class="photo__floor"></i>
+      <i class="photo__lamp"></i>
+      <i class="photo__chair"></i>
+      <i class="photo__scan" data-at="1500"></i>
+    </div>
+    <p class="said" data-at="900" data-fx="rise">
+      <Typed text={s.typed} at={1000} />
+    </p>
+  </div>
+  <div class="answer" data-at="2700" data-fx="rise">
+    <b class="answer__h">{s.head}</b>
+    <div class="shot__row" data-at="3200">
+      <span class="shot__label">{s.check}</span>
+      <span class="shot__value">
+        <span class="shot__text">{s.sees}</span>
+        <span class="shot__bar"></span>
+      </span>
+      <span class="shot__verdict">
+        <Tick />
+        {s.verdict}
+      </span>
+    </div>
+    <div class="fix" data-at="4300" data-fx="pop">
+      <span class="fix__phone" data-at="5300">
+        <i></i>
+      </span>
+      <span class="fix__words">
+        <span class="shot__label">{s.fixLabel}</span>
+        <b>{s.fix}</b>
+      </span>
+    </div>
+    <span class="shot__label answer__after" data-at="6300" data-fx="fade">
+      {s.after}
+    </span>
+  </div>
+</Shot>

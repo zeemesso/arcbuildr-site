@@ -1,0 +1,816 @@
+/* Feature cards: an animated screen of our own product beside a number, a heading and one sentence.
+ * The finished state is the default. home.ts adds .is-looping and then .on to each [data-at] element in turn,
+ * so with no JS or with reduced motion the screen shows complete. Numbers in comments are the motion rules. */
+
+.features__note {
+  max-width: 34rem;
+  margin: 0.75rem auto 0;
+  text-align: center;
+  color: var(--f-muted);
+}
+.feat {
+  display: grid;
+  gap: clamp(1.5rem, 4vw, 3.5rem);
+  align-items: center;
+  max-width: 68rem;
+  margin: clamp(2rem, 5vw, 3.5rem) auto 0;
+  padding: clamp(1rem, 3.2vw, 3rem);
+  border-radius: var(--f-radius);
+  background: var(--f-canvas);
+}
+@media (min-width: 56rem) {
+  .feat {
+    grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+  }
+  /* Every second card puts its words first. */
+  .feat:nth-of-type(even) .feat__screen {
+    order: 2;
+  }
+}
+.feat__screen {
+  min-width: 0;
+}
+.feat__n {
+  font-family: var(--f-mono);
+  font-size: var(--text-sm);
+  color: var(--f-muted);
+}
+.feat__h {
+  margin: 0.5rem 0 0.75rem;
+  font-family: var(--f-head);
+  font-size: clamp(1.625rem, 1.2rem + 1.6vw, 2.375rem);
+  font-weight: var(--f-head-weight);
+  letter-spacing: -0.03em;
+  line-height: 1.08;
+  text-wrap: balance;
+}
+.feat__p {
+  max-width: 30rem;
+  font-size: clamp(1rem, 0.95rem + 0.4vw, 1.25rem);
+  color: var(--f-muted);
+  text-wrap: pretty;
+}
+
+/* ---------- The screen ---------- */
+.shot {
+  position: relative;
+  max-width: 30rem;
+  margin: 0 auto;
+  font-size: 0.8125rem;
+  line-height: 1.3;
+}
+.shot svg {
+  width: 1em;
+  height: 1em;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.25;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.shot__tag {
+  position: absolute;
+  top: -0.6rem;
+  right: 0.75rem;
+  padding: 0.15rem 0.5rem;
+  border-radius: var(--radius-pill);
+  background: var(--f-ink);
+  color: var(--f-sheet);
+  font-family: var(--f-mono);
+  font-size: 0.625rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* The source: the interview, with a line that runs while the profile is written. */
+.shot__src {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0 0.75rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.75rem 0.75rem 0 0;
+  background: color-mix(in oklch, var(--f-ink) 92%, var(--f-sheet));
+  color: var(--f-sheet);
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+.shot__rec {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background: var(--color-accent);
+}
+.shot__meter {
+  flex: 1;
+  height: 3px;
+  overflow: hidden;
+  border-radius: 3px;
+  background: var(--shine-tile);
+}
+.shot__meter i {
+  display: block;
+  height: 100%;
+  background: var(--color-accent);
+  transform-origin: left;
+  transition: scale var(--meter, 2500ms) linear;
+}
+.shot__src-len {
+  font-family: var(--f-mono);
+  font-weight: 400;
+  opacity: 0.75;
+}
+
+.shot__win {
+  padding: 0.875rem;
+  border: 1px solid var(--color-rule);
+  border-radius: 1rem;
+  background: var(--f-sheet);
+  box-shadow: var(--shadow-card);
+}
+.shot__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.375rem 0.5rem;
+  min-height: 1.75rem;
+  margin-bottom: 0.625rem;
+}
+.shot__head > svg {
+  font-size: 1.125rem;
+  color: var(--f-muted);
+}
+.shot__head b {
+  white-space: nowrap;
+  font-family: var(--f-mono);
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+.shot__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  flex-shrink: 0;
+  margin-left: auto;
+  padding: 0.2rem 0.55rem 0.2rem 0.45rem;
+  border-radius: var(--radius-pill);
+  background: color-mix(in oklch, var(--color-sage) 16%, var(--f-sheet));
+  color: var(--f-ok-ink);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  white-space: nowrap;
+  transform-origin: right center;
+  /* 10: starts at 0.95. 1: eases out. */
+  transition:
+    opacity 200ms var(--f-out),
+    scale 200ms var(--f-out);
+}
+.shot__rows {
+  display: grid;
+  gap: 0.375rem;
+  padding: 0;
+  list-style: none;
+}
+.shot__row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  column-gap: 0.75rem;
+  align-items: center;
+  padding: 0.5rem 0.625rem 0.55rem 0.75rem;
+  border-radius: 0.625rem;
+  background: var(--color-field);
+  box-shadow: inset 0 0 0 1px var(--color-rule);
+}
+.shot__label {
+  grid-column: 1;
+  font-size: 0.6875rem;
+  color: var(--f-muted);
+}
+.shot__value {
+  position: relative;
+  grid-column: 1;
+  margin-top: 0.15rem;
+  font-weight: 500;
+}
+.shot__text {
+  display: block;
+  /* 17: the words arrive under a mask, left to right. */
+  clip-path: inset(0 0 0 0);
+  transition: clip-path 520ms var(--f-out);
+}
+.shot__bar {
+  position: absolute;
+  left: 0;
+  top: 0.3em;
+  width: 62%;
+  height: 0.55em;
+  border-radius: 0.3em;
+  background: var(--color-rule);
+  opacity: 0;
+  transition: opacity 160ms var(--f-out);
+}
+.shot__row:nth-child(even) .shot__bar {
+  width: 44%;
+}
+.shot__tick {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  display: grid;
+  place-items: center;
+  width: 1.25rem;
+  height: 1.25rem;
+  border-radius: 50%;
+  background: var(--color-sage);
+  color: var(--f-sheet);
+  font-size: 0.75rem;
+  /* 18: the tick comes in with a little blur. 6: after its words. */
+  transition:
+    opacity 200ms var(--f-out) 380ms,
+    scale 200ms var(--f-out) 380ms,
+    filter 200ms var(--f-out) 380ms;
+}
+
+.shot__ask {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-top: 0.625rem;
+  padding: 0.45rem 0.45rem 0.45rem 0.75rem;
+  border-radius: 0.75rem;
+  background: color-mix(in oklch, var(--color-accent) 9%, var(--f-sheet));
+  box-shadow: inset 0 0 0 1px color-mix(in oklch, var(--color-accent) 30%, var(--f-sheet));
+  font-weight: 600;
+  transition:
+    opacity 300ms var(--f-out),
+    translate 300ms var(--f-out);
+}
+.shot__btn {
+  position: relative;
+  display: grid;
+  place-items: center;
+  padding: 0.4rem 0.8rem;
+  border-radius: var(--radius-pill);
+  background: var(--color-sage);
+  color: var(--f-sheet);
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
+  transition: background-color 200ms var(--f-out) 140ms;
+}
+.shot__btn-a,
+.shot__btn-b {
+  grid-area: 1 / 1;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  /* 16, 18: the old label and the new one overlap, with a little blur. */
+  transition:
+    opacity 200ms var(--f-out) 140ms,
+    filter 200ms var(--f-out) 140ms;
+}
+.shot__btn-a {
+  opacity: 0;
+  filter: blur(3px);
+}
+
+/* ---------- Parts the other screens share ---------- */
+/* What the owner typed: a dark bubble on the right, its words arriving one after another. */
+.said {
+  width: fit-content;
+  max-width: 88%;
+  margin: 0 0 0.625rem auto;
+  padding: 0.45rem 0.75rem;
+  border-radius: 0.875rem 0.875rem 0.25rem 0.875rem;
+  background: var(--f-ink);
+  color: var(--f-sheet);
+  font-weight: 500;
+}
+.typed i {
+  font-style: normal;
+  transition: opacity 60ms linear calc(var(--k) * 85ms);
+}
+/* A step that arrives: it fades, rises, pops or drops in (1, 10). */
+[data-fx] {
+  transition:
+    opacity 240ms var(--f-out),
+    translate 300ms var(--f-out),
+    scale 200ms var(--f-out);
+}
+.shot__verdict {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.2rem 0.55rem 0.2rem 0.4rem;
+  border-radius: var(--radius-pill);
+  background: var(--color-sage);
+  color: var(--f-sheet);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  transition:
+    opacity 200ms var(--f-out) 380ms,
+    scale 200ms var(--f-out) 380ms,
+    filter 200ms var(--f-out) 380ms;
+}
+
+/* ---------- Screen 2: an idea, 3 angles, a script, 10 checks ---------- */
+.angles ol {
+  display: grid;
+  gap: 0.25rem;
+  margin: 0.25rem 0 0.625rem;
+}
+.angle {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.35rem 0.625rem;
+  border-radius: 0.5rem;
+  background: var(--color-field);
+  box-shadow: inset 0 0 0 1px var(--color-rule);
+  font-weight: 500;
+}
+.angle b,
+.add3__step b,
+.cut__rows b {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 1.125rem;
+  height: 1.125rem;
+  border-radius: 50%;
+  background: var(--color-rule);
+  font-family: var(--f-mono);
+  font-size: 0.625rem;
+  font-weight: 600;
+}
+/* The picked angle: a colour layer under a mask (17). */
+.angle__pick {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: color-mix(in oklch, var(--color-accent) 16%, transparent);
+  box-shadow: inset 0 0 0 1.5px var(--color-accent);
+  clip-path: inset(0 0 0 0 round 0.5rem);
+  transition: clip-path 320ms var(--f-out);
+}
+.draft {
+  display: grid;
+  gap: 0.15rem;
+  padding: 0.625rem 0.75rem;
+  border-radius: 0.75rem;
+  background: var(--color-field);
+  box-shadow: inset 0 0 0 1px var(--color-rule);
+}
+.draft b {
+  font-weight: 700;
+}
+.draft p {
+  display: grid;
+  margin-top: 0.3rem;
+  font-weight: 500;
+}
+.checks {
+  margin-top: 0.625rem;
+}
+.checks ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  margin: 0.3rem 0 0.5rem;
+}
+.checks li {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+  padding: 0.15rem 0.5rem 0.15rem 0.35rem;
+  border-radius: var(--radius-pill);
+  background: color-mix(in oklch, var(--color-sage) 14%, var(--f-sheet));
+  color: var(--f-ok-ink);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.checks__end,
+.addon__end {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
+}
+.checks__end .shot__badge,
+.addon__end .shot__badge {
+  margin-left: 0;
+}
+
+/* ---------- Screen 3: a photo of the setup, one fix ---------- */
+.snap {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
+  gap: 0.625rem;
+  margin-bottom: 0.625rem;
+}
+.snap .said {
+  max-width: none;
+  margin-bottom: 0;
+  white-space: nowrap;
+}
+/* The photo is drawn: a plain wall, a floor, a lamp and an empty chair. Wider than tall, which is the fix. */
+.photo {
+  position: relative;
+  aspect-ratio: 16 / 10;
+  max-width: 11rem;
+  overflow: hidden;
+  border-radius: 0.625rem;
+  background: var(--scene-wall);
+  transform-origin: left bottom;
+}
+.photo i {
+  position: absolute;
+}
+.photo__floor {
+  inset: 72% 0 0;
+  background: var(--scene-floor);
+}
+.photo__lamp {
+  left: 14%;
+  top: 22%;
+  width: 3%;
+  height: 52%;
+  background: var(--scene-thing);
+}
+.photo__lamp::before {
+  content: "";
+  position: absolute;
+  left: -260%;
+  top: -22%;
+  width: 620%;
+  height: 26%;
+  border-radius: 40% 40% 8% 8%;
+  background: var(--color-card);
+}
+.photo__chair {
+  left: 46%;
+  top: 40%;
+  width: 20%;
+  height: 34%;
+  border-radius: 12% 12% 0 0;
+  background: var(--scene-thing);
+}
+.photo__chair::before,
+.photo__chair::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  width: 12%;
+  height: 34%;
+  background: var(--scene-thing);
+}
+.photo__chair::before {
+  left: 0;
+}
+.photo__chair::after {
+  right: 0;
+}
+/* The check passes over the photo once. */
+.photo__scan {
+  inset: 0;
+  background: linear-gradient(90deg, transparent, var(--shine-tile) 50%, transparent);
+  translate: 110% 0;
+}
+.is-looping .photo__scan.on {
+  animation: scan 900ms var(--f-inout);
+}
+@keyframes scan {
+  from {
+    translate: -110% 0;
+  }
+  to {
+    translate: 110% 0;
+  }
+}
+.answer {
+  display: grid;
+  gap: 0.5rem;
+}
+.answer__h {
+  font-weight: 700;
+}
+.fix {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.625rem 0.75rem;
+  border-radius: 0.75rem;
+  background: color-mix(in oklch, var(--color-accent) 9%, var(--f-sheet));
+  box-shadow: inset 0 0 0 1px color-mix(in oklch, var(--color-accent) 30%, var(--f-sheet));
+  transform-origin: left center;
+}
+.fix__words {
+  display: grid;
+  gap: 0.1rem;
+}
+.fix__words b {
+  font-size: 0.9375rem;
+  font-weight: 700;
+}
+/* The phone turns upright (9). */
+.fix__phone {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 2.25rem;
+  height: 2.25rem;
+}
+.fix__phone i {
+  width: 1.125rem;
+  height: 2rem;
+  border: 2px solid var(--color-accent-text);
+  border-radius: 0.3rem;
+  transition: rotate 420ms var(--f-inout);
+}
+
+/* ---------- Screen 4: the cut list ---------- */
+.cut {
+  display: grid;
+  gap: 0.5rem;
+}
+.cut__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+.cut__head b {
+  font-weight: 700;
+}
+/* The clip as one line: what goes is hatched, the line that must stay is marked. */
+.cut__track {
+  position: relative;
+  height: 1.5rem;
+  overflow: hidden;
+  border-radius: 0.375rem;
+  background: color-mix(in oklch, var(--color-sage) 30%, var(--f-sheet));
+}
+.cut__track i {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+}
+.cut__gap {
+  left: var(--a);
+  width: max(3px, calc(var(--b) - var(--a)));
+  background: repeating-linear-gradient(
+    -45deg,
+    var(--color-clay) 0 3px,
+    color-mix(in oklch, var(--color-clay) 45%, var(--f-sheet)) 3px 6px
+  );
+  transform-origin: left;
+  transition: scale 260ms var(--f-out);
+}
+.cut__keep {
+  left: 42.5%;
+  width: 3.9%;
+  background: var(--color-ink);
+}
+/* The export runs along the clip once. */
+.cut__track .cut__run {
+  inset: auto 0 0;
+  height: 3px;
+  background: var(--color-accent);
+  transform-origin: left;
+  transition: scale 1400ms linear;
+}
+.cut__rows {
+  display: grid;
+  gap: 0.2rem;
+}
+.cut__rows li {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--f-mono);
+  font-size: 0.6875rem;
+}
+.cut__rows em {
+  margin-left: auto;
+  color: var(--f-muted);
+  font-style: normal;
+}
+.cut__never {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
+}
+
+/* ---------- Screen 5: a new file, added in 3 steps ---------- */
+.addon {
+  position: relative;
+  padding: 0.75rem;
+  border-radius: 0.75rem;
+  background: var(--color-field);
+  box-shadow: inset 0 0 0 1px var(--color-rule);
+  font-family: var(--f-mono);
+  font-size: 0.6875rem;
+}
+.addon__tag {
+  display: inline-block;
+  margin-bottom: 0.4rem;
+  padding: 0.1rem 0.4rem;
+  border-radius: 0.25rem;
+  background: var(--color-accent);
+  color: var(--color-ink);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+}
+.addon dl {
+  display: grid;
+  gap: 0.15rem;
+}
+.addon dl div {
+  display: grid;
+  grid-template-columns: 4.25rem 1fr;
+  gap: 0.5rem;
+}
+.addon dt {
+  color: var(--f-muted);
+}
+.addon dd {
+  font-weight: 600;
+}
+.add3 {
+  margin-top: 0.625rem;
+}
+.add3 ol {
+  display: grid;
+  gap: 0.25rem;
+  margin: 0.3rem 0 0.625rem;
+}
+.add3__step {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 0.5rem 0.4rem 0.625rem;
+  border-radius: 0.5rem;
+  background: var(--color-field);
+  box-shadow: inset 0 0 0 1px var(--color-rule);
+  font-weight: 500;
+  transition: opacity 240ms var(--f-out);
+}
+.add3__step .shot__tick {
+  flex: none;
+  margin-left: auto;
+  transition-delay: 0ms;
+}
+
+/* ---------- Waiting states: only while the loop runs. Leaving is about 20% shorter than arriving (15). ---------- */
+.is-looping .shot__meter i:not(.on) {
+  scale: 0 1;
+  transition: scale 240ms var(--f-inout);
+}
+.is-looping .shot__row:not(.on) .shot__text {
+  clip-path: inset(0 100% 0 0);
+  transition: clip-path 240ms var(--f-inout);
+}
+.is-looping .shot__row:not(.on) .shot__bar {
+  opacity: 1;
+  transition: opacity 240ms var(--f-out) 120ms;
+}
+.is-looping .shot__row:not(.on) .shot__tick {
+  opacity: 0;
+  scale: 0.95;
+  transition:
+    opacity 160ms var(--f-inout),
+    scale 160ms var(--f-inout),
+    filter 160ms var(--f-inout);
+}
+.is-looping .shot__row:not(.on) .shot__tick {
+  filter: blur(3px);
+}
+.is-looping .shot__btn:not(.on) {
+  background: var(--f-ink);
+  transition: background-color 160ms var(--f-inout);
+}
+.is-looping .shot__btn:not(.on) .shot__btn-a {
+  opacity: 1;
+  filter: none;
+}
+.is-looping .shot__btn:not(.on) .shot__btn-b {
+  opacity: 0;
+  filter: blur(3px);
+}
+.is-looping .shot__btn:not(.on) .shot__btn-a,
+.is-looping .shot__btn:not(.on) .shot__btn-b {
+  transition:
+    opacity 160ms var(--f-inout),
+    filter 160ms var(--f-inout);
+}
+/* 4: the pressed button goes to 0.97. 8: then one pulse says it worked. 13: no bounce. */
+.is-looping .shot__btn.on {
+  animation:
+    shot-press 280ms var(--f-inout),
+    shot-pulse 620ms var(--f-out) 140ms;
+}
+@keyframes shot-press {
+  45% {
+    scale: 0.97;
+  }
+}
+@keyframes shot-pulse {
+  from {
+    box-shadow: 0 0 0 0 color-mix(in oklch, var(--color-sage) 45%, transparent);
+  }
+  to {
+    box-shadow: 0 0 0 0.6rem transparent;
+  }
+}
+
+/* Waiting states of the shared parts and of screens 2 to 5. */
+.is-looping [data-fx]:not(.on) {
+  opacity: 0;
+  transition:
+    opacity 190ms var(--f-inout),
+    translate 190ms var(--f-inout),
+    scale 160ms var(--f-inout);
+}
+.is-looping [data-fx~="rise"]:not(.on) {
+  translate: 0 8px;
+}
+.is-looping [data-fx~="pop"]:not(.on) {
+  scale: 0.95;
+}
+.is-looping [data-fx~="drop"]:not(.on) {
+  translate: 0 -14px;
+  scale: 0.97;
+}
+.is-looping .typed:not(.on) i {
+  opacity: 0;
+  transition: none;
+}
+.is-looping .shot__row:not(.on) .shot__verdict {
+  opacity: 0;
+  scale: 0.95;
+  filter: blur(3px);
+  transition:
+    opacity 160ms var(--f-inout),
+    scale 160ms var(--f-inout),
+    filter 160ms var(--f-inout);
+}
+.is-looping .angle__pick:not(.on) {
+  clip-path: inset(0 100% 0 0 round 0.5rem);
+  transition: clip-path 190ms var(--f-inout);
+}
+.is-looping .fix__phone:not(.on) i {
+  rotate: 90deg;
+  transition: rotate 240ms var(--f-inout);
+}
+.is-looping .cut__gap:not(.on) {
+  scale: 0 1;
+  transition: scale 190ms var(--f-inout);
+}
+.is-looping .cut__run:not(.on) {
+  scale: 0 1;
+  transition: scale 190ms var(--f-inout);
+}
+.is-looping .add3__step:not(.on) {
+  opacity: 0.45;
+}
+.is-looping .add3__step:not(.on) .shot__tick {
+  opacity: 0;
+  scale: 0.95;
+  filter: blur(3px);
+  transition:
+    opacity 160ms var(--f-inout),
+    scale 160ms var(--f-inout),
+    filter 160ms var(--f-inout);
+}
+
+/* Each card comes in when it is reached, screen first. */
+@media (prefers-reduced-motion: no-preference) {
+  .js .features__note,
+  .js .feat__screen,
+  .js .feat__words {
+    opacity: 0;
+    translate: 0 12px;
+    transition:
+      opacity 0.5s var(--f-out) calc(var(--o, 0) * 90ms),
+      translate 0.5s var(--f-out) calc(var(--o, 0) * 90ms);
+  }
+  .js .feat__words {
+    --o: 1;
+  }
+  .js .features.is-in .features__note,
+  .js .feat.is-in .feat__screen,
+  .js .feat.is-in .feat__words {
+    opacity: 1;
+    translate: none;
+  }
+}

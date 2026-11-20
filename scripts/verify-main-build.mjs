@@ -71,8 +71,10 @@ try {
     }
     scriptBytes += scriptSize(body);
   }
-  if (scriptBytes >= 3 * 1024)
-    throw new Error(`Main JavaScript reaches 3 KB gzipped: ${scriptBytes} bytes`);
+  // The budget was 3 KB while the application was a hosted form. Since L1-P9 the page carries its own
+  // form (one question per screen, saved answers, retries), which is most of these bytes.
+  if (scriptBytes >= 10 * 1024)
+    throw new Error(`Main JavaScript reaches 10 KB gzipped: ${scriptBytes} bytes`);
   console.log(`main JavaScript: ${scriptBytes} bytes gzipped (including the map)`);
   // Remove ALLOW_NO_CONTACT_EMAIL=1 from test:main-build once the address is set.
   if (

@@ -1,134 +1,230 @@
 import { expect, test } from "@playwright/test";
-import {
-  hero,
-  founding,
-  questions,
-  fit,
-  offer,
-  evidence,
-  proof,
-  footer,
-} from "../src/content/site";
-import { CONTACT_EMAIL, FOUNDING_PLACES_LEFT } from "../src/config";
-import { SECTION_IDS } from "../src/content/sections";
+import { founding, home } from "../src/content/site";
+import { BOOKING_URL, FOUNDING_PLACES_LEFT } from "../src/config";
+import { press } from "./press";
 
-test("home has the headline, ten sections, the founding count and one price card", async ({
-  page,
-}) => {
-  await page.goto("/");
-  await expect(page.locator("h1")).toHaveCount(1);
-  await expect(page.locator("h1")).toHaveText(hero.h1.join(" "));
-  expect(await page.locator("main > section").evaluateAll((els) => els.map((el) => el.id))).toEqual(
-    [...SECTION_IDS],
-  );
-  const places = page.locator(".founding");
-  await expect(places).toHaveCount(1);
-  await expect(places).toContainText(founding.count.replace("{n}", String(FOUNDING_PLACES_LEFT)));
-  await expect(places.locator(".is-free")).toHaveCount(FOUNDING_PLACES_LEFT);
-  const price = page.locator(".price");
-  await expect(price).toContainText(offer.price.from);
-  await expect(price).toContainText(offer.price.to);
-  await expect(price).toContainText(offer.price.line);
-  // Prices live in the price card only. The one other figure is who the offer is for.
-  const outside = await page.locator("main").evaluate((el, exception) => {
-    const clone = el.cloneNode(true) as HTMLElement;
-    clone.querySelector(".price")?.remove();
-    clone.querySelectorAll("style").forEach((style) => style.remove());
-    return clone.textContent!.replace(exception, "");
-  }, fit.yes.items[2]!);
-  expect(outside).not.toMatch(/\b(750|1,?000|1,?250|1,?500|1,?750)\b/);
-});
+/** Words a visitor can read on load: no sample screens, no closed answers, no tab that is not picked. */
+const readable = (root: Element) => {
+  const copy = root.cloneNode(true) as Element;
+  const drop =
+    ".shot, [hidden], details > :not(summary), form, script, style, .sr-only, [aria-hidden='true']";
+  for (const el of copy.querySelectorAll(drop)) el.remove();
+  // An element ends a word even when the markup has no space after it.
+  for (const el of copy.querySelectorAll("p, li, h1, h2, h3, span, td, th, button, summary, a, b"))
+    el.append(" ");
+  return copy.textContent!.split(/\s+/).filter((word) => /[A-Za-z0-9]/.test(word)).length;
+};
 
-test("the offer is shown as pictures: 12 weeks, 6 deliveries, 3 sizes", async ({ page }) => {
-  await page.goto("/");
-  await expect(page.locator(".weeks__row > li")).toHaveCount(12);
-  await expect(page.locator(".weeks [role=img]")).toHaveAttribute("aria-label", offer.strip.alt);
-  const cards = page.locator(".deliver > .dcard");
-  await expect(cards).toHaveCount(offer.cards.length);
-  for (const [i, card] of offer.cards.entries()) {
-    await expect(cards.nth(i).locator(".when b")).toHaveText(String(card.day));
-    await expect(cards.nth(i).locator("h3")).toContainText(card.title);
-    await expect(cards.nth(i).locator(".dcard__body")).toHaveText(card.body);
-    await expect(cards.nth(i).locator(".art")).toHaveCount(1);
-  }
-  await expect(page.locator(".sizes > .size")).toHaveCount(3);
-  await expect(page.locator(".sizes > .size.is-pick")).toHaveCount(1);
-  await expect(page.locator(".sizes > .size.is-pick")).toContainText(offer.sizes.pickTag);
-});
+test.describe("the home page", () => {
+  test.use({ reducedMotion: "reduce" });
 
-test("questions are few, closed, and work from the keyboard", async ({ page }) => {
-  await page.goto("/");
-  await expect(page.locator("#questions details")).toHaveCount(questions.items.length);
-  await expect(page.locator("#questions")).not.toContainText(/\bAI\b/);
-  for (const item of questions.items) {
-    const row = page.locator(`#${item.id}`);
-    await expect(row.locator("p")).toHaveText(item.a);
-    await expect(row).not.toHaveAttribute("open");
-    await row.locator("summary").focus();
-    await page.keyboard.press("Enter");
-    await expect(row).toHaveAttribute("open", "");
-    await expect(row.locator("p")).toBeVisible();
-  }
-});
-
-test("the research sits behind one tap, with every source and the limit", async ({ page }) => {
-  await page.goto("/");
-  const research = page.locator("#evidence details");
-  await expect(research).not.toHaveAttribute("open");
-  await expect(page.locator(".finding").first()).toBeHidden();
-  await research.locator("summary").click();
-  for (const finding of evidence.findings) {
-    const card = page.locator(`#${finding.id}`);
-    await expect(card).toBeVisible();
-    await expect(card.locator("b")).toHaveText(finding.figure);
-    await expect(card.locator("p")).toHaveText(finding.claim);
-    await expect(card.locator("cite")).toHaveText(finding.source);
-  }
-  await expect(page.locator(".limit")).toHaveText(evidence.limit);
-});
-
-test("the proof shows the sample, the audit and the refund", async ({ page }) => {
-  await page.goto("/");
-  const sample = page.locator(".pcard--sample");
-  await expect(sample.locator(".script__row")).toHaveCount(1);
-  await expect(sample.getByRole("link", { name: proof.sample.link.text })).toHaveAttribute(
-    "href",
-    "/sample",
-  );
-  await expect(page.locator(".pcard--audit")).toContainText(proof.audit.body);
-  const refund = page.locator(".pcard--refund");
-  for (const step of proof.refund.steps) {
-    await expect(refund).toContainText(step.figure);
-    await expect(refund).toContainText(step.text);
-  }
-  await expect(refund).toContainText(proof.refund.rewrites);
-  await expect(refund).toContainText(proof.refund.not);
-});
-
-test("the footer gives the contact address", async ({ page }) => {
-  await page.goto("/");
-  const contact = page.locator('footer a[href^="mailto:"]');
-  await expect(contact).toHaveText(CONTACT_EMAIL);
-  await expect(contact).toHaveAttribute("href", `mailto:${CONTACT_EMAIL}`);
-  await expect(page.locator("footer")).toContainText(
-    footer.contact.replace("{email}", CONTACT_EMAIL),
-  );
-});
-
-test("the page stays short: about 1,000 words, about 800 on load", async ({ page }) => {
-  await page.setViewportSize({ width: 390, height: 844 });
-  await page.emulateMedia({ reducedMotion: "reduce" });
-  await page.goto("/");
-  const words = await page.evaluate(() => {
-    const count = (text: string) => (text.match(/[\p{L}\p{N}][\p{L}\p{N}'’.,:-]*/gu) ?? []).length;
-    const roots = [
-      ...document.querySelectorAll<HTMLElement>("body > header, body > main, body > footer"),
-    ];
-    const read = () => roots.map((root) => root.innerText).join("\n");
-    const onLoad = count(read());
-    document.querySelectorAll("details").forEach((d) => (d.open = true));
-    return { onLoad, all: count(read()) };
+  test("says the headline, then its sections in order", async ({ page }) => {
+    await page.goto("/");
+    await expect(page.locator("h1")).toHaveText(home.start.h1.join(" "));
+    expect((await page.locator("main h2").allTextContents()).map((text) => text.trim())).toEqual([
+      home.features.h2,
+      home.hub.h2,
+      home.iceberg.h2,
+      home.install.h2,
+      home.price.h2,
+      home.faq.h2,
+      home.book.h2,
+    ]);
+    await expect(page.locator(".hero__lede .chip")).toHaveText("750 to 1,750 USD");
   });
-  expect(words.onLoad).toBeLessThanOrEqual(850);
-  expect(words.all).toBeLessThanOrEqual(1100);
+
+  test("stays inside the word budget: 25 on the first screen, 450 on load", async ({ page }) => {
+    await page.goto("/");
+    const first = await page.locator("#start").evaluate(readable);
+    const all = await page.locator("body").evaluate(readable);
+    expect(first).toBeLessThanOrEqual(25);
+    expect(all).toBeLessThanOrEqual(450);
+    test
+      .info()
+      .annotations.push({ type: "words", description: `first screen ${first}, page ${all}` });
+  });
+
+  test("shows five tools, each with a screen labelled as a sample", async ({ page }) => {
+    await page.goto("/");
+    const cards = page.locator(".feat");
+    await expect(cards).toHaveCount(5);
+    for (const [i, card] of home.features.cards.entries()) {
+      await expect(cards.nth(i).locator("h3")).toHaveText(card.h3);
+      await expect(cards.nth(i)).toContainText(card.body);
+      const screen = cards.nth(i).locator(".shot");
+      await expect(screen).toHaveAttribute("role", "img");
+      await expect(screen).toHaveAttribute("aria-label", /^Sample: /);
+      await expect(screen.locator(".shot__tag")).toHaveText(home.features.sample);
+      await expect(screen.locator(".shot__tag")).toBeVisible();
+    }
+    await expect(page.locator("#tools")).toContainText(home.features.note);
+  });
+
+  test("with reduced motion every screen shows its finished state and nothing loops", async ({
+    page,
+  }) => {
+    await page.goto("/");
+    await page.locator(".feat").nth(1).scrollIntoViewIfNeeded();
+    await page.waitForTimeout(400);
+    await expect(page.locator(".shot.is-looping")).toHaveCount(0);
+    const hiddenParts = await page
+      .locator(".shot [data-at]")
+      .evaluateAll((els) => els.filter((el) => getComputedStyle(el).opacity === "0").length);
+    expect(hiddenParts).toBe(0);
+  });
+
+  test("the diagram puts the profile between what goes in and what comes out", async ({ page }) => {
+    await page.goto("/");
+    await expect(page.locator(".node--in")).toHaveText([...home.hub.inputs]);
+    await expect(page.locator(".node--out")).toHaveText([...home.hub.outputs]);
+    await expect(page.locator(".hub__core")).toContainText(home.hub.core);
+  });
+
+  test("the iceberg lists what is free and the 9 parts of Season One", async ({ page }) => {
+    await page.goto("/");
+    await expect(page.locator(".chip--free")).toHaveText(
+      home.iceberg.free.map((item) => item.text),
+    );
+    await expect(page.locator(".chip--free a")).toHaveAttribute("href", "/sample");
+    const text = await page.locator(".iceberg").innerText();
+    for (const row of home.iceberg.rows) expect(text, row.what).toContain(row.what);
+    expect(home.iceberg.rows).toHaveLength(9);
+  });
+
+  test("the price section shows the three sizes, the places left and the refund", async ({
+    page,
+  }) => {
+    await page.goto("/");
+    await expect(page.locator(".sizes tbody tr")).toHaveCount(home.price.rows.length);
+    await expect(page.locator(".places")).toContainText(
+      founding.count.replace("{n}", String(FOUNDING_PLACES_LEFT)),
+    );
+    await expect(page.locator(".refund")).toContainText(home.refund.h2);
+    await expect(page.locator(".refund")).toContainText(home.refund.body);
+    await expect(page.locator("main")).not.toContainText("{n}");
+  });
+
+  test("install tabs: one panel at a time, by click and by keyboard", async ({ page }) => {
+    await page.goto("/");
+    const tabs = page.getByRole("tab");
+    const panels = page.locator(".tabs__panel");
+    await expect(tabs).toHaveText(home.install.tabs.map((tab) => tab.label));
+    await expect(tabs.nth(0)).toHaveAttribute("aria-selected", "true");
+    await expect(panels.nth(0)).toBeVisible();
+    await expect(panels.nth(1)).toBeHidden();
+    await press(tabs.nth(1));
+    await expect(tabs.nth(1)).toHaveAttribute("aria-selected", "true");
+    await expect(tabs.nth(0)).toHaveAttribute("aria-selected", "false");
+    await expect(panels.nth(1)).toBeVisible();
+    await expect(panels.nth(0)).toBeHidden();
+    for (const step of home.install.tabs[1]!.steps) await expect(panels.nth(1)).toContainText(step);
+    await tabs.nth(1).press("ArrowRight");
+    await expect(tabs.nth(2)).toBeFocused();
+    await expect(tabs.nth(2)).toHaveAttribute("aria-selected", "true");
+    await expect(panels.nth(2)).toBeVisible();
+    await tabs.nth(2).press("ArrowRight");
+    await expect(tabs.nth(0)).toBeFocused();
+    await tabs.nth(0).press("End");
+    await expect(tabs.nth(2)).toHaveAttribute("aria-selected", "true");
+    await tabs.nth(2).press("Home");
+    await expect(tabs.nth(0)).toHaveAttribute("aria-selected", "true");
+    // Only the picked tab is in the Tab order.
+    expect(await tabs.evaluateAll((els) => els.map((el) => (el as HTMLElement).tabIndex))).toEqual([
+      0, -1, -1,
+    ]);
+  });
+
+  test("questions: five at most, closed on load, open on a press", async ({ page }) => {
+    await page.goto("/");
+    const items = page.locator(".faq__item");
+    await expect(items).toHaveCount(home.faq.items.length);
+    expect(
+      await items.evaluateAll((els) => els.filter((el) => (el as HTMLDetailsElement).open).length),
+    ).toBe(0);
+    for (const [i, item] of home.faq.items.entries()) {
+      await expect(items.nth(i).locator("summary")).toHaveText(item.q);
+      await press(items.nth(i).locator("summary"));
+      await expect(items.nth(i).locator("p")).toBeVisible();
+      await expect(items.nth(i).locator("p")).toHaveText(item.a);
+    }
+  });
+
+  test("names no social platform and leaves the failed feature off", async ({ page }) => {
+    await page.goto("/");
+    const text = await page.locator("body").evaluate((body) => body.textContent!);
+    expect(text).not.toMatch(
+      /instagram|tiktok|linkedin|youtube|facebook|whatsapp|twitter|snapchat|pinterest/i,
+    );
+    expect(text).not.toMatch(/one video into more/i);
+    expect(text).not.toMatch(/followers|go viral/i);
+  });
+});
+
+test.describe("the home page in motion", () => {
+  test("a screen plays its loop while it is on screen", async ({ page }) => {
+    await page.goto("/");
+    const screen = page.locator(".shot").first();
+    await screen.scrollIntoViewIfNeeded();
+    await expect(screen).toHaveClass(/is-looping/);
+    await expect(screen.locator("[data-at].on").first()).toBeAttached();
+    // By the end of the loop every part has arrived.
+    await expect
+      .poll(() => screen.locator("[data-at]:not(.on)").count(), { timeout: 12000 })
+      .toBe(0);
+  });
+
+  test("sections enter as you scroll, and stay put with reduced motion", async ({ page }) => {
+    await page.goto("/");
+    const section = page.locator(".install");
+    await expect(section).not.toHaveClass(/is-in/);
+    await section.scrollIntoViewIfNeeded();
+    await expect(section).toHaveClass(/is-in/);
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await page.goto("/");
+    for (const el of await page
+      .locator("[data-reveal], [data-reveal] .h2, .feat__words, .node")
+      .all()) {
+      expect(await el.evaluate((node) => getComputedStyle(node).opacity)).toBe("1");
+      expect(await el.evaluate((node) => getComputedStyle(node).translate)).toBe("none");
+    }
+  });
+
+  test("the header's button shows once the first form has left the screen", async ({ page }) => {
+    await page.goto("/");
+    const button = page.locator("[data-bar-cta]");
+    await expect(page.locator("#start form button")).toBeInViewport();
+    await expect(page.locator(".bar")).not.toHaveClass(/has-cta/);
+    await page.locator(".install").scrollIntoViewIfNeeded();
+    await expect(page.locator(".bar")).toHaveClass(/has-cta/);
+    await expect(button).toBeVisible();
+    await expect(button).toHaveText(home.pill);
+    // At the end of the page the second form is on screen, so the header's button steps back.
+    await page.locator("#apply form button").scrollIntoViewIfNeeded();
+    await expect(page.locator(".bar")).not.toHaveClass(/has-cta/);
+  });
+});
+
+test.describe("without JavaScript", () => {
+  test.use({ javaScriptEnabled: false });
+  test("every section shows, every tab panel is readable and the forms lead to the booking page", async ({
+    page,
+  }) => {
+    await page.goto("/");
+    for (const el of await page.locator("[data-reveal]").all()) {
+      expect(await el.evaluate((node) => getComputedStyle(node).opacity)).toBe("1");
+      expect(await el.evaluate((node) => getComputedStyle(node).translate)).toBe("none");
+    }
+    for (const panel of await page.locator(".tabs__panel").all()) await expect(panel).toBeVisible();
+    const parts = await page
+      .locator(".shot [data-at]")
+      .evaluateAll((els) => els.filter((el) => getComputedStyle(el).opacity === "0").length);
+    expect(parts).toBe(0);
+    for (const form of await page.locator("main form").all())
+      await expect(form).toHaveAttribute("action", BOOKING_URL);
+    const header = page.locator("[data-bar-cta]");
+    await expect(header).toBeVisible();
+    await press(header);
+    await expect(page).toHaveURL(/#apply$/);
+    await expect(page.locator("#apply form")).toBeInViewport();
+  });
 });

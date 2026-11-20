@@ -1,0 +1,285 @@
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import type { Env } from "../src/lib/env";
+import { handleApply, parseApplication } from "../src/lib/apply";
+import { LEAD_KEYS } from "../src/lib/sheets";
+import { application as form } from "../src/content/site";
+import worker from "../src/worker";
+
+const SHEETS_URL = "https://storage.example.test/exec";
+const env = { SHEETS_URL, SHEETS_TOKEN: "test-only-storage-value" } as Env;
+const NOW = "2026-11-21T10:00:00.000Z";
+const answers = {
+  profile: "@test.person",
+  sell: "Bookkeeping. One client is worth 2,000 USD.",
+  stranger: "That I do the books.",
+  film: form.questions[3].options[0],
+  count: form.questions[4].options[1],
+  decides: form.questions[5].options[0],
+  start: form.questions[6].options[2],
+  budget: form.questions[7].options[1],
+};
+const valid = {
+  id: "test-0001-abcd",
+  name: "TEST Person",
+  email: "Person@Example.test",
+  answers,
+  trap: "",
+  kind: "application",
+  src: "ig",
+  tz: "Africa/Casablanca",
+  page: "/?src=ig",
+  utm: "utm_source=ig",
+};
+type Body = Record<string, unknown>;
+const parse = (fields: Body = {}) => parseApplication({ ...valid, ...fields });
+function good(fields: Body = {}) {
+  const result = parse(fields);
+  if (!result.ok) throw new Error("Expected a valid application");
+  return result;
+}
+function post(body: unknown = valid, headers: HeadersInit = {}) {
+  return new Request("https://site.test/api/apply", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...headers },
+    body: typeof body === "string" ? body : JSON.stringify(body),
+  });
+}
+const fetchMock = vi.fn<typeof fetch>();
+async function answer(response: Response, status: number, ok: boolean) {
+  expect(response.status).toBe(status);
+  expect(await response.json()).toEqual({ ok });
+  expect(response.headers.get("cache-control")).toBe("no-store");
+  expect([...response.headers.keys()].some((key) => key.startsWith("access-control-"))).toBe(false);
+}
+const sent = () => JSON.parse(fetchMock.mock.calls[0]![1]!.body as string);
+beforeEach(() => {
+  vi.useFakeTimers();
+  vi.setSystemTime(new Date(NOW));
+  fetchMock.mockReset();
+  fetchMock.mockImplementation(async () => Response.json({ ok: true, application: true }));
+  vi.stubGlobal("fetch", fetchMock);
+  vi.spyOn(console, "log").mockImplementation(() => {});
+});
+afterEach(() => {
+  vi.useRealTimers();
+  vi.restoreAllMocks();
+  vi.unstubAllGlobals();
+});
+
+describe("parseApplication", () => {
+  it("keeps the 8 answers in the form's order, with each question as its heading", () => {
+    const { application } = good();
+    expect(application.answers.map((item) => item.id)).toEqual(
+      form.questions.map((question) => question.id),
+    );
+    expect(application.answers.map((item) => item.question)).toEqual(
+      form.questions.map((question) => question.q),
+    );
+    expect(application.answers.map((item) => item.answer)).toEqual(Object.values(answers));
+    expect(application).toMatchObject({
+      kind: "application",
+      id: valid.id,
+      name: "TEST Person",
+      email: "person@example.test",
+      timeZone: valid.tz,
+      sourcePage: valid.page,
+      utm: valid.utm,
+    });
+  });
+  it("also builds one Leads row a script that does not know applications can save", () => {
+    const { lead } = good();
+    expect(["timestamp", ...Object.keys(lead)].sort()).toEqual([...LEAD_KEYS].sort());
+    expect(lead).toMatchObject({
+      name: "TEST Person",
+      email: "person@example.test",
+      instagram: answers.profile,
+      budget: answers.budget,
+      decisionMaker: answers.decides,
+      timing: answers.start,
+      channel: "ig",
+      timeZone: valid.tz,
+      sourcePage: valid.page,
+      utm: valid.utm,
+    });
+    expect(lead.need).toBe(
+      `${answers.sell} / Videos say: ${answers.stranger} / Films: ${answers.film} / Posted in 30 days: ${answers.count}`,
+    );
+  });
+  it("marks the form answered after a chat booking", () => {
+    expect(good({ kind: "prep" }).application.kind).toBe("prep");
+    expect(good({ kind: "anything" }).application.kind).toBe("application");
+  });
+  it.each([null, undefined, "text", 4, [], [valid]])(
+    "rejects a body that is not an object: %j",
+    (body) => {
+      expect(parseApplication(body).ok).toBe(false);
+    },
+  );
+  it.each(["", "short", "has space 1", "x".repeat(65), "bad/char-0001", 12345678])(
+    "rejects id %j",
+    (id) => {
+      expect(parse({ id }).ok).toBe(false);
+    },
+  );
+  it.each([
+    { name: "" },
+    { name: "x".repeat(201) },
+    { email: "bad" },
+    { email: 4 },
+    { email: `${"a".repeat(316)}@b.co` },
+  ])("rejects %j", (fields) => {
+    expect(parse(fields).ok).toBe(false);
+  });
+  it.each(form.questions.map((question) => question.id))("requires an answer to %s", (id) => {
+    expect(parse({ answers: { ...answers, [id]: "" } }).ok).toBe(false);
+    expect(parse({ answers: { ...answers, [id]: "  \n " } }).ok).toBe(false);
+    const { [id]: _dropped, ...rest } = answers as Record<string, string>;
+    expect(parse({ answers: rest }).ok).toBe(false);
+  });
+  it("rejects answers that are missing or not an object", () => {
+    expect(parse({ answers: undefined }).ok).toBe(false);
+    expect(parse({ answers: "profile" }).ok).toBe(false);
+  });
+  const choices = form.questions.filter((question) => question.type === "choice");
+  it("asks five of the questions as a choice", () => {
+    expect(choices.map((question) => question.id)).toEqual([
+      "film",
+      "count",
+      "decides",
+      "start",
+      "budget",
+    ]);
+  });
+  it.each(choices)("accepts only a choice the form offers for $id", ({ id, options }) => {
+    for (const option of options)
+      expect(parse({ answers: { ...answers, [id]: option } }).ok).toBe(true);
+    expect(parse({ answers: { ...answers, [id]: "Something else entirely" } }).ok).toBe(false);
+    expect(parse({ answers: { ...answers, [id]: options[0].toLowerCase() } }).ok).toBe(false);
+  });
+  it("keeps line breaks in a long answer, drops other control characters and cuts at 1,000", () => {
+    const { application } = good({
+      answers: { ...answers, sell: " line one\nline\u0000 two\u0085 ", stranger: "x".repeat(1200) },
+    });
+    expect(application.answers[1]!.answer).toBe("line one\nline two");
+    expect(application.answers[2]!.answer).toHaveLength(1000);
+  });
+  it("flags a filled trap field and nothing else", () => {
+    expect(good().trapped).toBe(false);
+    expect(good({ trap: "   " }).trapped).toBe(false);
+    expect(good({ trap: undefined }).trapped).toBe(false);
+    expect(good({ trap: "Acme" }).trapped).toBe(true);
+  });
+  it("falls back to safe origin values", () => {
+    expect(
+      good({ src: "a b", tz: "UTC\n", page: "https://elsewhere.test/", utm: "x=1" }).application,
+    ).toMatchObject({
+      timeZone: "",
+      sourcePage: "/",
+      utm: "",
+    });
+  });
+});
+
+describe("apply handler", () => {
+  it.each(["GET", "PUT", "DELETE"])(
+    "returns 405 for %s through the Worker route",
+    async (method) => {
+      const response = await worker.fetch(
+        new Request("https://site.test/api/apply", { method }) as Parameters<
+          typeof worker.fetch
+        >[0],
+        env,
+        { waitUntil: vi.fn() } as unknown as ExecutionContext,
+      );
+      await answer(response, 405, false);
+      expect(response.headers.get("Allow")).toBe("POST");
+      expect(fetchMock).not.toHaveBeenCalled();
+    },
+  );
+  it.each(["application/x-www-form-urlencoded", "text/plain", "application/json-evil", ""])(
+    "returns 415 for %j",
+    async (type) => {
+      await answer(await handleApply(post(valid, { "Content-Type": type }), env), 415, false);
+      expect(fetchMock).not.toHaveBeenCalled();
+    },
+  );
+  it.each(["https://foreign.test", "null", ""])("rejects foreign Origin %j", async (origin) => {
+    await answer(await handleApply(post(valid, { Origin: origin }), env), 403, false);
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+  it("refuses a body over 16,384 bytes, counted in UTF-8", async () => {
+    for (const filler of ["x".repeat(16385), "é".repeat(8193)]) {
+      await answer(await handleApply(post(JSON.stringify({ ...valid, filler })), env), 413, false);
+    }
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+  it.each(["{", "", "[]", '"text"', JSON.stringify({ ...valid, email: "bad" })])(
+    "returns 400 for %j",
+    async (body) => {
+      await answer(await handleApply(post(body), env), 400, false);
+      expect(fetchMock).not.toHaveBeenCalled();
+    },
+  );
+  it("handles an unreadable body", async () => {
+    const request = post();
+    vi.spyOn(request, "text").mockRejectedValue(new Error("read failed"));
+    await answer(await handleApply(request, env), 400, false);
+  });
+  it("answers a filled trap calmly and saves nothing", async () => {
+    await answer(await handleApply(post({ ...valid, trap: "Acme" }), env), 200, true);
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+  it.each([{ SHEETS_URL: "" }, { SHEETS_TOKEN: undefined }])(
+    "says it did not save when storage is not set up: %j",
+    async (missing) => {
+      await answer(await handleApply(post(), { ...env, ...missing }), 503, false);
+      expect(fetchMock).not.toHaveBeenCalled();
+    },
+  );
+  it("saves once, with the token, the lead row and the application, both at the server's time", async () => {
+    await answer(await handleApply(post(valid, { Origin: "https://site.test" }), env), 200, true);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(fetchMock.mock.calls[0]![0]).toBe(SHEETS_URL);
+    const body = sent();
+    expect(Object.keys(body).sort()).toEqual(["application", "lead", "token"]);
+    expect(body.token).toBe(env.SHEETS_TOKEN);
+    expect(Object.keys(body.lead).sort()).toEqual([...LEAD_KEYS].sort());
+    expect(body.lead.timestamp).toBe(NOW);
+    expect(body.application).toMatchObject({ kind: "application", id: valid.id, submittedAt: NOW });
+    expect(body.application.answers).toHaveLength(8);
+  });
+  it("ignores a time, a token or a status sent by the page", async () => {
+    await handleApply(
+      post({
+        ...valid,
+        token: "page-value",
+        submittedAt: "1999",
+        timestamp: "1999",
+        status: "won",
+      }),
+      env,
+    );
+    const body = sent();
+    expect(body.token).toBe(env.SHEETS_TOKEN);
+    expect(body.application.submittedAt).toBe(NOW);
+    expect(body.lead.timestamp).toBe(NOW);
+    expect(JSON.stringify(body)).not.toContain("won");
+  });
+  it.each(["rejected", "http", "throw", "malformed"])(
+    "says it did not save on a sheet failure: %s",
+    async (failure) => {
+      fetchMock.mockImplementationOnce(async () => {
+        if (failure === "throw") throw new Error("offline");
+        if (failure === "http") return Response.json({ ok: true }, { status: 500 });
+        if (failure === "malformed") return new Response("not JSON");
+        return Response.json({ ok: false });
+      });
+      await answer(await handleApply(post(), env), 502, false);
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+    },
+  );
+  it("accepts the answer of a script that saved the lead row only", async () => {
+    fetchMock.mockImplementationOnce(async () => Response.json({ ok: true }));
+    await answer(await handleApply(post(), env), 200, true);
+  });
+});

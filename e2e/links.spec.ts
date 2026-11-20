@@ -1,6 +1,8 @@
 import { expect, test } from "@playwright/test";
-import { APPLICATION_AFTER_BOOKING_URL, APPLICATION_URL } from "../src/config";
-test("all page links resolve and entry forms use the application URL", async ({ page }) => {
+import { BOOKING_URL } from "../src/config";
+test("all page links resolve, and the entry forms fall back to the booking page", async ({
+  page,
+}) => {
   for (const path of ["/", "/sample", "/booked", "/privacy", "/404"]) {
     await page.goto(path);
     const hrefs = await page
@@ -9,8 +11,6 @@ test("all page links resolve and entry forms use the application URL", async ({ 
     expect(hrefs.length, path).toBeGreaterThan(0);
     for (const href of hrefs) {
       if (href.startsWith("mailto:")) continue;
-      // The one outside link: the application for a booking made from a chat. It is not opened here.
-      if (path === "/booked" && href === APPLICATION_AFTER_BOOKING_URL) continue;
       const url = new URL(href, page.url());
       expect(url.origin, href).toBe(new URL(page.url()).origin);
       if (url.pathname === new URL(page.url()).pathname && url.hash)
@@ -22,6 +22,8 @@ test("all page links resolve and entry forms use the application URL", async ({ 
       }
     }
     for (const form of await page.locator("main form").all())
-      await expect(form).toHaveAttribute("action", APPLICATION_URL);
+      await expect(form).toHaveAttribute("action", BOOKING_URL);
+    // The site sends nobody to a hosted form any more.
+    await expect(page.locator('a[href*="tally.so"], form[action*="tally.so"]')).toHaveCount(0);
   }
 });
