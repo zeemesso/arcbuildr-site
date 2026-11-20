@@ -70,6 +70,16 @@ Changed on 2026-11-18 (L1-P8 redesign, branch `l1-p8-redesign`):
 - `CONTACT_EMAIL` is `hello@arcbuildr.co`.
 - iPhone engine tests are opt-in: `npx playwright install webkit`, then `PW_WEBKIT=1 npx playwright test --project=iphone`.
 
+Changed on 2026-11-21 (L1-P9 rebuild, branch `l1-p9-rebuild`):
+
+- The home page is new (`DESIGN.md`, section 10): `src/layouts/Home.astro`, `src/components/home/`, `src/styles/home/`, `src/scripts/home.ts`. `/sample`, `/booked`, `/privacy` and 404 keep Direction A2. "Choose your season" is gone from the home page.
+- The application is the site's own form, one question per screen, with the same 8 questions and choices as the Tally form it replaces. `APPLICATION_MODE` in `src/config.ts` is `"native"`; `"embed"` sends the two fields to `APPLICATION_URL` instead. Pages reach the form only through `startApplication()` in `src/scripts/application.ts`.
+- `POST /api/apply` saves the 8 answers through the same Apps Script web app and secrets as `POST /api/lead`. What both send is in `apps-script/README.md`. The sheet's script is not in this repo.
+- The answers stay on the visitor's device until the sheet says it has them. `/booked` sends them once more when a booking was made before they saved.
+- Without scripts the two fields lead to the booking page with the name and email filled.
+- Words: at most 25 on the first screen and 450 on load, counted by `e2e/home.spec.ts`. Script budget on the production build: 10 KB gzipped (`scripts/verify-main-build.mjs`).
+- Browser tests press with `press()` from `e2e/press.ts`: a tap on phone projects, a click on desktop.
+
 ## STATUS
 
 - Steps 1 to 6 done. `COPY.md`, `PROTOTYPE.md` and `PLAN.md` approved.

@@ -109,3 +109,16 @@ Rules: with `prefers-reduced-motion: reduce`, nothing moves and everything is sh
 ## 9. Verified by tests
 
 `npm run check`: no sideways scroll from 320 to 1440 px on every page; the first screen at 650 px tall; tap targets of 44 px on phones; axe with every answer open and in every costume; reduced motion; JavaScript off; the home page's own scripts under 3 KB gzipped; a budget of 850 words on load and 1,100 with every answer open.
+
+## 10. The home page from 21 Nov 2026
+
+Sections 4 to 6 describe the pages that keep Direction A2: `/sample`, `/booked`, `/privacy` and the 404 page. The home page was rebuilt around the two fields and the application, and follows this section instead.
+
+- **Files.** `src/layouts/Home.astro`, `src/components/home/`, `src/scripts/home.ts` and `src/styles/home/`: `frame.css` (structure and motion), `feature.css` (the five sample screens), `rest.css` (the lower sections).
+- **Frame.** A grey canvas holds rounded white windows. One dark band carries the diagram. Labels are in the system mono font; everything else is Open Runde.
+- **Order.** The first screen (headline, one line, the two fields), five sample screens, the diagram with "Your profile" at its centre, the iceberg, the install tabs, the price, five closed questions, the two fields again, the footer.
+- **Colour.** Only the names in `tokens.css`. A tint is mixed from those names with `color-mix`, never written as a raw value.
+- **Words.** At most 25 on the first screen and 450 on load. `e2e/home.spec.ts` counts them. Every sample screen is labelled a sample.
+- **Motion.** Two curves: entrances ease out, moves between two places ease in and out. Exits are shorter than entrances, pressed controls scale to 0.97, list rows follow each other 30 ms apart, and nothing bounces. With reduced motion the page shows its finished state at once.
+- **The application.** One question per screen, in `src/components/application/` and `src/scripts/apply.ts`. The page reaches it only through `startApplication()` in `src/scripts/application.ts`, so another form can replace it by changing `APPLICATION_MODE` in `src/config.ts`.
+- **Script budget.** 10 KB gzipped on the production build, checked by `scripts/verify-main-build.mjs`. It was 3 KB before the page carried its own form.
