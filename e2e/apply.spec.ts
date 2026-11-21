@@ -405,6 +405,13 @@ test("a finished booking lands on /booked, greeted by first name", async ({ page
   expect(new URL(page.url()).search).toBe("");
 });
 
+test("/booked greets by name without waiting for the visit counter", async ({ page }) => {
+  // The visit counter's server never answers here. The page's own script must still run.
+  await page.route(/cloudflareinsights\.com/, () => new Promise(() => {}));
+  await page.goto("/booked?attendeeName=TEST+Visitor", { waitUntil: "commit" });
+  await expect(page.locator("h1")).toContainText("TEST");
+});
+
 test("when the calendar cannot load, a link to the booking page takes its place", async ({
   page,
 }) => {

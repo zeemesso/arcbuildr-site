@@ -102,7 +102,10 @@ const button = s.get("booked from a chat, button");
   </section>
   <Foot slot="after" />
   {native && <Application kind="prep" slot="after" />}
+  <!-- Inside the page, so it comes before the visit counter (see Home.astro). -->
+  <Fragment slot="after">
+    <script>
+      import "../scripts/booked";
+    </script>
+  </Fragment>
 </Home>
-<script>
-  import "../scripts/booked";
-</script>

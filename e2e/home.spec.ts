@@ -41,6 +41,14 @@ const CARDS = Array.from({ length: 11 }, (_, n) => String(n + 1).padStart(2, "0"
 test.describe("the home page", () => {
   test.use({ reducedMotion: "reduce" });
 
+  test("the page's script does not wait for the visit counter", async ({ page }) => {
+    // The visit counter's server never answers here. The form must still open.
+    await page.route(/cloudflareinsights\.com/, () => new Promise(() => {}));
+    await page.goto("/", { waitUntil: "commit" });
+    await press(page.locator("#top [data-apply-open]").first());
+    await expect(page.locator("#a-name")).toBeFocused();
+  });
+
   test("the first screen says the deck's words, word for word", async ({ page }) => {
     await page.goto("/");
     await expect(page.locator("h1")).toHaveText(first.get("headline"));

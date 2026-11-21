@@ -37,6 +37,12 @@ const analyticsToken = import.meta.env.PUBLIC_CF_ANALYTICS_TOKEN;
       <slot />
     </main>
     <Footer />
+    <!-- The page's own script comes before the visit counter: scripts run in this order, so another
+         company's slow server can never hold the page's script up. -->
+    <script>
+      import "../scripts/motion";
+      if (__PREVIEW__) import("../components/mountFeedback");
+    </script>
     {analyticsToken && (
       <script
         defer
@@ -47,7 +53,3 @@ const analyticsToken = import.meta.env.PUBLIC_CF_ANALYTICS_TOKEN;
     )}
   </body>
 </html>
-<script>
-  import "../scripts/motion";
-  if (__PREVIEW__) import("../components/mountFeedback");
-</script>
