@@ -1,0 +1,34 @@
+---
+/**
+ * One card of "Everything you get": its number, when it arrives, its title, what it does,
+ * and its live screen (the default slot). Cards 01 and 11 are wide.
+ */
+import { section } from "../../content/deck";
+interface Props {
+  n: string;
+  wide?: boolean;
+}
+const { n, wide = false } = Astro.props;
+const s = section(5);
+const key = `card ${n}`;
+const more = s.list(`${key}, body `).map((item) => item.words);
+const small = s.find(`${key}, small line`);
+---
+
+<li class:list={["card", { "card--wide": wide }]} data-reveal>
+  <div class="card__stage">
+    <slot />
+  </div>
+  <div class="card__text">
+    <p class="card__meta">
+      <span class="card__n">{n}</span>
+      <span class="card__date">{s.get(`${key}, date`)}</span>
+    </p>
+    <h3 class="card__h">{s.get(`${key}, title`)}</h3>
+    <p class="card__body">{s.get(`${key}, body`)}</p>
+    {more.map((words) => (
+      <p class="card__body">{words}</p>
+    ))}
+    {small && <p class="card__small">{small}</p>}
+  </div>
+</li>

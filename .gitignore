@@ -12,3 +12,7 @@ src/generated/
 test-results/
 playwright-report/
 .playwright-mcp/
+
+# Real pieces of client zero stay out of this public repo until Zyade approves them (scripts/proof/import.mjs).
+src/content/proof/
+public/proof/

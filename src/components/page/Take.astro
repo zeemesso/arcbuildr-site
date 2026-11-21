@@ -1,0 +1,79 @@
+---
+/**
+ * The first screen's loop: a script page on the left becomes the filmed frame on the right.
+ * It reads script 1 of Zyade's own season and a still from the video he filmed from it. Until those
+ * pieces exist, the page shows bars and the frame shows a camera's guide lines: nothing is invented.
+ * Times are milliseconds into the loop (src/scripts/page.ts).
+ */
+import { piece } from "../../content/proof";
+const script = piece("script-1");
+const beats = script
+  ? script.lines.slice(0, 5).map((line) => [line])
+  : [
+      ["100%", "92%", "64%"],
+      ["96%", "100%", "48%"],
+      ["100%", "70%"],
+      ["94%", "100%", "56%"],
+      ["100%", "82%"],
+    ];
+const caps = ["74%", "88%", "60%", "80%", "68%"].slice(0, beats.length);
+const start = 2500;
+const each = 850;
+---
+
+<figure
+  class="take"
+  data-loop="10000"
+  aria-hidden={script ? undefined : "true"}
+  data-enter
+  style="--i:3"
+>
+  <div class="take__page">
+    <div class="take__top" data-at="200">
+      <i></i>
+      <i></i>
+    </div>
+    {beats.map((lines, n) => (
+      <div
+        class="beat"
+        data-at={400 + n * 300}
+        data-now={start + n * each}
+        data-until={n < beats.length - 1 ? start + (n + 1) * each : start + beats.length * each}
+      >
+        <span class="beat__n">{String(n + 1).padStart(2, "0")}</span>
+        <div class="beat__lines">
+          {lines.map((line, k) =>
+            script ? (
+              <span style={`--k:${k}`}>{line}</span>
+            ) : (
+              <i style={`--k:${k};width:${line}`} />
+            ),
+          )}
+        </div>
+      </div>
+    ))}
+  </div>
+  <i class="take__link" data-at="2000"></i>
+  <div class="take__phone">
+    <div class="take__screen" data-at="2100">
+      {script?.still ? (
+        <img src={script.still} alt="" loading="lazy" decoding="async" />
+      ) : (
+        <>
+          <i class="take__guides" />
+          <i class="take__focus" />
+        </>
+      )}
+      <i class="take__rec"></i>
+      <div class="take__caps">
+        {caps.map((width, n) => (
+          <i
+            style={`width:${width}`}
+            data-now={start + n * each}
+            data-until={n < caps.length - 1 ? start + (n + 1) * each : undefined}
+          />
+        ))}
+      </div>
+    </div>
+  </div>
+</figure>

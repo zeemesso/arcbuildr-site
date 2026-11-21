@@ -1,0 +1,32 @@
+---
+/**
+ * The Claude and ChatGPT marks, side by side. Each file is the company's own, unchanged
+ * (public/marks/): each sits whole in its own disc, and the discs meet only at the rim.
+ * AI_MARKS in src/config.ts set to "names" shows no mark.
+ */
+import { AI_MARKS } from "../../config";
+import { page } from "../../content/site";
+---
+
+{AI_MARKS === "official" && (
+  <span class="marks">
+    <span class="marks__disc">
+      <img
+        src="/marks/claude-spark.svg"
+        alt={page.marks.claude}
+        width="22"
+        height="22"
+        data-mark="claude"
+      />
+    </span>
+    <span class="marks__disc">
+      <img
+        src="/marks/openai-blossom.svg"
+        alt={page.marks.chatgpt}
+        width="38"
+        height="38"
+        data-mark="chatgpt"
+      />
+    </span>
+  </span>
+)}

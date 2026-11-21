@@ -1,21 +1,22 @@
 ---
 /**
- * The home page's own layout (L1-P9). It shares the head with Base.astro and loads only tokens.css and
- * the home styles: its class names (.btn, .hero, .chip, .sheet, .entry) would collide with the other pages' styles.
+ * The home page's own layout. It shares the head with Base.astro and loads only tokens.css and the
+ * page styles (src/styles/page/): its class names would collide with the other pages' styles.
  */
 import "../styles/tokens.css";
-import "../styles/home/frame.css";
-import "../styles/home/feature.css";
-import "../styles/home/rest.css";
+import "../styles/page/frame.css";
+import "../styles/page/cards.css";
 import Head from "./Head.astro";
 import { meta } from "../content/site";
+import { section } from "../content/deck";
+const head = section(15);
 const analyticsToken = import.meta.env.PUBLIC_CF_ANALYTICS_TOKEN;
 ---
 
 <!doctype html>
 <html lang="en" class="home">
   <head>
-    <Head />
+    <Head title={head.get("title")} description={head.get("description")} />
   </head>
   <body>
     <a class="skip" href="#main">
@@ -37,6 +38,6 @@ const analyticsToken = import.meta.env.PUBLIC_CF_ANALYTICS_TOKEN;
   </body>
 </html>
 <script>
-  import "../scripts/home";
+  import "../scripts/page";
   if (__PREVIEW__) import("../components/mountFeedback");
 </script>

@@ -1,28 +1,18 @@
 ---
 import Home from "../layouts/Home.astro";
-import Bar from "../components/home/Bar.astro";
-import Start from "../components/home/Start.astro";
-import Features from "../components/home/Features.astro";
-import Hub from "../components/home/Hub.astro";
-import Iceberg from "../components/home/Iceberg.astro";
-import Install from "../components/home/Install.astro";
-import Price from "../components/home/Price.astro";
-import Faq from "../components/home/Faq.astro";
-import Book from "../components/home/Book.astro";
-import Foot from "../components/home/Foot.astro";
+import Bar from "../components/page/Bar.astro";
+import First from "../components/page/First.astro";
+import Get from "../components/page/Get.astro";
+import Foot from "../components/page/Foot.astro";
 import Application from "../components/application/Application.astro";
+import { section } from "../content/deck";
+const links = [{ text: section(5).get("label"), href: "#get" }];
 ---
 
 <Home>
-  <Bar slot="bar" />
-  <Start />
-  <Features />
-  <Hub />
-  <Iceberg />
-  <Install />
-  <Price />
-  <Faq />
-  <Book />
+  <Bar slot="bar" links={links} />
+  <First />
+  <Get />
   <Foot slot="after" />
   <Application slot="after" />
 </Home>

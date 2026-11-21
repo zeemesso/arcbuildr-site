@@ -67,6 +67,7 @@
   --hue-accent: var(--color-accent-text);
 
   --font-display: "Open Runde", ui-rounded, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
   --text-xs: 0.75rem;
   --text-sm: 0.875rem;
   --text-base: 1.0625rem;
@@ -85,4 +86,7 @@
   --ease-out: cubic-bezier(0.2, 0.6, 0.2, 1);
   --spring: linear(0, 0.25 8%, 0.7 20%, 1.04 36%, 1.06 44%, 1.01 62%, 0.995 78%, 1);
   --dur-fast: 150ms;
+  /* The home page from L1-P11: entrances ease out, moves between two places ease in and out. */
+  --ease-enter: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-move: cubic-bezier(0.4, 0, 0.2, 1);
 }

@@ -23,6 +23,18 @@ export const entry = {
   button: action,
 };
 
+/**
+ * The home page's words come from the copy deck (src/content/deck.ts). These few are not in the deck:
+ * who the face is, the two product names, and what the controls are called for a screen reader.
+ */
+export const page = {
+  /** The header's button, once the first button has left the screen. */
+  pill: "Apply",
+  founder: { name: "Zyade Messaoudi", role: "co-founder", initials: "ZM" },
+  marks: { claude: "Claude", chatgpt: "ChatGPT" },
+  nav: "Sections",
+};
+
 export const founding = { count: "Founding price: {n} of 3 places left." };
 
 export const home = {

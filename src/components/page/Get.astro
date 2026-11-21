@@ -1,0 +1,26 @@
+---
+/** 5. Everything you get: eleven numbered cards, each with a live screen. */
+import Card from "./Card.astro";
+import Doc from "./screens/Doc.astro";
+import Profile from "./screens/Profile.astro";
+import { section } from "../../content/deck";
+const s = section(5);
+---
+
+<section class="get" id="get" aria-labelledby="get-h">
+  <div class="get__head" data-reveal>
+    <p class="label">{s.get("label")}</p>
+    <h2 class="h2" id="get-h">
+      {s.get("heading")}
+    </h2>
+    <p class="get__line">{s.get("line under it")}</p>
+  </div>
+  <ol class="cards">
+    <Card n="01" wide>
+      <Doc />
+    </Card>
+    <Card n="02">
+      <Profile />
+    </Card>
+  </ol>
+</section>

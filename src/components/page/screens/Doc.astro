@@ -1,0 +1,72 @@
+---
+/**
+ * Screen 01: page 1 of the Brand Strategy. The paragraph is typed in, then the beliefs appear one by one.
+ * It reads the real piece (src/content/proof.ts). Until it exists, the page shows bars.
+ * The two captions are pieces of the card's own words. Times are milliseconds into the loop.
+ */
+import { excerpt, section } from "../../../content/deck";
+import { piece } from "../../../content/proof";
+const s = section(5);
+const body = s.get("card 01, body");
+const real = piece("brand-strategy");
+const caps = [
+  excerpt(body, "what you want to be known for"),
+  excerpt(body, "the 3 to 5 beliefs you stand for"),
+];
+const lines = ["100%", "96%", "88%", "94%", "58%"];
+const beliefs = real ? real.beliefs : ["84%", "68%", "92%"];
+// The beliefs follow the paragraph: 34 ms a word, or 260 ms a line.
+const typed = real ? real.knownFor.split(/\s+/) : [];
+const after = 500 + (real ? typed.length * 34 + 150 : lines.length * 260);
+---
+
+<figure class="screen" data-loop="10000" aria-hidden={real ? undefined : "true"}>
+  <div class="doc__back"></div>
+  <div class="doc">
+    <p class="doc__top" data-at="150">
+      <span class="doc__title">{s.get("card 01, title")}</span>
+      <span class="doc__day">{s.get("card 01, date")}</span>
+    </p>
+    <div class="doc__part">
+      <p class="cap" data-at="350">
+        {caps[0]}
+      </p>
+      {real ? (
+        <p class="doc__text typed" data-at="500">
+          {typed.map((word, k) => (
+            <>
+              <span class="w" style={`--k:${k}`}>
+                {word}
+              </span>{" "}
+            </>
+          ))}
+        </p>
+      ) : (
+        <div class="bars typed" data-at="500">
+          {lines.map((width, k) => (
+            <i style={`--w:${width};--k:${k}`} />
+          ))}
+        </div>
+      )}
+    </div>
+    <div class="doc__part">
+      <p class="cap" data-at={after}>
+        {caps[1]}
+      </p>
+      <ol class="doc__beliefs">
+        {beliefs.map((belief, n) => (
+          <li data-at={after + 200 + n * 300}>
+            <b>{n + 1}</b>
+            {real ? (
+              <span>{belief}</span>
+            ) : (
+              <span class="bars">
+                <i style={`--w:${belief}`} />
+              </span>
+            )}
+          </li>
+        ))}
+      </ol>
+    </div>
+  </div>
+</figure>

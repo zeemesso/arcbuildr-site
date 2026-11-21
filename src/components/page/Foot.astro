@@ -1,0 +1,13 @@
+---
+/** The home page's footer: privacy, the contact address, the year. */
+import Logo from "../Logo.astro";
+import { CONTACT_EMAIL } from "../../config";
+import { footer } from "../../content/site";
+---
+
+<footer class="foot">
+  <Logo />
+  <a href="/privacy">{footer.privacy}</a>
+  {CONTACT_EMAIL && <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>}
+  <span>{footer.rights}</span>
+</footer>

@@ -1,0 +1,1056 @@
+{
+  "deck": "deck-v2.md",
+  "sections": {
+    "1": {
+      "title": "First screen",
+      "slots": [
+        [
+          "label above the headline",
+          "For owners who are the face of their business"
+        ],
+        [
+          "headline",
+          "Stop guessing what to post."
+        ],
+        [
+          "line under it",
+          "We plan [12 weeks] of short videos with you and write [every script] in [your voice], so people remember what you do. [You film.] It starts with one 45-minute interview with me."
+        ],
+        [
+          "button",
+          "Apply and pick a time"
+        ],
+        [
+          "second button, with the Claude and ChatGPT icons",
+          "See everything you get"
+        ],
+        [
+          "under the buttons",
+          "8 questions, then a 15-minute call with me. No payment on this page."
+        ],
+        [
+          "hanging tab",
+          "Founding price: 3 of 3 places left"
+        ]
+      ]
+    },
+    "2": {
+      "title": "Manifesto",
+      "slots": [
+        [
+          "label",
+          "What we believe"
+        ],
+        [
+          "large, lighter ink",
+          "Posting more won't fix it."
+        ],
+        [
+          "large, full ink",
+          "Most owners' videos go wrong before the camera is on, because three things were never decided: what you want to be known for, how your videos look, and what each video is about."
+        ],
+        [
+          "paragraph",
+          "You know your work. Then you sit down to film, and every video starts from zero. One week it's a tip. The next it's something you saw another owner do. Each video is fine by itself, and together they tell a stranger nothing about what you do."
+        ],
+        [
+          "paragraph",
+          "AI doesn't fix that. It will write you 24 scripts in a minute, and they are the 24 it would write for anyone in your field, because it only has what you type into it."
+        ],
+        [
+          "paragraph",
+          "So we start with you. I interview you for 45 minutes about your work, your clients and how you got here. From that, we decide the three things with you, in writing, before a single script exists. Then we plan your 12 weeks like a season, which is why we call it Season One: every video has its job, and every script is written before you film it."
+        ],
+        [
+          "paragraph",
+          "That is how a writers' room works. It is how a long series stays itself across dozens of scripts: the direction is settled first, every script is written against it, and every script is reviewed before it is filmed. We run your videos the same way, and I direct and review every script myself."
+        ],
+        [
+          "paragraph",
+          "The scripts are in your words, from your stories. A line you would say to a client is easier to say than one you invent in front of a camera."
+        ],
+        [
+          "paragraph",
+          "I stand behind every script. I don't promise followers, views or sales, because the filming and the posting are yours. Be careful with anyone who does promise them."
+        ]
+      ]
+    },
+    "3": {
+      "title": "Zyade",
+      "slots": [
+        [
+          "label",
+          "Who you work with"
+        ],
+        [
+          "heading",
+          "You work with me, from the interview to the last script."
+        ],
+        [
+          "paragraph",
+          "I'm Zyade Messaoudi. I started Arcbuildr with my co-founder, Hanane. I do your interview, I plan your 12 weeks with you, and I review every script before it reaches you."
+        ],
+        [
+          "paragraph",
+          "We're new: two founders, and I won't show you results we don't have yet. So I show you the work, three ways."
+        ],
+        [
+          "item 1",
+          "Before you pay anything, I go through your account and write you a one-page audit: the 3 things your videos leave unclear. I show it to you on our call, and it's yours whatever you decide."
+        ],
+        [
+          "item 2",
+          "I'm running Season One on my own account right now. The strategy, the scripts and the covers further down this page all come from it."
+        ],
+        [
+          "item 3",
+          "Week 1 is on us. Your Brand Strategy, the document that says what you want to be known for, arrives on day 7. If you're not happy with it, tell me within 3 days and I refund every dollar."
+        ],
+        [
+          "paragraph",
+          "That is also why the first three clients pay less: I need three examples to show."
+        ],
+        [
+          "small line",
+          "I'm Moroccan, I live in Shenzhen, and I work in English with owners in the US. Every call time you see is in your own time zone."
+        ],
+        [
+          "apply strip",
+          "Want to see what I'd write about your videos? Apply, and your one-page audit is ready before we speak."
+        ]
+      ]
+    },
+    "4": {
+      "title": "How it works",
+      "slots": [
+        [
+          "label",
+          "How it works"
+        ],
+        [
+          "heading",
+          "It starts with one 45-minute interview. Everything else is built from it."
+        ],
+        [
+          "diagram, left label",
+          "You bring"
+        ],
+        [
+          "input 1",
+          "Your interview. 45 minutes with me. You write nothing beforehand."
+        ],
+        [
+          "input 2",
+          "Your videos so far. I go through your account before we speak."
+        ],
+        [
+          "input 3",
+          "Your offer. What you sell, who buys it, and what one new client is worth to you."
+        ],
+        [
+          "diagram, hub label",
+          "We decide"
+        ],
+        [
+          "hub",
+          "Your strategy: what you want to be known for, how your videos look, and what each video is about. Decided with you, in writing."
+        ],
+        [
+          "diagram, right label",
+          "You get"
+        ],
+        [
+          "output 1",
+          "Your scripts. 12, 24 or 36, each with a shot list and a card of talking points."
+        ],
+        [
+          "output 2, with the Claude and ChatGPT icons",
+          "Your AI. Your own Claude or ChatGPT, set up from your interview, so what it drafts sounds like you."
+        ],
+        [
+          "step 1",
+          "The interview, on day 1. I ask about your work, your clients and how you got here. Be somewhere quiet for 45 minutes. That is all you prepare."
+        ],
+        [
+          "step 2",
+          "The strategy, from day 7 to day 21. I write your Brand Strategy first, then your Visual Identity System and your Content Strategy. You read each one and tell me what to change."
+        ],
+        [
+          "step 3",
+          "The scripts, from day 10. Your first 3 arrive on day 10. The rest follow, and all of them are written by day 28, 42 or 56, depending on how many you chose."
+        ],
+        [
+          "step 4",
+          "You film. On your phone, where you already work, 6 videos or fewer in a sitting. Your filming plan tells you which ones. You or your editor edit and post."
+        ],
+        [
+          "step 5",
+          "We review. Every Monday I write to you about what you filmed and posted, and what comes next. We talk in week 4 and in week 8, and once a month I review your videos live in a small group."
+        ]
+      ]
+    },
+    "5": {
+      "title": "Everything you get",
+      "slots": [
+        [
+          "label",
+          "Everything you get"
+        ],
+        [
+          "heading",
+          "Season One is eleven things, and each one has a date."
+        ],
+        [
+          "line under it",
+          "The first nine are work we do with you. The tenth is your AI. The last is what stays yours."
+        ],
+        [
+          "card 01, title",
+          "Brand Strategy"
+        ],
+        [
+          "card 01, date",
+          "Day 7"
+        ],
+        [
+          "card 01, body",
+          "This is the document everything else is built on. From your interview, I write what you want to be known for in one paragraph, the 3 to 5 beliefs you stand for, your main story, and the words you use and the ones you never use. It comes from what you have lived, so nobody else could post it. Every script we write later points back to a line in it. That link is what lets one video tell a stranger what you do."
+        ],
+        [
+          "card 01, screen",
+          "[CLIENT ZERO: page 1 of Zyade's own Brand Strategy, the paragraph and the beliefs]"
+        ],
+        [
+          "card 02, title",
+          "Profile Audit & Optimization"
+        ],
+        [
+          "card 02, date",
+          "Day 7"
+        ],
+        [
+          "card 02, body",
+          "Someone who likes one of your videos looks at your public profile next. I go through every field of it and rewrite each one to match your Brand Strategy, ready to paste, and I tell you what to pin and in what order. A visitor then knows what you do and what to do next."
+        ],
+        [
+          "card 02, screen",
+          "[CLIENT ZERO: Zyade's own profile fields, before and after]"
+        ],
+        [
+          "card 03, title",
+          "Visual Identity System"
+        ],
+        [
+          "card 03, date",
+          "Day 14"
+        ],
+        [
+          "card 03, body",
+          "This is how your videos look, decided once. You get 3 to 5 colors, 1 or 2 fonts and your templates. You also get direction for filming in the places you already work: how to frame the shot, the light, and what is behind you. People come back to what they recognize. They see one second of a video and know it is yours."
+        ],
+        [
+          "card 03, screen",
+          "[CLIENT ZERO: the colors, fonts and framing page of Zyade's own Visual Identity System]"
+        ],
+        [
+          "card 04, title",
+          "Content Strategy"
+        ],
+        [
+          "card 04, date",
+          "Day 21"
+        ],
+        [
+          "card 04, body",
+          "This is the plan for your 12 weeks. It holds the 3 to 5 formats you repeat, the season plan with one line for every video, and a scorecard for your videos with the rules for reading it. Every video has its job and its story before it is written, so no video starts from zero and no idea gets used twice."
+        ],
+        [
+          "card 04, screen",
+          "[CLIENT ZERO: the season plan from Zyade's own Content Strategy, one line per video]"
+        ],
+        [
+          "card 05, title",
+          "Your scripts"
+        ],
+        [
+          "card 05, date",
+          "First 3 on day 10. All of them by day 28, 42 or 56."
+        ],
+        [
+          "card 05, body",
+          "You choose 12, 24 or 36 scripts: one, two or three videos a week for 12 weeks. Each one is written in your voice, from your interview, and tells you what to say, what to show and the caption. Each comes with a shot list, and with a card of talking points that marks the one line to keep word for word. I review every script myself before you get it. Your first 3 arrive on day 10, so you film in week 2."
+        ],
+        [
+          "card 05, screen",
+          "[CLIENT ZERO: script 1 of Zyade's season, with its shot list and its card of talking points]"
+        ],
+        [
+          "card 06, title",
+          "Your filming plan and your phone guide"
+        ],
+        [
+          "card 06, date",
+          "Day 10 and day 14"
+        ],
+        [
+          "card 06, body",
+          "You film on your phone. The guide is one page, 12 steps with a do and a don't for each, and it arrives on day 10 with your first scripts. The filming plan arrives on day 14. It groups your videos into sittings of 6 or fewer, so 24 videos take about 4 sittings, and it grows each time new scripts are written."
+        ],
+        [
+          "card 06, screen",
+          "[CLIENT ZERO: Zyade's filming plan for his first sitting, and the phone guide card]"
+        ],
+        [
+          "card 07, title",
+          "Your calls with me"
+        ],
+        [
+          "card 07, date",
+          "One setup call, then week 4 and week 8"
+        ],
+        [
+          "card 07, body",
+          "Three calls, one to one. The first is a 20-minute setup call: we set up your AI and get the video editor running, and you leave with a checklist you keep. Then we talk for 15 minutes in week 4 and again in week 8, so the 12 weeks stay on track."
+        ],
+        [
+          "card 07, screen",
+          "[CLIENT ZERO: the setup checklist from Zyade's own setup, ticked]"
+        ],
+        [
+          "card 08, title",
+          "Three group reviews"
+        ],
+        [
+          "card 08, date",
+          "Once a month during your 12 weeks"
+        ],
+        [
+          "card 08, body",
+          "Once a month, I review clients' videos live, with 12 owners at most. You bring one video, or one week of your numbers, and you get about 10 minutes on yours. You also hear what I tell the others."
+        ],
+        [
+          "card 08, screen",
+          "[CLIENT ZERO: Zyade's review of one of his own videos, in the group review's format]"
+        ],
+        [
+          "card 09, title",
+          "Your Monday messages"
+        ],
+        [
+          "card 09, date",
+          "Every Monday, for 12 weeks"
+        ],
+        [
+          "card 09, body",
+          "Every Monday I write to you: what you filmed and posted last week, and what comes next this week. When you write to me in between, I answer within 24 hours."
+        ],
+        [
+          "card 09, screen",
+          "[CLIENT ZERO: the Monday message from week 2 of Zyade's own season]"
+        ],
+        [
+          "card 10, title",
+          "Your AI, set up from your interview"
+        ],
+        [
+          "card 10, date",
+          "Day 7"
+        ],
+        [
+          "card 10, body",
+          "For everything we don't write, your own Claude or ChatGPT learns to write the way you talk. On day 7 it becomes your script coach, already set up with what you told me in the interview: what you sell, who buys it, your stories, how you talk and what you never claim. You say an idea in your own words; it writes the script and runs ten checks on it before you film."
+        ],
+        [
+          "card 10, body 2",
+          "It comes with four helpers: opening lines from your stories, your replies and offer posts, a check of what's behind you on camera, and a read of your last 10 videos' numbers. It also comes with a video editor that cuts your pauses. Each one tells you what to check yourself. The editor is a tool you run; we don't edit for you."
+        ],
+        [
+          "card 10, small line",
+          "We'll also sell this kit on its own for 147 USD, without the interview behind it. Yours arrives filled in. It needs ChatGPT Plus or a paid Claude plan; the editor needs Claude Pro or higher."
+        ],
+        [
+          "card 10, screen",
+          "[CLIENT ZERO: Zyade's own Claude, set up from his interview: one idea typed, the script and its ten checks]"
+        ],
+        [
+          "card 11, title",
+          "Support after, and what you keep"
+        ],
+        [
+          "card 11, date",
+          "30 days after week 12, then for life"
+        ],
+        [
+          "card 11, body",
+          "When your 12 weeks end, I stay available for 30 more days: answers within 24 hours, and one review of how your first videos did, with the changes it calls for. Everything stays yours: the strategy, the look, the plan, every script and your AI. Your client area and the community stay open to you for life, and the tools keep getting updates at no cost for as long as we make them. If we ever stop, you keep the last version, and it keeps working without us."
+        ],
+        [
+          "card 11, screen",
+          "[CLIENT ZERO: Zyade's own client area, with every document of his season in it]"
+        ],
+        [
+          "apply strip",
+          "All eleven start from one 45-minute interview. The first step is 8 questions."
+        ]
+      ]
+    },
+    "6": {
+      "title": "Real work",
+      "slots": [
+        [
+          "label",
+          "Real work"
+        ],
+        [
+          "heading",
+          "I can't show you client results yet. So here is the work."
+        ],
+        [
+          "paragraph",
+          "Everything in this gallery comes from my own Season One, the one I'm running on my account now. Nothing here is a mockup."
+        ],
+        [
+          "tab 1",
+          "Strategy"
+        ],
+        [
+          "tab 1, piece 1",
+          "[CLIENT ZERO: the \"known for\" paragraph of Zyade's Brand Strategy]"
+        ],
+        [
+          "tab 1, piece 2",
+          "[CLIENT ZERO: the beliefs page of Zyade's Brand Strategy]"
+        ],
+        [
+          "tab 1, piece 3",
+          "[CLIENT ZERO: two weeks of Zyade's season plan]"
+        ],
+        [
+          "tab 2",
+          "Scripts"
+        ],
+        [
+          "tab 2, piece 1",
+          "[CLIENT ZERO: script 1 of Zyade's season, in full]"
+        ],
+        [
+          "tab 2, piece 2",
+          "[CLIENT ZERO: the shot list of the same script]"
+        ],
+        [
+          "tab 2, piece 3",
+          "[CLIENT ZERO: the card of talking points of the same script]"
+        ],
+        [
+          "tab 3",
+          "Visual identity"
+        ],
+        [
+          "tab 3, piece 1",
+          "[CLIENT ZERO: Zyade's colors and fonts]"
+        ],
+        [
+          "tab 3, piece 2",
+          "[CLIENT ZERO: Zyade's framing direction for the place he films]"
+        ],
+        [
+          "tab 3, piece 3",
+          "[CLIENT ZERO: one of Zyade's templates]"
+        ],
+        [
+          "tab 4",
+          "Covers"
+        ],
+        [
+          "tab 4, piece 1",
+          "[CLIENT ZERO: the cover of Zyade's video 1]"
+        ],
+        [
+          "tab 4, piece 2",
+          "[CLIENT ZERO: the cover of Zyade's video 2]"
+        ],
+        [
+          "tab 4, piece 3",
+          "[CLIENT ZERO: the cover of Zyade's video 3]"
+        ],
+        [
+          "line under the gallery",
+          "When our first three clients finish, their work goes here too, with their permission."
+        ]
+      ]
+    },
+    "7": {
+      "title": "The 12 weeks",
+      "slots": [
+        [
+          "label",
+          "The 12 weeks"
+        ],
+        [
+          "heading",
+          "What arrives, and when."
+        ],
+        [
+          "line under it",
+          "What you see before you pay is the small part. Day 1 is the day of your interview."
+        ],
+        [
+          "above the water, label",
+          "Free, before you pay"
+        ],
+        [
+          "free 1",
+          "A 15-minute call with me."
+        ],
+        [
+          "free 2",
+          "Your one-page audit: the 3 things your videos leave unclear, written from your own account before we speak. You keep it."
+        ],
+        [
+          "free 3",
+          "A real script to read, from my own season. [CLIENT ZERO: script 1 of Zyade's season, readable in full]"
+        ],
+        [
+          "waterline",
+          "Season One"
+        ],
+        [
+          "below the water, label",
+          "Below the water"
+        ],
+        [
+          "band 1",
+          "Day 1. Your interview, 45 minutes. Your client area opens the same day, and every document will land there."
+        ],
+        [
+          "band 2",
+          "Day 7. Your Brand Strategy, your public profile rewritten to match, and your AI set up from your interview. Your 3 days to ask for a refund start here."
+        ],
+        [
+          "band 3",
+          "Day 10. Your first 3 scripts, each with its shot list and its card, and your one-page phone guide. You film in week 2."
+        ],
+        [
+          "band 4",
+          "Day 14. Your Visual Identity System, and your filming plan in sittings of 6 or fewer."
+        ],
+        [
+          "band 5",
+          "Day 21. Your Content Strategy: your formats, your season plan and your scorecard."
+        ],
+        [
+          "band 6",
+          "Day 28, 42 or 56. All your scripts are written: day 28 for 12, day 42 for 24, day 56 for 36."
+        ],
+        [
+          "band 7",
+          "Weeks 1 to 12. A message every Monday, my review of every script, a call in week 4 and in week 8, three group reviews and your setup call."
+        ],
+        [
+          "band 8",
+          "After week 12. 30 days of answers, and one review of how your first videos did."
+        ],
+        [
+          "band 9",
+          "For life. Your client area, the community, and updates for as long as we make them."
+        ]
+      ]
+    },
+    "8": {
+      "title": "Price and what's included",
+      "slots": [
+        [
+          "label",
+          "Price"
+        ],
+        [
+          "heading",
+          "What it costs, and what is in it."
+        ],
+        [
+          "paragraph",
+          "Here is each piece of Season One, next to what the same work typically costs when you hire a freelancer or an agency to do it for you. The figures are for 24 videos, our main size."
+        ],
+        [
+          "stack row 1",
+          "Brand Strategy. 1,250 USD."
+        ],
+        [
+          "stack row 2",
+          "Profile Audit & Optimization. 150 USD."
+        ],
+        [
+          "stack row 3",
+          "Visual Identity System. 1,000 USD."
+        ],
+        [
+          "stack row 4",
+          "Content Strategy. 1,760 USD."
+        ],
+        [
+          "stack row 5",
+          "Your 24 scripts. 1,050 USD."
+        ],
+        [
+          "stack row 6",
+          "Your calls with me. 145 USD."
+        ],
+        [
+          "stack row 7",
+          "Your AI, set up from your interview, with its four helpers and the video editor. We'll sell it alone for 147 USD."
+        ],
+        [
+          "stack row 8",
+          "Your filming plan and your phone guide. Included."
+        ],
+        [
+          "stack row 9",
+          "Three group reviews. Included."
+        ],
+        [
+          "stack row 10",
+          "Your Monday messages and the support after. Included."
+        ],
+        [
+          "stack row 11",
+          "Your client area, the community and updates for life. Included."
+        ],
+        [
+          "stack total",
+          "Bought piece by piece, for 24 videos: 5,502 USD."
+        ],
+        [
+          "stack price",
+          "Season One, 24 videos, founding price: 1,000 USD."
+        ],
+        [
+          "line under the stack",
+          "Typical prices for the same work, done for you by freelancers and agencies, plus our own price for the AI kit. Checked on November 21, 2026."
+        ],
+        [
+          "paragraph",
+          "The last four pieces have no price beside them, because we didn't find them sold on their own. They are included, and they are not in the total."
+        ],
+        [
+          "paragraph",
+          "Hired out, those are separate people to find and brief, and each one starts from zero. Here everything comes from one interview, and I review all of it."
+        ],
+        [
+          "paragraph",
+          "Generic scripts are cheap: a freelancer writes one for about 44 USD, and AI writes them for free. What you pay for here is what makes them yours: the interview, the strategy behind every script, and my review of each one."
+        ],
+        [
+          "price table, columns",
+          "Videos. A week. All written by. Founding price. Then."
+        ],
+        [
+          "price row 1",
+          "12 videos. 1 a week. Day 28. 750 USD. 1,250 USD."
+        ],
+        [
+          "price row 2",
+          "24 videos. 2 a week. Day 42. 1,000 USD. 1,500 USD."
+        ],
+        [
+          "price row 3",
+          "36 videos. 3 a week. Day 56. 1,250 USD. 1,750 USD."
+        ],
+        [
+          "founding line",
+          "Founding price: 3 of 3 places left."
+        ],
+        [
+          "paragraph",
+          "The first three clients pay the founding price, because I need three examples to show. In return I ask two things: 10 minutes of feedback at the end of your 12 weeks, and your permission to show the work. You never have to praise it."
+        ],
+        [
+          "paragraph",
+          "Each size has one fixed price, and it does not change on the call."
+        ],
+        [
+          "apply strip",
+          "3 of 3 founding places are open. Apply, and the call tells us both which size fits you."
+        ]
+      ]
+    },
+    "9": {
+      "title": "Guarantee",
+      "slots": [
+        [
+          "label",
+          "Guarantee"
+        ],
+        [
+          "heading",
+          "Week 1 is on us."
+        ],
+        [
+          "paragraph",
+          "Your Brand Strategy arrives by day 7. If you're not happy with it, for any reason, send me one message within 3 days of receiving it. I refund every dollar within 5 working days, and you keep the document."
+        ],
+        [
+          "paragraph",
+          "I put the refund there on purpose. The Brand Strategy is the first real work you see, and every script is written from it. So you judge the work before most of the 12 weeks have happened."
+        ],
+        [
+          "paragraph",
+          "What I don't guarantee is followers, views or sales. I control the writing. You control the filming and the posting."
+        ]
+      ]
+    },
+    "10": {
+      "title": "Who it's for, and who it's not for",
+      "slots": [
+        [
+          "label",
+          "Fit"
+        ],
+        [
+          "heading",
+          "Who Season One is for, and who it isn't for."
+        ],
+        [
+          "column 1, title",
+          "It's for you if"
+        ],
+        [
+          "for 1",
+          "You sell a service or your expertise with your own face and name. Coaches, consultants, clinic owners, agency founders and advisers are the owners we built this for."
+        ],
+        [
+          "for 2",
+          "You already film and post. The trouble is that your videos don't add up: different topics, different looks, and a stranger couldn't say what you do."
+        ],
+        [
+          "for 3",
+          "One new client is worth more to you than Season One costs."
+        ],
+        [
+          "for 4",
+          "You can give it the time: one 45-minute interview, an answer within 3 days each time I send something, about 4 filming sittings for 24 videos, a 20-minute setup call, and two 15-minute calls."
+        ],
+        [
+          "column 2, title",
+          "It's not for you if"
+        ],
+        [
+          "not 1",
+          "You want someone to film, edit or post for you. We don't."
+        ],
+        [
+          "not 2",
+          "You won't appear on camera."
+        ],
+        [
+          "not 3",
+          "You have nothing to sell yet."
+        ],
+        [
+          "not 4",
+          "You need a number of followers, views or sales guaranteed."
+        ],
+        [
+          "not 5",
+          "Scripts are all you need. Then AI is the cheaper choice, and I'd tell you to use it."
+        ],
+        [
+          "apply strip",
+          "If the left column is you, apply. If you're not sure, the call will tell us both, and you keep the audit."
+        ]
+      ]
+    },
+    "11": {
+      "title": "Questions",
+      "slots": [
+        [
+          "label",
+          "Questions"
+        ],
+        [
+          "heading",
+          "What owners ask me before they start."
+        ],
+        [
+          "question 1",
+          "How much of my time does it take?"
+        ],
+        [
+          "answer 1",
+          "Your part is one 45-minute interview, with nothing to write beforehand. Then you read what I send and answer within 3 days. You film in sittings of 6 videos or fewer, about 4 sittings for 24 videos. We have one 20-minute setup call, and we talk twice more, for 15 minutes each, in week 4 and in week 8. Editing and posting stay with you or your editor."
+        ],
+        [
+          "question 2",
+          "I'm not comfortable on camera."
+        ],
+        [
+          "answer 2",
+          "You don't need to be good on camera. Each script comes with a shot list, so you know where to stand and what to show, and with a card of the points to say. A line you would say to a client is easier to say than one you invent in front of a camera, and these are your lines. Your one-page phone guide arrives on day 10, and you film where you already work."
+        ],
+        [
+          "question 3",
+          "Will this work for my kind of business?"
+        ],
+        [
+          "answer 3",
+          "If you sell a service or your expertise with your own face, yes. Your videos come from your story, whatever your field. It isn't for you if you have nothing to sell yet, or if you need someone to film, edit or post for you. If it doesn't fit, I say so on the call."
+        ],
+        [
+          "question 4",
+          "I've posted before and it didn't work."
+        ],
+        [
+          "answer 4",
+          "Posting more will not fix it. Three things were never decided: what you want to be known for, how your videos look, and what each video is about. We decide them with you before a single script is written. And if you posted for two weeks and then stopped, nobody was keeping you on track. Here every delivery has a date, I write to you every Monday, and we talk in week 4 and in week 8. I don't promise followers, views or sales: I control the writing, and you control the filming and the posting."
+        ],
+        [
+          "question 5",
+          "You're new. How do I know it's any good?"
+        ],
+        [
+          "answer 5",
+          "You're right to ask, and I won't pretend otherwise. I won't show you results I don't have yet. So you see the work before you risk anything. On our call you get a one-page audit of your own videos, and you can judge whether it describes you. My own season is on this page. And your Brand Strategy arrives on day 7: if you're not happy with it, every dollar comes back and you keep the document."
+        ],
+        [
+          "question 6",
+          "Why not just use ChatGPT?"
+        ],
+        [
+          "answer 6",
+          "You can. AI will write you 24 scripts in a minute. They are the 24 it would write for anyone in your field, because it only has what you type into it. The part it can't do for you is the part we do: a 45-minute interview with you, what you want to be known for decided with you, all 12 weeks planned together, and me keeping you on track. If scripts are all you need, AI is the cheaper choice and I'd tell you to use it."
+        ],
+        [
+          "answer 6, second paragraph",
+          "Do we use AI ourselves? Of course. It would be strange not to in 2026. AI runs our internal systems, which is how we move fast and deliver on time. The creative work is different: it starts from your interview, and I direct and review every script myself. AI amplifies our creativity. It doesn't replace it."
+        ],
+        [
+          "question 7",
+          "What if I don't like a script?"
+        ],
+        [
+          "answer 7",
+          "Tell me what's off and I rewrite it. You approve every script before you film it. I write from your own words and examples, to be said out loud by you, so each script starts close to how you talk. How changes work is written on the one-page summary you get on our call."
+        ],
+        [
+          "question 8",
+          "What happens after the 12 weeks?"
+        ],
+        [
+          "answer 8",
+          "You keep everything: your strategy, your look, your plan, every script and your AI, and they keep working without us. When your 12 weeks end, I stay available for 30 more days. Your client area, the community and the updates stay yours. If you want a second season, it is built on the strategy and the look you already own. It isn't on sale yet, and a founding client keeps the founding price for it when it starts within 30 days of the end of the first."
+        ]
+      ]
+    },
+    "12": {
+      "title": "Apply",
+      "slots": [
+        [
+          "label",
+          "Apply"
+        ],
+        [
+          "heading",
+          "Apply, then we talk."
+        ],
+        [
+          "line under it",
+          "We plan [12 weeks] of short videos with you and write [every script] in [your voice]. [You film.]"
+        ],
+        [
+          "paragraph",
+          "Leave your name and your email, answer 8 questions, and pick a time for a 15-minute call with me. It takes about 3 minutes. Before we speak, I go through your account and your answers. On the call, I show you your audit on screen: one page on the 3 things your videos leave unclear. If Season One fits you, I tell you which size and the dates. If it doesn't fit, I say so. The page is yours either way."
+        ],
+        [
+          "field 1",
+          "Name"
+        ],
+        [
+          "field 2",
+          "Email"
+        ],
+        [
+          "button",
+          "Apply and pick a time"
+        ],
+        [
+          "under the button",
+          "No payment on this page. Founding price: 3 of 3 places left."
+        ],
+        [
+          "step 1",
+          "8 questions, about 3 minutes."
+        ],
+        [
+          "step 2",
+          "A 15-minute call with me, shown in your time zone."
+        ],
+        [
+          "step 3",
+          "Your one-page audit, yours to keep."
+        ]
+      ]
+    },
+    "13": {
+      "title": "The form",
+      "slots": [
+        [
+          "name",
+          "First, your name."
+        ],
+        [
+          "email",
+          "And your email."
+        ],
+        [
+          "greeting",
+          "Hi {name}. 8 questions, about 3 minutes, then you pick a time."
+        ],
+        [
+          "profile",
+          "Where can I see your videos? Paste the link to your main profile, or your handle."
+        ],
+        [
+          "profile, hint",
+          "A link or your handle"
+        ],
+        [
+          "sell",
+          "What do you sell, and what is one new client worth to you?"
+        ],
+        [
+          "sell, hint",
+          "For example: coaching for founders, about 2,000 USD a client"
+        ],
+        [
+          "stranger",
+          "If a stranger watched 3 of your videos, what would they say you do?"
+        ],
+        [
+          "stranger, hint",
+          "Your best guess, in their words"
+        ],
+        [
+          "film",
+          "Where do you film today?"
+        ],
+        [
+          "film, choices",
+          "At my office or studio. At home. At my clinic, shop or workplace. Outdoors or on the move. Somewhere else."
+        ],
+        [
+          "count",
+          "How many videos did you post in the last 30 days?"
+        ],
+        [
+          "count, choices",
+          "None. 1 to 4. 5 to 9. 10 to 19. 20 or more."
+        ],
+        [
+          "decides",
+          "Who decides on this with you?"
+        ],
+        [
+          "decides, choices",
+          "Just me. Me and a partner. A team."
+        ],
+        [
+          "start",
+          "When do you want to start?"
+        ],
+        [
+          "start, choices",
+          "This week. This month. Next month. Just exploring."
+        ],
+        [
+          "budget",
+          "What budget do you have in mind for your videos over the next 3 months?"
+        ],
+        [
+          "budget, choices",
+          "Under 750 USD. 750 to 1,500 USD. 1,500 to 3,000 USD. Over 3,000 USD."
+        ],
+        [
+          "budget, under 750, line 1",
+          "Thank you, {name}. Season One starts at 750 USD, so it isn't the right step for you today, and I'd rather tell you now than on a call."
+        ],
+        [
+          "budget, under 750, line 2",
+          "We're about to open a 147 USD kit that sets up your own Claude or ChatGPT to write scripts the way you talk. I'll email you when it opens."
+        ]
+      ]
+    },
+    "14": {
+      "title": "The booked page",
+      "slots": [
+        [
+          "heading",
+          "You're booked, {name}."
+        ],
+        [
+          "heading, no name",
+          "You're booked."
+        ],
+        [
+          "video, title",
+          "Watch this before we talk"
+        ],
+        [
+          "video, length",
+          "75 seconds"
+        ],
+        [
+          "next, title",
+          "What happens next"
+        ],
+        [
+          "next 1",
+          "Before the call, I go through your account and your answers to the 8 questions, and I write your audit: one page on the 3 things your videos leave unclear."
+        ],
+        [
+          "next 2",
+          "The call is 15 minutes with me. I show you the audit on screen. If Season One fits you, I tell you which size and the dates. If it doesn't, I say so. The page is yours either way."
+        ],
+        [
+          "practical 1",
+          "Your invite comes by email. Add it to your calendar now."
+        ],
+        [
+          "practical 2",
+          "If it isn't in your inbox in 2 minutes, check your spam folder."
+        ],
+        [
+          "booked from a chat, in place of next 1",
+          "The 8 questions come first: I write your audit from your answers and your account."
+        ],
+        [
+          "booked from a chat, button",
+          "Answer the 8 questions (3 minutes)"
+        ],
+        [
+          "booked from a chat, line",
+          "Messages about your call come from Zyade or Hanane, in the chat you used."
+        ]
+      ]
+    },
+    "15": {
+      "title": "Title and description",
+      "slots": [
+        [
+          "title",
+          "Arcbuildr | 12 weeks of short videos, written in your voice"
+        ],
+        [
+          "description",
+          "For owners who are the face of their business. We plan 12 weeks of short videos with you and write every script in your voice. You film."
+        ],
+        [
+          "link preview, title",
+          "Stop guessing what to post."
+        ],
+        [
+          "link preview, description",
+          "We plan 12 weeks of short videos with you and write every script in your voice, from one 45-minute interview. You film."
+        ]
+      ]
+    }
+  }
+}

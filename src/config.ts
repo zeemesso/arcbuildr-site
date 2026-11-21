@@ -26,3 +26,9 @@ export const CONFIRMATION_VIDEO = "/video/confirmation.mp4";
 export const APPLICATION_AFTER_BOOKING_URL = "https://tally.so/r/9NZpVV";
 // The Cal.com event that is booked from a chat.
 export const CHAT_EVENT_SLUG = "15-minute-call-chat";
+// His face on the home page: a real photo of Zyade, as a path under public/ (for example "/proof/zyade.jpg").
+// While this is empty the page shows his initials in a circle. Never the pixel character, never a generated face.
+export const FOUNDER_PHOTO = "";
+// The Claude and ChatGPT marks (public/marks/, each company's own file, unchanged). Both companies ask for
+// their approval before a site shows their mark: "names" writes the two names instead, with no mark.
+export const AI_MARKS: "official" | "names" = "official";

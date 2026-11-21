@@ -8,3 +8,4 @@ package-lock.json
 .agents
 playwright-report
 test-results
+src/content/deck.json

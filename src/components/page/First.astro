@@ -1,0 +1,67 @@
+---
+/**
+ * 1. First screen: who it is for, the headline, one sentence with its small labels, the two buttons,
+ * his face beside them, the loop, and the founding count on a tab that hangs from the window.
+ */
+import Marks from "./Marks.astro";
+import Take from "./Take.astro";
+import { founding, labelled, section } from "../../content/deck";
+import { page } from "../../content/site";
+import { FOUNDER_PHOTO, FOUNDING_PLACES_LEFT } from "../../config";
+const s = section(1);
+const headline = s.find("headline") ?? s.get("headline, option 1");
+const line = labelled(s.get("line under it"));
+const { founder } = page;
+---
+
+<section class="window first" id="top" aria-labelledby="first-h">
+  <div class="first__words">
+    <p class="label" data-enter style="--i:0">
+      {s.get("label above the headline")}
+    </p>
+    <h1 class="first__h" id="first-h" data-enter style="--i:1">
+      {headline}
+    </h1>
+    <p class="first__line" data-enter style="--i:2">
+      {line.map((part) => (part.label ? <span class="chip">{part.text}</span> : part.text))}
+    </p>
+    <div class="first__actions" data-enter style="--i:3">
+      <a class="btn" href="#apply" data-apply-open data-cta>
+        {s.get("button")}
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M5 12h14M13 6l6 6-6 6" />
+        </svg>
+      </a>
+      <a class="btn btn--quiet" href="#get">
+        <Marks />
+        {s.get("second button, with the Claude and ChatGPT icons")}
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M6 9l6 6 6-6" />
+        </svg>
+      </a>
+    </div>
+    <div class="who" data-enter style="--i:4">
+      {FOUNDER_PHOTO ? (
+        <img class="who__face" src={FOUNDER_PHOTO} alt="" width="48" height="48" />
+      ) : (
+        <span class="who__face" aria-hidden="true">
+          {founder.initials}
+        </span>
+      )}
+      <p>
+        <span class="who__name">{`${founder.name}, ${founder.role}`}</span>
+        <br />
+        <span class="who__note">{s.get("under the buttons")}</span>
+      </p>
+    </div>
+  </div>
+  <Take />
+  <p class="hang">
+    <span class="hang__dots" aria-hidden="true">
+      {[0, 1, 2].map((n) => (
+        <i data-taken={n >= FOUNDING_PLACES_LEFT ? "" : undefined} />
+      ))}
+    </span>
+    {founding(s.get("hanging tab"))}
+  </p>
+</section>

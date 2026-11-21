@@ -1,0 +1,26 @@
+---
+/** The header: a dark pill that follows the page. Its button shows once no other apply button is on screen. */
+import Logo from "../Logo.astro";
+import { page } from "../../content/site";
+interface Props {
+  /** The sections the pill links to: the section's own label, and its id. */
+  links?: { text: string; href: string }[];
+}
+const { links = [] } = Astro.props;
+---
+
+<header class="bar">
+  <div class="bar__pill">
+    <Logo />
+    {links.length > 0 && (
+      <nav class="bar__links" aria-label={page.nav}>
+        {links.map((link) => (
+          <a href={link.href}>{link.text}</a>
+        ))}
+      </nav>
+    )}
+    <a class="bar__cta" href="#apply" data-apply-open>
+      <span>{page.pill}</span>
+    </a>
+  </div>
+</header>
