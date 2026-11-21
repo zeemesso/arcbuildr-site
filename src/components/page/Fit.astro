@@ -1,0 +1,49 @@
+---
+/** 10. Who it's for, and who it's not for: two columns in one window, plain lists. An apply strip closes it. */
+import Strip from "./Strip.astro";
+import { section } from "../../content/deck";
+const s = section(10);
+const columns = [
+  {
+    kind: "for",
+    title: s.get("column 1, title"),
+    items: s.list("for ").map(({ words }) => words),
+    mark: "M6.5 12.5l3.5 3.5 7.5-8",
+  },
+  {
+    kind: "not",
+    title: s.get("column 2, title"),
+    items: s.list("not ").map(({ words }) => words),
+    mark: "M7 7l10 10M17 7L7 17",
+  },
+];
+---
+
+<section class="window fit" id="fit" aria-labelledby="fit-h">
+  <div class="fit__head">
+    <p class="label" data-reveal>
+      {s.get("label")}
+    </p>
+    <h2 class="h2" id="fit-h" data-reveal>
+      {s.get("heading")}
+    </h2>
+  </div>
+  <div class="fit__cols">
+    {columns.map(({ kind, title, items, mark }) => (
+      <div class:list={["fit__col", `fit__col--${kind}`]} data-reveal>
+        <h3>{title}</h3>
+        <ul>
+          {items.map((words) => (
+            <li>
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d={mark} />
+              </svg>
+              <span>{words}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+    ))}
+  </div>
+  <Strip from={10} />
+</section>

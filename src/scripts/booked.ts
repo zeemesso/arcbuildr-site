@@ -1,19 +1,28 @@
 // The page after a booking. The booking page can send the first name and the email along.
 // A name is letters only and an email is a plain address, so nothing else can be shown here or passed on.
-import { resendPending, startApplication } from "./application";
+import { BOOKED_KEY, resendPending, startApplication } from "./application";
 import { APPLICATION_MODE, CHAT_EVENT_SLUG } from "../config";
 
 const query = new URLSearchParams(location.search);
+// The calendar inside our form leaves the name and email on this device; a booking page can send them in the address.
+const kept = (() => {
+  try {
+    const found = JSON.parse(sessionStorage.getItem(BOOKED_KEY) || "{}") as Record<string, unknown>;
+    return { name: String(found.name ?? ""), email: String(found.email ?? "") };
+  } catch {
+    return { name: "", email: "" };
+  }
+})();
 const given = (
   query.get("attendeeFirstName") ||
   query.get("attendeeName") ||
   query.get("name") ||
-  ""
+  kept.name
 )
   .trim()
   .split(/\s+/)[0]!;
 const name = /^[\p{L}'’-]{1,40}$/u.test(given) ? given : "";
-const typed = (query.get("email") || "").trim();
+const typed = (query.get("email") || kept.email).trim();
 const email =
   typed.length <= 254 && /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/.test(typed)
     ? typed
@@ -28,7 +37,6 @@ const fromChat = query.get("via") === "chat" || query.get("eventTypeSlug") === C
 if (chat && fromChat) {
   const action = chat.querySelector<HTMLElement>("[data-chat-action]")!;
   document.querySelector<HTMLElement>("[data-note]")!.hidden = true;
-  document.querySelector<HTMLElement>("[data-chat-line]")!.hidden = false;
   chat.hidden = false;
   if (APPLICATION_MODE === "native") {
     // Our own form opens on this page, starts at the first question when the email is known, and stays here.

@@ -1,0 +1,30 @@
+---
+/**
+ * A video slot. With a file it is a player; until he films it, a poster with his face and his name.
+ * No play button on the poster: there is nothing to play yet.
+ */
+import Face from "./Face.astro";
+import { page } from "../../content/site";
+interface Props {
+  src: string;
+  /** What the video is, for a screen reader. */
+  title: string;
+  /** A line shown on the poster's corner (the deck's own words), such as its length. */
+  note?: string;
+}
+const { src, title, note } = Astro.props;
+const { founder } = page;
+---
+
+{src ? (
+  <video class="video" controls playsinline preload="metadata" aria-label={title} src={src} />
+) : (
+  <div class="video video--poster" data-poster>
+    <Face size={96} class="video__face" />
+    <p class="video__who">
+      <b>{founder.name}</b>
+      <span>{founder.role}</span>
+    </p>
+    {note && <p class="video__note">{note}</p>}
+  </div>
+)}

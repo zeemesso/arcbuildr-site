@@ -3,7 +3,7 @@ import { BOOKING_URL } from "../src/config";
 test("all page links resolve, and the entry forms fall back to the booking page", async ({
   page,
 }) => {
-  for (const path of ["/", "/sample", "/booked", "/privacy", "/404"]) {
+  for (const path of ["/", "/booked", "/privacy", "/404"]) {
     await page.goto(path);
     const hrefs = await page
       .locator("header a[href], main a[href], footer a[href]")

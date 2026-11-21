@@ -5,8 +5,10 @@ import { page } from "../../content/site";
 interface Props {
   /** The sections the pill links to: the section's own label, and its id. */
   links?: { text: string; href: string }[];
+  /** False on a page with nothing to apply to. */
+  cta?: boolean;
 }
-const { links = [] } = Astro.props;
+const { links = [], cta = true } = Astro.props;
 ---
 
 <header class="bar">
@@ -19,8 +21,10 @@ const { links = [] } = Astro.props;
         ))}
       </nav>
     )}
-    <a class="bar__cta" href="#apply" data-apply-open>
-      <span>{page.pill}</span>
-    </a>
+    {cta && (
+      <a class="bar__cta" href="#apply" data-apply-open>
+        <span>{page.pill}</span>
+      </a>
+    )}
   </div>
 </header>

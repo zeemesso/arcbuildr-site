@@ -1,0 +1,53 @@
+---
+/**
+ * Screen 10: their own AI. An idea is typed in their words, the script builds, and ten checks pass.
+ * The Claude and ChatGPT marks sit in the corner. Bars until Zyade's own setup exists.
+ */
+import Marks from "../Marks.astro";
+import T from "./T.astro";
+import Tick from "./Tick.astro";
+import { excerpt, section } from "../../../content/deck";
+import { piece } from "../../../content/proof";
+const body = section(5).get("card 10, body");
+const real = piece("ai-coach");
+const caps = [
+  excerpt(body, "You say an idea in your own words"),
+  excerpt(body, "it writes the script"),
+  excerpt(body, "ten checks"),
+];
+const widths = ["96%", "88%", "100%", "74%", "92%", "60%"];
+const script: (string | undefined)[] = real ? real.script.slice(0, 6) : widths.map(() => undefined);
+---
+
+<figure class="screen s10" data-loop="10000" aria-hidden={real ? undefined : "true"}>
+  <div class="s10__marks">
+    <Marks />
+  </div>
+  <div class="s10__idea pop" data-at="200">
+    <p class="cap">{caps[0]}</p>
+    <span class="bars typed" data-at="450">
+      {real ? <T text={real.idea} /> : [<T w="92%" strong />, <T w="54%" strong k={1} />]}
+    </span>
+  </div>
+  <div class="s10__script pop" data-at="1300">
+    <p class="cap">{caps[1]}</p>
+    <div class="bars typed" data-at="1500">
+      {script.map((line, k) => (
+        <T text={line} w={widths[k]!} k={k} />
+      ))}
+    </div>
+    <div class="s10__checks">
+      <p class="cap pop" data-at="3000">
+        {caps[2]}
+      </p>
+      <ol>
+        {Array.from({ length: 10 }, (_, n) => (
+          <li data-at={3200 + n * 130}>
+            <b>{n + 1}</b>
+            <Tick />
+          </li>
+        ))}
+      </ol>
+    </div>
+  </div>
+</figure>

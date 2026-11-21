@@ -1,0 +1,570 @@
+/* Sections 2, 3, 4 and 9 to 12, and the apply strips. Each section has its own surface, so no two
+ * neighbours look alike: type on the canvas, a white window, a dark window, a tinted window. */
+
+/* ---------- Shared pieces ---------- */
+.window--night {
+  background: var(--night);
+  color: var(--on-night);
+}
+.window--night .label {
+  color: var(--on-night-muted);
+}
+.face {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 3rem;
+  height: 3rem;
+  border-radius: 50%;
+  background: var(--ink);
+  color: var(--window);
+  font-size: var(--text-sm);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  object-fit: cover;
+}
+
+/* An apply strip: one sentence, the same button. */
+.strip {
+  display: grid;
+  justify-items: start;
+  gap: 1.25rem;
+  padding: clamp(1.5rem, 4vw, 2.25rem) var(--pad);
+}
+.strip__words {
+  max-width: 34rem;
+  font-size: clamp(1.25rem, 1rem + 1vw, 1.625rem);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.25;
+  text-wrap: balance;
+}
+.strip--window {
+  border-top: 1px solid var(--hair);
+}
+.window--night .strip--window {
+  border-top-color: var(--hair-night);
+}
+.strip--canvas {
+  max-width: 72rem;
+  margin: clamp(0.75rem, 1.6vw, 1.25rem) auto 0;
+  padding-inline: calc(var(--frame) + clamp(0.75rem, 2vw, 1.5rem));
+}
+@media (min-width: 48rem) {
+  .strip {
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: 2rem;
+  }
+}
+@media (max-width: 47.99rem) {
+  .strip .btn {
+    width: 100%;
+  }
+}
+
+/* A video slot: a player, or a poster with his face until he films it. */
+.video {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  border-radius: var(--r-inner);
+  background: var(--night);
+  color: var(--on-night);
+  object-fit: cover;
+}
+.video--poster {
+  position: relative;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 1rem;
+  overflow: hidden;
+  isolation: isolate;
+  text-align: center;
+}
+/* A soft light behind him, so the poster is not a flat block. */
+.video--poster::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: -20%;
+  background:
+    radial-gradient(
+      40% 50% at 50% 42%,
+      color-mix(in oklch, var(--color-accent) 34%, transparent),
+      transparent 70%
+    ),
+    radial-gradient(
+      70% 60% at 50% 110%,
+      color-mix(in oklch, var(--color-taupe) 40%, transparent),
+      transparent 70%
+    );
+}
+.video__face {
+  width: clamp(5rem, 14vw, 7.5rem);
+  height: clamp(5rem, 14vw, 7.5rem);
+  background: var(--window);
+  color: var(--ink);
+  font-size: clamp(1.5rem, 4vw, 2.25rem);
+  letter-spacing: -0.02em;
+  box-shadow:
+    0 0 0 4px var(--night),
+    0 0 0 7px var(--color-accent);
+}
+.video__who {
+  display: grid;
+  gap: 0.125rem;
+  line-height: 1.3;
+}
+.video__who b {
+  font-size: var(--text-lg);
+}
+.video__who span {
+  color: var(--on-night-muted);
+  font-size: var(--text-sm);
+}
+.video__note {
+  position: absolute;
+  right: 1rem;
+  bottom: 1rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: var(--radius-pill);
+  background: var(--hair-night);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  letter-spacing: 0.04em;
+}
+
+/* ---------- 2. Manifesto: type on the canvas ---------- */
+.say {
+  display: grid;
+  gap: clamp(1.5rem, 4vw, 2.5rem);
+  max-width: 82rem;
+  margin-inline: auto;
+  padding: clamp(5rem, 12vw, 10rem) calc(var(--frame) + var(--pad)) clamp(4rem, 9vw, 7.5rem);
+}
+.say__big {
+  font-size: clamp(2rem, 1rem + 4.4vw, 4.5rem);
+  font-weight: 700;
+  letter-spacing: var(--track);
+  line-height: 1.04;
+  text-wrap: balance;
+}
+.say__light {
+  font: inherit;
+  letter-spacing: inherit;
+  color: color-mix(in oklch, var(--color-ink) 48%, var(--canvas));
+}
+.say__full {
+  margin-top: 0.12em;
+}
+.say__body {
+  display: grid;
+  gap: 1.25rem;
+  margin-top: clamp(1rem, 3vw, 2rem);
+  padding-top: clamp(1.5rem, 4vw, 2.5rem);
+  border-top: 1px solid var(--hair);
+  font-size: 1.125rem;
+  line-height: 1.6;
+  text-wrap: pretty;
+}
+@media (min-width: 56rem) {
+  .say__body {
+    display: block;
+    columns: 2;
+    column-gap: clamp(2.5rem, 6vw, 5rem);
+    font-size: 1.1875rem;
+  }
+  .say__body p {
+    break-inside: avoid;
+    margin-bottom: 1.25rem;
+  }
+}
+/* Each word of the second sentence takes its ink as it passes up the screen. */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .js .say__full .w {
+      animation: say-ink linear both;
+      animation-timeline: view();
+      animation-range: cover 12% cover 38%;
+    }
+  }
+}
+@keyframes say-ink {
+  from {
+    color: color-mix(in oklch, var(--color-ink) 30%, var(--canvas));
+  }
+}
+
+/* ---------- 3. Zyade: a white window, his video and his words ---------- */
+.founder__grid {
+  display: grid;
+  gap: clamp(1.75rem, 5vw, 4rem);
+  padding: clamp(1.25rem, 4vw, 3.5rem) clamp(1.25rem, 4vw, 3.5rem) clamp(2rem, 5vw, 4rem);
+}
+.founder__video .video {
+  aspect-ratio: 4 / 5;
+}
+.founder__words {
+  display: grid;
+  align-content: start;
+  justify-items: start;
+  gap: 1.125rem;
+  font-size: 1.125rem;
+  line-height: 1.6;
+  text-wrap: pretty;
+}
+.founder__words .h2 {
+  max-width: 16ch;
+  margin-bottom: 0.5rem;
+}
+.founder__words > p {
+  max-width: 36rem;
+}
+.founder__ways {
+  display: grid;
+  gap: 0.625rem;
+  width: 100%;
+  max-width: 38rem;
+  margin-block: 0.5rem;
+}
+.founder__ways li {
+  display: grid;
+  grid-template-columns: 2.25rem 1fr;
+  gap: 1rem;
+  padding: 1.125rem 1.25rem 1.125rem 1.125rem;
+  border-radius: var(--r-inner);
+  background: var(--tint-accent);
+  font-size: var(--text-base);
+  line-height: 1.5;
+}
+.founder__ways li:nth-child(2) {
+  background: var(--tint-sage);
+}
+.founder__ways li:nth-child(3) {
+  background: var(--tint-taupe);
+}
+.founder__ways b {
+  display: grid;
+  place-items: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 50%;
+  background: var(--ink);
+  color: var(--window);
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  font-weight: 500;
+}
+.founder__small {
+  color: var(--muted);
+  font-size: var(--text-sm);
+  line-height: 1.5;
+}
+@media (min-width: 64rem) {
+  .founder__grid {
+    grid-template-columns: minmax(0, 0.82fr) minmax(0, 1fr);
+    align-items: start;
+  }
+  .founder__video {
+    position: sticky;
+    top: 6.5rem;
+  }
+}
+@media (max-width: 63.99rem) {
+  .founder__video .video {
+    aspect-ratio: 4 / 3;
+  }
+}
+
+/* ---------- 4. How it works: a dark window, the diagram, then five steps ---------- */
+.how {
+  padding: clamp(3rem, 8vw, 6rem) var(--pad) clamp(1.5rem, 4vw, 3rem);
+}
+.how__head {
+  display: grid;
+  justify-items: start;
+  gap: 1rem;
+  margin-bottom: clamp(2rem, 6vw, 4rem);
+}
+.how__head .h2 {
+  max-width: 20ch;
+}
+.flow {
+  display: grid;
+  gap: 0;
+}
+.flow__col {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  gap: 0.75rem;
+}
+.flow__label {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--on-night-muted);
+}
+.flow__cards {
+  display: grid;
+  grid-auto-rows: 1fr;
+  gap: 0.625rem;
+}
+.flow__card {
+  display: block;
+  padding: 1.125rem 1.25rem;
+  border-radius: var(--r-inner);
+  background: color-mix(in oklch, var(--color-card) 9%, var(--night));
+  box-shadow: inset 0 0 0 1px var(--hair-night);
+  color: var(--on-night-muted);
+  line-height: 1.45;
+}
+.flow__card b {
+  display: block;
+  margin-bottom: 0.25rem;
+  color: var(--on-night);
+  font-size: var(--text-lg);
+  letter-spacing: -0.01em;
+}
+.flow__card--out {
+  background: var(--window);
+  box-shadow: none;
+  color: var(--muted);
+}
+.flow__card--out b {
+  color: var(--ink);
+}
+.flow__card--out:has(.marks) {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: start;
+  gap: 1rem;
+  --marks-ring: var(--canvas);
+}
+.flow__hub {
+  display: grid;
+  align-content: center;
+  gap: 0.5rem;
+  padding: clamp(1.5rem, 3vw, 2.25rem);
+  border-radius: 1.5rem;
+  background: var(--color-accent);
+  color: var(--color-ink);
+  font-size: var(--text-lg);
+  font-weight: 500;
+  line-height: 1.4;
+}
+.flow__hub b {
+  font-size: clamp(1.75rem, 1.2rem + 2vw, 2.5rem);
+  letter-spacing: -0.03em;
+  line-height: 1.05;
+}
+/* The connectors: a filled pipe from each card to the hub, and a light that runs along it. */
+.flow__pipes {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+.flow__pipes path {
+  fill: none;
+  stroke: color-mix(in oklch, var(--color-card) 16%, var(--night));
+  stroke-width: 10;
+  stroke-linecap: round;
+  vector-effect: non-scaling-stroke;
+}
+.flow__pipes .flow__run {
+  stroke: var(--color-accent);
+  stroke-width: 3;
+  stroke-dasharray: 2 26;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .flow.is-in .flow__run {
+    animation: flow-run 1.6s linear infinite;
+  }
+}
+@keyframes flow-run {
+  to {
+    stroke-dashoffset: -28;
+  }
+}
+@media (min-width: 64rem) {
+  .flow {
+    grid-template-columns:
+      minmax(0, 1fr) clamp(2.5rem, 5vw, 4.5rem) minmax(0, 0.9fr) clamp(2.5rem, 5vw, 4.5rem)
+      minmax(0, 1fr);
+  }
+  /* The pipes sit beside the cards, below the row of labels. */
+  .flow__pipes {
+    align-self: end;
+    height: calc(100% - 1.875rem);
+  }
+}
+@media (max-width: 63.99rem) {
+  .flow {
+    gap: 0;
+  }
+  /* On a phone the pipes become one short stem between the groups. */
+  .flow__pipes {
+    justify-self: center;
+    width: 0.625rem;
+    height: 2.25rem;
+    margin-block: 0.25rem;
+    border-radius: var(--radius-pill);
+    background: color-mix(in oklch, var(--color-card) 16%, var(--night));
+  }
+  .flow__pipes path {
+    display: none;
+  }
+}
+
+/* The five steps. */
+.steps {
+  display: grid;
+  gap: 0.625rem;
+  margin-top: clamp(2rem, 6vw, 4rem);
+  padding-top: clamp(1.5rem, 4vw, 2.5rem);
+  border-top: 1px solid var(--hair-night);
+}
+.steps__step {
+  position: relative;
+  display: grid;
+  align-content: start;
+  gap: 0.75rem;
+  padding: 1.25rem;
+  border-radius: var(--r-inner);
+  background: color-mix(in oklch, var(--color-card) 9%, var(--night));
+  overflow: hidden;
+}
+.steps__h {
+  font: inherit;
+}
+.steps__h button {
+  display: grid;
+  gap: 0.75rem;
+  width: 100%;
+  min-height: 2.75rem;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: default;
+}
+.steps__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.steps__n {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  color: var(--on-night-muted);
+}
+.steps__step svg {
+  width: 1.75rem;
+  height: 1.75rem;
+  fill: none;
+  stroke: var(--color-accent);
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.steps__t {
+  font-size: var(--text-lg);
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  line-height: 1.25;
+  text-wrap: balance;
+}
+.steps__text {
+  color: var(--on-night-muted);
+  line-height: 1.55;
+  text-wrap: pretty;
+}
+.steps__bar {
+  display: none;
+}
+/* Wide screens, with scripts: a row of five tabs. The open one is wide and shows its text. */
+@media (min-width: 64rem) {
+  .js .steps {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    transition: grid-template-columns 600ms var(--ease-enter);
+  }
+  .js .steps[data-active="1"] {
+    grid-template-columns: 2.6fr 1fr 1fr 1fr 1fr;
+  }
+  .js .steps[data-active="2"] {
+    grid-template-columns: 1fr 2.6fr 1fr 1fr 1fr;
+  }
+  .js .steps[data-active="3"] {
+    grid-template-columns: 1fr 1fr 2.6fr 1fr 1fr;
+  }
+  .js .steps[data-active="4"] {
+    grid-template-columns: 1fr 1fr 1fr 2.6fr 1fr;
+  }
+  .js .steps[data-active="5"] {
+    grid-template-columns: 1fr 1fr 1fr 1fr 2.6fr;
+  }
+  .js .steps__step {
+    min-height: 17rem;
+    transition: background-color 300ms var(--ease-move);
+  }
+  .js .steps__h button {
+    cursor: pointer;
+  }
+  /* The whole tab is the target. */
+  .js .steps__h button::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+  }
+  .js .steps__step:not(.is-on) .steps__text {
+    display: none;
+  }
+  .js .steps__step:not(.is-on):hover {
+    background: color-mix(in oklch, var(--color-card) 14%, var(--night));
+  }
+  .js .steps__step.is-on {
+    background: var(--window);
+    color: var(--ink);
+  }
+  .js .steps__step.is-on .steps__n,
+  .js .steps__step.is-on .steps__text {
+    color: var(--muted);
+  }
+  .js .steps__step.is-on .steps__t {
+    font-size: var(--text-xl);
+  }
+  .js .steps__step.is-on .steps__text {
+    max-width: 30rem;
+    animation: steps-in 500ms var(--ease-enter) 120ms backwards;
+  }
+  /* The line that fills while a tab has its turn. */
+  .js .steps__bar {
+    display: block;
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    height: 3px;
+    background: var(--color-accent);
+    scale: 0 1;
+    transform-origin: left;
+  }
+  .js .steps.is-turning .steps__step.is-on .steps__bar {
+    animation: steps-turn var(--turn, 5s) linear forwards;
+  }
+}
+@keyframes steps-in {
+  from {
+    opacity: 0;
+    translate: 0 0.5rem;
+  }
+}
+@keyframes steps-turn {
+  to {
+    scale: 1 1;
+  }
+}

@@ -8,10 +8,12 @@ import Take from "./Take.astro";
 import { founding, labelled, section } from "../../content/deck";
 import { page } from "../../content/site";
 import { FOUNDER_PHOTO, FOUNDING_PLACES_LEFT } from "../../config";
+import { founderPhoto } from "../../content/proof";
 const s = section(1);
 const headline = s.find("headline") ?? s.get("headline, option 1");
 const line = labelled(s.get("line under it"));
 const { founder } = page;
+const photo = FOUNDER_PHOTO || founderPhoto();
 ---
 
 <section class="window first" id="top" aria-labelledby="first-h">
@@ -41,8 +43,8 @@ const { founder } = page;
       </a>
     </div>
     <div class="who" data-enter style="--i:4">
-      {FOUNDER_PHOTO ? (
-        <img class="who__face" src={FOUNDER_PHOTO} alt="" width="48" height="48" />
+      {photo ? (
+        <img class="who__face" src={photo} alt="" width="48" height="48" />
       ) : (
         <span class="who__face" aria-hidden="true">
           {founder.initials}

@@ -37,13 +37,9 @@ try {
   const urls = [...sitemap.matchAll(/<loc>(.*?)<\/loc>/g)].map((match) => match[1]);
   if (
     JSON.stringify(urls) !==
-    JSON.stringify([
-      "https://arcbuildr.co/",
-      "https://arcbuildr.co/sample",
-      "https://arcbuildr.co/privacy",
-    ])
+    JSON.stringify(["https://arcbuildr.co/", "https://arcbuildr.co/privacy"])
   )
-    throw new Error("sitemap must list only /, /sample and /privacy");
+    throw new Error("sitemap must list only / and /privacy");
   // Count scripts reachable from the page. React's unused integration asset is not loaded.
   const scriptTags = [...home.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/g)];
   const reachable = new Set();

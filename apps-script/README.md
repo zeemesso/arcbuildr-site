@@ -14,6 +14,8 @@ Both endpoints post JSON to the Apps Script web app at `SHEETS_URL`. The body ca
 **`POST /api/apply`**, when someone answers the 8 questions: `{ token, lead, application }`.
 
 - `application` holds `kind` (`application`, or `prep` for the form answered after a booking made from a chat), `id`, `submittedAt`, `name`, `email`, `timeZone`, `sourcePage`, `utm` and `answers`, a list of `{ id, question, answer }` in the form's order.
+- After the 8 answers comes one the visitor does not type: `{ id: "outcome", question: "Outcome", answer }`. The answer is `Calendar shown`, `Budget under the lowest price: no calendar shown`, or `Booked from a chat` for `prep`. The script finds no column for it and makes one at the right, headed "Outcome".
+- The question texts come from the deck. The script finds a column by its exact heading first, then by a pattern for the answer's `id`, so a reworded question keeps its column and the old heading stays until someone renames it.
 - A script that knows applications adds one row to the answers tab ("Tally application", or "Tally prep" for `prep`), under the headings already there. An `id` it already has adds nothing. It answers `{ "ok": true, "application": true }`. Its own sync then adds the Leads row with the status `applied`.
 - A script that does not know applications saves `lead` as a Leads row with the status `new` and answers `{ "ok": true }`. `lead` carries the same answers, so nothing is lost.
 - Any other answer means not saved. The form then says so, keeps what was typed on the visitor's device and offers another try with the same `id`.

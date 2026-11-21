@@ -79,6 +79,11 @@ main:focus {
   outline: 2px solid var(--color-focus);
   outline-offset: 3px;
 }
+/* On a dark surface the ring takes the brighter orange. */
+.window--night :focus-visible,
+.bar :focus-visible {
+  outline-color: var(--color-accent);
+}
 .sr-only {
   position: absolute;
   width: 1px;
@@ -279,7 +284,16 @@ main:focus {
     0 0 0 1px var(--hair-night);
 }
 .bar .logo {
+  min-height: max(2.75rem, 44px);
   margin-right: 0.875rem;
+}
+/* A pill with the logo alone: the same space on both sides. */
+.bar .logo:last-child {
+  margin-right: 0.875rem;
+  padding-right: 0;
+}
+.bar__pill:has(> .logo:last-child) {
+  padding-right: 0.25rem;
 }
 .bar__links {
   display: none;
@@ -828,17 +842,24 @@ main:focus {
     translate 900ms var(--ease-enter) calc(var(--i, 0) * 70ms),
     scale 900ms var(--ease-enter) calc(var(--i, 0) * 70ms);
 }
-/* The first screen arrives once the fonts are in, piece by piece. */
-.js [data-enter] {
-  opacity: 0;
-  translate: 0 1.25rem;
+/* The first screen arrives piece by piece. It is the style sheet's own doing, so the words never
+   wait for a script: they are on screen as soon as the page is. */
+@media (prefers-reduced-motion: no-preference) {
+  [data-enter] {
+    animation:
+      enter-fade 600ms var(--ease-enter) calc(var(--i, 0) * 80ms) backwards,
+      enter-rise 800ms var(--ease-enter) calc(var(--i, 0) * 80ms) backwards;
+  }
 }
-.js.ready [data-enter] {
-  opacity: 1;
-  translate: none;
-  transition:
-    opacity 600ms var(--ease-enter) calc(var(--i, 0) * 80ms),
-    translate 800ms var(--ease-enter) calc(var(--i, 0) * 80ms);
+@keyframes enter-fade {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes enter-rise {
+  from {
+    translate: 0 1.25rem;
+  }
 }
 .js .logo path {
   stroke-dashoffset: 1;
@@ -853,7 +874,6 @@ main:focus {
     scroll-behavior: auto;
   }
   .js [data-reveal],
-  .js [data-enter],
   .js .logo path {
     opacity: 1;
     translate: none;
@@ -861,12 +881,13 @@ main:focus {
     stroke-dashoffset: 0;
     transition: none;
   }
+  /* No transition at all, not a very short one: a field that has just been shown must be able to take
+     the cursor in the same turn, and a value still in transition counts as its old one. */
   *,
   *::before,
   *::after {
     animation: none !important;
-    transition-duration: 0.01ms !important;
-    transition-delay: 0s !important;
+    transition: none !important;
   }
 }
 

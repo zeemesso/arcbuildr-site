@@ -1,0 +1,46 @@
+---
+/**
+ * Screen 04: the season plan from the Content Strategy, one line for every video. The lines appear
+ * week by week. Bars until the real plan exists.
+ */
+import T from "./T.astro";
+import { excerpt, section } from "../../../content/deck";
+import { piece } from "../../../content/proof";
+const s = section(5);
+const body = s.get("card 04, body");
+const real = piece("season-plan");
+const caps = [excerpt(body, "the season plan"), excerpt(body, "one line for every video")];
+const widths = [
+  ["78%", "64%"],
+  ["70%", "86%"],
+  ["58%", "74%"],
+  ["82%", "60%"],
+  ["66%", "80%"],
+  ["74%", "56%"],
+  ["62%", "84%"],
+];
+const weeks: (string | undefined)[][] = real
+  ? real.weeks.slice(0, 7)
+  : widths.map((row) => row.map(() => undefined));
+---
+
+<figure class="screen s4" data-loop="10000" aria-hidden={real ? undefined : "true"}>
+  <div class="s4__sheet">
+    <p class="s4__top pop" data-at="150">
+      <span class="cap">{caps[0]}</span>
+      <span class="cap">{caps[1]}</span>
+    </p>
+    <ol class="s4__weeks">
+      {weeks.map((videos, n) => (
+        <li class="pop" data-at={500 + n * 300}>
+          <b>{n + 1}</b>
+          <span class="bars typed" data-at={560 + n * 300}>
+            {videos.map((video, k) => (
+              <T text={video} w={widths[n % widths.length]![k % 2]!} k={k} />
+            ))}
+          </span>
+        </li>
+      ))}
+    </ol>
+  </div>
+</figure>

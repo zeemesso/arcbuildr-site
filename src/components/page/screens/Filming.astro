@@ -1,0 +1,45 @@
+---
+/**
+ * Screen 06: the filming plan and the phone guide. Six videos slide into the first sitting, and the
+ * guide's 12 steps are counted off, a do and a don't for each. Bars until the real plan exists.
+ */
+import { excerpt, section } from "../../../content/deck";
+import { piece } from "../../../content/proof";
+const body = section(5).get("card 06, body");
+const real = piece("filming-plan");
+const caps = [
+  excerpt(body, "sittings of 6 or fewer"),
+  excerpt(body, "12 steps with a do and a don't for each"),
+];
+const videos: (string | undefined)[] = real ? real.videos.slice(0, 6) : Array(6).fill(undefined);
+---
+
+<figure class="screen s6" data-loop="10000" aria-hidden={real ? undefined : "true"}>
+  <div class="s6__plan">
+    <p class="cap pop" data-at="150">
+      {caps[0]}
+    </p>
+    <ol class="s6__tray">
+      {videos.map((video, n) => (
+        <li data-at={500 + n * 280} style={`--k:${n}`}>
+          <b>{n + 1}</b>
+          {video ? <span class="t">{video}</span> : <i />}
+        </li>
+      ))}
+    </ol>
+  </div>
+  <div class="s6__guide">
+    <p class="cap pop" data-at="2300">
+      {caps[1]}
+    </p>
+    <ol>
+      {Array.from({ length: 12 }, (_, n) => (
+        <li class="pop" data-at={2500 + n * 60}>
+          <b>{n + 1}</b>
+          <i class="s6__do"></i>
+          <i class="s6__dont"></i>
+        </li>
+      ))}
+    </ol>
+  </div>
+</figure>

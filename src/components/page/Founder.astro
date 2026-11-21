@@ -1,0 +1,47 @@
+---
+/**
+ * 3. Zyade: his video on one side (a poster until he films it), his words on the other.
+ * An apply strip closes the window.
+ */
+import Strip from "./Strip.astro";
+import Video from "./Video.astro";
+import { section } from "../../content/deck";
+import { FOUNDER_VIDEO } from "../../config";
+const s = section(3);
+const paragraphs = s.list("paragraph").map(({ words }) => words);
+const items = s.list("item ").map(({ words }) => words);
+---
+
+<section class="window founder" id="zyade" aria-labelledby="founder-h">
+  <div class="founder__grid">
+    <div class="founder__video" data-reveal>
+      <Video src={FOUNDER_VIDEO} title={s.get("heading")} />
+    </div>
+    <div class="founder__words">
+      <p class="label" data-reveal>
+        {s.get("label")}
+      </p>
+      <h2 class="h2" id="founder-h" data-reveal>
+        {s.get("heading")}
+      </h2>
+      {paragraphs.slice(0, 2).map((words) => (
+        <p data-reveal>{words}</p>
+      ))}
+      <ol class="founder__ways">
+        {items.map((words, n) => (
+          <li data-reveal style={`--i:${n}`}>
+            <b aria-hidden="true">{n + 1}</b>
+            <span>{words}</span>
+          </li>
+        ))}
+      </ol>
+      {paragraphs.slice(2).map((words) => (
+        <p data-reveal>{words}</p>
+      ))}
+      <p class="founder__small" data-reveal>
+        {s.get("small line")}
+      </p>
+    </div>
+  </div>
+  <Strip from={3} />
+</section>

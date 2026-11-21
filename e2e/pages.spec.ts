@@ -1,8 +1,18 @@
-import { expect, test, type Page, type Request } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
 import { existsSync } from "node:fs";
-import { application as form, booked, notFound, sample } from "../src/content/site";
+import {
+  application as form,
+  booked as status,
+  notFound,
+  page as words,
+} from "../src/content/site";
+import { section } from "../src/content/deck";
 import { CONFIRMATION_VIDEO } from "../src/config";
 import { answer, press } from "./press";
+import { current, layer, stub } from "./stubs";
+
+const booked = section(14);
+const named = (name: string) => booked.get("heading").replace("{name}", name);
 
 test("404 renders content and a home link", async ({ page }) => {
   const response = await page.goto("/no-such-page");
@@ -13,98 +23,92 @@ test("404 renders content and a home link", async ({ page }) => {
   await expect(page.getByRole("link", { name: notFound.link })).toHaveAttribute("href", "/");
 });
 
-test("sitemap lists home, the sample and privacy", async ({ page }) => {
+test("sitemap lists home and privacy, and the sample page is gone", async ({ page }) => {
   const xml = await (await page.request.get("/sitemap.xml")).text();
   expect([...xml.matchAll(/<loc>(.*?)<\/loc>/g)].map((m) => m[1])).toEqual([
     "https://arcbuildr.co/",
-    "https://arcbuildr.co/sample",
     "https://arcbuildr.co/privacy",
   ]);
+  expect((await page.request.get("/sample")).status()).toBe(404);
 });
 
-test("the sample page shows the whole episode and leads back to the form", async ({ page }) => {
-  await page.goto("/sample");
-  await expect(page.locator("h1")).toHaveText(sample.h1);
-  const rows = page.locator(".script__row");
-  await expect(rows).toHaveCount(sample.doc.rows.length);
-  for (const [i, row] of sample.doc.rows.entries()) {
-    await expect(rows.nth(i)).toContainText(row.say);
-    await expect(rows.nth(i)).toContainText(row.show);
-  }
-  await expect(page.locator(".script__caption")).toContainText(sample.doc.caption);
-  await expect(page.locator("main a.btn")).toHaveAttribute("href", "/#apply");
-});
-
-test.describe("the confirmation page", () => {
-  test("says the invite line, the agenda and what to have ready", async ({ page }) => {
+test.describe("the page after a booking", () => {
+  test("shows him, the video slot and what happens next, in the deck's words", async ({ page }) => {
     await page.goto("/booked");
-    await expect(page.locator("h1")).toHaveText(booked.h1);
-    await expect(page.locator("main .lead").first()).toHaveText(booked.invite);
-    await expect(page.locator("main")).toContainText(
-      "If your email shows it as from an unknown sender, confirm that you know the sender, then accept it.",
+    await expect(page.locator("h1")).toHaveText(booked.get("heading, no name"));
+    for (const slot of ["practical 1", "practical 2", "video, title", "video, length"])
+      await expect(page.locator("#top")).toContainText(booked.get(slot));
+    await expect(page.locator("#next-h")).toHaveText(booked.get("next, title"));
+    await expect(page.locator(".next__list > li")).toHaveCount(2);
+    for (const slot of ["next 1", "next 2"])
+      await expect(page.getByText(booked.get(slot), { exact: true })).toBeVisible();
+    // Him: his name and role on the video slot, with his photo or his initials. Never a drawing.
+    const slot = page.locator("#top .video");
+    await expect(slot).toBeVisible();
+    if (!existsSync(`public${CONFIRMATION_VIDEO}`)) {
+      await expect(slot).toContainText(words.founder.name);
+      await expect(slot.locator(".face")).toBeVisible();
+    }
+    await expect(page.locator("main svg image, main canvas, .pixel, [class*=sprite]")).toHaveCount(
+      0,
     );
-    for (const item of [...booked.call.items, ...booked.ready.items])
-      await expect(page.locator("main")).toContainText(item);
     // No other offer on this page, and no way to start a second application.
     await expect(page.locator("main form")).toHaveCount(0);
-    await expect(page.locator("header [data-apply]")).toHaveCount(0);
-    // The chat line is for chat bookings only.
-    await expect(page.getByText(booked.chat)).toBeHidden();
-  });
-
-  test("does not assume the application is done", async ({ page }) => {
-    await page.goto("/booked");
-    await expect(page.locator("main")).toContainText(booked.application.body);
-    // What the visitor can see: the lines for a chat booking and for unsaved answers stay hidden.
-    expect(await page.locator("main").innerText()).not.toMatch(
-      /your answers are|you answered|thanks for/i,
-    );
+    await expect(page.locator(".bar__cta")).toHaveCount(0);
+    // The chat lines are for chat bookings only.
+    await expect(page.getByText(booked.get("booked from a chat, line"))).toBeHidden();
     await expect(page.locator("[data-resend]")).toBeHidden();
+    // Two short lines and two steps: no wall of instructions.
+    expect((await page.locator("main").innerText()).split(/\s+/).length).toBeLessThan(140);
   });
 
-  test("greets by first name when the booking passes one, and only a plain name", async ({
+  test("greets by first name from the address or from the device, and only a plain name", async ({
     page,
   }) => {
     await page.goto("/booked?attendeeName=TEST+Visitor&email=test%40example.com");
-    await expect(page.locator("h1")).toHaveText(booked.h1Named.replace("{name}", "TEST"));
+    await expect(page.locator("h1")).toHaveText(named("TEST"));
     await page.goto("/booked?attendeeName=%3Cimg+src%3Dx+onerror%3Dalert(1)%3E");
-    await expect(page.locator("h1")).toHaveText(booked.h1);
+    await expect(page.locator("h1")).toHaveText(booked.get("heading, no name"));
     await expect(page.locator("h1 img")).toHaveCount(0);
     await page.goto("/booked?name=" + "a".repeat(60));
-    await expect(page.locator("h1")).toHaveText(booked.h1);
+    await expect(page.locator("h1")).toHaveText(booked.get("heading, no name"));
+    // What the calendar inside the form leaves behind.
+    await page.evaluate(() =>
+      sessionStorage.setItem("arcbuildr-booked", JSON.stringify({ name: "TEST", email: "t@e.co" })),
+    );
+    await page.goto("/booked");
+    await expect(page.locator("h1")).toHaveText(named("TEST"));
+    await page.evaluate(() =>
+      sessionStorage.setItem("arcbuildr-booked", JSON.stringify({ name: "<b>x</b>" })),
+    );
+    await page.goto("/booked");
+    await expect(page.locator("h1")).toHaveText(booked.get("heading, no name"));
+    await page.evaluate(() => sessionStorage.setItem("arcbuildr-booked", "not json"));
+    await page.goto("/booked");
+    await expect(page.locator("h1")).toHaveText(booked.get("heading, no name"));
   });
 });
 
 // Someone who booked from a chat has not answered the 8 questions yet. The address says so:
 // `via=chat`, or the chat event's slug. Nobody else sees the button.
-test.describe("the confirmation page after a booking from a chat", () => {
-  const label = "Answer the 8 questions (3 minutes)";
+test.describe("the page after a booking from a chat", () => {
+  const label = booked.get("booked from a chat, button");
+  const first = booked.get("booked from a chat, in place of next 1");
+  const line = booked.get("booked from a chat, line");
   const button = (page: Page) => page.getByRole("button", { name: label, exact: true });
-  const layer = (page: Page) => page.locator("[data-apply]");
-  const current = (page: Page) => page.locator(".q.is-current");
+  const options = (id: string) => {
+    const question = form.questions.find((item) => item.id === id)!;
+    return question.type === "choice" ? question.options : [];
+  };
   const answers: Record<string, string> = {
     profile: "@test.visitor",
     sell: "TEST: bookkeeping",
     stranger: "TEST: the books",
-    film: form.questions[3].options[1],
-    count: form.questions[4].options[0],
-    decides: form.questions[5].options[0],
-    start: form.questions[6].options[1],
+    film: options("film")[1]!,
+    count: options("count")[0]!,
+    decides: options("decides")[0]!,
+    start: options("start")[1]!,
   };
-  /** Stand-ins: no test writes a row. */
-  async function stub(page: Page) {
-    const applies: Request[] = [];
-    const leads: Request[] = [];
-    await page.route("**/api/lead", (route) => {
-      leads.push(route.request());
-      return route.fulfill({ status: 204 });
-    });
-    await page.route("**/api/apply", (route) => {
-      applies.push(route.request());
-      return route.fulfill({ json: { ok: true } });
-    });
-    return { applies, leads };
-  }
 
   test("without a chat booking the page stays as it is", async ({ page }) => {
     for (const query of [
@@ -115,9 +119,9 @@ test.describe("the confirmation page after a booking from a chat", () => {
       "?attendeeName=TEST+Visitor&email=test%40example.com",
     ]) {
       await page.goto("/booked" + query);
-      await expect(page.getByText(booked.application.body), query).toBeVisible();
-      await expect(page.getByText(booked.application.first), query).toBeHidden();
-      await expect(page.getByText(booked.chat), query).toBeHidden();
+      await expect(page.getByText(booked.get("next 1")), query).toBeVisible();
+      await expect(page.getByText(first), query).toBeHidden();
+      await expect(page.getByText(line), query).toBeHidden();
       await expect(button(page), query).toHaveCount(0);
       await expect(page.locator('main a[href*="tally.so"]'), query).toHaveCount(0);
     }
@@ -128,16 +132,16 @@ test.describe("the confirmation page after a booking from a chat", () => {
       const calls = await stub(page);
       await page.goto(`/booked?${sign}&attendeeName=TEST+Visitor&email=test%2Bchat%40example.com`);
       await expect(button(page)).toBeVisible();
-      await expect(page.getByText(booked.application.first)).toBeVisible();
-      await expect(page.getByText(booked.application.body)).toBeHidden();
+      await expect(page.getByText(first)).toBeVisible();
+      await expect(page.getByText(booked.get("next 1"))).toBeHidden();
       // Who writes to them, and where.
-      await expect(page.getByText(booked.chat)).toBeVisible();
-      // The rest of the page is the same: the greeting, the invite line, no second application.
-      await expect(page.locator("h1")).toHaveText(booked.h1Named.replace("{name}", "TEST"));
-      await expect(page.locator("main")).toContainText(booked.invite);
-      for (const item of booked.ready.items) await expect(page.getByText(item)).toBeVisible();
+      await expect(page.getByText(line)).toBeVisible();
+      // The rest of the page is the same: the greeting, the practical lines, no second application.
+      await expect(page.locator("h1")).toHaveText(named("TEST"));
+      await expect(page.locator("main")).toContainText(booked.get("practical 1"));
+      await expect(page.getByText(booked.get("next 2"))).toBeVisible();
       await expect(page.locator("main form")).toHaveCount(0);
-      await expect(page.locator("header [data-apply]")).toHaveCount(0);
+      await expect(page.locator(".bar__cta")).toHaveCount(0);
 
       // The name and email are known, so the form starts at the first question.
       await press(button(page));
@@ -150,7 +154,7 @@ test.describe("the confirmation page after a booking from a chat", () => {
       await press(current(page).locator(".choice").first());
 
       // Saved: the layer closes, the page says so, and nobody is sent to a calendar.
-      await expect(page.getByText(booked.application.saved)).toBeVisible();
+      await expect(page.getByText(status.saved)).toBeVisible();
       await expect(layer(page)).toBeHidden();
       await expect(button(page)).toBeHidden();
       await expect(page).toHaveURL(/\/booked\?/);
@@ -160,10 +164,11 @@ test.describe("the confirmation page after a booking from a chat", () => {
         name: "TEST",
         email: "test+chat@example.com",
         page: "/booked",
-        answers: { ...answers, budget: form.questions[7].options[0] },
+        answers: { ...answers, budget: options("budget")[0] },
       });
-      // They are already a lead: the booking made the row.
+      // They are already a lead: the booking made the row. And no calendar loads here.
       expect(calls.leads).toHaveLength(0);
+      expect(calls.calendars).toHaveLength(0);
     });
   }
 
@@ -175,7 +180,7 @@ test.describe("the confirmation page after a booking from a chat", () => {
       void dialog.dismiss();
     });
     const markup = '"><img src=x onerror=alert(1)>';
-    for (const [query, first] of [
+    for (const [query, start] of [
       ["", "name"],
       [`&attendeeName=${encodeURIComponent(markup)}&email=test%40example.com`, "name"],
       [`&name=${"a".repeat(60)}&email=not-an-email`, "name"],
@@ -190,22 +195,24 @@ test.describe("the confirmation page after a booking from a chat", () => {
       await expect(button(page), query).toBeVisible();
       await press(button(page));
       // The form asks for whatever the address did not give in a plain form.
-      await expect(current(page).locator(`#a-${first}`), query).toBeVisible();
+      await expect(current(page).locator(`#a-${start}`), query).toBeVisible();
       await expect(page.locator("main img, [data-apply] img"), query).toHaveCount(0);
     }
     expect(dialogs).toEqual([]);
   });
 
-  test("on a phone the button breaks between its two parts, never inside one", async ({ page }) => {
-    for (const width of [360, 390, 414]) {
+  test("on a phone the button and its words stay inside the screen", async ({ page }) => {
+    for (const width of [320, 360, 390, 414]) {
       await page.setViewportSize({ width, height: 650 });
       await page.goto("/booked?via=chat");
       await page.evaluate(() => document.fonts.ready);
-      const size = await button(page).evaluate((el) => parseFloat(getComputedStyle(el).fontSize));
-      const parts = button(page).locator("span");
-      await expect(parts).toHaveCount(2);
-      for (const part of await parts.all())
-        expect((await part.boundingBox())!.height, `${width}`).toBeLessThan(size * 1.5);
+      const box = (await button(page).boundingBox())!;
+      expect(box.x, `${width}`).toBeGreaterThanOrEqual(0);
+      expect(box.x + box.width, `${width}`).toBeLessThanOrEqual(width);
+      expect(
+        await button(page).evaluate((el) => el.scrollWidth <= el.clientWidth + 1),
+        `${width}`,
+      ).toBe(true);
     }
   });
 
@@ -213,27 +220,30 @@ test.describe("the confirmation page after a booking from a chat", () => {
     test.use({ javaScriptEnabled: false });
     test("the page stays the standard one", async ({ page }) => {
       await page.goto("/booked?via=chat&attendeeName=TEST+Visitor");
-      await expect(page.locator("h1")).toHaveText(booked.h1);
-      await expect(page.getByText(booked.application.body)).toBeVisible();
+      await expect(page.locator("h1")).toHaveText(booked.get("heading, no name"));
+      await expect(page.getByText(booked.get("next 1"))).toBeVisible();
       await expect(button(page)).toHaveCount(0);
     });
   });
 });
 
-test("the /booked video slot takes the confirmation video, and loads none before a press", async ({
+test("the /booked video slot takes the confirmation video, and shows a poster until it exists", async ({
   page,
 }) => {
   const media: string[] = [];
   page.on("request", (r) => r.resourceType() === "media" && media.push(r.url()));
   await page.goto("/booked");
   await page.waitForLoadState("networkidle");
-  await expect(page.locator(".video .video__zyade")).toHaveCount(1);
-  // The video element is made on the first press, so there is none before it.
-  await expect(page.locator(".video video")).toHaveCount(0);
-  const play = page.locator(".video [data-play]");
-  // Until the file is in public/, the slot shows its poster and no play button.
-  if (existsSync(`public${CONFIRMATION_VIDEO}`))
-    await expect(play).toHaveAttribute("href", CONFIRMATION_VIDEO);
-  else await expect(play).toHaveCount(0);
-  expect(media).toEqual([]);
+  const video = page.locator("#top video");
+  if (existsSync(`public${CONFIRMATION_VIDEO}`)) {
+    await expect(video).toHaveAttribute("src", CONFIRMATION_VIDEO);
+    // Only its first bytes load before a press.
+    await expect(video).toHaveAttribute("preload", "metadata");
+  } else {
+    // Until he films it: a poster with him on it, no play button, and nothing to load.
+    await expect(video).toHaveCount(0);
+    await expect(page.locator("#top [data-poster]")).toBeVisible();
+    await expect(page.locator("#top [data-poster] button, #top [data-poster] a")).toHaveCount(0);
+    expect(media).toEqual([]);
+  }
 });

@@ -26,7 +26,13 @@ const words = {
   finish,
   errName: copy.who[0].err,
   errEmail: copy.who[1].err,
-  send: { ...copy.send, saving: prep ? copy.send.savingPrep : copy.send.saving },
+  /** The last button and the saving line for someone who will not see a calendar. */
+  finishShort: copy.finishPrep,
+  send: {
+    ...copy.send,
+    saving: prep ? copy.send.savingPrep : copy.send.saving,
+    savingShort: copy.send.savingPrep,
+  },
 };
 ---
 
@@ -202,6 +208,31 @@ const words = {
           </div>
         </footer>
       </form>
+
+      {!prep && (
+        <div class="apply__after" data-apply-after hidden>
+          <div
+            class="apply__end"
+            data-apply-end
+            data-id={copy.tooLow.id}
+            data-option={copy.tooLow.option}
+            hidden
+          >
+            {copy.tooLow.lines.map((line) => (
+              <p data-line={line} />
+            ))}
+          </div>
+          <div class="apply__cal" data-apply-calendar hidden>
+            <h2 class="apply__cal-h" tabindex="-1">
+              {copy.calendar.title}
+            </h2>
+            <div class="apply__cal-frame" data-calendar />
+            <a class="apply__cal-link" data-calendar-link href="#" hidden>
+              {copy.send.booked}
+            </a>
+          </div>
+        </div>
+      )}
     </div>
   </div>
 )}

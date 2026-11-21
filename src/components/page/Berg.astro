@@ -1,0 +1,104 @@
+---
+/**
+ * 7. The 12 weeks: the iceberg. A tip above the waterline with the three free things beside it, then
+ * nine bands under the water, each tied by its color to one line of the list. On a phone the picture
+ * comes first, then the list with its color keys.
+ */
+import { section } from "../../content/deck";
+import { piece } from "../../content/proof";
+const s = section(7);
+/** "Day 1. Your interview, 45 minutes." → the first sentence is the key, the rest explains it. */
+const lead = (words: string) => {
+  const cut = words.indexOf(". ");
+  return cut < 0
+    ? ([words, ""] as const)
+    : ([words.slice(0, cut + 1), words.slice(cut + 2)] as const);
+};
+const free = s.list("free ").map(({ slot, words }) => ({ words, proof: s.isProof(slot) }));
+const bands = s.list("band ").map(({ words }) => lead(words));
+const script = piece("script-1-full");
+---
+
+<section class="window berg" id="weeks" aria-labelledby="berg-h" data-berg>
+  <div class="berg__head">
+    <p class="label" data-reveal>
+      {s.get("label")}
+    </p>
+    <h2 class="h2" id="berg-h" data-reveal>
+      {s.get("heading")}
+    </h2>
+    <p class="berg__line" data-reveal>
+      {s.get("line under it")}
+    </p>
+  </div>
+
+  <div class="berg__grid">
+    <div class="berg__pic" aria-hidden="true">
+      <div class="berg__sky">
+        <span class="berg__tip" data-reveal></span>
+        <span class="berg__free">{s.get("above the water, label")}</span>
+      </div>
+      <p class="berg__water">
+        <span>{s.get("waterline")}</span>
+      </p>
+      <ol class="berg__ice">
+        {bands.map(([key], n) => (
+          <li
+            class="berg__band"
+            data-band={n + 1}
+            data-reveal
+            style={`--i:${n};--c:var(--band-${n + 1});--on:var(--on-band-${n + 1})`}
+          >
+            {key.replace(/\.$/, "")}
+          </li>
+        ))}
+      </ol>
+    </div>
+
+    <div class="berg__list">
+      <p class="berg__group">{s.get("above the water, label")}</p>
+      <ul class="berg__items berg__items--free">
+        {free.map(({ words, proof }) => (
+          <li data-reveal>
+            <i class="berg__key" />
+            <div>
+              {proof && script ? (
+                <details class="berg__read">
+                  <summary>{words}</summary>
+                  <div>
+                    {script.lines.map((line) => (
+                      <p>{line}</p>
+                    ))}
+                  </div>
+                </details>
+              ) : (
+                <p>{words}</p>
+              )}
+              {proof && !script && (
+                <span class="bars berg__wait" aria-hidden="true">
+                  <i style="--w:92%" />
+                  <i style="--w:78%" />
+                  <i style="--w:54%" />
+                </span>
+              )}
+            </div>
+          </li>
+        ))}
+      </ul>
+      <p class="berg__mark">
+        <span>{s.get("waterline")}</span>
+      </p>
+      <p class="berg__group">{s.get("below the water, label")}</p>
+      <ol class="berg__items">
+        {bands.map(([key, rest], n) => (
+          <li data-band={n + 1} data-reveal style={`--c:var(--band-${n + 1})`}>
+            <i class="berg__key" />
+            <p>
+              <b>{key}</b> {rest}
+            </p>
+          </li>
+        ))}
+      </ol>
+    </div>
+  </div>
+</section>

@@ -1,0 +1,143 @@
+/* The page after a booking: one white window with him and the video, then what happens next on the canvas. */
+.done {
+  display: grid;
+  gap: clamp(2rem, 6vw, 4rem);
+  padding: clamp(6.5rem, 12vw, 9rem) var(--pad) clamp(1.25rem, 4vw, 3.5rem);
+}
+.done__words {
+  display: grid;
+  align-content: center;
+  gap: clamp(1.5rem, 3vw, 2.25rem);
+}
+.done__h {
+  font-size: var(--h1);
+  font-weight: 700;
+  letter-spacing: -0.045em;
+  line-height: 0.98;
+  text-wrap: balance;
+  overflow-wrap: anywhere;
+}
+.done__notes {
+  display: grid;
+  gap: 0.75rem;
+  max-width: 30rem;
+  font-size: var(--text-lg);
+  line-height: 1.45;
+  text-wrap: pretty;
+}
+.done__notes li {
+  display: grid;
+  grid-template-columns: 1.625rem 1fr;
+  gap: 0.875rem;
+}
+.done__notes svg {
+  width: 1.625rem;
+  height: 1.625rem;
+  padding: 0.3125rem;
+  border-radius: 50%;
+  background: var(--color-sage);
+  fill: none;
+  stroke: var(--color-card);
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.done__video {
+  display: grid;
+  gap: 0.875rem;
+}
+.done__video figcaption {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  font-size: var(--text-lg);
+}
+.done__video figcaption span {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  color: var(--muted);
+  white-space: nowrap;
+}
+@media (min-width: 64rem) {
+  .done {
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+    align-items: center;
+  }
+}
+
+.next {
+  display: grid;
+  gap: clamp(1.5rem, 4vw, 2.5rem);
+  max-width: 82rem;
+  margin-inline: auto;
+  padding: clamp(3.5rem, 8vw, 6.5rem) calc(var(--frame) + clamp(0.75rem, 2vw, 1.5rem));
+}
+.next__list {
+  display: grid;
+  gap: 0.625rem;
+}
+.next__list > li {
+  display: grid;
+  grid-template-columns: 2.5rem minmax(0, 1fr);
+  align-content: start;
+  gap: 1rem;
+  padding: clamp(1.25rem, 3vw, 2rem);
+  border-radius: 1.5rem;
+  background: var(--window);
+  font-size: var(--text-lg);
+  line-height: 1.55;
+  text-wrap: pretty;
+}
+.next__list > li > b {
+  display: grid;
+  place-items: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  background: var(--color-accent);
+  color: var(--color-ink);
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  font-weight: 500;
+}
+.next__chat {
+  display: grid;
+  justify-items: start;
+  gap: 1rem;
+}
+.next__chat[hidden],
+.next__chat [hidden] {
+  display: none;
+}
+.next__chat + .next__chat,
+[data-note] + .next__chat {
+  margin-top: 1rem;
+}
+.next__saved {
+  font-weight: 700;
+}
+.next__small {
+  color: var(--muted);
+  font-size: var(--text-base);
+}
+@media (min-width: 56rem) {
+  .next__list {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+.next__chat .btn {
+  max-width: 100%;
+  white-space: normal;
+  text-align: center;
+}
+/* On a phone the number sits above its words, so the words and the button get the whole width. */
+@media (max-width: 30rem) {
+  .next__list > li {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .next__chat .btn {
+    width: 100%;
+    padding-inline: 1rem;
+  }
+}

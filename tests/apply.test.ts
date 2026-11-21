@@ -8,15 +8,21 @@ import worker from "../src/worker";
 const SHEETS_URL = "https://storage.example.test/exec";
 const env = { SHEETS_URL, SHEETS_TOKEN: "test-only-storage-value" } as Env;
 const NOW = "2026-11-21T10:00:00.000Z";
+/** The choices of one question, as the form offers them. */
+const options = (id: string) => {
+  const question = form.questions.find((item) => item.id === id);
+  if (!question || question.type !== "choice") throw new Error(`${id} is not a choice`);
+  return question.options;
+};
 const answers = {
   profile: "@test.person",
   sell: "Bookkeeping. One client is worth 2,000 USD.",
   stranger: "That I do the books.",
-  film: form.questions[3].options[0],
-  count: form.questions[4].options[1],
-  decides: form.questions[5].options[0],
-  start: form.questions[6].options[2],
-  budget: form.questions[7].options[1],
+  film: options("film")[0]!,
+  count: options("count")[1]!,
+  decides: options("decides")[0]!,
+  start: options("start")[2]!,
+  budget: options("budget")[1]!,
 };
 const valid = {
   id: "test-0001-abcd",
@@ -69,13 +75,16 @@ afterEach(() => {
 describe("parseApplication", () => {
   it("keeps the 8 answers in the form's order, with each question as its heading", () => {
     const { application } = good();
-    expect(application.answers.map((item) => item.id)).toEqual(
-      form.questions.map((question) => question.id),
-    );
-    expect(application.answers.map((item) => item.question)).toEqual(
+    // The 8 answers, then the tag that says what the person was shown.
+    const eight = application.answers.slice(0, 8);
+    expect(eight.map((item) => item.id)).toEqual(form.questions.map((question) => question.id));
+    expect(eight.map((item) => item.question)).toEqual(
       form.questions.map((question) => question.q),
     );
-    expect(application.answers.map((item) => item.answer)).toEqual(Object.values(answers));
+    expect(eight.map((item) => item.answer)).toEqual(Object.values(answers));
+    expect(application.answers.slice(8)).toEqual([
+      { id: "outcome", question: "Outcome", answer: "Calendar shown" },
+    ]);
     expect(application).toMatchObject({
       kind: "application",
       id: valid.id,
@@ -141,6 +150,23 @@ describe("parseApplication", () => {
     expect(parse({ answers: "profile" }).ok).toBe(false);
   });
   const choices = form.questions.filter((question) => question.type === "choice");
+  it("tags a budget under the lowest price, and a booking made from a chat", () => {
+    expect(form.tooLow.option).toBe("Under 750 USD");
+    expect(options("budget")).toEqual([
+      "Under 750 USD",
+      "750 to 1,500 USD",
+      "1,500 to 3,000 USD",
+      "Over 3,000 USD",
+    ]);
+    const low = good({ answers: { ...answers, budget: form.tooLow.option } });
+    expect(low.application.answers.at(-1)).toEqual({
+      id: "outcome",
+      question: "Outcome",
+      answer: "Budget under the lowest price: no calendar shown",
+    });
+    expect(low.lead.budget).toBe("Under 750 USD");
+    expect(good({ kind: "prep" }).application.answers.at(-1)!.answer).toBe("Booked from a chat");
+  });
   it("asks five of the questions as a choice", () => {
     expect(choices.map((question) => question.id)).toEqual([
       "film",
@@ -246,7 +272,7 @@ describe("apply handler", () => {
     expect(Object.keys(body.lead).sort()).toEqual([...LEAD_KEYS].sort());
     expect(body.lead.timestamp).toBe(NOW);
     expect(body.application).toMatchObject({ kind: "application", id: valid.id, submittedAt: NOW });
-    expect(body.application.answers).toHaveLength(8);
+    expect(body.application.answers).toHaveLength(9);
   });
   it("ignores a time, a token or a status sent by the page", async () => {
     await handleApply(

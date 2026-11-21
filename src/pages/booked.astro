@@ -1,99 +1,108 @@
 ---
+/**
+ * The page after a booking (the deck's section 14): him, the confirmation video, and what happens next.
+ * The calendar inside the form sends people here when a booking succeeds; the first name and the email
+ * are kept on the device, or come in the address when the booking page sends them.
+ */
 import { existsSync } from "node:fs";
-import Base from "../layouts/Base.astro";
-import VideoCard from "../components/VideoCard.astro";
-import Mark from "../components/Mark.astro";
+import "../styles/page/booked.css";
+import Home from "../layouts/Home.astro";
+import Bar from "../components/page/Bar.astro";
+import Foot from "../components/page/Foot.astro";
+import Video from "../components/page/Video.astro";
 import Application from "../components/application/Application.astro";
+import { section } from "../content/deck";
 import { booked } from "../content/site";
 import { APPLICATION_AFTER_BOOKING_URL, APPLICATION_MODE, CONFIRMATION_VIDEO } from "../config";
 
-// The slot takes the confirmation video. Until its file is in public/, the card shows the poster.
+const s = section(14);
+// The slot takes the confirmation video. Until its file is in public/, the slot shows the poster.
 const video =
   CONFIRMATION_VIDEO && existsSync(new URL(`../../public${CONFIRMATION_VIDEO}`, import.meta.url))
     ? CONFIRMATION_VIDEO
     : "";
 const native = APPLICATION_MODE === "native";
-const words = booked.application;
+const button = s.get("booked from a chat, button");
 ---
 
-<Base title={booked.title} description={booked.description} noindex apply={false}>
-  <article class="doc">
-    <h1 data-booked={booked.h1Named}>{booked.h1}</h1>
-    <div class="doc__block">
-      <p class="lead">{booked.invite}</p>
-      <p>{booked.calendar}</p>
-      <p data-chat-line hidden>
-        {booked.chat}
-      </p>
+<Home title={s.get("heading, no name")} description={s.get("practical 1")} noindex ownForm>
+  <Bar slot="bar" cta={false} />
+  <section class="window done" id="top" aria-labelledby="done-h">
+    <div class="done__words">
+      <h1 class="done__h" id="done-h" data-booked={s.get("heading")} data-enter style="--i:0">
+        {s.get("heading, no name")}
+      </h1>
+      <ul class="done__notes" data-enter style="--i:1">
+        {s.list("practical ").map(({ words }) => (
+          <li>
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M6.5 12.5l3.5 3.5 7.5-8" />
+            </svg>
+            <span>{words}</span>
+          </li>
+        ))}
+      </ul>
     </div>
-    <VideoCard
-      src={video}
-      alt={booked.video.alt}
-      title={booked.video.title}
-      length={booked.video.length}
-      play={booked.video.play}
-    />
-    <section class="card card--sage" aria-labelledby="booked-call">
-      <h2 id="booked-call">{booked.call.title}</h2>
-      <p class="small">{booked.call.meta}</p>
-      <ol class="steplist">
-        {booked.call.items.map((item) => (
-          <li>{item}</li>
-        ))}
-      </ol>
-    </section>
-    <section class="card" aria-labelledby="booked-ready">
-      <h2 id="booked-ready">{booked.ready.title}</h2>
-      <ul class="ticklist">
-        {booked.ready.items.map((item) => (
-          <li>
-            <Mark />
-            {item}
-          </li>
-        ))}
-      </ul>
-      <p class="muted" data-note>
-        {words.body}
-      </p>
-      <div class="doc__block" data-chat hidden>
-        <p data-chat-first>{words.first}</p>
-        {native ? (
-          <button class="btn btn--parts" type="button" data-apply-open data-chat-action>
-            <span>{words.link[0]}</span> <span>{words.link[1]}</span>
-          </button>
-        ) : (
-          <a class="btn btn--parts" href={APPLICATION_AFTER_BOOKING_URL} data-chat-action>
-            <span>{words.link[0]}</span> <span>{words.link[1]}</span>
-          </a>
-        )}
-        <p class="lead" data-chat-saved role="status" hidden>
-          {words.saved}
-        </p>
-      </div>
-      {/* Answers typed before the booking that had not saved are sent once more from here. */}
-      <div class="doc__block" data-resend hidden>
-        <p role="status" data-resend-note data-saved={words.resent} data-failed={words.unsent}></p>
-        <button class="btn btn--small" type="button" data-resend-retry hidden>
-          {words.retry}
-        </button>
-      </div>
-    </section>
-    <section class="doc__block" aria-labelledby="booked-before">
-      <h2 id="booked-before">{booked.before.title}</h2>
-      <ul class="doc__block">
-        {booked.before.items.map((item) => (
-          <li>
-            <a class="more" href={item.href}>
-              {item.text}
-            </a>
-          </li>
-        ))}
-      </ul>
-    </section>
-    <p class="muted">{booked.refund}</p>
-  </article>
-</Base>
-{native && <Application kind="prep" />}
+    <figure class="done__video" data-enter style="--i:2">
+      <figcaption>
+        <b>{s.get("video, title")}</b>
+        <span>{s.get("video, length")}</span>
+      </figcaption>
+      <Video src={video} title={s.get("video, title")} />
+    </figure>
+  </section>
+
+  <section class="next" aria-labelledby="next-h">
+    <h2 class="h2" id="next-h" data-reveal>
+      {s.get("next, title")}
+    </h2>
+    <ol class="next__list">
+      <li data-reveal style="--i:0">
+        <b>1</b>
+        <div>
+          <p data-note>{s.get("next 1")}</p>
+          <div class="next__chat" data-chat hidden>
+            <p data-chat-first>{s.get("booked from a chat, in place of next 1")}</p>
+            {native ? (
+              <button class="btn" type="button" data-apply-open data-chat-action>
+                {button}
+              </button>
+            ) : (
+              <a class="btn" href={APPLICATION_AFTER_BOOKING_URL} data-chat-action>
+                {button}
+              </a>
+            )}
+            <p class="next__saved" data-chat-saved role="status" hidden>
+              {booked.saved}
+            </p>
+            <p class="next__small" data-chat-line>
+              {s.get("booked from a chat, line")}
+            </p>
+          </div>
+          {/* Answers typed before the booking that had not saved are sent once more from here. */}
+          <div class="next__chat" data-resend hidden>
+            <p
+              class="next__small"
+              role="status"
+              data-resend-note
+              data-saved={booked.resent}
+              data-failed={booked.unsent}
+            ></p>
+            <button class="btn btn--quiet" type="button" data-resend-retry hidden>
+              {booked.retry}
+            </button>
+          </div>
+        </div>
+      </li>
+      <li data-reveal style="--i:1">
+        <b>2</b>
+        <p>{s.get("next 2")}</p>
+      </li>
+    </ol>
+  </section>
+  <Foot slot="after" />
+  {native && <Application kind="prep" slot="after" />}
+</Home>
 <script>
   import "../scripts/booked";
 </script>

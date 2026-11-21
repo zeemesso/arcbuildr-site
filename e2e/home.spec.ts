@@ -8,8 +8,27 @@ const plain = (text: string) => text.replace(/[[\]]/g, "");
 /** A page's text with every run of spaces as one space. */
 const flat = (text: string | null) => (text ?? "").replace(/\s+/g, " ").trim();
 
+/** Letters and digits only: a row the page splits into cells still reads the same, word for word. */
+const squash = (text: string | null) => (text ?? "").replace(/[^\p{L}\p{N}]+/gu, "");
+
 const first = section(1);
 const get = section(5);
+/** The 12 sections, in the deck's order, with the id each has on the page. */
+const SECTIONS = [
+  "top",
+  "believe",
+  "zyade",
+  "how",
+  "get",
+  "work",
+  "weeks",
+  "price",
+  "guarantee",
+  "fit",
+  "questions",
+  "apply",
+];
+const CARDS = Array.from({ length: 11 }, (_, n) => String(n + 1).padStart(2, "0"));
 
 test.describe("the home page", () => {
   test.use({ reducedMotion: "reduce" });
@@ -36,6 +55,33 @@ test.describe("the home page", () => {
     ]);
   });
 
+  test("the 12 sections come in the deck's order", async ({ page }) => {
+    await page.goto("/");
+    const ids = await page.locator("main > section").evaluateAll((els) => els.map((el) => el.id));
+    expect(ids).toEqual(SECTIONS);
+  });
+
+  for (const [index, id] of SECTIONS.entries()) {
+    test(`section ${index + 1} (#${id}) says every line of the deck, word for word, in order`, async ({
+      page,
+    }) => {
+      await page.goto("/");
+      const text = squash(await page.locator(`#${id}`).textContent());
+      let from = 0;
+      for (const { slot, words } of section(index + 1).list("")) {
+        // A note for a real piece has no words of its own. A gallery tab shows only once it has a piece.
+        if (!words || /^tab \d/.test(slot)) continue;
+        const said = squash(founding(words));
+        const at = text.indexOf(said, from);
+        expect(at, `${slot}: ${words}`).toBeGreaterThanOrEqual(0);
+        // Most sections keep the deck's order from top to bottom. Four place a line by design: the first
+        // screen's hanging tab, the diagram's labels, a card's date above its title, and the iceberg's
+        // picture before its list.
+        if (![1, 4, 5, 7].includes(index + 1)) from = at;
+      }
+    });
+  }
+
   test("his name and role sit beside the buttons, with initials until a real photo exists", async ({
     page,
   }) => {
@@ -48,13 +94,28 @@ test.describe("the home page", () => {
     expect(await page.locator("#top").textContent()).not.toMatch(/USD|\$/);
   });
 
-  test("the two marks are the companies' own files, whole, on the second button", async ({
+  test("the two marks are the companies' own files, whole, in the three places", async ({
     page,
   }) => {
     await page.goto("/");
-    const marks = page.locator(".btn--quiet .marks img");
-    await expect(marks).toHaveCount(2);
+    const files = ["/marks/claude-spark.svg", "/marks/openai-blossom.svg"];
+    // The first screen's second button, the diagram's second output, the corner of card 10's screen.
+    for (const place of [
+      "#top .btn--quiet",
+      "#how .flow",
+      "#get .card:nth-child(10) .card__stage",
+    ]) {
+      const here = page.locator(`${place} .marks img`);
+      await expect(here, place).toHaveCount(2);
+      expect(
+        await here.evaluateAll((imgs) => imgs.map((img) => img.getAttribute("src"))),
+        place,
+      ).toEqual(files);
+    }
+    await expect(page.locator("main .marks img")).toHaveCount(6);
+    const marks = page.locator("main .marks img");
     for (const mark of await marks.all()) {
+      await mark.scrollIntoViewIfNeeded();
       expect(await mark.evaluate((img: HTMLImageElement) => img.naturalWidth)).toBeGreaterThan(0);
       // Nothing is drawn over a mark: the point at its center is the mark itself.
       const covered = await mark.evaluate((img) => {
@@ -63,10 +124,6 @@ test.describe("the home page", () => {
       });
       expect(covered).toBe(false);
     }
-    expect(await marks.evaluateAll((imgs) => imgs.map((img) => img.getAttribute("src")))).toEqual([
-      "/marks/claude-spark.svg",
-      "/marks/openai-blossom.svg",
-    ]);
   });
 
   test("section 5 says the deck's words, and each card has its number, date, title and body", async ({
@@ -77,7 +134,8 @@ test.describe("the home page", () => {
     await expect(page.locator("#get h2")).toHaveText(get.get("heading"));
     await expect(page.locator(".get__line")).toHaveText(get.get("line under it"));
     const cards = page.locator(".cards > .card");
-    for (const [index, n] of ["01", "02"].entries()) {
+    await expect(cards).toHaveCount(11);
+    for (const [index, n] of CARDS.entries()) {
       const card = cards.nth(index);
       await expect(card.locator(".card__n")).toHaveText(n);
       await expect(card.locator(".card__date")).toHaveText(get.get(`card ${n}, date`));
@@ -91,8 +149,11 @@ test.describe("the home page", () => {
     page,
   }) => {
     await page.goto("/");
-    for (const [index, n] of ["01", "02"].entries()) {
-      const own = ["title", "date", "body"].map((part) => get.get(`card ${n}, ${part}`)).join(" ");
+    for (const [index, n] of CARDS.entries()) {
+      const own = get
+        .list(`card ${n}, `)
+        .map(({ words }) => words)
+        .join(" ");
       // Every piece of text inside the screen is a number or a run of the card's own words.
       const texts = await page
         .locator(".cards > .card")
@@ -107,7 +168,12 @@ test.describe("the home page", () => {
           }
           return found;
         });
-      for (const text of texts) if (!/^\d+$/.test(text)) expect(own).toContain(text);
+      for (const text of texts) {
+        if (/^\d+$/.test(text)) continue;
+        expect(own, `card ${n}: "${text}"`).toContain(text);
+        // What an owner would read: never a file name, a time stamp, a version or a check code.
+        expect(text, `card ${n}`).not.toMatch(/\.\w{2,4}$|\d:\d\d|\bv\d|#\w+|[A-F0-9]{6,}/);
+      }
     }
     // The first screen's loop holds no text at all.
     expect(flat(await page.locator(".take").textContent()).replace(/\d/g, "")).toBe("");
@@ -127,14 +193,152 @@ test.describe("the home page", () => {
       expect(await el.evaluate((node) => getComputedStyle(node).opacity)).toBe("1");
       expect(await el.evaluate((node) => getComputedStyle(node).translate)).toBe("none");
     }
+    // The gallery stays still, with no pause button, and the diagram's lines do not run.
+    const row = page.locator("#work [data-reel-row]");
+    await row.scrollIntoViewIfNeeded();
+    await expect(page.locator("#work [data-reel-pause]")).toBeHidden();
+    await page.waitForTimeout(3200);
+    expect(await row.evaluate((el) => el.scrollLeft)).toBe(0);
+    const running = await page.evaluate(
+      () =>
+        document.getAnimations().filter((animation) => animation.playState === "running").length,
+    );
+    expect(running).toBe(0);
   });
 
   test("names no social platform, and says videos, never episodes", async ({ page }) => {
     await page.goto("/");
     const text = (await page.locator("body").textContent())!;
     expect(text).not.toMatch(
-      /instagram|tiktok|linkedin|youtube|facebook|twitter|\bepisodes?\b|\bLLC\b|\bInc\b/i,
+      /instagram|tiktok|linkedin|youtube|facebook|twitter|\bepisodes?\b|\bLLC\b|\bInc\b|registered/i,
     );
+    // No install steps, file names or jargon.
+    expect(text).not.toMatch(/\binstall|\.zip\b|\.md\b|terminal|\bprompt\b|\bAPI\b|\brepo\b/i);
+  });
+
+  test("an apply button closes sections 3, 5, 8 and 10, and each opens the same form", async ({
+    page,
+  }) => {
+    await page.goto("/");
+    const form = page.locator(".apply");
+    for (const [n, id] of [
+      [3, "zyade"],
+      [5, "get"],
+      [8, "price"],
+      [10, "fit"],
+    ] as const) {
+      const strip = page.locator(`#${id} .strip`);
+      await expect(strip).toHaveCount(1);
+      await expect(strip.locator("p")).toHaveText(founding(section(n).get("apply strip")));
+      const button = strip.locator("[data-apply-open]");
+      await expect(button).toHaveText(section(12).get("button"));
+      // It is the last thing in its section.
+      expect(await strip.evaluate((el) => el.parentElement!.lastElementChild === el), id).toBe(
+        true,
+      );
+      await press(button);
+      await expect(form, id).toBeVisible();
+      await expect(form.locator("#a-name"), id).toBeFocused();
+      await page.keyboard.press("Escape");
+      await expect(form, id).toBeHidden();
+    }
+    // The other sections have none, and the final panel has the two fields.
+    await expect(page.locator("main .strip")).toHaveCount(4);
+    await expect(page.locator("#apply form[data-apply-entry] input")).toHaveCount(2);
+    await expect(page.locator("#apply form button")).toHaveText(section(12).get("button"));
+  });
+
+  test("the price shows the stack, the six prices and the founding places, and nothing negative", async ({
+    page,
+  }) => {
+    await page.goto("/");
+    const price = page.locator("#price");
+    await expect(price.locator(".stack li")).toHaveCount(11);
+    await expect(price.locator(".sizes__table tbody tr")).toHaveCount(3);
+    const cells = await price.locator(".sizes__table tbody td").allTextContents();
+    expect(cells.filter((cell) => /^[\d,]+ USD$/.test(cell.trim()))).toHaveLength(6);
+    await expect(price.locator(".sizes__founding")).toHaveText(
+      founding(section(8).get("founding line")),
+    );
+    await expect(price.locator(".sizes__founding i")).toHaveCount(3);
+    // Beside the price: the total and the founding price, and no other figure or warning.
+    await expect(price.locator(".sum p")).toHaveCount(2);
+    expect(await price.locator(".sum").textContent()).not.toMatch(/\bno\b|\bnot\b|don't|never/i);
+    // The AI kit is one line of the stack.
+    expect(
+      (await price.locator(".stack li").allTextContents()).filter((row) => /\bAI\b/.test(row)),
+    ).toHaveLength(1);
+  });
+
+  test("the iceberg explains every band, each tied to its line by its color", async ({ page }) => {
+    await page.goto("/");
+    const bands = page.locator("#weeks .berg__band");
+    const lines = page.locator("#weeks .berg__items li[data-band]");
+    await expect(bands).toHaveCount(9);
+    await expect(lines).toHaveCount(9);
+    for (let n = 0; n < 9; n++) {
+      const words = section(7).get(`band ${n + 1}`);
+      await expect(lines.nth(n)).toHaveText(words);
+      expect(words.startsWith(`${(await bands.nth(n).textContent())!.trim()}.`)).toBe(true);
+      const band = await bands.nth(n).evaluate((el) => getComputedStyle(el).backgroundColor);
+      const key = await lines
+        .nth(n)
+        .locator(".berg__key")
+        .evaluate((el) => getComputedStyle(el).backgroundColor);
+      expect(key, `band ${n + 1}`).toBe(band);
+    }
+    // Nine different colors.
+    const colors = await bands.evaluateAll((els) =>
+      els.map((el) => getComputedStyle(el).backgroundColor),
+    );
+    expect(new Set(colors).size).toBe(9);
+  });
+
+  test("the gallery shows no invented piece: blanks hold no words, and a tab with no piece is hidden", async ({
+    page,
+  }) => {
+    await page.goto("/");
+    const pieces = page.locator("#work .piece");
+    const real = page.locator("#work .piece:not(.piece--blank)");
+    const tabs = page.locator("#work [data-reel-tab]");
+    if ((await real.count()) === 0) {
+      await expect(tabs).toHaveCount(0);
+      expect(flat(await page.locator("#work .reel__row").textContent())).toBe("");
+      await expect(page.locator("#work .reel__row")).toHaveAttribute("aria-hidden", "true");
+    } else {
+      // Every tab on show has a piece of its own.
+      for (const tab of await tabs.all()) {
+        const n = await tab.getAttribute("data-reel-tab");
+        expect(await page.locator(`#work .piece[data-tab="${n}"]`).count()).toBeGreaterThan(0);
+      }
+      await expect(page.locator("#work .piece--blank")).toHaveCount(0);
+    }
+    expect(await pieces.count()).toBeGreaterThan(0);
+  });
+
+  test("the questions open one at a time, the first one open", async ({ page }) => {
+    await page.goto("/");
+    const rows = page.locator("#questions details");
+    await expect(rows).toHaveCount(8);
+    await expect(rows.first()).toHaveAttribute("open", "");
+    await expect(page.locator("#questions details[open]")).toHaveCount(1);
+    await press(rows.nth(5).locator("summary"));
+    await expect(rows.nth(5)).toHaveAttribute("open", "");
+    await expect(rows.nth(5)).toContainText(section(11).get("answer 6, second paragraph"));
+    await expect(page.locator("#questions details[open]")).toHaveCount(1);
+  });
+
+  test("no section sits on the same surface as the one before it", async ({ page }) => {
+    await page.goto("/");
+    // A section is a window with its own color, or type straight on the canvas.
+    const surfaces = await page.locator("main > section").evaluateAll((els) =>
+      els.map((el) => {
+        const color = getComputedStyle(el).backgroundColor;
+        return /rgba?\(0, 0, 0, 0\)|transparent/.test(color) ? "canvas" : color;
+      }),
+    );
+    for (let n = 1; n < surfaces.length; n++)
+      expect(surfaces[n], `section ${n + 1} after section ${n}`).not.toBe(surfaces[n - 1]);
   });
 });
 
@@ -152,6 +356,54 @@ test.describe("the home page in motion", () => {
       .toBe(0);
     await page.evaluate(() => scrollTo(0, 0));
     await expect(screen).not.toHaveClass(/is-looping/);
+  });
+
+  test("the gallery steps forward by itself, and the pause button stops it", async ({ page }) => {
+    await page.goto("/");
+    const row = page.locator("#work [data-reel-row]");
+    const pause = page.locator("#work [data-reel-pause]");
+    await row.scrollIntoViewIfNeeded();
+    await expect(pause).toBeVisible();
+    await expect
+      .poll(() => row.evaluate((el) => el.scrollLeft), { timeout: 9000 })
+      .toBeGreaterThan(50);
+    await press(pause);
+    await expect(pause).toHaveAttribute("aria-pressed", "true");
+    // Let a step that had started finish, then nothing more moves.
+    await page.waitForTimeout(1200);
+    const held = await row.evaluate((el) => el.scrollLeft);
+    await page.waitForTimeout(3200);
+    expect(await row.evaluate((el) => el.scrollLeft)).toBe(held);
+  });
+
+  test("the five steps turn by themselves on a wide screen, and a press picks one", async ({
+    page,
+  }, info) => {
+    test.skip(info.project.name !== "desktop", "The row of tabs is the wide layout");
+    await page.goto("/");
+    const steps = page.locator("#how [data-steps]");
+    await steps.scrollIntoViewIfNeeded();
+    await expect(steps).toHaveAttribute("data-active", "1");
+    await expect(steps).toHaveAttribute("data-active", "2", { timeout: 9000 });
+    await press(steps.locator("button").nth(4));
+    await expect(steps).toHaveAttribute("data-active", "5");
+    await expect(steps.locator("button").nth(4)).toHaveAttribute("aria-expanded", "true");
+    await page.waitForTimeout(6000);
+    await expect(steps).toHaveAttribute("data-active", "5");
+  });
+
+  test("every one of the 11 screens plays, and comes back to its start", async ({ page }) => {
+    test.slow();
+    await page.goto("/");
+    for (const [index, n] of CARDS.entries()) {
+      const screen = page.locator(".cards > .card").nth(index).locator("[data-loop]");
+      await screen.scrollIntoViewIfNeeded();
+      await expect(screen, `card ${n}`).toHaveClass(/is-looping/);
+      expect(await screen.locator("[data-at]").count(), `card ${n}`).toBeGreaterThan(1);
+      await expect
+        .poll(() => screen.locator("[data-at].on").count(), { timeout: 8000 })
+        .toBeGreaterThan(0);
+    }
   });
 
   test("sections enter as you scroll", async ({ page }) => {
@@ -212,6 +464,20 @@ test.describe("on a phone", () => {
   });
 });
 
+test.describe("the iceberg on a phone", () => {
+  test.use({ viewport: { width: 390, height: 844 }, reducedMotion: "reduce" });
+  test("one picture first, then the list with its color keys", async ({ page }) => {
+    await page.goto("/");
+    const picture = (await page.locator("#weeks .berg__pic").boundingBox())!;
+    const list = (await page.locator("#weeks .berg__list").boundingBox())!;
+    expect(picture.y + picture.height).toBeLessThanOrEqual(list.y);
+    // The picture is one piece, as wide as the window lets it be.
+    expect(picture.width).toBeGreaterThan(300);
+    for (const key of await page.locator("#weeks .berg__items li[data-band] .berg__key").all())
+      expect((await key.boundingBox())!.width).toBeGreaterThan(10);
+  });
+});
+
 test.describe("a phone's first screen", () => {
   test.use({ reducedMotion: "reduce" });
   for (const width of [360, 375, 390, 414]) {
@@ -230,9 +496,10 @@ test.describe("without JavaScript", () => {
   test.use({ javaScriptEnabled: false });
   test("everything shows, and every screen is in its finished state", async ({ page }) => {
     await page.goto("/");
+    // The first screen's entrance is the style sheet's own, so it plays here too, and then it is done.
     for (const el of await page.locator("[data-reveal], [data-enter]").all()) {
-      expect(await el.evaluate((node) => getComputedStyle(node).opacity)).toBe("1");
-      expect(await el.evaluate((node) => getComputedStyle(node).translate)).toBe("none");
+      await expect(el).toHaveCSS("opacity", "1");
+      await expect(el).toHaveCSS("translate", "none");
     }
     const hidden = await page
       .locator("[data-loop] [data-at]")

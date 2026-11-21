@@ -1,0 +1,81 @@
+---
+/**
+ * Screen 05: script 1, its shot list and its card of talking points. The script moves up the page,
+ * the shot list lines up beside it, then the card turns over. Bars until the real script exists.
+ */
+import T from "./T.astro";
+import { excerpt, section } from "../../../content/deck";
+import { piece } from "../../../content/proof";
+const body = section(5).get("card 05, body");
+const real = piece("script-1");
+const caps = [
+  excerpt(body, "what to say"),
+  excerpt(body, "shot list"),
+  excerpt(body, "card of talking points"),
+  excerpt(body, "the one line to keep word for word"),
+];
+const lineWidths = [
+  "92%",
+  "100%",
+  "84%",
+  "96%",
+  "70%",
+  "100%",
+  "88%",
+  "94%",
+  "62%",
+  "98%",
+  "80%",
+  "90%",
+];
+const lines: (string | undefined)[] = real
+  ? real.lines.slice(0, 12)
+  : lineWidths.map(() => undefined);
+const shots: (string | undefined)[] = real?.shots?.slice(0, 3) ?? [undefined, undefined, undefined];
+const points: (string | undefined)[] = real?.card?.slice(0, 3) ?? [undefined, undefined, undefined];
+const keep = real?.keep ?? 1;
+---
+
+<figure class="screen s5" data-loop="10000" aria-hidden={real ? undefined : "true"}>
+  <div class="s5__script">
+    <p class="cap pop" data-at="150">
+      {caps[0]}
+    </p>
+    <div class="s5__roll" data-at="900">
+      <div class="bars typed" data-at="350">
+        {lines.map((line, k) => (
+          <T text={line} w={lineWidths[k]!} k={k} />
+        ))}
+      </div>
+    </div>
+  </div>
+  <div class="s5__shots">
+    <p class="cap pop" data-at="1300">
+      {caps[1]}
+    </p>
+    <ol>
+      {shots.map((shot, n) => (
+        <li class="pop" data-at={1500 + n * 220}>
+          <b>{n + 1}</b>
+          <span class="bars">
+            <T text={shot} w={["70%", "86%", "58%", "76%"][n]!} />
+          </span>
+        </li>
+      ))}
+    </ol>
+  </div>
+  <div class="s5__card" data-at="2500">
+    <div class="s5__back"></div>
+    <div class="s5__face">
+      <p class="cap">{caps[2]}</p>
+      <ul class="bars">
+        {points.map((point, n) => (
+          <li class:list={{ "is-kept": n === keep }}>
+            <T text={point} w={["82%", "94%", "66%"][n]!} strong={n === keep} />
+          </li>
+        ))}
+      </ul>
+      <p class="cap s5__keep">{caps[3]}</p>
+    </div>
+  </div>
+</figure>

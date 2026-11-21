@@ -80,6 +80,15 @@ Changed on 2026-11-21 (L1-P9 rebuild, branch `l1-p9-rebuild`):
 - Words: at most 25 on the first screen and 450 on load, counted by `e2e/home.spec.ts`. Script budget on the production build: 10 KB gzipped (`scripts/verify-main-build.mjs`).
 - Browser tests press with `press()` from `e2e/press.ts`: a tap on phone projects, a click on desktop.
 
+Changed on 2026-11-22 (L1-P11 page, branch `l1-p11-page`):
+
+- The home page and `/booked` are new (`DESIGN.md`, section 11): `src/components/page/`, `src/styles/page/`, `src/scripts/page.ts`. `/sample` and `src/components/home/` are gone.
+- Words: every page word comes from `~/fable-sprint/L1-P10/deck-v2.md`. `node scripts/deck/sync.mjs` copies it into `src/content/deck.json`; `--check` says whether the page is in sync. Never edit page words in the repo: change the deck, then sync. The word budgets of L1-P9 no longer apply.
+- Real pieces: `node scripts/proof/import.mjs` brings L13-P1's pieces in from `~/fable-sprint/L13-P1/proof/INDEX.md` into `src/content/proof/` and `public/proof/`, both ignored by git. An empty slot shows grey bars; an empty gallery tab is hidden. Nothing is invented.
+- His face: `FOUNDER_PHOTO` in `src/config.ts`, or the imported `founder-photo` piece; his initials until then. The Claude and ChatGPT marks: `AI_MARKS` in `src/config.ts` (`"names"` removes them).
+- After the form saves, the calendar opens inside the same layer (Cal.com's inline embed). A finished booking goes to `/booked` (`BOOKED_PATH`). A budget under 750 USD ends the form with the deck's lines and no calendar; the answers are saved with an `outcome` answer.
+- Browser tests answer the form's requests and the calendar themselves through `e2e/stubs.ts`.
+
 ## STATUS
 
 - Steps 1 to 6 done. `COPY.md`, `PROTOTYPE.md` and `PLAN.md` approved.
@@ -90,3 +99,4 @@ Changed on 2026-11-21 (L1-P9 rebuild, branch `l1-p9-rebuild`):
 - 2026-11-18, later: Zyade rejected that preview's look. Branch `l1-p8-redesign` rebuilds it in Direction A2: 1,100 words on the home page (2,985 before), motion, the pixel character, `/sample` and `/booked`. L1-P8b added the chat state of `/booked`. `npm run check` passes (103 unit tests; 146 browser tests, 1 skipped on desktop by design). `CONTACT_EMAIL` is set. Next: Zyade reviews the branch preview; production only when he says "ship it".
 - 2026-11-21: branch `l1-p9-rebuild` replaces the home page and Tally with the site's own application (see the 2026-11-21 changes above). 442 words on load, 24 on the first screen. `npm run check` passes (173 unit tests; 156 browser tests, 2 skipped by design); the iPhone engine passes 77, 2 skipped. Lighthouse mobile on the preview: performance 92, accessibility 100. A test application from the preview reached the sheet.
 - 2026-11-21, later: the sheet's script is updated (deployment "Site lead form v1", Version 3). `PUBLIC_CF_ANALYTICS_TOKEN` is a build variable of the Worker, so builds made by Cloudflare count visits. A test application from the preview landed in the "Tally application" tab with its 8 answers, and the sheet copied it to Leads as "applied"; the test rows are deleted. A push to `main` is the production deploy (Cloudflare builds `main` with `npx wrangler deploy`). Cal.com shows "Redirect on booking" as a paid Teams feature on this account, so `/booked` is not reached after a booking until Zyade picks a route: an email on booking from a Cal.com workflow, the calendar inside the site, or the paid plan. Next: Zyade reviews the preview and picks the route; production only when he says "ship it".
+- 2026-11-22: branch `l1-p11-page` rebuilds the page from the deck (see the 2026-11-22 changes above): 12 sections, the 11 live screens, the gallery, the iceberg, the form with the calendar inside it, and the new `/booked`. Every real-piece slot is empty and his face is initials, because L13-P1 has delivered no piece and no photo yet. `npm run check` passes (178 unit tests; 193 browser tests, 3 skipped by design); the iPhone engine passes 95, 3 skipped. Scripts are 8.2 KB gzipped. Next: Zyade judges the preview; production only when he says "ship it".

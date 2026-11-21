@@ -1,0 +1,17 @@
+---
+/**
+ * A real piece that is a picture (a screenshot of the document): shown whole in a window, then it
+ * moves slowly down the page, the way someone reads it.
+ */
+interface Props {
+  image: string;
+  alt: string;
+}
+const { image, alt } = Astro.props;
+---
+
+<figure class="screen shot" data-loop="10000">
+  <div class="shot__window">
+    <img src={image} alt={alt} loading="lazy" decoding="async" data-at="1200" />
+  </div>
+</figure>

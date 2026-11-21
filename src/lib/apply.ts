@@ -40,16 +40,28 @@ export function parseApplication(body: unknown): ParsedApplication {
   for (const question of form.questions) {
     const value = answer(given[question.id]);
     if (!value) return { ok: false };
-    if (question.type === "choice" && !(question.options as readonly string[]).includes(value))
-      return { ok: false };
+    if (question.type === "choice" && !question.options.includes(value)) return { ok: false };
     answers.push({ id: question.id, question: question.q, answer: value });
   }
+  // The tag the brief asks for: whether this person was shown the calendar. It becomes one more column.
+  const kind = data.kind === "prep" ? "prep" : "application";
+  const low = form.tooLow;
+  const tooLow = answers.some((item) => item.id === low.id && item.answer === low.option);
+  answers.push({
+    id: "outcome",
+    question: "Outcome",
+    answer:
+      kind === "prep"
+        ? "Booked from a chat"
+        : tooLow
+          ? "Budget under the lowest price: no calendar shown"
+          : "Calendar shown",
+  });
   const from = origin(data);
   const by = Object.fromEntries(answers.map((item) => [item.id, item.answer])) as Record<
     string,
     string
   >;
-  const kind = data.kind === "prep" ? "prep" : "application";
   return {
     ok: true,
     // A person never sees the trap field. A program that fills it gets a calm answer and no row.

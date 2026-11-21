@@ -32,3 +32,5 @@ export const FOUNDER_PHOTO = "";
 // The Claude and ChatGPT marks (public/marks/, each company's own file, unchanged). Both companies ask for
 // their approval before a site shows their mark: "names" writes the two names instead, with no mark.
 export const AI_MARKS: "official" | "names" = "official";
+// After a booking made in the calendar inside the page, the visitor goes here.
+export const BOOKED_PATH = "/booked";

@@ -24,6 +24,11 @@ export type ApplyOptions = {
   done?: () => void;
   /** Name and email the page already knows (a booking made from a chat). */
   seed?: { name: string; email: string };
+  /**
+   * Puts the calendar inside `into`, with the name and email filled. `failed` is called when it cannot load;
+   * the form then shows a link to `booking` instead. With a calendar, nobody is sent to another site.
+   */
+  calendar?: (into: HTMLElement, who: { name: string; email: string }, failed: () => void) => void;
   /** Called once, the first time the form holds a valid name and email (the page's own "opened" beacon). */
   opened?: (who: { name: string; email: string }) => void;
 };
@@ -45,6 +50,8 @@ type Saved = {
 
 const KEY = "arcbuildr-application";
 const DONE = "arcbuildr-application-done";
+/** What the person saw after saving, in this visit: "end" (no calendar) or "calendar". */
+const OUTCOME = "arcbuildr-application-outcome";
 const HASH = "#apply";
 const OUT = "cubic-bezier(0.23, 1, 0.32, 1)"; // 1: entrances ease out.
 const INOUT = "cubic-bezier(0.4, 0, 0.2, 1)"; // 9: moves between two places.
@@ -107,10 +114,19 @@ export function initApply(options: ApplyOptions) {
     again: string;
     next: string;
     finish: string;
+    finishShort: string;
     errName: string;
     errEmail: string;
     send: Record<
-      "busy" | "done" | "saving" | "slow" | "failed" | "offline" | "retry" | "booked",
+      | "busy"
+      | "done"
+      | "saving"
+      | "savingShort"
+      | "slow"
+      | "failed"
+      | "offline"
+      | "retry"
+      | "booked",
       string
     >;
   };
@@ -140,6 +156,9 @@ export function initApply(options: ApplyOptions) {
   );
   const entries = [...document.querySelectorAll<HTMLFormElement>("[data-apply-entry]")];
   const trap = layer.querySelector<HTMLInputElement>("[data-trap]");
+  const afterWrap = layer.querySelector<HTMLElement>("[data-apply-after]");
+  const endPanel = layer.querySelector<HTMLElement>("[data-apply-end]");
+  const calPanel = layer.querySelector<HTMLElement>("[data-apply-calendar]");
 
   // ---- What was typed stays on this device until the sheet has it. ----
   let state = fresh();
@@ -174,6 +193,16 @@ export function initApply(options: ApplyOptions) {
     keep();
   } else if (seed?.name && !state.name.trim()) state.name = seed.name;
   const who = () => ({ name: state.name.trim(), email: state.email.trim() });
+  /** A budget under the lowest price: the answers are saved, and no calendar is offered. */
+  const tooLow = () =>
+    !!endPanel && state.answers[endPanel.dataset.id || ""] === endPanel.dataset.option;
+  const outcome = () => {
+    try {
+      return sessionStorage.getItem(OUTCOME) || "";
+    } catch {
+      return "";
+    }
+  };
   const hasAnswers = () => Object.values(state.answers).some((value) => value.trim() !== "");
 
   let at = -1;
@@ -372,7 +401,15 @@ export function initApply(options: ApplyOptions) {
     if (n >= 1) count.textContent = String(n);
     layer.classList.toggle("is-last", at === last);
     if (!busy && !finished)
-      relabel(failed ? words.send.retry : at === last ? words.finish : words.next);
+      relabel(
+        failed
+          ? words.send.retry
+          : at !== last
+            ? words.next
+            : tooLow()
+              ? words.finishShort
+              : words.finish,
+      );
   }
   function focusStep() {
     const target = fieldOf(at) ?? radiosOf(at).find((radio) => radio.checked) ?? radiosOf(at)[0];
@@ -495,8 +532,14 @@ export function initApply(options: ApplyOptions) {
   }
   function begin(from: HTMLElement | null, focusBack: HTMLElement | null) {
     if (open) return;
-    const start = startIndex();
     returnTo = focusBack;
+    // Already saved in this visit: the layer opens on what came after, not on the questions again.
+    if (finished) {
+      openLayer(from);
+      history.pushState({ apply: last, depth: 1 }, "", HASH);
+      return leave();
+    }
+    const start = startIndex();
     greet(hasAnswers() ? "again" : start === WHO ? "hi" : "none");
     openLayer(from);
     history.pushState({ apply: start, depth: 1 }, "", HASH);
@@ -513,7 +556,44 @@ export function initApply(options: ApplyOptions) {
       closeLayer();
     }
   }
+  /** What comes after the questions, in the same layer: the calendar, or the lines that end the form. */
+  let mounted = false;
+  function after(kind: "end" | "calendar") {
+    if (!afterWrap || !endPanel || !calPanel) return;
+    lock(false);
+    if (!open) {
+      openLayer(null);
+      history.pushState({ apply: last, depth: 1 }, "", HASH);
+    }
+    form.hidden = true;
+    afterWrap.hidden = false;
+    layer.classList.add("is-after");
+    layer.classList.toggle("is-calendar", kind === "calendar");
+    endPanel.hidden = kind !== "end";
+    calPanel.hidden = kind !== "calendar";
+    if (kind === "end") {
+      const first = state.name.trim().split(/\s+/)[0] || "";
+      for (const line of endPanel.querySelectorAll<HTMLElement>("[data-line]"))
+        line.textContent = (line.dataset.line || "")
+          .replace(first ? "{name}" : ", {name}", first)
+          .replace("{name}", first);
+      closeButton.disabled = false;
+      closeButton.focus({ preventScroll: true });
+      return;
+    }
+    calPanel.querySelector<HTMLElement>("h2")?.focus({ preventScroll: true });
+    if (mounted || !options.calendar) return;
+    mounted = true;
+    const link = calPanel.querySelector<HTMLAnchorElement>("[data-calendar-link]");
+    options.calendar(calPanel.querySelector<HTMLElement>("[data-calendar]")!, who(), () => {
+      if (!link || !options.booking) return;
+      link.href = options.booking(who());
+      link.hidden = false;
+    });
+  }
   const leave = () => {
+    if (endPanel && (tooLow() || outcome() === "end")) return after("end");
+    if (options.calendar && calPanel) return after("calendar");
     const booking = options.booking;
     if (booking) return location.assign(booking(who()));
     shut();
@@ -545,7 +625,8 @@ export function initApply(options: ApplyOptions) {
     say(offline ? words.send.offline : words.send.failed, true);
     relabel(words.send.retry);
     if (options.booking) anyway.href = options.booking(who());
-    anyway.hidden = offline || !options.booking;
+    // No way round to the calendar for a budget under the lowest price.
+    anyway.hidden = offline || !options.booking || tooLow();
     ok.focus({ preventScroll: true });
     if (offline)
       addEventListener(
@@ -563,7 +644,7 @@ export function initApply(options: ApplyOptions) {
     busy = true;
     lock(true);
     relabel(words.send.busy);
-    say(words.send.saving);
+    say(tooLow() ? words.send.savingShort : words.send.saving);
     const control = new AbortController();
     abort = control;
     timers = [
@@ -600,6 +681,7 @@ export function initApply(options: ApplyOptions) {
     try {
       localStorage.removeItem(KEY);
       sessionStorage.setItem(DONE, state.email.trim().toLowerCase());
+      sessionStorage.setItem(OUTCOME, tooLow() ? "end" : "calendar");
     } catch {
       /* Storage may be off. */
     }
@@ -613,7 +695,14 @@ export function initApply(options: ApplyOptions) {
     if (busy) return;
     if (failed && at === last) return void send();
     if (!validAt(at)) return showError(at);
-    if (steps[at].dataset.who && steps.slice(0, WHO).every((_, i) => validAt(i))) claim();
+    if (steps[at].dataset.who && steps.slice(0, WHO).every((_, i) => validAt(i))) {
+      // Already applied in this visit with this email: no second form.
+      if (at === WHO - 1 && bookedAs() === state.email.trim().toLowerCase()) {
+        finished = true;
+        return leave();
+      }
+      claim();
+    }
     if (at === last) return void send();
     const next = at + 1;
     history.pushState({ apply: next, depth: depth() + 1 }, "", HASH);
@@ -694,7 +783,12 @@ export function initApply(options: ApplyOptions) {
     const now = event.state as { apply?: number } | null;
     if (now && typeof now.apply === "number" && steps[now.apply]) {
       if (busy) cancelSend();
-      if (finished) return;
+      // After the answers are saved, Back leaves the layer in one step.
+      if (finished) {
+        const pushed = depth();
+        if (pushed > 0) history.go(-pushed);
+        return;
+      }
       const target = Math.min(now.apply, firstOpen());
       if (!open) openLayer(null);
       show(target, target < at ? -1 : 1);
@@ -739,7 +833,11 @@ export function initApply(options: ApplyOptions) {
       state.name = name.value;
       state.email = email.value;
       // Already applied in this visit: straight to the calendar, no second form.
-      if (bookedAs() === email.value.toLowerCase()) return leave();
+      if (bookedAs() === email.value.toLowerCase()) {
+        finished = true;
+        returnTo = entry.querySelector<HTMLElement>("button");
+        return leave();
+      }
       claim();
       begin(entry, entry.querySelector<HTMLElement>("button"));
     });

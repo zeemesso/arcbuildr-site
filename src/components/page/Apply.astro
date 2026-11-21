@@ -1,0 +1,77 @@
+---
+/**
+ * 12. Apply: the final dark window. The headline, the first screen's sentence with its labels, the two
+ * fields and the button, the founding count beside it, and three small steps in a row.
+ * Without scripts the two fields lead to the booking page with the name and email filled.
+ */
+import { founding, labelled, section } from "../../content/deck";
+import { APPLICATION_MODE, APPLICATION_URL, BOOKING_URL } from "../../config";
+const s = section(12);
+const line = labelled(s.get("line under it"));
+const steps = s.list("step ").map(({ words }) => words);
+const fallback = APPLICATION_MODE === "native" ? BOOKING_URL : APPLICATION_URL;
+const under = founding(s.get("under the button"));
+---
+
+<section class="window window--night final" id="apply" aria-labelledby="final-h">
+  <div class="final__words">
+    <p class="label" data-reveal>
+      {s.get("label")}
+    </p>
+    <h2 class="final__h" id="final-h" data-reveal>
+      {s.get("heading")}
+    </h2>
+    <p class="final__line" data-reveal>
+      {line.map((part) => (part.label ? <span class="chip">{part.text}</span> : part.text))}
+    </p>
+    <p class="final__p" data-reveal>
+      {s.get("paragraph")}
+    </p>
+  </div>
+  <div class="final__box" data-reveal>
+    <form class="entry" action={fallback} novalidate data-apply-entry data-cta>
+      <label class="entry__field">
+        <span class="sr-only">{s.get("field 1")}</span>
+        <input
+          name="name"
+          autocomplete="given-name"
+          autocapitalize="words"
+          placeholder={s.get("field 1")}
+          enterkeyhint="next"
+          maxlength="200"
+        />
+        <span class="entry__err" data-entry-err role="alert"></span>
+      </label>
+      <label class="entry__field">
+        <span class="sr-only">{s.get("field 2")}</span>
+        <input
+          name="email"
+          type="email"
+          inputmode="email"
+          autocomplete="email"
+          autocapitalize="none"
+          spellcheck="false"
+          placeholder={s.get("field 2")}
+          enterkeyhint="go"
+          maxlength="320"
+        />
+        <span class="entry__err" data-entry-err role="alert"></span>
+      </label>
+      <button class="btn" type="submit">
+        {s.get("button")}
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M5 12h14M13 6l6 6-6 6" />
+        </svg>
+      </button>
+    </form>
+    <p class="final__under">{under}</p>
+  </div>
+  <ol class="final__steps">
+    {steps.map((words, n) => (
+      <li data-reveal style={`--i:${n}`}>
+        <b>{n + 1}</b>
+        <span>{words}</span>
+      </li>
+    ))}
+  </ol>
+</section>

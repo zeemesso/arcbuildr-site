@@ -1,0 +1,124 @@
+---
+/**
+ * 6. Real work: a row of pieces that steps forward about every 2.5 seconds, with a pause button and
+ * one tab per kind of piece. Only real pieces from Zyade's own Season One go here (src/content/proof.ts).
+ * A tab with no piece is not shown. Until the first piece exists the row holds quiet blanks.
+ */
+import { section } from "../../content/deck";
+import { gallery } from "../../content/proof";
+import { page } from "../../content/site";
+const s = section(6);
+const tabs = [1, 2, 3, 4]
+  .map((n) => ({ n, name: s.get(`tab ${n}`), pieces: gallery(n) }))
+  .filter((tab) => tab.pieces.length > 0);
+const empty = tabs.length === 0;
+// The blanks follow the four kinds: a page of text, a list, colors, a cover.
+const blanks = ["text", "list", "look", "cover"].flatMap((kind) => [kind, kind, kind]);
+const { ui } = page;
+---
+
+<section class="window work" id="work" aria-labelledby="work-h">
+  <div class="work__head">
+    <p class="label" data-reveal>
+      {s.get("label")}
+    </p>
+    <h2 class="h2" id="work-h" data-reveal>
+      {s.get("heading")}
+    </h2>
+    <p class="work__line" data-reveal>
+      {s.get("paragraph")}
+    </p>
+  </div>
+
+  <div class="reel" data-reel data-reveal>
+    <ul
+      class="reel__row"
+      data-reel-row
+      tabindex={empty ? undefined : 0}
+      aria-hidden={empty ? "true" : undefined}
+    >
+      {empty
+        ? blanks.map((kind, n) => (
+            <li class:list={["piece", "piece--blank", `piece--${kind}`]} style={`--n:${n % 3}`}>
+              {kind === "look" ? (
+                <span class="piece__colors">
+                  <i />
+                  <i />
+                  <i />
+                  <i />
+                </span>
+              ) : kind === "cover" ? null : (
+                <span class="bars">
+                  {(kind === "text"
+                    ? ["100%", "94%", "88%", "97%", "62%"]
+                    : ["70%", "84%", "58%", "76%"]
+                  ).map((w) => (
+                    <i style={`--w:${w}`} />
+                  ))}
+                </span>
+              )}
+            </li>
+          ))
+        : tabs.flatMap((tab) =>
+            tab.pieces.map((item) => (
+              <li class="piece" data-tab={tab.n}>
+                <button type="button" class="piece__open" data-zoom>
+                  {item.image ? (
+                    <img src={item.image} alt={item.alt ?? ""} loading="lazy" decoding="async" />
+                  ) : (
+                    <span class="piece__text">
+                      {item.title && <b>{item.title}</b>}
+                      {item.text?.map((line) => (
+                        <span>{line}</span>
+                      ))}
+                    </span>
+                  )}
+                </button>
+              </li>
+            )),
+          )}
+    </ul>
+    <div class="reel__bar">
+      {tabs.length > 0 && (
+        <div class="reel__tabs" role="group" aria-labelledby="work-h">
+          {tabs.map((tab, i) => (
+            <button
+              type="button"
+              class="reel__tab"
+              data-reel-tab={tab.n}
+              aria-pressed={i === 0 ? "true" : "false"}
+            >
+              {tab.name}
+            </button>
+          ))}
+        </div>
+      )}
+      <button
+        type="button"
+        class="reel__pause"
+        data-reel-pause
+        aria-pressed="false"
+        aria-label={ui.pause}
+        hidden
+      >
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path class="reel__pause-on" d="M8 5v14M16 5v14" />
+          <path class="reel__pause-off" d="M8 5l11 7-11 7z" />
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <p class="work__after" data-reveal>
+    {s.get("line under the gallery")}
+  </p>
+
+  <dialog class="zoom" data-zoom-box aria-labelledby="work-h">
+    <button type="button" class="zoom__x" data-zoom-close aria-label={ui.close}>
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M6 6l12 12M18 6L6 18" />
+      </svg>
+    </button>
+    <div class="zoom__body" data-zoom-body></div>
+  </dialog>
+</section>

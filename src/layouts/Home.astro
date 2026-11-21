@@ -6,17 +6,38 @@
 import "../styles/tokens.css";
 import "../styles/page/frame.css";
 import "../styles/page/cards.css";
+import "../styles/page/screens.css";
+import "../styles/page/sections.css";
+import "../styles/page/more.css";
 import Head from "./Head.astro";
 import { meta } from "../content/site";
 import { section } from "../content/deck";
+interface Props {
+  /** The home page takes its title and description from the deck; another page gives its own. */
+  title?: string;
+  description?: string;
+  noindex?: boolean;
+  /** True for a page that starts the form itself, with its own settings. */
+  ownForm?: boolean;
+}
 const head = section(15);
+const {
+  title = head.get("title"),
+  description = head.get("description"),
+  noindex = false,
+  ownForm = false,
+} = Astro.props;
+// A shared link shows the deck's own preview lines.
+const share = Astro.props.title
+  ? undefined
+  : { title: head.get("link preview, title"), description: head.get("link preview, description") };
 const analyticsToken = import.meta.env.PUBLIC_CF_ANALYTICS_TOKEN;
 ---
 
 <!doctype html>
-<html lang="en" class="home">
+<html lang="en" class="home" data-own-form={ownForm ? "" : undefined}>
   <head>
-    <Head title={head.get("title")} description={head.get("description")} />
+    <Head title={title} description={description} noindex={noindex} share={share} />
   </head>
   <body>
     <a class="skip" href="#main">

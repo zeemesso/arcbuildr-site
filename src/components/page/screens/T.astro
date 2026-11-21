@@ -1,0 +1,20 @@
+---
+/** One line inside a screen: the real words when the piece exists, a quiet bar until then. */
+interface Props {
+  text?: string | undefined;
+  /** The bar's width, when there is no text yet. */
+  w?: string;
+  /** Its place in a staggered build. */
+  k?: number;
+  strong?: boolean;
+}
+const { text, w = "100%", k = 0, strong = false } = Astro.props;
+---
+
+{text ? (
+  <span class="t" style={`--k:${k}`}>
+    {text}
+  </span>
+) : (
+  <i class:list={{ "is-strong": strong }} style={`--w:${w};--k:${k}`} />
+)}

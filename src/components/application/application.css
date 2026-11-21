@@ -565,3 +565,100 @@
     animation-duration: 1.6s;
   }
 }
+
+/* After the last answer is saved: the calendar, or the two lines for a budget under the lowest price. */
+.apply__form[hidden],
+.apply__after[hidden],
+.apply__end[hidden],
+.apply__cal[hidden],
+.apply__cal-link[hidden] {
+  display: none;
+}
+.apply__after {
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 0.5rem var(--apply-pad) 2rem;
+}
+.apply__end {
+  display: grid;
+  align-content: center;
+  gap: 1.25rem;
+  max-width: 38rem;
+  min-height: 100%;
+  margin-inline: auto;
+}
+.apply__end p {
+  margin: 0;
+  font-size: clamp(1.25rem, 1rem + 1.2vw, 1.75rem);
+  line-height: 1.35;
+  letter-spacing: -0.015em;
+  text-wrap: pretty;
+}
+.apply__end p + p {
+  color: var(--f-muted);
+  font-size: var(--text-lg);
+  line-height: 1.5;
+  letter-spacing: 0;
+}
+.apply__cal {
+  display: grid;
+  gap: 1rem;
+  max-width: 68rem;
+  margin-inline: auto;
+}
+.apply__cal-h {
+  margin: 0;
+  font-size: clamp(1.5rem, 1.2rem + 1.4vw, 2.25rem);
+  font-weight: var(--f-q-weight, 700);
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+  text-align: center;
+}
+.apply__cal-h:focus {
+  outline: none;
+}
+/* The calendar's own frame sets its height once it has loaded. */
+.apply__cal-frame {
+  min-height: 28rem;
+  border-radius: var(--f-radius-in);
+  overflow: hidden;
+}
+.apply__cal-link {
+  justify-self: center;
+  display: inline-flex;
+  align-items: center;
+  min-height: 3rem;
+  padding: 0 1.5rem;
+  border-radius: 999px;
+  background: var(--f-ink);
+  color: var(--f-sheet);
+  font-weight: 600;
+  text-decoration: none;
+}
+/* The calendar needs room for its month and its times side by side. */
+@media (min-width: 48rem) {
+  .apply.is-calendar .apply__sheet {
+    width: min(100%, 68rem);
+    height: min(100%, 50rem);
+  }
+}
+.apply.is-after .apply__count,
+.apply.is-after .apply__progress {
+  visibility: hidden;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .apply__end:not([hidden]) p,
+  .apply__cal:not([hidden]) {
+    animation: apply-after 320ms cubic-bezier(0.23, 1, 0.32, 1) backwards;
+  }
+  .apply__end p + p {
+    animation-delay: 120ms;
+  }
+}
+@keyframes apply-after {
+  from {
+    opacity: 0;
+    transform: translateY(0.75rem);
+  }
+}

@@ -1,0 +1,37 @@
+---
+/**
+ * Screen 11: the client area. Its folders open one by one, each with its documents inside. The
+ * folders are named with the card's own words; the documents are bars until Zyade's own area exists.
+ */
+import T from "./T.astro";
+import { excerpt, section } from "../../../content/deck";
+import { piece } from "../../../content/proof";
+const body = section(5).get("card 11, body");
+const real = piece("client-area");
+const names = ["the strategy", "the look", "the plan", "every script", "your AI"].map((name) =>
+  excerpt(body, name),
+);
+const cap = excerpt(body, "Everything stays yours");
+const counts = [3, 2, 3, 4, 2];
+---
+
+<figure class="screen s11" data-loop="10000" aria-hidden={real ? undefined : "true"}>
+  <p class="cap s11__cap pop" data-at="150">
+    {cap}
+  </p>
+  <ul class="s11__folders">
+    {names.map((name, n) => (
+      <li data-at={500 + n * 420} style={`--k:${n}`}>
+        <span class="s11__tab"></span>
+        <span class="s11__name">{name}</span>
+        <span class="s11__files bars">
+          {(real?.folders[n]?.files ?? Array(counts[n]).fill(undefined))
+            .slice(0, 4)
+            .map((file: string | undefined, k: number) => (
+              <T text={file} w={["84%", "62%", "74%", "52%"][k]!} k={k} />
+            ))}
+        </span>
+      </li>
+    ))}
+  </ul>
+</figure>

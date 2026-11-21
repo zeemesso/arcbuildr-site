@@ -2,9 +2,10 @@ import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
 import { meta } from "../src/content/site";
 import { press } from "./press";
+import { calendar, ending, open, stub } from "./stubs";
 // Reduced motion puts every section in its final state, which is the state to check.
 test.use({ reducedMotion: "reduce" });
-for (const path of ["/", "/sample", "/booked", "/booked?via=chat", "/privacy"]) {
+for (const path of ["/", "/booked", "/booked?via=chat", "/privacy"]) {
   test(`${path}: axe, open details and heading hierarchy`, async ({ page, browserName }) => {
     await page.goto(path);
     const skip = page.locator(".skip");
@@ -23,17 +24,11 @@ for (const path of ["/", "/sample", "/booked", "/booked?via=chat", "/privacy"]) 
     expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
   });
 }
-test("the application passes axe on a text question, on the choices and on an error", async ({
+test("the application passes axe on a text question, on the choices, on an error and on both endings", async ({
   page,
 }) => {
-  await page.route("**/api/lead", (route) => route.fulfill({ status: 204 }));
-  await page.goto("/");
-  await page.locator("#start input[name=name]").fill("TEST Visitor");
-  await page.locator("#start input[name=email]").fill("test@example.com");
-  await press(page.locator("#start form button"));
-  const layer = page.locator("[data-apply]");
-  await expect(layer).toBeVisible();
-  await expect(page.locator(".q.is-current #a-profile")).toBeVisible();
+  await stub(page);
+  await open(page, { name: "TEST Visitor", email: "test@example.com" });
   expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
   await press(page.locator("[data-ok]"));
   await expect(page.locator(".q.is-current [data-err]")).toBeVisible();
@@ -44,11 +39,24 @@ test("the application passes axe on a text question, on the choices and on an er
   }
   await expect(page.locator('.q.is-current[data-id="film"]')).toBeVisible();
   expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
+  for (const id of ["film", "count", "decides", "start"])
+    await press(page.locator(`.q.is-current[data-id="${id}"] .choice`).first());
+  // The lowest budget: the ending with no calendar.
+  await press(page.locator('.q.is-current[data-id="budget"] .choice').first());
+  await expect(ending(page)).toBeVisible();
+  expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
 });
-test("every install tab passes axe", async ({ page }) => {
-  await page.goto("/");
-  for (const tab of await page.getByRole("tab").all()) {
-    await press(tab);
-    expect((await new AxeBuilder({ page }).include(".install").analyze()).violations).toEqual([]);
+test("the calendar's panel passes axe", async ({ page }) => {
+  await stub(page);
+  await open(page, { name: "TEST Visitor", email: "test+b@example.com" });
+  for (const id of ["profile", "sell", "stranger"]) {
+    await page.locator(`.q.is-current #a-${id}`).fill("4");
+    await page.locator(`.q.is-current #a-${id}`).press("Enter");
   }
+  for (const id of ["film", "count", "decides", "start"])
+    await press(page.locator(`.q.is-current[data-id="${id}"] .choice`).first());
+  await press(page.locator('.q.is-current[data-id="budget"] .choice').nth(1));
+  await expect(calendar(page).locator("iframe")).toBeVisible();
+  // The frame's inside is Cal.com's, and here a stand-in: only our own panel is checked.
+  expect((await new AxeBuilder({ page }).exclude("iframe").analyze()).violations).toEqual([]);
 });
