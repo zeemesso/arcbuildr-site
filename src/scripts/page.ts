@@ -175,13 +175,16 @@ if (reel) {
     const gap = parseFloat(getComputedStyle(row).columnGap) || 16;
     row.scrollTo({ left: end ? 0 : row.scrollLeft + card.offsetWidth + gap, behavior: "smooth" });
   };
+  /** With few pieces the whole row is on screen: there is nothing to step to, and nothing to pause. */
+  const fits = () => row.scrollWidth <= row.clientWidth + 4;
   const sync = () => {
     clearInterval(timer);
-    if (!calm && !paused && !held && seenNow && !document.hidden)
+    pause.hidden = calm || fits();
+    if (!calm && !fits() && !paused && !held && seenNow && !document.hidden)
       timer = window.setInterval(step, STEP);
   };
   if (!calm) {
-    pause.hidden = false;
+    new ResizeObserver(sync).observe(row);
     pause.addEventListener("click", () => {
       paused = !paused;
       pause.setAttribute("aria-pressed", String(paused));

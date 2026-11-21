@@ -53,59 +53,6 @@
   overflow: hidden;
   translate: 0 calc(var(--n, 0) * 0.625rem);
 }
-/* A blank: the place of a piece that does not exist yet. */
-.piece--blank {
-  display: grid;
-  align-content: start;
-  gap: 1rem;
-  padding: 1.5rem;
-  box-shadow: var(--shadow-card);
-}
-.piece--blank .bars {
-  gap: 0.625rem;
-}
-.piece--blank .bars i {
-  height: 0.5rem;
-  border-radius: 0.5rem;
-}
-.piece--list .bars {
-  gap: 1.125rem;
-}
-.piece--list .bars i {
-  height: 0.875rem;
-}
-.piece__colors {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0.625rem;
-}
-.piece__colors i {
-  aspect-ratio: 1;
-  border-radius: 0.875rem;
-  background: var(--bar);
-}
-.piece__colors i:nth-child(2) {
-  background: color-mix(in oklch, var(--color-ink) 28%, var(--color-card));
-}
-.piece__colors i:nth-child(3) {
-  background: color-mix(in oklch, var(--color-ink) 50%, var(--color-card));
-}
-.piece__colors i:nth-child(4) {
-  background: var(--bar-strong);
-}
-.piece--cover {
-  background: color-mix(in oklch, var(--color-ink) 82%, var(--color-taupe));
-}
-.piece--cover::after {
-  content: "";
-  position: absolute;
-  left: 1.5rem;
-  right: 35%;
-  bottom: 1.5rem;
-  height: 0.875rem;
-  border-radius: 0.5rem;
-  background: color-mix(in oklch, var(--color-card) 30%, transparent);
-}
 .piece__open {
   display: block;
   width: 100%;
@@ -172,6 +119,20 @@
 .reel__tab[aria-pressed="true"] {
   background: var(--ink);
   color: var(--window);
+}
+/* On a phone the tabs take two rows rather than hide one behind a sideways scroll. */
+@media (max-width: 39.99rem) {
+  .reel__bar {
+    gap: 0.75rem;
+  }
+  .reel__tabs {
+    flex-wrap: wrap;
+    border-radius: 1.75rem;
+    overflow: visible;
+  }
+  .reel__tab {
+    flex: 1 1 auto;
+  }
 }
 .reel__pause {
   display: grid;

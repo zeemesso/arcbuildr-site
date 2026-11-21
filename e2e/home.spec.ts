@@ -1,3 +1,4 @@
+import { existsSync, readdirSync } from "node:fs";
 import { expect, test } from "@playwright/test";
 import { founding, section } from "../src/content/deck";
 import { page as words } from "../src/content/site";
@@ -28,6 +29,13 @@ const SECTIONS = [
   "questions",
   "apply",
 ];
+/**
+ * Section 6, the gallery, is on the page only once a real piece of it exists. The pieces are files in
+ * src/content/proof/, which git ignores, so this is false until `node scripts/proof/import.mjs` brings one in.
+ */
+const PROOF = "src/content/proof";
+const galleryOn =
+  existsSync(PROOF) && readdirSync(PROOF).some((name) => /^gallery-\d-\d\.json$/.test(name));
 const CARDS = Array.from({ length: 11 }, (_, n) => String(n + 1).padStart(2, "0"));
 
 test.describe("the home page", () => {
@@ -55,10 +63,12 @@ test.describe("the home page", () => {
     ]);
   });
 
-  test("the 12 sections come in the deck's order", async ({ page }) => {
+  test("the sections come in the deck's order, the gallery only with a real piece", async ({
+    page,
+  }) => {
     await page.goto("/");
     const ids = await page.locator("main > section").evaluateAll((els) => els.map((el) => el.id));
-    expect(ids).toEqual(SECTIONS);
+    expect(ids).toEqual(SECTIONS.filter((id) => id !== "work" || galleryOn));
   });
 
   for (const [index, id] of SECTIONS.entries()) {
@@ -66,6 +76,15 @@ test.describe("the home page", () => {
       page,
     }) => {
       await page.goto("/");
+      if (id === "work" && !galleryOn) {
+        // No real piece yet: the section, its words and any link to it are not on the page.
+        await expect(page.locator("#work")).toHaveCount(0);
+        await expect(page.locator('a[href$="#work"]')).toHaveCount(0);
+        expect(squash(await page.locator("body").textContent())).not.toContain(
+          squash(section(6).get("heading")),
+        );
+        return;
+      }
       const text = squash(await page.locator(`#${id}`).textContent());
       let from = 0;
       for (const { slot, words } of section(index + 1).list("")) {
@@ -193,12 +212,14 @@ test.describe("the home page", () => {
       expect(await el.evaluate((node) => getComputedStyle(node).opacity)).toBe("1");
       expect(await el.evaluate((node) => getComputedStyle(node).translate)).toBe("none");
     }
-    // The gallery stays still, with no pause button, and the diagram's lines do not run.
-    const row = page.locator("#work [data-reel-row]");
-    await row.scrollIntoViewIfNeeded();
-    await expect(page.locator("#work [data-reel-pause]")).toBeHidden();
-    await page.waitForTimeout(3200);
-    expect(await row.evaluate((el) => el.scrollLeft)).toBe(0);
+    // The gallery, when it is on, stays still with no pause button, and the diagram's lines do not run.
+    if (galleryOn) {
+      const row = page.locator("#work [data-reel-row]");
+      await row.scrollIntoViewIfNeeded();
+      await expect(page.locator("#work [data-reel-pause]")).toBeHidden();
+      await page.waitForTimeout(3200);
+      expect(await row.evaluate((el) => el.scrollLeft)).toBe(0);
+    }
     const running = await page.evaluate(
       () =>
         document.getAnimations().filter((animation) => animation.playState === "running").length,
@@ -294,26 +315,19 @@ test.describe("the home page", () => {
     expect(new Set(colors).size).toBe(9);
   });
 
-  test("the gallery shows no invented piece: blanks hold no words, and a tab with no piece is hidden", async ({
+  test("the gallery shows only real pieces, and a tab with no piece is hidden", async ({
     page,
   }) => {
+    test.skip(!galleryOn, "No real piece yet: the gallery is not on the page");
     await page.goto("/");
-    const pieces = page.locator("#work .piece");
-    const real = page.locator("#work .piece:not(.piece--blank)");
     const tabs = page.locator("#work [data-reel-tab]");
-    if ((await real.count()) === 0) {
-      await expect(tabs).toHaveCount(0);
-      expect(flat(await page.locator("#work .reel__row").textContent())).toBe("");
-      await expect(page.locator("#work .reel__row")).toHaveAttribute("aria-hidden", "true");
-    } else {
-      // Every tab on show has a piece of its own.
-      for (const tab of await tabs.all()) {
-        const n = await tab.getAttribute("data-reel-tab");
-        expect(await page.locator(`#work .piece[data-tab="${n}"]`).count()).toBeGreaterThan(0);
-      }
-      await expect(page.locator("#work .piece--blank")).toHaveCount(0);
+    expect(await page.locator("#work .piece").count()).toBeGreaterThan(0);
+    expect(await tabs.count()).toBeGreaterThan(0);
+    // Every tab on show has a piece of its own.
+    for (const tab of await tabs.all()) {
+      const n = await tab.getAttribute("data-reel-tab");
+      expect(await page.locator(`#work .piece[data-tab="${n}"]`).count()).toBeGreaterThan(0);
     }
-    expect(await pieces.count()).toBeGreaterThan(0);
   });
 
   test("the questions open one at a time, the first one open", async ({ page }) => {
@@ -359,10 +373,18 @@ test.describe("the home page in motion", () => {
   });
 
   test("the gallery steps forward by itself, and the pause button stops it", async ({ page }) => {
+    test.skip(!galleryOn, "No real piece yet: the gallery is not on the page");
     await page.goto("/");
     const row = page.locator("#work [data-reel-row]");
     const pause = page.locator("#work [data-reel-pause]");
     await row.scrollIntoViewIfNeeded();
+    if (await row.evaluate((el) => el.scrollWidth <= el.clientWidth + 4)) {
+      // Few pieces: the whole row is on screen, so nothing steps and there is nothing to pause.
+      await expect(pause).toBeHidden();
+      await page.waitForTimeout(3200);
+      expect(await row.evaluate((el) => el.scrollLeft)).toBe(0);
+      return;
+    }
     await expect(pause).toBeVisible();
     await expect
       .poll(() => row.evaluate((el) => el.scrollLeft), { timeout: 9000 })
