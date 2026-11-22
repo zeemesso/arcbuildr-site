@@ -1,0 +1,41 @@
+---
+/**
+ * A product card: the digital product, shown as a thing with a cover, its name and its value.
+ * The cover is drawn (the arc, on a dark sheet with two sheets behind it); the words are the deck's.
+ */
+interface Props {
+  name: string;
+  /** The line that carries its value. A figure in it ("147 USD") is set apart. */
+  value: string;
+  /** Its number in the list it belongs to. */
+  n: string;
+}
+const { name, value, n } = Astro.props;
+const figure = /[\d,]+ USD/.exec(value);
+const parts = figure
+  ? [value.slice(0, figure.index), figure[0], value.slice(figure.index + figure[0].length)]
+  : [value, "", ""];
+---
+
+<article class="product" data-product data-reveal>
+  <div class="product__shot" aria-hidden="true">
+    <span class="product__sheet"></span>
+    <span class="product__sheet"></span>
+    <span class="product__cover">
+      <svg viewBox="0 0 120 150" focusable="false">
+        <path class="product__ring" d="M14 118 A 46 46 0 0 1 106 118"></path>
+        <path class="product__ring" d="M30 118 A 30 30 0 0 1 90 118"></path>
+        <path class="product__arc" d="M46 118 A 14 14 0 0 1 74 118"></path>
+      </svg>
+      <span class="product__n">{n}</span>
+    </span>
+  </div>
+  <div class="product__words">
+    <h3 class="product__name">{name}</h3>
+    <p class="product__value">
+      {parts[0]}
+      {parts[1] && <b>{parts[1]}</b>}
+      {parts[2]}
+    </p>
+  </div>
+</article>

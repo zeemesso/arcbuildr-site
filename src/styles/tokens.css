@@ -60,6 +60,14 @@
   --scene-floor: #8d8378;
   --scene-thing: #5d6770;
 
+  /* The iceberg's picture: its sky, its water from the surface to the deep, and its ice. */
+  --color-sky-high: oklch(86% 0.035 235);
+  --color-sky: oklch(95.5% 0.012 235);
+  --color-water: oklch(55% 0.05 232);
+  --color-water-deep: oklch(25% 0.04 248);
+  --color-ice: #ffffff;
+  --color-ice-shade: oklch(88% 0.018 235);
+
   --hue-sage: var(--color-sage);
   --hue-clay: var(--color-clay);
   --hue-taupe: var(--color-taupe);

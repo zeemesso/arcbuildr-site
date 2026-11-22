@@ -243,6 +243,16 @@ if (reel) {
   }
 }
 
+// The sales video: the poster's button starts it, then the player's own controls take over.
+const vsl = document.querySelector<HTMLElement>("[data-vsl]");
+const film = vsl?.querySelector<HTMLVideoElement>("[data-vsl-video]");
+vsl?.querySelector("[data-vsl-play]")?.addEventListener("click", () => {
+  vsl.classList.add("is-playing");
+  film?.focus({ preventScroll: true });
+  // A browser may refuse to start a video; its controls are showing by then, so nothing is lost.
+  film?.play().catch(() => {});
+});
+
 // The iceberg: a line of the list and its band light up together, on hover, on focus, and (on a wide
 // screen, where the picture stays beside the list) as the line passes the middle of the screen.
 const berg = document.querySelector<HTMLElement>("[data-berg]");

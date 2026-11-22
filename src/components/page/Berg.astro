@@ -1,8 +1,8 @@
 ---
 /**
- * 7. The 12 weeks: the iceberg. A tip above the waterline with the three free things beside it, then
- * nine bands under the water, each tied by its color to one line of the list. On a phone the picture
- * comes first, then the list with its color keys.
+ * The 12 weeks: the iceberg. One drawing: a small tip above the waterline (what is free), and under
+ * it the big mass of ice, cut into nine bands, with water around it. Each band is tied by its color to
+ * one line of the list. On a phone the picture comes first, then the list with its color keys.
  */
 import { section } from "../../content/deck";
 import { piece } from "../../content/proof";
@@ -17,9 +17,22 @@ const lead = (words: string) => {
 const free = s.list("free ").map(({ slot, words }) => ({ words, proof: s.isProof(slot) }));
 const bands = s.list("band ").map(({ words }) => lead(words));
 const script = piece("script-1-full");
+
+// The drawing, on a 360 by 560 sheet. The waterline sits at WATER; the mass runs from there to FLOOR.
+const WATER = 132;
+const FLOOR = 536;
+const TIP = "112,132 130,108 144,100 156,70 170,40 184,64 198,72 210,96 226,104 244,132";
+const TIP_SHADE = "170,40 184,64 198,72 210,96 226,104 244,132 182,132";
+const TIP_EDGE = "112,132 130,108 144,100 152,132";
+const MASS =
+  "92,132 252,132 288,178 316,236 322,292 300,352 288,408 254,470 232,506 196,536 158,528 132,488 96,440 70,376 44,312 38,250 60,186";
+const MASS_SHADE =
+  "206,132 252,132 288,178 316,236 322,292 300,352 288,408 254,470 232,506 196,536 190,468 224,380 238,290 224,204";
+const MASS_LIGHT = "92,132 140,132 122,206 98,300 44,312 38,250 60,186";
+const step = (FLOOR - WATER) / bands.length;
 ---
 
-<section class="window berg" id="weeks" aria-labelledby="berg-h" data-berg>
+<section class="berg" id="weeks" aria-labelledby="berg-h" data-berg>
   <div class="berg__head">
     <p class="label" data-reveal>
       {s.get("label")}
@@ -33,26 +46,101 @@ const script = piece("script-1-full");
   </div>
 
   <div class="berg__grid">
-    <div class="berg__pic" aria-hidden="true">
-      <div class="berg__sky">
-        <span class="berg__tip" data-reveal></span>
-        <span class="berg__free">{s.get("above the water, label")}</span>
-      </div>
-      <p class="berg__water">
-        <span>{s.get("waterline")}</span>
-      </p>
-      <ol class="berg__ice">
+    <div class="berg__pic" aria-hidden="true" data-reveal>
+      <svg class="berg__svg" viewBox="0 0 360 560" focusable="false">
+        <defs>
+          <linearGradient id="berg-sea" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" class="berg-sea-top"></stop>
+            <stop offset="1" class="berg-sea-floor"></stop>
+          </linearGradient>
+          <linearGradient id="berg-depth" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" class="berg-depth-top"></stop>
+            <stop offset="1" class="berg-depth-floor"></stop>
+          </linearGradient>
+          <linearGradient id="berg-sky" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" class="berg-sky-top"></stop>
+            <stop offset="1" class="berg-sky-low"></stop>
+          </linearGradient>
+          <radialGradient id="berg-glow" cx="0.5" cy="1" r="0.75">
+            <stop offset="0" class="berg-glow-in"></stop>
+            <stop offset="1" class="berg-glow-out"></stop>
+          </radialGradient>
+          <clipPath id="berg-mass">
+            <polygon points={MASS}></polygon>
+          </clipPath>
+        </defs>
+
+        <rect width="360" height={WATER} fill="url(#berg-sky)"></rect>
+        <rect width="360" height={WATER} fill="url(#berg-glow)"></rect>
+        <rect y={WATER} width="360" height={560 - WATER} fill="url(#berg-sea)"></rect>
+        <!-- Light that falls through the water. -->
+        <g class="berg-rays">
+          <polygon points="20,132 62,132 18,560 -40,560"></polygon>
+          <polygon points="250,132 284,132 372,560 300,560"></polygon>
+          <polygon points="318,132 338,132 420,470 392,470"></polygon>
+        </g>
+
+        <!-- The tip: the small part, above the water. -->
+        <g class="berg-tip">
+          <polygon class="berg-tip__ice" points={TIP}></polygon>
+          <polygon class="berg-tip__shade" points={TIP_SHADE}></polygon>
+          <polygon class="berg-tip__edge" points={TIP_EDGE}></polygon>
+        </g>
+
+        <!-- The mass: nine bands, cut to the shape of the ice. -->
+        <g clip-path="url(#berg-mass)">
+          {bands.map((_, n) => (
+            <rect
+              class="berg-band"
+              data-band={n + 1}
+              x="0"
+              y={WATER + n * step}
+              width="360"
+              height={step + 0.5}
+              style={`--i:${n};fill:var(--band-${n + 1})`}
+            />
+          ))}
+          <polygon class="berg-mass__light" points={MASS_LIGHT}></polygon>
+          <polygon class="berg-mass__shade" points={MASS_SHADE}></polygon>
+          <rect y={WATER} width="360" height={FLOOR - WATER} fill="url(#berg-depth)"></rect>
+          {bands.slice(1).map((_, n) => (
+            <line
+              class="berg-cut"
+              x1="0"
+              x2="360"
+              y1={WATER + (n + 1) * step}
+              y2={WATER + (n + 1) * step}
+            />
+          ))}
+        </g>
         {bands.map(([key], n) => (
-          <li
-            class="berg__band"
+          <text
+            class="berg-name"
             data-band={n + 1}
-            data-reveal
-            style={`--i:${n};--c:var(--band-${n + 1});--on:var(--on-band-${n + 1})`}
+            x="180"
+            y={WATER + n * step + step / 2}
+            style={`--i:${n};fill:var(--on-band-${n + 1})`}
           >
             {key.replace(/\.$/, "")}
-          </li>
+          </text>
         ))}
-      </ol>
+
+        <!-- The waterline, and the glint that crosses it. -->
+        <path
+          class="berg-line"
+          d={`M0 ${WATER} Q 45 ${WATER - 2.5} 90 ${WATER} T 180 ${WATER} T 270 ${WATER} T 360 ${WATER}`}
+        ></path>
+        <rect class="berg-glint" x="-90" y={WATER - 1} width="90" height="2"></rect>
+        <!-- A small piece of ice, adrift. -->
+        <polygon class="berg-floe" points="26,132 31,125 40,122 49,127 53,132"></polygon>
+        <polygon
+          class="berg-floe berg-floe--under"
+          points="24,132 55,132 50,145 37,150 28,143"
+        ></polygon>
+        <polygon class="berg-mass__rim" points={MASS}></polygon>
+      </svg>
+      <span class="berg__free">{s.get("above the water, label")}</span>
+      <span class="berg__water">{s.get("waterline")}</span>
     </div>
 
     <div class="berg__list">

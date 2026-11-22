@@ -1,22 +1,19 @@
 ---
 /**
- * 1. First screen: who it is for, the headline, one sentence with its small labels, the two buttons,
- * his face beside them, the loop, and the founding count on a tab that hangs from the window.
+ * The first screen: who it is for, the headline, one sentence, then the sales video (a 16:9 slot),
+ * the two actions and his face beside "with me". The three wins follow it (Wins.astro).
  */
 import Marks from "./Marks.astro";
-import Take from "./Take.astro";
+import Vsl from "./Vsl.astro";
 import { founding, labelled, section } from "../../content/deck";
-import { page } from "../../content/site";
-import { FOUNDER_PHOTO, FOUNDING_PLACES_LEFT } from "../../config";
-import { founderPhoto } from "../../content/proof";
+import { FOUNDING_PLACES_LEFT } from "../../config";
+import Face from "./Face.astro";
 const s = section(1);
 const headline = s.find("headline") ?? s.get("headline, option 1");
 const line = labelled(s.get("line under it"));
-const { founder } = page;
-const photo = FOUNDER_PHOTO || founderPhoto();
 ---
 
-<section class="window first" id="top" aria-labelledby="first-h">
+<section class="first" id="top" aria-labelledby="first-h">
   <div class="first__words">
     <p class="label" data-enter style="--i:0">
       {s.get("label above the headline")}
@@ -27,43 +24,35 @@ const photo = FOUNDER_PHOTO || founderPhoto();
     <p class="first__line" data-enter style="--i:2">
       {line.map((part) => (part.label ? <span class="chip">{part.text}</span> : part.text))}
     </p>
-    <div class="first__actions" data-enter style="--i:3">
+  </div>
+  <Vsl title={headline} />
+  <div class="first__foot" data-enter style="--i:4">
+    <div class="first__actions">
       <a class="btn" href="#apply" data-apply-open data-cta>
         {s.get("button")}
         <svg viewBox="0 0 24 24" aria-hidden="true">
-          <path d="M5 12h14M13 6l6 6-6 6" />
+          <path d="M5 12h14M13 6l6 6-6 6"></path>
         </svg>
       </a>
       <a class="btn btn--quiet" href="#get">
         <Marks />
         {s.get("second button, with the Claude and ChatGPT icons")}
         <svg viewBox="0 0 24 24" aria-hidden="true">
-          <path d="M6 9l6 6 6-6" />
+          <path d="M6 9l6 6 6-6"></path>
         </svg>
       </a>
     </div>
-    <div class="who" data-enter style="--i:4">
-      {photo ? (
-        <img class="who__face" src={photo} alt="" width="48" height="48" />
-      ) : (
-        <span class="who__face" aria-hidden="true">
-          {founder.initials}
-        </span>
-      )}
-      <p>
-        <span class="who__name">{`${founder.name}, ${founder.role}`}</span>
-        <br />
-        <span class="who__note">{s.get("under the buttons")}</span>
-      </p>
+    <div class="who">
+      <Face size={40} class="who__face" />
+      <p class="who__note">{s.get("under the buttons")}</p>
     </div>
+    <p class="first__places">
+      <span class="hang__dots" aria-hidden="true">
+        {[0, 1, 2].map((n) => (
+          <i data-taken={n >= FOUNDING_PLACES_LEFT ? "" : undefined} />
+        ))}
+      </span>
+      {founding(s.get("hanging tab"))}
+    </p>
   </div>
-  <Take />
-  <p class="hang">
-    <span class="hang__dots" aria-hidden="true">
-      {[0, 1, 2].map((n) => (
-        <i data-taken={n >= FOUNDING_PLACES_LEFT ? "" : undefined} />
-      ))}
-    </span>
-    {founding(s.get("hanging tab"))}
-  </p>
 </section>

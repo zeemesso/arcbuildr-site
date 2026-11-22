@@ -90,6 +90,15 @@ Changed on 2026-11-22 (L1-P11 page, branch `l1-p11-page`):
 - Browser tests answer the form's requests and the calendar themselves through `e2e/stubs.ts`.
 - A page's own script tag comes before the visit counter's tag, so the counter's server can never hold the page's script up.
 
+Changed on 2026-11-22, later (L1-P11 redesign, branch `l1-p11-page`):
+
+- Look: the quiet folio (`DESIGN.md`, section 12). One sheet of paper, a small type scale, long air, few surfaces. Its styles are in `src/styles/page/folio.css`, loaded last.
+- The first screen leads with the sales video: `VSL_VIDEO` in `src/config.ts`. Empty shows the poster with a drawn play mark.
+- Three wins follow the first screen: the deck's `win 1` to `win 3` in section 1, grey bars until the deck has them.
+- The iceberg is one drawing in `src/components/page/Berg.astro`. Its sky, water and ice colours are in `tokens.css`.
+- The offer shows the deck's stack as a ledger (a row with a figure alone), a product card (a row with a sentence and a figure) and a bonus stack (a row with no figure).
+- `AI_MARKS` is `"names"`: no company's mark is on the page.
+
 ## STATUS
 
 - Steps 1 to 6 done. `COPY.md`, `PROTOTYPE.md` and `PLAN.md` approved.

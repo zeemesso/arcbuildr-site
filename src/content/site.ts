@@ -25,7 +25,7 @@ export const page = {
   /** The three marks of the guarantee's timeline (the deck's screen note for section 9). */
   guarantee: { marks: ["Day 1", "Day 7", "Day 10"] },
   /** Names of controls for a screen reader. They are not shown. */
-  ui: { pause: "Pause the gallery", close: "Close" },
+  ui: { pause: "Pause the gallery", close: "Close", play: "Play the video" },
 };
 
 export type Question = { id: string; q: string; err: string } & (
