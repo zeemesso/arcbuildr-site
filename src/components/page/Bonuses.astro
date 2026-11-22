@@ -1,16 +1,16 @@
 ---
 /**
- * The bonus stack: each bonus is an item with a cover, its name and its value, one above the other.
- * The covers are drawn; the names and the values are the deck's.
+ * The bonus stack: each bonus is a small card with a cover, its name, its value and what it removes.
+ * The covers are drawn; the names, the values and the lines are the deck's.
  */
 interface Props {
-  items: { n: string; name: string; value: string }[];
+  items: { name: string; value: string; body: string }[];
 }
 const { items } = Astro.props;
 ---
 
 <ol class="bonuses" data-bonuses>
-  {items.map(({ n, name, value }, at) => (
+  {items.map(({ name, value, body }, at) => (
     <li class="bonus" data-reveal style={`--i:${at};--tone:var(--bonus-${(at % 4) + 1})`}>
       <span class="bonus__cover" aria-hidden="true">
         <svg viewBox="0 0 64 64" focusable="false">
@@ -18,9 +18,9 @@ const { items } = Astro.props;
           <path d="M20 50 A 12 12 0 0 1 44 50" />
         </svg>
       </span>
-      <span class="bonus__n">{n}</span>
-      <span class="bonus__name">{name}</span>
+      <h4 class="bonus__name">{name}</h4>
       <span class="bonus__value">{value}</span>
+      <p class="bonus__body">{body}</p>
     </li>
   ))}
 </ol>

@@ -1,9 +1,11 @@
 ---
 /**
- * One card of "Everything you get": its number, when it arrives, its title, what it does,
- * and its live screen (the default slot). Cards 01 and 11 are wide.
+ * One card of "What you get": its number, when it arrives, the step of the Show it comes from, its
+ * title, what it does, and its screen. The screen is a picture of the real document (src/content/proof.ts);
+ * until that picture exists, the screen is the card's own title on a plain panel.
  */
 import { section } from "../../content/deck";
+import { CARD_PIECES, shot } from "../../content/proof";
 interface Props {
   n: string;
   wide?: boolean;
@@ -11,24 +13,32 @@ interface Props {
 const { n, wide = false } = Astro.props;
 const s = section(5);
 const key = `card ${n}`;
-const more = s.list(`${key}, body `).map((item) => item.words);
-const small = s.find(`${key}, small line`);
+const title = s.get(`${key}, title`);
+const picture = n in CARD_PIECES ? shot(CARD_PIECES[n as keyof typeof CARD_PIECES]) : null;
 ---
 
-<li class:list={["card", { "card--wide": wide }]} data-reveal>
-  <div class="card__stage">
-    <slot />
+<li class:list={["card", { "card--wide": wide }]} data-reveal data-card={n}>
+  <div class:list={["card__stage", { "card__stage--shot": picture }]}>
+    <span class="card__n">{n}</span>
+    {picture ? (
+      <img
+        src={picture.image}
+        alt={picture.alt}
+        width={picture.width}
+        height={picture.height}
+        loading="lazy"
+        decoding="async"
+      />
+    ) : (
+      <h3 class="card__h">{title}</h3>
+    )}
   </div>
   <div class="card__text">
+    {picture && <h3 class="card__h">{title}</h3>}
     <p class="card__meta">
-      <span class="card__n">{n}</span>
       <span class="card__date">{s.get(`${key}, date`)}</span>
+      <span class="card__from">{s.get(`${key}, from`)}</span>
     </p>
-    <h3 class="card__h">{s.get(`${key}, title`)}</h3>
     <p class="card__body">{s.get(`${key}, body`)}</p>
-    {more.map((words) => (
-      <p class="card__body">{words}</p>
-    ))}
-    {small && <p class="card__small">{small}</p>}
   </div>
 </li>

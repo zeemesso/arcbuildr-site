@@ -1,23 +1,27 @@
 ---
 /**
- * A product card: the digital product, shown as a thing with a cover, its name and its value.
- * The cover is drawn (the arc, on a dark sheet with two sheets behind it); the words are the deck's.
+ * The product card: our own product, shown as a product page in small. Its label, its name, its price,
+ * one line, what it is, what's inside, and what it needs. The cover is drawn (the arc, on a dark sheet
+ * with two sheets behind it); every word is the deck's (section 9, "add-on").
  */
-interface Props {
-  name: string;
-  /** The line that carries its value. A figure in it ("147 USD") is set apart. */
-  value: string;
-  /** Its number in the list it belongs to. */
-  n: string;
-}
-const { name, value, n } = Astro.props;
+import { section } from "../../content/deck";
+const s = section(9);
+const value = s.get("add-on, value");
+/** The figure in the price line ("147 USD") is set apart. */
 const figure = /[\d,]+ USD/.exec(value);
 const parts = figure
   ? [value.slice(0, figure.index), figure[0], value.slice(figure.index + figure[0].length)]
   : [value, "", ""];
+/** "The method: how a piece is made." → the name leads, the rest explains it. */
+const inside = s.list("inside ").map(({ words }) => {
+  const cut = words.indexOf(": ");
+  return cut < 0
+    ? (["", words] as const)
+    : ([words.slice(0, cut + 1), words.slice(cut + 2)] as const);
+});
 ---
 
-<article class="product" data-product data-reveal>
+<article class="product" data-product data-reveal aria-labelledby="product-h">
   <div class="product__shot" aria-hidden="true">
     <span class="product__sheet"></span>
     <span class="product__sheet"></span>
@@ -27,15 +31,35 @@ const parts = figure
         <path class="product__ring" d="M30 118 A 30 30 0 0 1 90 118"></path>
         <path class="product__arc" d="M46 118 A 14 14 0 0 1 74 118"></path>
       </svg>
-      <span class="product__n">{n}</span>
     </span>
   </div>
   <div class="product__words">
-    <h3 class="product__name">{name}</h3>
+    <p class="product__label">{s.get("add-on, label")}</p>
+    <h3 class="product__name" id="product-h">
+      {s.get("add-on, name")}
+    </h3>
     <p class="product__value">
       {parts[0]}
       {parts[1] && <b>{parts[1]}</b>}
       {parts[2]}
     </p>
+    <p class="product__line">{s.get("add-on, line")}</p>
+    <p class="product__body">{s.get("add-on, body")}</p>
+  </div>
+  <div class="product__inside">
+    <h4>{s.get("add-on, inside title")}</h4>
+    <ul>
+      {inside.map(([name, rest]) => (
+        <li>
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M6.5 12.5l3.5 3.5 7.5-8" />
+          </svg>
+          <span>
+            {name && <b>{name}</b>} {rest}
+          </span>
+        </li>
+      ))}
+    </ul>
+    <p class="product__small">{s.get("add-on, small line")}</p>
   </div>
 </article>

@@ -1,14 +1,13 @@
 ---
 /**
- * 12. Apply: the final dark window. The headline, the first screen's sentence with its labels, the two
- * fields and the button, the founding count beside it, and three small steps in a row.
+ * 13. Apply: the final dark window. The heading, the first screen's sentence, the two fields and the
+ * button, the founding count beside it, and three small steps in a row.
  * Without scripts, or when the page's script fails, the browser posts the two fields itself to
  * POST /api/apply: the name and email are saved, and the person goes on to the booking page with both filled.
  */
-import { founding, labelled, section } from "../../content/deck";
+import { founding, section } from "../../content/deck";
 import { APPLICATION_MODE, APPLICATION_URL } from "../../config";
-const s = section(12);
-const line = labelled(s.get("line under it"));
+const s = section("the apply window");
 const steps = s.list("step ").map(({ words }) => words);
 const native = APPLICATION_MODE === "native";
 const under = founding(s.get("under the button"));
@@ -23,7 +22,7 @@ const under = founding(s.get("under the button"));
       {s.get("heading")}
     </h2>
     <p class="final__line" data-reveal>
-      {line.map((part) => (part.label ? <span class="chip">{part.text}</span> : part.text))}
+      {s.get("line under it")}
     </p>
     <p class="final__p" data-reveal>
       {s.get("paragraph")}

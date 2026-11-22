@@ -5,8 +5,6 @@
  */
 import "../styles/tokens.css";
 import "../styles/page/frame.css";
-import "../styles/page/cards.css";
-import "../styles/page/screens.css";
 import "../styles/page/sections.css";
 import "../styles/page/more.css";
 import "../styles/page/folio.css";
@@ -21,7 +19,7 @@ interface Props {
   /** True for a page that starts the form itself, with its own settings. */
   ownForm?: boolean;
 }
-const head = section(15);
+const head = section("title and description");
 const {
   title = head.get("title"),
   description = head.get("description"),

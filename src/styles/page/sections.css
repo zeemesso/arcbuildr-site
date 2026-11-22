@@ -1,7 +1,40 @@
-/* Sections 2, 3, 4 and 9 to 12, and the apply strips. Each section has its own surface, so no two
- * neighbours look alike: type on the canvas, a white window, a dark window, a tinted window. */
+/* The quiet folio (DESIGN.md, section 12), sections 2 to 6 and 10 to 13, the apply strips and the video
+ * poster. A section sits on the paper itself, parted from the next by air and from its own parts by
+ * hairlines. Only three of them are a surface: the framework, the guarantee and the last panel. */
 
 /* ---------- Shared pieces ---------- */
+.say,
+.creed,
+.get,
+.who,
+.fit,
+.faq {
+  max-width: calc(var(--page) + 2 * var(--pad));
+  margin-inline: auto;
+  padding: var(--air) var(--pad) 0;
+}
+.creed__head,
+.get__head,
+.fit__head {
+  display: grid;
+  justify-items: start;
+  gap: 1rem;
+  margin-bottom: clamp(2rem, 1.5rem + 3vw, 3.5rem);
+}
+.get__head .h2,
+.fit__head .h2,
+.creed__head .h2 {
+  max-width: 24ch;
+}
+/* A section that paints its own surface is a panel on the paper, never a band across the screen. */
+.window--night,
+.promise {
+  width: calc(100% - 2 * clamp(0.625rem, 2vw, 1.5rem));
+  max-width: calc(var(--page) + 2 * var(--pad));
+  margin: var(--air) auto 0;
+  border-radius: var(--r-window);
+  overflow: clip;
+}
 .window--night {
   background: var(--night);
   color: var(--on-night);
@@ -24,31 +57,22 @@
   object-fit: cover;
 }
 
-/* An apply strip: one sentence, the same button. */
+/* An apply strip: one sentence and the same button, under a hairline at the end of its section. */
 .strip {
   display: grid;
   justify-items: start;
   gap: 1.25rem;
-  padding: clamp(1.5rem, 4vw, 2.25rem) var(--pad);
+  margin-top: clamp(2.5rem, 2rem + 3vw, 4.5rem);
+  padding-top: clamp(1.5rem, 3vw, 2.25rem);
+  border-top: 1px solid var(--hair);
 }
 .strip__words {
   max-width: 34rem;
-  font-size: clamp(1.25rem, 1rem + 1vw, 1.625rem);
+  font-size: clamp(1.125rem, 1rem + 0.6vw, 1.375rem);
   font-weight: 600;
   letter-spacing: -0.02em;
-  line-height: 1.25;
+  line-height: 1.3;
   text-wrap: balance;
-}
-.strip--window {
-  border-top: 1px solid var(--hair);
-}
-.window--night .strip--window {
-  border-top-color: var(--hair-night);
-}
-.strip--canvas {
-  max-width: 72rem;
-  margin: clamp(0.75rem, 1.6vw, 1.25rem) auto 0;
-  padding-inline: calc(var(--frame) + clamp(0.75rem, 2vw, 1.5rem));
 }
 @media (min-width: 48rem) {
   .strip {
@@ -79,6 +103,7 @@
   place-content: center;
   justify-items: center;
   gap: 1rem;
+  padding: 1rem;
   overflow: hidden;
   isolation: isolate;
   text-align: center;
@@ -89,40 +114,26 @@
   position: absolute;
   z-index: -1;
   inset: -20%;
-  background:
-    radial-gradient(
-      40% 50% at 50% 42%,
-      color-mix(in oklch, var(--color-accent) 34%, transparent),
-      transparent 70%
-    ),
-    radial-gradient(
-      70% 60% at 50% 110%,
-      color-mix(in oklch, var(--color-taupe) 40%, transparent),
-      transparent 70%
-    );
+  background: radial-gradient(
+    60% 60% at 50% 110%,
+    color-mix(in oklch, var(--color-accent) 30%, transparent),
+    transparent 70%
+  );
 }
 .video__face {
-  width: clamp(5rem, 14vw, 7.5rem);
-  height: clamp(5rem, 14vw, 7.5rem);
+  width: clamp(4rem, 12vw, 5.5rem);
+  height: clamp(4rem, 12vw, 5.5rem);
   background: var(--window);
   color: var(--ink);
-  font-size: clamp(1.5rem, 4vw, 2.25rem);
+  font-size: clamp(1.25rem, 3.5vw, 1.625rem);
   letter-spacing: -0.02em;
-  box-shadow:
-    0 0 0 4px var(--night),
-    0 0 0 7px var(--color-accent);
 }
 .video__who {
-  display: grid;
-  gap: 0.125rem;
-  line-height: 1.3;
-}
-.video__who b {
-  font-size: var(--text-lg);
-}
-.video__who span {
+  max-width: 22rem;
   color: var(--on-night-muted);
   font-size: var(--text-sm);
+  line-height: 1.4;
+  text-wrap: balance;
 }
 .video__note {
   position: absolute;
@@ -136,19 +147,17 @@
   letter-spacing: 0.04em;
 }
 
-/* ---------- 2. Manifesto: type on the canvas ---------- */
+/* ---------- 2. The problem: type on the paper, then the list and two paragraphs ---------- */
 .say {
   display: grid;
-  gap: clamp(1.5rem, 4vw, 2.5rem);
-  max-width: 82rem;
-  margin-inline: auto;
-  padding: clamp(5rem, 12vw, 10rem) calc(var(--frame) + var(--pad)) clamp(4rem, 9vw, 7.5rem);
+  gap: clamp(1.5rem, 4vw, 2.25rem);
 }
 .say__big {
-  font-size: clamp(2rem, 1rem + 4.4vw, 4.5rem);
-  font-weight: 700;
+  max-width: 21em;
+  font-size: clamp(1.75rem, 1.2rem + 2.3vw, 2.75rem);
+  font-weight: 600;
   letter-spacing: var(--track);
-  line-height: 1.04;
+  line-height: 1.14;
   text-wrap: balance;
 }
 .say__light {
@@ -158,28 +167,6 @@
 }
 .say__full {
   margin-top: 0.12em;
-}
-.say__body {
-  display: grid;
-  gap: 1.25rem;
-  margin-top: clamp(1rem, 3vw, 2rem);
-  padding-top: clamp(1.5rem, 4vw, 2.5rem);
-  border-top: 1px solid var(--hair);
-  font-size: 1.125rem;
-  line-height: 1.6;
-  text-wrap: pretty;
-}
-@media (min-width: 56rem) {
-  .say__body {
-    display: block;
-    columns: 2;
-    column-gap: clamp(2.5rem, 6vw, 5rem);
-    font-size: 1.1875rem;
-  }
-  .say__body p {
-    break-inside: avoid;
-    margin-bottom: 1.25rem;
-  }
 }
 /* Each word of the second sentence takes its ink as it passes up the screen. */
 @supports (animation-timeline: view()) {
@@ -196,375 +183,833 @@
     color: color-mix(in oklch, var(--color-ink) 30%, var(--canvas));
   }
 }
-
-/* ---------- 3. Zyade: a white window, his video and his words ---------- */
-.founder__grid {
+.say__grid {
   display: grid;
-  gap: clamp(1.75rem, 5vw, 4rem);
-  padding: clamp(1.25rem, 4vw, 3.5rem) clamp(1.25rem, 4vw, 3.5rem) clamp(2rem, 5vw, 4rem);
+  gap: clamp(2rem, 5vw, 4rem);
+  margin-top: clamp(1rem, 3vw, 2rem);
 }
-.founder__video .video {
-  aspect-ratio: 4 / 5;
+.pains__h {
+  padding-bottom: 0.875rem;
+  font-size: 1.125rem;
+  font-weight: 600;
+  line-height: 1.3;
 }
-.founder__words {
+.pains li {
+  position: relative;
+  padding: 0.9375rem 0 0.9375rem 1.75rem;
+  border-top: 1px solid var(--hair);
+  line-height: 1.5;
+  text-wrap: pretty;
+}
+.pains li:last-child {
+  border-bottom: 1px solid var(--hair);
+}
+/* A small mark before each one: a short stroke, in the color of what is wrong. */
+.pains li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 1.625rem;
+  width: 0.75rem;
+  border-top: 2px solid var(--color-clay);
+}
+.say__body {
+  display: grid;
+  align-content: start;
+  gap: 1rem;
+  max-width: var(--measure);
+  color: var(--muted);
+  font-size: var(--lead);
+  line-height: 1.55;
+  text-wrap: pretty;
+}
+.say__body p:first-child {
+  color: var(--ink);
+}
+@media (min-width: 56rem) {
+  .say__grid {
+    grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+  }
+  /* The paragraphs start level with the first line of the list. */
+  .say__body {
+    padding-top: 2.5rem;
+  }
+}
+
+/* ---------- 3. What we believe: six beliefs in two rows ---------- */
+.creed__list {
+  display: grid;
+  column-gap: clamp(1.5rem, 4vw, 3.5rem);
+}
+.creed__list li {
+  display: grid;
+  align-content: start;
+  gap: 0.5rem;
+  padding: 1.25rem 0 clamp(1.5rem, 1rem + 2vw, 2.5rem);
+  border-top: 1px solid var(--hair);
+}
+.creed__n,
+.wins__n,
+.chain__n,
+.card__n {
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.1em;
+}
+.creed__list h3 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.3;
+  text-wrap: balance;
+}
+.creed__list p {
+  color: var(--muted);
+  line-height: 1.5;
+  text-wrap: pretty;
+}
+.creed__close {
+  max-width: 40rem;
+  padding-top: clamp(1.5rem, 3vw, 2.25rem);
+  border-top: 1px solid var(--hair);
+  font-size: var(--lead);
+  line-height: 1.5;
+  text-wrap: pretty;
+}
+@media (min-width: 40rem) {
+  .creed__list {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+@media (min-width: 60rem) {
+  .creed__list {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* ---------- 4. The framework: one chain in a dark window ---------- */
+.show {
+  padding: clamp(2.5rem, 1.5rem + 5vw, 5rem) clamp(1.25rem, 4.5vw, 4rem);
+  --link: 0.75rem;
+}
+.show__head {
+  display: grid;
+  justify-items: start;
+  gap: 1rem;
+  max-width: 44rem;
+  margin-bottom: clamp(2.5rem, 1.5rem + 5vw, 4.5rem);
+}
+.show__lead {
+  color: var(--on-night-muted);
+  font-size: var(--lead);
+  line-height: 1.55;
+  text-wrap: pretty;
+}
+/* On a phone the chain runs top to bottom, with its line down the left. */
+.chain {
+  --gap: 2.5rem;
+  display: grid;
+  gap: var(--gap);
+}
+.chain__link {
+  position: relative;
   display: grid;
   align-content: start;
   justify-items: start;
-  gap: 1.125rem;
-  font-size: 1.125rem;
-  line-height: 1.6;
+  gap: 0.5rem;
+  padding-left: 2rem;
+}
+.chain__dot {
+  position: absolute;
+  left: 0;
+  top: 0.3rem;
+  width: var(--link);
+  height: var(--link);
+  border-radius: 50%;
+  background: var(--color-accent);
+}
+/* The two ends are rings: the chain starts with the owner and ends with the piece. */
+.chain__link--end .chain__dot {
+  background: none;
+  box-shadow: inset 0 0 0 2px var(--color-accent);
+}
+/* The line from one link to the next: a faint track, and the fill that runs along it. */
+.chain__link::before,
+.chain__link::after {
+  content: "";
+  position: absolute;
+  left: calc(var(--link) / 2 - 0.5px);
+  top: calc(0.3rem + var(--link) + 0.375rem);
+  bottom: calc(-1 * var(--gap) + 0.075rem);
+  width: 1px;
+}
+.chain__link::before {
+  background: var(--hair-night);
+}
+.chain__link::after {
+  background: var(--color-accent);
+  transform-origin: top left;
+}
+.chain__link--last::before,
+.chain__link--last::after {
+  content: none;
+}
+.js .chain__link::after {
+  scale: 1 0;
+}
+.js .chain__link.is-in::after {
+  scale: 1 1;
+  transition: scale 700ms var(--ease-move) 300ms;
+}
+.chain__n {
+  color: var(--on-night-muted);
+}
+/* The step's name is large; its plain meaning sits right under it, never apart from it. */
+.chain__name {
+  font-size: clamp(1.625rem, 1.35rem + 1.1vw, 2.125rem);
+  font-weight: 600;
+  letter-spacing: var(--track);
+  line-height: 1.1;
+}
+.chain__plain {
+  line-height: 1.45;
   text-wrap: pretty;
 }
-.founder__words .h2 {
-  max-width: 16ch;
-  margin-bottom: 0.5rem;
-}
-.founder__words > p {
-  max-width: 36rem;
-}
-.founder__ways {
+.chain__becomes {
   display: grid;
-  gap: 0.625rem;
+  grid-template-columns: 1rem minmax(0, 1fr);
+  gap: 0.5rem;
   width: 100%;
-  max-width: 38rem;
-  margin-block: 0.5rem;
+  margin-block: 0.5rem 0.25rem;
+  padding-block: 0.75rem;
+  border-block: 1px solid var(--hair-night);
+  color: var(--color-accent);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  line-height: 1.4;
+  text-wrap: pretty;
 }
-.founder__ways li {
-  display: grid;
-  grid-template-columns: 2.25rem 1fr;
-  gap: 1rem;
-  padding: 1.125rem 1.25rem 1.125rem 1.125rem;
-  border-radius: var(--r-inner);
-  background: var(--tint-accent);
-  font-size: var(--text-base);
+.chain__becomes svg {
+  width: 1rem;
+  height: 1rem;
+  margin-top: 0.125rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.chain__title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  line-height: 1.3;
+}
+.chain__body {
+  color: var(--on-night-muted);
+  font-size: var(--text-sm);
+  line-height: 1.55;
+  text-wrap: pretty;
+}
+.show__close {
+  max-width: 44rem;
+  margin-top: clamp(2.5rem, 1.5rem + 5vw, 4.5rem);
+  padding-top: clamp(1.5rem, 3vw, 2rem);
+  border-top: 1px solid var(--hair-night);
+  font-size: var(--lead);
   line-height: 1.5;
+  text-wrap: pretty;
 }
-.founder__ways li:nth-child(2) {
-  background: var(--tint-sage);
+/* On a wide screen the chain runs left to right: the interview, the three steps, the piece. */
+@media (min-width: 64rem) {
+  .chain {
+    --gap: clamp(1.25rem, 2.2vw, 2.25rem);
+    grid-template-columns: 0.8fr repeat(3, 1fr) 0.8fr;
+  }
+  .chain__link {
+    padding: 2.25rem 0 0;
+  }
+  .chain__dot {
+    top: 0;
+  }
+  .chain__link::before,
+  .chain__link::after {
+    left: calc(var(--link) + 0.5rem);
+    right: calc(-1 * var(--gap) + 0.5rem);
+    top: calc(var(--link) / 2 - 0.5px);
+    bottom: auto;
+    width: auto;
+    height: 1px;
+  }
+  .js .chain__link::after {
+    scale: 0 1;
+  }
+  /* The links arrive in order, and each line fills once its link is there. */
+  .js .chain__link.is-in {
+    transition-delay: calc(var(--i) * 380ms);
+  }
+  .js .chain__link.is-in::after {
+    transition: scale 380ms linear calc(var(--i) * 380ms + 240ms);
+  }
 }
-.founder__ways li:nth-child(3) {
-  background: var(--tint-taupe);
+
+/* ---------- 5. What you get: seven cards, each with a screen ---------- */
+.cards {
+  display: grid;
+  gap: clamp(2.5rem, 2rem + 3vw, 4.5rem) clamp(1.5rem, 4vw, 3.5rem);
 }
-.founder__ways b {
+.card {
+  display: grid;
+  align-content: start;
+  gap: 1.25rem;
+}
+/* The screen: a picture of the real document, or the card's own title on a plain panel. */
+.card__stage {
+  position: relative;
+  display: grid;
+  align-content: end;
+  aspect-ratio: 2 / 1;
+  padding: clamp(1.25rem, 3vw, 2rem);
+  border-radius: var(--r-window);
+  background: var(--color-paper-2);
+  overflow: hidden;
+}
+.card__n {
+  position: absolute;
+  top: clamp(1.125rem, 3vw, 1.75rem);
+  left: clamp(1.25rem, 3vw, 2rem);
+}
+.card__stage .card__h {
+  max-width: 16ch;
+  font-size: clamp(1.375rem, 1.15rem + 1vw, 1.875rem);
+  letter-spacing: var(--track);
+  line-height: 1.12;
+}
+.card__h {
+  font-size: 1.25rem;
+  font-weight: 600;
+  line-height: 1.2;
+  text-wrap: balance;
+}
+.card__stage--shot {
+  aspect-ratio: 16 / 10;
+  padding: 0;
+}
+.card__stage--shot img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top;
+}
+.card__stage--shot .card__n {
+  z-index: 1;
+  padding: 0.125rem 0.5rem;
+  border-radius: var(--radius-pill);
+  background: var(--window);
+  color: var(--ink);
+}
+.card__text {
+  display: grid;
+  justify-items: start;
+  gap: 0.625rem;
+}
+.card__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.25rem 1rem;
+  line-height: 1.4;
+}
+.card__date {
+  font-weight: 600;
+}
+/* The step of the Show it comes from. */
+.card__from {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4375rem;
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.card__from::before {
+  content: "";
+  width: 0.375rem;
+  height: 0.375rem;
+  border-radius: 50%;
+  background: var(--color-accent);
+}
+.card__body {
+  max-width: var(--measure);
+  color: var(--muted);
+  line-height: 1.55;
+  text-wrap: pretty;
+}
+.get__after {
+  max-width: var(--measure);
+  margin-top: clamp(2.5rem, 2rem + 3vw, 4.5rem);
+  font-size: var(--lead);
+  line-height: 1.5;
+  text-wrap: pretty;
+}
+@media (min-width: 48rem) {
+  .cards {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  /* The wide card: its screen on one side, its words on the other. */
+  .card--wide {
+    grid-column: 1 / -1;
+    grid-template-columns: subgrid;
+    column-gap: clamp(1.5rem, 4vw, 3.5rem);
+    align-items: center;
+  }
+}
+
+/* ---------- 6. Who directs it: his photo, then the words ---------- */
+.who__grid {
+  display: grid;
+  gap: clamp(2rem, 6vw, 5rem);
+}
+.who__photo {
   display: grid;
   place-items: center;
-  width: 2.25rem;
-  height: 2.25rem;
-  border-radius: 50%;
-  background: var(--ink);
-  color: var(--window);
-  font-family: var(--font-mono);
-  font-size: var(--text-sm);
-  font-weight: 500;
+  aspect-ratio: 4 / 5;
+  border-radius: var(--r-window);
+  background: var(--color-paper-2);
+  overflow: hidden;
 }
-.founder__small {
+.who__photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.who__face {
+  width: 5.5rem;
+  height: 5.5rem;
+  font-size: 1.5rem;
+  letter-spacing: -0.02em;
+}
+.who__words {
+  display: grid;
+  align-content: start;
+  justify-items: start;
+  gap: 1rem;
+  text-wrap: pretty;
+}
+.who__words .h2 {
+  margin-bottom: 0.25rem;
+}
+.who__words > p:not(.label) {
+  max-width: var(--measure);
   color: var(--muted);
+  line-height: 1.6;
+}
+.who__words > .h2 + p:not(.label) {
+  color: var(--ink);
+}
+.who__ways {
+  display: grid;
+  width: 100%;
+  max-width: var(--measure);
+  margin-block: 0.5rem 0.25rem;
+}
+.who__ways li {
+  display: grid;
+  grid-template-columns: 1.75rem minmax(0, 1fr);
+  gap: 0.75rem;
+  padding-block: 1rem;
+  border-top: 1px solid var(--hair);
+  line-height: 1.5;
+}
+.who__ways li:last-child {
+  border-bottom: 1px solid var(--hair);
+}
+.who__ways b {
+  padding-top: 0.3125rem;
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+}
+.who__words > .who__small {
   font-size: var(--text-sm);
   line-height: 1.5;
 }
-@media (min-width: 64rem) {
-  .founder__grid {
-    grid-template-columns: minmax(0, 0.82fr) minmax(0, 1fr);
+@media (min-width: 60rem) {
+  .who__grid {
+    grid-template-columns: minmax(0, 0.78fr) minmax(0, 1fr);
     align-items: start;
   }
-  .founder__video {
+  .who__photo {
     position: sticky;
     top: 6.5rem;
   }
 }
-@media (max-width: 63.99rem) {
-  .founder__video .video {
-    aspect-ratio: 4 / 3;
+/* Until there is a photo, his initials do not need a tall panel on a phone. */
+@media (max-width: 59.99rem) {
+  .who__photo:not(:has(img)) {
+    aspect-ratio: 16 / 7;
   }
 }
 
-/* ---------- 4. How it works: a dark window, the diagram, then five steps ---------- */
-.how {
-  padding: clamp(3rem, 8vw, 6rem) var(--pad) clamp(1.5rem, 4vw, 3rem);
+/* ---------- 10. Guarantee: one quiet tinted panel ---------- */
+.promise {
+  display: grid;
+  gap: clamp(1.75rem, 4vw, 3rem);
+  padding: clamp(2.5rem, 1.5rem + 5vw, 5rem) clamp(1.25rem, 4.5vw, 4rem);
+  background: var(--tint-sage);
 }
-.how__head {
+.promise__top {
   display: grid;
   justify-items: start;
   gap: 1rem;
-  margin-bottom: clamp(2rem, 6vw, 4rem);
 }
-.how__head .h2 {
-  max-width: 20ch;
+.promise__h {
+  font-size: var(--h1);
+  font-weight: 600;
+  letter-spacing: var(--track);
+  line-height: 1.06;
+  text-wrap: balance;
 }
-.flow {
+/* Day 1, day 7, day 10: the stretch from 7 to 10 is the refund window. */
+.days {
+  position: relative;
+  height: 3.75rem;
+  max-width: 26rem;
+  margin-inline: 0.5rem 1rem;
+  border-top: 1.5px solid color-mix(in oklch, var(--color-sage) 40%, transparent);
+}
+.days::after {
+  content: "";
+  position: absolute;
+  left: 66.667%;
+  right: 0;
+  top: -4px;
+  height: 6px;
+  border-radius: 3px;
+  background: var(--color-sage);
+  transform-origin: left;
+}
+.days li {
+  position: absolute;
+  top: -0.4375rem;
   display: grid;
-  gap: 0;
-}
-.flow__col {
-  display: grid;
-  grid-template-rows: auto 1fr;
-  gap: 0.75rem;
-}
-.flow__label {
+  justify-items: center;
+  gap: 0.625rem;
+  translate: -50% 0;
   font-family: var(--font-mono);
   font-size: var(--text-xs);
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--on-night-muted);
+  letter-spacing: 0.04em;
+  white-space: nowrap;
 }
-.flow__cards {
+.days li:nth-child(1) {
+  left: 0;
+  justify-items: start;
+  translate: -0.375rem 0;
+}
+.days li:nth-child(2) {
+  left: 66.667%;
+}
+.days li:nth-child(3) {
+  left: 100%;
+  justify-items: end;
+  translate: calc(-100% + 0.375rem) 0;
+}
+.days i {
+  z-index: 1;
+  width: 0.75rem;
+  height: 0.75rem;
+  border-radius: 50%;
+  background: var(--tint-sage);
+  box-shadow: inset 0 0 0 1.5px var(--color-sage);
+}
+.days li:nth-child(n + 2) i {
+  background: var(--color-sage);
+}
+.days li:nth-child(n + 2) span {
+  font-weight: 700;
+}
+.js .days[data-reveal]::after {
+  scale: 0 1;
+}
+.js .days[data-reveal].is-in::after {
+  scale: 1 1;
+  transition: scale 900ms var(--ease-enter) 400ms;
+}
+.promise__words {
   display: grid;
-  grid-auto-rows: 1fr;
-  gap: 0.625rem;
-}
-.flow__card {
-  display: block;
-  padding: 1.125rem 1.25rem;
-  border-radius: var(--r-inner);
-  background: color-mix(in oklch, var(--color-card) 9%, var(--night));
-  box-shadow: inset 0 0 0 1px var(--hair-night);
-  color: var(--on-night-muted);
-  line-height: 1.45;
-}
-.flow__card b {
-  display: block;
-  margin-bottom: 0.25rem;
-  color: var(--on-night);
-  font-size: var(--text-lg);
-  letter-spacing: -0.01em;
-}
-.flow__card--out {
-  background: var(--window);
-  box-shadow: none;
-  color: var(--muted);
-}
-.flow__card--out b {
-  color: var(--ink);
-}
-.flow__card--out:has(.marks) {
-  display: grid;
-  grid-template-columns: auto 1fr;
-  align-items: start;
   gap: 1rem;
-  --marks-ring: var(--canvas);
+  max-width: 36rem;
+  color: var(--muted);
+  line-height: 1.6;
+  text-wrap: pretty;
 }
-.flow__hub {
-  display: grid;
-  align-content: center;
-  gap: 0.5rem;
-  padding: clamp(1.5rem, 3vw, 2.25rem);
-  border-radius: 1.5rem;
-  background: var(--color-accent);
-  color: var(--color-ink);
-  font-size: var(--text-lg);
-  font-weight: 500;
-  line-height: 1.4;
+.promise__first {
+  color: var(--ink);
+  font-size: var(--lead);
+  line-height: 1.5;
 }
-.flow__hub b {
-  font-size: clamp(1.75rem, 1.2rem + 2vw, 2.5rem);
-  letter-spacing: -0.03em;
-  line-height: 1.05;
-}
-/* The connectors: a filled pipe from each card to the hub, and a light that runs along it. */
-.flow__pipes {
-  width: 100%;
-  height: 100%;
-  overflow: visible;
-}
-.flow__pipes path {
-  fill: none;
-  stroke: color-mix(in oklch, var(--color-card) 16%, var(--night));
-  stroke-width: 10;
-  stroke-linecap: round;
-  vector-effect: non-scaling-stroke;
-}
-.flow__pipes .flow__run {
-  stroke: var(--color-accent);
-  stroke-width: 3;
-  stroke-dasharray: 2 26;
-}
-@media (prefers-reduced-motion: no-preference) {
-  .flow.is-in .flow__run {
-    animation: flow-run 1.6s linear infinite;
+@media (min-width: 60rem) {
+  .promise {
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1fr);
+    grid-template-rows: auto 1fr;
+    column-gap: clamp(2rem, 6vw, 5rem);
   }
-}
-@keyframes flow-run {
-  to {
-    stroke-dashoffset: -28;
-  }
-}
-@media (min-width: 64rem) {
-  .flow {
-    grid-template-columns:
-      minmax(0, 1fr) clamp(2.5rem, 5vw, 4.5rem) minmax(0, 0.9fr) clamp(2.5rem, 5vw, 4.5rem)
-      minmax(0, 1fr);
-  }
-  /* The pipes sit beside the cards, below the row of labels. */
-  .flow__pipes {
-    align-self: end;
-    height: calc(100% - 1.875rem);
-  }
-}
-@media (max-width: 63.99rem) {
-  .flow {
-    gap: 0;
-  }
-  /* On a phone the pipes become one short stem between the groups. */
-  .flow__pipes {
-    justify-self: center;
-    width: 0.625rem;
-    height: 2.25rem;
-    margin-block: 0.25rem;
-    border-radius: var(--radius-pill);
-    background: color-mix(in oklch, var(--color-card) 16%, var(--night));
-  }
-  .flow__pipes path {
-    display: none;
+  .promise__words {
+    grid-column: 2;
+    grid-row: 1 / span 2;
   }
 }
 
-/* The five steps. */
-.steps {
+/* ---------- 11. Fit: two plain lists ---------- */
+.fit__cols {
   display: grid;
-  gap: 0.625rem;
-  margin-top: clamp(2rem, 6vw, 4rem);
-  padding-top: clamp(1.5rem, 4vw, 2.5rem);
-  border-top: 1px solid var(--hair-night);
+  gap: clamp(2rem, 6vw, 5rem);
 }
-.steps__step {
-  position: relative;
+.fit__col h3 {
+  padding-bottom: 0.875rem;
+  font-size: 1.125rem;
+  font-weight: 600;
+  line-height: 1.3;
+}
+.fit__col li {
   display: grid;
-  align-content: start;
-  gap: 0.75rem;
-  padding: 1.25rem;
-  border-radius: var(--r-inner);
-  background: color-mix(in oklch, var(--color-card) 9%, var(--night));
-  overflow: hidden;
+  grid-template-columns: 1.25rem minmax(0, 1fr);
+  gap: 0.875rem;
+  padding-block: 0.9375rem;
+  border-top: 1px solid var(--hair);
+  line-height: 1.5;
+  text-wrap: pretty;
 }
-.steps__h {
-  font: inherit;
+.fit__col li:last-child {
+  border-bottom: 1px solid var(--hair);
 }
-.steps__h button {
-  display: grid;
-  gap: 0.75rem;
-  width: 100%;
-  min-height: 2.75rem;
-  padding: 0;
-  border: 0;
-  background: none;
-  color: inherit;
-  font: inherit;
-  text-align: left;
-  cursor: default;
-}
-.steps__top {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-.steps__n {
-  font-family: var(--font-mono);
-  font-size: var(--text-sm);
-  color: var(--on-night-muted);
-}
-.steps__step svg {
-  width: 1.75rem;
-  height: 1.75rem;
+.fit__col svg {
+  width: 1.25rem;
+  height: 1.25rem;
+  margin-top: 0.125rem;
   fill: none;
-  stroke: var(--color-accent);
-  stroke-width: 1.6;
+  stroke: var(--color-sage);
+  stroke-width: 2.4;
   stroke-linecap: round;
   stroke-linejoin: round;
 }
-.steps__t {
-  font-size: var(--text-lg);
-  font-weight: 700;
-  letter-spacing: -0.015em;
-  line-height: 1.25;
-  text-wrap: balance;
+.fit__col--not svg {
+  stroke: var(--color-clay);
 }
-.steps__text {
-  color: var(--on-night-muted);
-  line-height: 1.55;
-  text-wrap: pretty;
+.fit__col--not li {
+  color: var(--muted);
 }
-.steps__bar {
+@media (min-width: 56rem) {
+  .fit__cols {
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+    align-items: start;
+  }
+}
+
+/* ---------- 12. Questions: rows that open ---------- */
+.faq {
+  display: grid;
+  gap: clamp(1.5rem, 4vw, 2.5rem);
+}
+.faq__head {
+  display: grid;
+  align-content: start;
+  justify-items: start;
+  gap: 1rem;
+}
+.faq__row {
+  border-top: 1px solid var(--hair);
+  interpolate-size: allow-keywords;
+}
+.faq__row:last-child {
+  border-bottom: 1px solid var(--hair);
+}
+.faq__row summary {
+  display: grid;
+  grid-template-columns: 2rem minmax(0, 1fr) 1.25rem;
+  align-items: center;
+  gap: 0.75rem;
+  min-height: 3.75rem;
+  /* Room on the right for the mark, which is wider once it has turned. */
+  padding: 1rem 0.3125rem 1rem 0;
+  font-size: 1.0625rem;
+  font-weight: 600;
+  line-height: 1.35;
+  list-style: none;
+  cursor: pointer;
+}
+.faq__row summary::-webkit-details-marker {
   display: none;
 }
-/* Wide screens, with scripts: a row of five tabs. The open one is wide and shows its text. */
+.faq__n {
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+}
+.faq__row summary svg {
+  width: 1.25rem;
+  height: 1.25rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  transition: rotate 300ms var(--ease-enter);
+}
+.faq__row[open] summary svg {
+  rotate: 45deg;
+}
+.faq__a {
+  display: grid;
+  gap: 0.875rem;
+  max-width: 40rem;
+  padding: 0 0 1.5rem 2.75rem;
+  color: var(--muted);
+  line-height: 1.6;
+  text-wrap: pretty;
+}
+.faq__row::details-content {
+  block-size: 0;
+  overflow: clip;
+  transition:
+    block-size 400ms var(--ease-enter),
+    content-visibility 400ms allow-discrete;
+}
+.faq__row[open]::details-content {
+  block-size: auto;
+}
 @media (min-width: 64rem) {
-  .js .steps {
-    grid-template-columns: repeat(5, minmax(0, 1fr));
-    transition: grid-template-columns 600ms var(--ease-enter);
+  .faq {
+    grid-template-columns: minmax(0, 0.72fr) minmax(0, 1.28fr);
   }
-  .js .steps[data-active="1"] {
-    grid-template-columns: 2.6fr 1fr 1fr 1fr 1fr;
-  }
-  .js .steps[data-active="2"] {
-    grid-template-columns: 1fr 2.6fr 1fr 1fr 1fr;
-  }
-  .js .steps[data-active="3"] {
-    grid-template-columns: 1fr 1fr 2.6fr 1fr 1fr;
-  }
-  .js .steps[data-active="4"] {
-    grid-template-columns: 1fr 1fr 1fr 2.6fr 1fr;
-  }
-  .js .steps[data-active="5"] {
-    grid-template-columns: 1fr 1fr 1fr 1fr 2.6fr;
-  }
-  .js .steps__step {
-    min-height: 17rem;
-    transition: background-color 300ms var(--ease-move);
-  }
-  .js .steps__h button {
-    cursor: pointer;
-  }
-  /* The whole tab is the target. */
-  .js .steps__h button::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-  }
-  .js .steps__step:not(.is-on) .steps__text {
-    display: none;
-  }
-  .js .steps__step:not(.is-on):hover {
-    background: color-mix(in oklch, var(--color-card) 14%, var(--night));
-  }
-  .js .steps__step.is-on {
-    background: var(--window);
-    color: var(--ink);
-  }
-  .js .steps__step.is-on .steps__n,
-  .js .steps__step.is-on .steps__text {
-    color: var(--muted);
-  }
-  .js .steps__step.is-on .steps__t {
-    font-size: var(--text-xl);
-  }
-  .js .steps__step.is-on .steps__text {
-    max-width: 30rem;
-    animation: steps-in 500ms var(--ease-enter) 120ms backwards;
-  }
-  /* The line that fills while a tab has its turn. */
-  .js .steps__bar {
-    display: block;
-    position: absolute;
-    left: 0;
-    bottom: 0;
-    width: 100%;
-    height: 3px;
-    background: var(--color-accent);
-    scale: 0 1;
-    transform-origin: left;
-  }
-  .js .steps.is-turning .steps__step.is-on .steps__bar {
-    animation: steps-turn var(--turn, 5s) linear forwards;
+  .faq__head {
+    position: sticky;
+    top: 7rem;
   }
 }
-@keyframes steps-in {
-  from {
-    opacity: 0;
-    translate: 0 0.5rem;
+@media (max-width: 30rem) {
+  .faq__a {
+    padding-left: 0;
   }
 }
-@keyframes steps-turn {
-  to {
-    scale: 1 1;
+
+/* ---------- 13. Apply: the last dark panel ---------- */
+.final {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: clamp(2rem, 5vw, 3.5rem);
+  padding: clamp(2.5rem, 1.5rem + 5vw, 5rem) clamp(1.25rem, 4.5vw, 4rem) clamp(1.5rem, 4vw, 3rem);
+}
+.final__words {
+  display: grid;
+  justify-items: start;
+  gap: 1rem;
+}
+.final__h {
+  font-size: var(--h1);
+  font-weight: 600;
+  letter-spacing: var(--track);
+  line-height: 1.06;
+  text-wrap: balance;
+}
+.final__line {
+  max-width: 34rem;
+  font-size: var(--lead);
+  line-height: 1.5;
+  text-wrap: pretty;
+}
+.final__p {
+  max-width: 36rem;
+  color: var(--on-night-muted);
+  line-height: 1.6;
+  text-wrap: pretty;
+}
+.final__box {
+  padding: clamp(1rem, 3vw, 1.5rem);
+  border-radius: 1.5rem;
+  background: color-mix(in oklch, var(--color-card) 9%, var(--night));
+  box-shadow: inset 0 0 0 1px var(--hair-night);
+}
+.entry {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.625rem;
+}
+.entry__field {
+  display: grid;
+  gap: 0.375rem;
+}
+.entry input {
+  width: 100%;
+  min-height: 3.25rem;
+  padding: 0 1.125rem;
+  border: 0;
+  border-radius: 0.875rem;
+  background: var(--window);
+  color: var(--ink);
+  font: inherit;
+  font-size: var(--text-base);
+}
+.entry input::placeholder {
+  color: var(--muted);
+}
+.entry input[aria-invalid="true"] {
+  box-shadow: inset 0 0 0 2px var(--color-clay);
+}
+.entry__err {
+  color: color-mix(in oklch, var(--color-clay) 45%, var(--color-card));
+  font-size: var(--text-sm);
+  font-weight: 600;
+}
+.entry__err:empty {
+  display: none;
+}
+.entry .btn {
+  width: 100%;
+  margin-top: 0.25rem;
+}
+.final__under {
+  margin-top: 0.875rem;
+  color: var(--on-night-muted);
+  font-size: var(--text-sm);
+  text-align: center;
+  text-wrap: balance;
+}
+.final__steps {
+  display: grid;
+  gap: 0.75rem;
+  padding-top: clamp(1.5rem, 4vw, 2.25rem);
+  border-top: 1px solid var(--hair-night);
+}
+.final__steps li {
+  display: grid;
+  grid-template-columns: 1.5rem minmax(0, 1fr);
+  align-items: baseline;
+  gap: 0.75rem;
+  color: var(--on-night-muted);
+  font-size: var(--text-sm);
+  line-height: 1.45;
+}
+.final__steps b {
+  color: var(--color-accent);
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+}
+@media (min-width: 64rem) {
+  .final {
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+    align-items: end;
+  }
+  .final__steps {
+    grid-column: 1 / -1;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
   }
 }

@@ -323,7 +323,7 @@ test("the form opens from a link on another page", async ({ page }) => {
 test("the header's button opens the form", async ({ page }) => {
   await stub(page);
   await page.goto("/");
-  await page.locator("#how").scrollIntoViewIfNeeded();
+  await page.locator("#get").scrollIntoViewIfNeeded();
   await press(page.locator(".bar__cta"));
   await expect(layer(page)).toBeVisible();
   await expect(current(page).locator("#a-name")).toBeVisible();
@@ -359,7 +359,7 @@ test("a budget under 750 USD ends the form with the deck's message, and no calen
   await press(current(page).locator(".choice").first());
   await expect(ending(page)).toBeVisible();
   const lines = ["budget, under 750, line 1", "budget, under 750, line 2"].map((slot) =>
-    section(13).get(slot).replace("{name}", "TEST"),
+    section("the form").get(slot).replace("{name}", "TEST"),
   );
   await expect(ending(page).locator("p")).toHaveText(lines);
   // The answers are saved all the same, with the budget they picked.
@@ -400,7 +400,9 @@ test("a finished booking lands on /booked, greeted by first name", async ({ page
   await expect(calendar(page).locator("iframe")).toBeVisible();
   await page.evaluate(() => (window as unknown as { __booked: () => void }).__booked());
   await page.waitForURL("**/booked");
-  await expect(page.locator("h1")).toHaveText(section(14).get("heading").replace("{name}", "TEST"));
+  await expect(page.locator("h1")).toHaveText(
+    section("the booked page").get("heading").replace("{name}", "TEST"),
+  );
   // The name and the email are kept on the device, never in the address.
   expect(new URL(page.url()).search).toBe("");
 });

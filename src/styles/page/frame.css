@@ -167,7 +167,7 @@ main:focus {
 }
 
 /* A section sits on the paper itself. Only a few things are a surface of their own: the video, the
-   iceberg's picture, the offer and the last panel. */
+   framework, the iceberg's picture, the product and the bonuses, the guarantee and the last panel. */
 .window {
   position: relative;
   margin: 0 auto;
@@ -230,33 +230,6 @@ main:focus {
 }
 .btn--quiet:hover svg {
   translate: 0 0.15rem;
-}
-
-/* The Claude and ChatGPT marks, each whole in its own white disc. The discs meet at the rim; no mark is covered. */
-.marks {
-  display: inline-flex;
-  flex: none;
-}
-.marks__disc {
-  display: grid;
-  place-items: center;
-  width: 2.5rem;
-  height: 2.5rem;
-  border-radius: 50%;
-  background: var(--color-card);
-  box-shadow: 0 0 0 2px var(--marks-ring, var(--canvas));
-}
-.marks__disc + .marks__disc {
-  margin-left: -0.5rem;
-}
-.marks__disc img {
-  width: 1.375rem;
-  height: 1.375rem;
-}
-/* The second file carries its own clear space, so it is drawn larger to look the same size. */
-.marks__disc img[data-mark="chatgpt"] {
-  width: 2.375rem;
-  height: 2.375rem;
 }
 
 /* The header: a dark pill that follows the page. Its button shows once the first button has left the screen. */

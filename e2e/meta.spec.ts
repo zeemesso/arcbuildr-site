@@ -2,8 +2,8 @@ import { expect, test } from "@playwright/test";
 import { privacy } from "../src/content/site";
 import { section } from "../src/content/deck";
 
-const head = section(15);
-const booked = section(14);
+const head = section("title and description");
+const booked = section("the booked page");
 /** Each page's title and description, and what a shared link shows. */
 const PAGES = [
   {

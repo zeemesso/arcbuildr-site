@@ -1,0 +1,73 @@
+---
+/**
+ * 4. The framework, the Show: one chain in a dark window. It starts with the interview, runs through
+ * the three steps (each with its name, its plain meaning right under it, and what it becomes) and ends
+ * with the piece. Left to right on a wide screen, top to bottom on a phone. The line between two links
+ * fills as its link arrives.
+ */
+import { section } from "../../content/deck";
+const s = section(4);
+const steps = s
+  .list("step ")
+  .filter(({ slot }) => slot.endsWith(", name"))
+  .map(({ slot, words }) => {
+    const key = slot.replace(", name", "");
+    return {
+      n: key.replace("step ", ""),
+      name: words,
+      plain: s.get(`${key}, plain meaning`),
+      becomes: s.get(`${key}, becomes`),
+      body: s.get(`${key}, body`),
+    };
+  });
+---
+
+<section class="window window--night show" id="framework" aria-labelledby="show-h">
+  <div class="show__head">
+    <p class="label" data-reveal>
+      {s.get("label")}
+    </p>
+    <h2 class="h2" id="show-h" data-reveal>
+      {s.get("heading")}
+    </h2>
+    <p class="show__lead" data-reveal>
+      {s.get("paragraph")}
+    </p>
+  </div>
+
+  <ol class="chain" data-chain>
+    <li class="chain__link chain__link--end" data-reveal style="--i:0">
+      <i class="chain__dot" aria-hidden="true"></i>
+      <h3 class="chain__title">{s.get("start, title")}</h3>
+      <p class="chain__body">{s.get("start, line")}</p>
+    </li>
+    {steps.map(({ n, name, plain, becomes, body }, at) => (
+      <li class="chain__link chain__link--step" data-reveal style={`--i:${at + 1}`}>
+        <i class="chain__dot" aria-hidden="true" />
+        <span class="chain__n">{n}</span>
+        <h3 class="chain__name">{name}</h3>
+        <p class="chain__plain">{plain}</p>
+        <p class="chain__becomes">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M5 12h14M13 6l6 6-6 6" />
+          </svg>
+          <span>{becomes}</span>
+        </p>
+        <p class="chain__body">{body}</p>
+      </li>
+    ))}
+    <li
+      class="chain__link chain__link--end chain__link--last"
+      data-reveal
+      style={`--i:${steps.length + 1}`}
+    >
+      <i class="chain__dot" aria-hidden="true"></i>
+      <h3 class="chain__title">{s.get("end, title")}</h3>
+      <p class="chain__body">{s.get("end, line")}</p>
+    </li>
+  </ol>
+
+  <p class="show__close" data-reveal>
+    {s.get("chain line")}
+  </p>
+</section>

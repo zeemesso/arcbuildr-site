@@ -1,15 +1,15 @@
 ---
 /**
- * 9. Guarantee: one quiet window, large type, no picture. A small timeline of three marks: day 1,
+ * 10. Guarantee: one quiet window, large type, no picture. A small timeline of three marks: day 1,
  * day 7, day 10, with the stretch from day 7 to day 10 highlighted.
  */
 import { section } from "../../content/deck";
 import { page } from "../../content/site";
-const s = section(9);
+const s = section(10);
 const paragraphs = s.list("paragraph").map(({ words }) => words);
 ---
 
-<section class="window promise" id="guarantee" aria-labelledby="promise-h">
+<section class="promise" id="guarantee" aria-labelledby="promise-h">
   <div class="promise__top">
     <p class="label" data-reveal>
       {s.get("label")}

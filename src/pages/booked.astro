@@ -1,6 +1,6 @@
 ---
 /**
- * The page after a booking (the deck's section 14): him, the confirmation video, and what happens next.
+ * The page after a booking (the deck's "The booked page"): him, the confirmation video, and what happens next.
  * The calendar inside the form sends people here when a booking succeeds; the first name and the email
  * are kept on the device, or come in the address when the booking page sends them.
  */
@@ -15,7 +15,7 @@ import { section } from "../content/deck";
 import { booked } from "../content/site";
 import { APPLICATION_AFTER_BOOKING_URL, APPLICATION_MODE, CONFIRMATION_VIDEO } from "../config";
 
-const s = section(14);
+const s = section("the booked page");
 // The slot takes the confirmation video. Until its file is in public/, the slot shows the poster.
 const video =
   CONFIRMATION_VIDEO && existsSync(new URL(`../../public${CONFIRMATION_VIDEO}`, import.meta.url))

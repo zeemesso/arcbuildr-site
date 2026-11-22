@@ -1,35 +1,19 @@
 ---
-/**
- * The three wins under the first screen. Their words are the deck's (section 1, "win 1" to "win 3").
- * Until the deck has them, each place shows grey bars: nothing is written here.
- */
+/** The three wins under the first screen: a title and one line each, in the deck's words (section 1). */
 import { section } from "../../content/deck";
-const wins = section(1).list("win ");
-/** "A win. What it means." → the first sentence leads, the rest explains it. */
-const lead = (words: string) => {
-  const cut = words.indexOf(". ");
-  return cut < 0
-    ? ([words, ""] as const)
-    : ([words.slice(0, cut + 1), words.slice(cut + 2)] as const);
-};
-const places = wins.length ? wins.map(({ words }) => lead(words)) : [null, null, null];
+const s = section(1);
+const wins = s
+  .list("win ")
+  .filter(({ slot }) => slot.endsWith(", title"))
+  .map(({ slot, words }) => ({ title: words, line: s.get(slot.replace(", title", ", line")) }));
 ---
 
-<ul class="wins" data-wins aria-hidden={wins.length ? undefined : "true"}>
-  {places.map((win, n) => (
+<ul class="wins" data-wins>
+  {wins.map(({ title, line }, n) => (
     <li data-reveal style={`--i:${n}`}>
       <span class="wins__n">{String(n + 1).padStart(2, "0")}</span>
-      {win ? (
-        <p>
-          <b>{win[0]}</b> {win[1]}
-        </p>
-      ) : (
-        <span class="bars wins__wait">
-          <i style="--w:72%" />
-          <i style="--w:94%" />
-          <i style="--w:58%" />
-        </span>
-      )}
+      <h2 class="wins__h">{title}</h2>
+      <p>{line}</p>
     </li>
   ))}
 </ul>

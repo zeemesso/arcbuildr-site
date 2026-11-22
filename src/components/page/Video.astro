@@ -1,10 +1,10 @@
 ---
 /**
- * A video slot. With a file it is a player; until he films it, a poster with his face and his name.
- * No play button on the poster: there is nothing to play yet.
+ * A video slot. With a file it is a player; until he films it, a poster with his face and the deck's
+ * line on who he is. No play button on the poster: there is nothing to play yet.
  */
 import Face from "./Face.astro";
-import { page } from "../../content/site";
+import { section } from "../../content/deck";
 interface Props {
   src: string;
   /** What the video is, for a screen reader. */
@@ -13,7 +13,7 @@ interface Props {
   note?: string;
 }
 const { src, title, note } = Astro.props;
-const { founder } = page;
+const who = section(1).get("video, poster");
 ---
 
 {src ? (
@@ -21,10 +21,7 @@ const { founder } = page;
 ) : (
   <div class="video video--poster" data-poster>
     <Face size={96} class="video__face" />
-    <p class="video__who">
-      <b>{founder.name}</b>
-      <span>{founder.role}</span>
-    </p>
+    <p class="video__who">{who}</p>
     {note && <p class="video__note">{note}</p>}
   </div>
 )}

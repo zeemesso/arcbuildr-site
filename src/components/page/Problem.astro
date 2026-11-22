@@ -1,0 +1,48 @@
+---
+/**
+ * 2. The problem: no picture, the type is the visual. The first sentence in lighter ink, the next in
+ * full ink; its words take their ink as they pass up the screen. Then the list of what it looks like
+ * from the inside, and two short paragraphs.
+ */
+import { section } from "../../content/deck";
+const s = section(2);
+const full = s.get("large, full ink").split(" ");
+---
+
+<section class="say" id="problem" aria-labelledby="say-h">
+  <p class="label" data-reveal>
+    {s.get("label")}
+  </p>
+  <div class="say__big" data-reveal>
+    <h2 class="say__light" id="say-h">
+      {s.get("large, lighter ink")}
+    </h2>
+    <p class="say__full">
+      {full.map((word, n) => (
+        <>
+          <span class="w">{word}</span>
+          {n < full.length - 1 ? " " : ""}
+        </>
+      ))}
+    </p>
+  </div>
+  <div class="say__grid">
+    <div class="pains">
+      <h3 class="pains__h" data-reveal>
+        {s.get("list title")}
+      </h3>
+      <ul>
+        {s.list("pain ").map(({ words }, n) => (
+          <li data-reveal style={`--i:${n}`}>
+            {words}
+          </li>
+        ))}
+      </ul>
+    </div>
+    <div class="say__body">
+      {s.list("paragraph").map(({ words }) => (
+        <p data-reveal>{words}</p>
+      ))}
+    </div>
+  </div>
+</section>

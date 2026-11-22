@@ -1,22 +1,20 @@
 ---
 /**
- * An apply strip: one sentence and the same button, after sections 3, 5, 8 and 10.
+ * An apply strip: one sentence and the same button, after sections 5, 6, 9 and 11.
  * Every strip opens the same form.
  */
 import { section } from "../../content/deck";
 interface Props {
   /** The deck section whose `apply strip` this is. */
   from: number;
-  /** Sits on the canvas between two sections, or closes a window. */
-  on?: "canvas" | "window";
 }
-const { from, on = "window" } = Astro.props;
+const { from } = Astro.props;
 ---
 
-<div class:list={["strip", `strip--${on}`]} data-reveal data-strip={from}>
+<div class="strip" data-reveal data-strip={from}>
   <p class="strip__words">{section(from).get("apply strip")}</p>
   <a class="btn" href="#apply" data-apply-open data-cta>
-    {section(12).get("button")}
+    {section("the apply window").get("button")}
     <svg viewBox="0 0 24 24" aria-hidden="true">
       <path d="M5 12h14M13 6l6 6-6 6"></path>
     </svg>

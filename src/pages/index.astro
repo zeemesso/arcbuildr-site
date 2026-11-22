@@ -3,13 +3,14 @@ import Home from "../layouts/Home.astro";
 import Bar from "../components/page/Bar.astro";
 import First from "../components/page/First.astro";
 import Wins from "../components/page/Wins.astro";
-import Manifesto from "../components/page/Manifesto.astro";
-import Founder from "../components/page/Founder.astro";
-import How from "../components/page/How.astro";
+import Problem from "../components/page/Problem.astro";
+import Beliefs from "../components/page/Beliefs.astro";
+import Framework from "../components/page/Framework.astro";
 import Get from "../components/page/Get.astro";
+import Who from "../components/page/Who.astro";
 import Gallery from "../components/page/Gallery.astro";
 import Berg from "../components/page/Berg.astro";
-import Price from "../components/page/Price.astro";
+import Offer from "../components/page/Offer.astro";
 import Guarantee from "../components/page/Guarantee.astro";
 import Fit from "../components/page/Fit.astro";
 import Faq from "../components/page/Faq.astro";
@@ -19,10 +20,10 @@ import Application from "../components/application/Application.astro";
 import { section } from "../content/deck";
 // The header's links are the sections' own labels.
 const links = [
-  { text: section(4).get("label"), href: "#how" },
+  { text: section(4).get("label"), href: "#framework" },
   { text: section(5).get("label"), href: "#get" },
-  { text: section(8).get("label"), href: "#price" },
-  { text: section(11).get("label"), href: "#questions" },
+  { text: section(9).get("label"), href: "#offer" },
+  { text: section(12).get("label"), href: "#questions" },
 ];
 ---
 
@@ -30,13 +31,14 @@ const links = [
   <Bar slot="bar" links={links} />
   <First />
   <Wins />
-  <Manifesto />
-  <Founder />
-  <How />
+  <Problem />
+  <Beliefs />
+  <Framework />
   <Get />
+  <Who />
   <Gallery />
   <Berg />
-  <Price />
+  <Offer />
   <Guarantee />
   <Fit />
   <Faq />

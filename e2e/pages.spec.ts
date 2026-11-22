@@ -11,7 +11,7 @@ import { CONFIRMATION_VIDEO } from "../src/config";
 import { answer, press } from "./press";
 import { current, layer, stub } from "./stubs";
 
-const booked = section(14);
+const booked = section("the booked page");
 const named = (name: string) => booked.get("heading").replace("{name}", name);
 
 test("404 renders content and a home link", async ({ page }) => {
@@ -42,11 +42,11 @@ test.describe("the page after a booking", () => {
     await expect(page.locator(".next__list > li")).toHaveCount(2);
     for (const slot of ["next 1", "next 2"])
       await expect(page.getByText(booked.get(slot), { exact: true })).toBeVisible();
-    // Him: his name and role on the video slot, with his photo or his initials. Never a drawing.
+    // Him: the deck's poster line on the video slot, with his photo or his initials. Never a drawing.
     const slot = page.locator("#top .video");
     await expect(slot).toBeVisible();
     if (!existsSync(`public${CONFIRMATION_VIDEO}`)) {
-      await expect(slot).toContainText(words.founder.name);
+      await expect(slot).toContainText(section(1).get("video, poster"));
       await expect(slot.locator(".face")).toBeVisible();
     }
     await expect(page.locator("main svg image, main canvas, .pixel, [class*=sprite]")).toHaveCount(

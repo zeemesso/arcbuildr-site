@@ -5,10 +5,11 @@
  */
 import { section } from "./deck";
 
+const head = section("title and description");
 export const meta = {
-  /** The deck's own title and description (its section 15). */
-  title: section(15).get("title"),
-  description: section(15).get("description"),
+  /** The deck's own title and description. */
+  title: head.get("title"),
+  description: head.get("description"),
   /** The link a keyboard user meets first. */
   skip: "Skip to the content",
 };
@@ -19,10 +20,10 @@ export const action = "Apply and pick a time";
 export const page = {
   /** The header's button, once the first button has left the screen. */
   pill: "Apply",
-  founder: { name: "Zyade Messaoudi", role: "co-founder", initials: "ZM" },
-  marks: { claude: "Claude", chatgpt: "ChatGPT" },
+  /** His initials stand in the circle until a real photo of him exists. */
+  founder: { initials: "ZM" },
   nav: "Sections",
-  /** The three marks of the guarantee's timeline (the deck's screen note for section 9). */
+  /** The three marks of the guarantee's timeline (the deck's screen note for section 10). */
   guarantee: { marks: ["Day 1", "Day 7", "Day 10"] },
   /** Names of controls for a screen reader. They are not shown. */
   ui: { pause: "Pause the gallery", close: "Close", play: "Play the video" },
@@ -31,8 +32,8 @@ export const page = {
 export type Question = { id: string; q: string; err: string } & (
   { type: "link" | "long"; ph: string } | { type: "choice"; options: string[] }
 );
-/** The form's questions, hints and choices are the deck's (section 13). The deck lists choices as "A. B. C." */
-const form = section(13);
+/** The form's questions, hints and choices are the deck's ("The form"). The deck lists choices as "A. B. C." */
+const form = section("the form");
 const choices = (id: string) => form.get(`${id}, choices`).replace(/\.$/, "").split(". ");
 const budgets = choices("budget");
 
@@ -135,7 +136,7 @@ export const application = {
 };
 
 /**
- * The page after a booking. Its words are the deck's section 14; these four are short status lines the
+ * The page after a booking. Its words are the deck's ("The booked page"); these four are short status lines the
  * deck does not hold. `saved` takes the button's place once someone who booked from a chat has answered.
  * The other three are said when answers typed before the booking are saved again from that page.
  */

@@ -1,16 +1,13 @@
 ---
 /**
- * The first screen: who it is for, the headline, one sentence, then the sales video (a 16:9 slot),
- * the two actions and his face beside "with me". The three wins follow it (Wins.astro).
+ * 1. First screen: who it is for, the headline, one sentence, then the sales video (a 16:9 slot) under
+ * "Watch this first", one button, and the founding count. The three wins follow it (Wins.astro).
  */
-import Marks from "./Marks.astro";
 import Vsl from "./Vsl.astro";
-import { founding, labelled, section } from "../../content/deck";
-import { FOUNDING_PLACES_LEFT } from "../../config";
-import Face from "./Face.astro";
+import { founding, section } from "../../content/deck";
+import { FOUNDING_PLACES_LEFT, VSL_VIDEO } from "../../config";
 const s = section(1);
-const headline = s.find("headline") ?? s.get("headline, option 1");
-const line = labelled(s.get("line under it"));
+const headline = s.get("headline");
 ---
 
 <section class="first" id="top" aria-labelledby="first-h">
@@ -22,30 +19,31 @@ const line = labelled(s.get("line under it"));
       {headline}
     </h1>
     <p class="first__line" data-enter style="--i:2">
-      {line.map((part) => (part.label ? <span class="chip">{part.text}</span> : part.text))}
+      {s.get("line under it")}
     </p>
   </div>
-  <Vsl title={headline} />
+  <div class="first__watch" data-enter style="--i:3">
+    <p class="first__cue">
+      {s.get("video, label")}
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M12 5v14M6 13l6 6 6-6"></path>
+      </svg>
+    </p>
+    <Vsl title={headline} poster={s.get("video, poster")} />
+    {!VSL_VIDEO && (
+      <p class="first__soon" data-vsl-soon>
+        {s.get("video, placeholder line")}
+      </p>
+    )}
+  </div>
   <div class="first__foot" data-enter style="--i:4">
-    <div class="first__actions">
-      <a class="btn" href="#apply" data-apply-open data-cta>
-        {s.get("button")}
-        <svg viewBox="0 0 24 24" aria-hidden="true">
-          <path d="M5 12h14M13 6l6 6-6 6"></path>
-        </svg>
-      </a>
-      <a class="btn btn--quiet" href="#get">
-        <Marks />
-        {s.get("second button, with the Claude and ChatGPT icons")}
-        <svg viewBox="0 0 24 24" aria-hidden="true">
-          <path d="M6 9l6 6 6-6"></path>
-        </svg>
-      </a>
-    </div>
-    <div class="who">
-      <Face size={40} class="who__face" />
-      <p class="who__note">{s.get("under the buttons")}</p>
-    </div>
+    <a class="btn" href="#apply" data-apply-open data-cta>
+      {s.get("button")}
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M5 12h14M13 6l6 6-6 6"></path>
+      </svg>
+    </a>
+    <p class="first__under">{s.get("under the button")}</p>
     <p class="first__places">
       <span class="hang__dots" aria-hidden="true">
         {[0, 1, 2].map((n) => (

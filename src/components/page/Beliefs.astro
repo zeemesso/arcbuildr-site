@@ -1,0 +1,32 @@
+---
+/** 3. What we believe: six short beliefs in two rows, a title and one line each, then one paragraph. */
+import { section } from "../../content/deck";
+const s = section(3);
+const beliefs = s
+  .list("belief ")
+  .filter(({ slot }) => slot.endsWith(", title"))
+  .map(({ slot, words }) => ({ title: words, line: s.get(slot.replace(", title", ", line")) }));
+---
+
+<section class="creed" id="believe" aria-labelledby="creed-h">
+  <div class="creed__head">
+    <p class="label" data-reveal>
+      {s.get("label")}
+    </p>
+    <h2 class="h2" id="creed-h" data-reveal>
+      {s.get("heading")}
+    </h2>
+  </div>
+  <ol class="creed__list">
+    {beliefs.map(({ title, line }, n) => (
+      <li data-reveal style={`--i:${n % 3}`}>
+        <span class="creed__n">{String(n + 1).padStart(2, "0")}</span>
+        <h3>{title}</h3>
+        <p>{line}</p>
+      </li>
+    ))}
+  </ol>
+  <p class="creed__close" data-reveal>
+    {s.get("paragraph")}
+  </p>
+</section>

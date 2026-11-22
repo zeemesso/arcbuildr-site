@@ -1,8 +1,8 @@
 ---
-/** 10. Who it's for, and who it's not for: two columns in one window, plain lists. An apply strip closes it. */
+/** 11. Who it's for, and who it isn't: two columns, plain lists. An apply strip closes it. */
 import Strip from "./Strip.astro";
 import { section } from "../../content/deck";
-const s = section(10);
+const s = section(11);
 const columns = [
   {
     kind: "for",
@@ -19,7 +19,7 @@ const columns = [
 ];
 ---
 
-<section class="window fit" id="fit" aria-labelledby="fit-h">
+<section class="fit" id="fit" aria-labelledby="fit-h">
   <div class="fit__head">
     <p class="label" data-reveal>
       {s.get("label")}
@@ -45,5 +45,5 @@ const columns = [
       </div>
     ))}
   </div>
-  <Strip from={10} />
+  <Strip from={11} />
 </section>

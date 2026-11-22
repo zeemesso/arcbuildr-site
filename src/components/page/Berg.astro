@@ -1,12 +1,13 @@
 ---
 /**
- * The 12 weeks: the iceberg. One drawing: a small tip above the waterline (what is free), and under
+ * 8. The 12 weeks: the iceberg. One drawing: a small tip above the waterline (what is free), and under
  * it the big mass of ice, cut into nine bands, with water around it. Each band is tied by its color to
  * one line of the list. On a phone the picture comes first, then the list with its color keys.
+ * The free thing that is a real piece to read shows only while "The work" is on the page.
  */
 import { section } from "../../content/deck";
-import { piece } from "../../content/proof";
-const s = section(7);
+import { reading, workIsReady } from "../../content/proof";
+const s = section(8);
 /** "Day 1. Your interview, 45 minutes." → the first sentence is the key, the rest explains it. */
 const lead = (words: string) => {
   const cut = words.indexOf(". ");
@@ -14,9 +15,12 @@ const lead = (words: string) => {
     ? ([words, ""] as const)
     : ([words.slice(0, cut + 1), words.slice(cut + 2)] as const);
 };
-const free = s.list("free ").map(({ slot, words }) => ({ words, proof: s.isProof(slot) }));
+const read = workIsReady() ? reading() : null;
+const free = s
+  .list("free ")
+  .map(({ slot, words }) => ({ words, proof: s.isProof(slot) }))
+  .filter(({ proof }) => !proof || read);
 const bands = s.list("band ").map(({ words }) => lead(words));
-const script = piece("script-1-full");
 
 // The drawing, on a 360 by 560 sheet. The waterline sits at WATER; the mass runs from there to FLOOR.
 const WATER = 132;
@@ -150,24 +154,17 @@ const step = (FLOOR - WATER) / bands.length;
           <li data-reveal>
             <i class="berg__key" />
             <div>
-              {proof && script ? (
+              {proof && read ? (
                 <details class="berg__read">
                   <summary>{words}</summary>
                   <div>
-                    {script.lines.map((line) => (
+                    {read.lines.map((line) => (
                       <p>{line}</p>
                     ))}
                   </div>
                 </details>
               ) : (
                 <p>{words}</p>
-              )}
-              {proof && !script && (
-                <span class="bars berg__wait" aria-hidden="true">
-                  <i style="--w:92%" />
-                  <i style="--w:78%" />
-                  <i style="--w:54%" />
-                </span>
               )}
             </div>
           </li>

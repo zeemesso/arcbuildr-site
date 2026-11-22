@@ -1,0 +1,138 @@
+---
+/**
+ * 9. The offer, in the deck's order: the work (one row per part of Season One: the core first and
+ * heavier, then the four documents beside what the same work costs hired out, then what is included),
+ * the bonuses (each a small card with its name, its value and what it removes), the product (its own
+ * card), then the total beside the founding price, the six prices and the founding places.
+ * An apply strip closes it.
+ */
+import Strip from "./Strip.astro";
+import Product from "./Product.astro";
+import Bonuses from "./Bonuses.astro";
+import { founding, section } from "../../content/deck";
+import { FOUNDING_PLACES_LEFT } from "../../config";
+const s = section(9);
+/** The deck writes a row as sentences; on the page each sentence is a cell. */
+const cells = (words: string) => words.replace(/\.$/, "").split(". ");
+/** A row of the stack: "Name: detail. Figure." The figure is the last sentence. */
+const rows = s.list("stack row ").map(({ words }) => {
+  const cut = words.lastIndexOf(". ");
+  const [name, value] = [words.slice(0, cut), words.slice(cut + 2).replace(/\.$/, "")];
+  const colon = name.indexOf(": ");
+  return {
+    title: colon < 0 ? name : name.slice(0, colon + 1),
+    detail: colon < 0 ? "" : name.slice(colon + 2),
+    value,
+    // Told apart by what stands where a price would: a figure, a word with no figure, or the core's name.
+    kind: /^[\d,]+ USD$/.test(value) ? "priced" : /^Included$/i.test(value) ? "included" : "core",
+  };
+});
+const sum = (words: string) => {
+  const cut = words.lastIndexOf(": ");
+  return [words.slice(0, cut), words.slice(cut + 2).replace(/\.$/, "")] as const;
+};
+const total = sum(s.get("stack total"));
+const price = sum(s.get("stack price"));
+const paragraphs = s.list("paragraph").map(({ words }) => words);
+const columns = cells(s.get("price table, columns"));
+const prices = s.list("price row ").map(({ words }) => cells(words));
+const bonuses = s
+  .list("bonus ")
+  .filter(({ slot }) => slot.endsWith(", name"))
+  .map(({ slot, words }) => {
+    const key = slot.replace(", name", "");
+    return { name: words, value: s.get(`${key}, value`), body: s.get(`${key}, body`) };
+  });
+---
+
+<section class="offer" id="offer" aria-labelledby="offer-h">
+  <div class="offer__head">
+    <p class="label" data-reveal>
+      {s.get("label")}
+    </p>
+    <h2 class="h2" id="offer-h" data-reveal>
+      {s.get("heading")}
+    </h2>
+    <p class="offer__lead" data-reveal>
+      {paragraphs[0]}
+    </p>
+  </div>
+
+  <div class="offer__grid">
+    <div class="offer__work">
+      <h3 class="offer__title" data-reveal>
+        {s.get("stack title")}
+      </h3>
+      <ol class="ledger" data-ledger data-reveal>
+        {rows.map(({ title, detail, value, kind }) => (
+          <li class={`ledger__row ledger__row--${kind}`} data-kind={kind}>
+            <span class="ledger__name">
+              <b>{title}</b> {detail}
+            </span>
+            <span class="ledger__value">{value}</span>
+          </li>
+        ))}
+      </ol>
+      <p class="offer__note" data-reveal>
+        {s.get("stack note")}
+      </p>
+    </div>
+
+    <div class="offer__bonuses">
+      <h3 class="offer__title" data-reveal>
+        {s.get("bonus title")}
+      </h3>
+      <Bonuses items={bonuses} />
+    </div>
+
+    <Product />
+
+    <div class="sum" data-reveal>
+      <p class="sum__total">
+        <span>{total[0]}</span>
+        <b>{total[1]}</b>
+      </p>
+      <p class="sum__price">
+        <span>{price[0]}</span>
+        <b>{price[1]}</b>
+      </p>
+      <p class="sum__note">{s.get("line under the stack")}</p>
+    </div>
+  </div>
+
+  <div class="sizes" data-reveal>
+    <table class="sizes__table">
+      <thead>
+        <tr>
+          {columns.map((name) => (
+            <th scope="col">{name}</th>
+          ))}
+        </tr>
+      </thead>
+      <tbody>
+        {prices.map((row) => (
+          <tr>
+            {row.map((cell, n) =>
+              n === 0 ? <th scope="row">{cell}</th> : <td data-col={columns[n]}>{cell}</td>,
+            )}
+          </tr>
+        ))}
+      </tbody>
+    </table>
+    <p class="sizes__founding">
+      <span class="hang__dots" aria-hidden="true">
+        {[0, 1, 2].map((n) => (
+          <i data-taken={n >= FOUNDING_PLACES_LEFT ? "" : undefined} />
+        ))}
+      </span>
+      {founding(s.get("founding line"))}
+    </p>
+    <div class="sizes__more">
+      {paragraphs.slice(1).map((words) => (
+        <p>{words}</p>
+      ))}
+    </div>
+  </div>
+
+  <Strip from={9} />
+</section>

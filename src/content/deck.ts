@@ -1,5 +1,5 @@
 /**
- * The home page's words, as the copy deck wrote them. `deck.json` is made by `node scripts/deck/sync.mjs`
+ * The page's words, as the copy deck wrote them. `deck.json` is made by `node scripts/deck/sync.mjs`
  * and is never edited by hand. A component asks for a slot by the name the deck gave it; a slot the deck
  * no longer has stops the build, so a renamed line is noticed.
  */
@@ -12,6 +12,16 @@ const sections = data.sections as unknown as Record<string, { title: string; slo
 /** A visual that must be a real piece of Zyade's own Season One. The words inside are a note, never shown. */
 const CLIENT_ZERO = /\s*\[CLIENT ZERO:[^\]]*\]/g;
 
+/** The digital product's name. The deck writes it once and puts `{product}` everywhere else. */
+export const PRODUCT = sections.names?.slots.find(([slot]) => slot === "product name")?.[1] ?? "";
+
+/** A slot's words as the page shows them: the note of a real-piece slot off, the product's name in. */
+const shown = (words: string) => {
+  if (words.includes("{product}") && !PRODUCT) throw new Error("deck: no product name");
+  return words.replace(CLIENT_ZERO, "").replaceAll("{product}", PRODUCT).trim();
+};
+
+/** A section by its number, or a part of section 13 by its heading ("the form", "the booked page"). */
 export function section(key: number | string) {
   const found = sections[String(key)];
   if (!found) throw new Error(`deck: no section "${key}"`);
@@ -22,30 +32,21 @@ export function section(key: number | string) {
     get(name: string): string {
       const words = find(name);
       if (words === undefined) throw new Error(`deck: section "${key}" has no slot "${name}"`);
-      return words.replace(CLIENT_ZERO, "").trim();
+      return shown(words);
     },
     /** The same, or nothing when the deck has no such slot. */
-    find: (name: string) => find(name)?.replace(CLIENT_ZERO, "").trim(),
+    find: (name: string) => {
+      const words = find(name);
+      return words === undefined ? undefined : shown(words);
+    },
     /** Every slot whose name starts with `prefix`, in the deck's order. */
     list: (prefix: string) =>
       slots
         .filter(([slot]) => slot.startsWith(prefix))
-        .map(([slot, words]) => ({ slot, words: words.replace(CLIENT_ZERO, "").trim() })),
+        .map(([slot, words]) => ({ slot, words: shown(words) })),
     /** True when the slot is, or holds, a real-piece visual. */
     isProof: (name: string) => /\[CLIENT ZERO:/.test(find(name) ?? ""),
   };
-}
-
-/** Words in [square brackets] sit in a small label. */
-export function labelled(words: string) {
-  return words
-    .split(/(\[[^\]]+\])/)
-    .filter(Boolean)
-    .map((part) =>
-      part.startsWith("[")
-        ? { label: true, text: part.slice(1, -1) }
-        : { label: false, text: part },
-    );
 }
 
 /** The deck writes today's count ("3 of 3"). The number left comes from src/config.ts. */

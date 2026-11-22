@@ -15,8 +15,10 @@
  * a list line: `- slot | file | caption`. A line marked personal is left out. Any other line is skipped.
  *
  *   picture (.png .jpg .jpeg .webp .avif)  shown as a picture of the real document; the caption is its description
- *   .json                                   shown as live text; the shapes are in src/content/proof.ts
- *   .md or .txt                             one paragraph per line of the script, the message or the gallery piece
+ *   .md or .txt                             a gallery piece, or the piece to read in full: one paragraph per line
+ *   .json                                   the same two, in the shapes of src/content/proof.ts
+ *
+ * A card of "What you get" takes a picture only: it shows the real document, never a drawing of it.
  */
 import { copyFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, extname, join, resolve } from "node:path";
@@ -41,17 +43,13 @@ const CARDS = [
   "season-plan",
   "script-1",
   "filming-plan",
-  "setup-checklist",
-  "review",
   "monday-message",
-  "ai-coach",
-  "client-area",
 ];
 const GALLERY = [1, 2, 3, 4].flatMap((tab) => [1, 2, 3].map((n) => `gallery-${tab}-${n}`));
-const SLOTS = [...CARDS, ...GALLERY, "script-1-full"];
+/** The piece to read in full, above the iceberg's waterline. */
+const READING = "script-1-full";
+const SLOTS = [...CARDS, ...GALLERY, READING];
 const PHOTO = "founder-photo";
-/** Slots whose words can come from a plain text file: one paragraph is one line. */
-const LINES = ["script-1", "script-1-full", "monday-message"];
 const PICTURE = [".png", ".jpg", ".jpeg", ".webp", ".avif"];
 
 if (!existsSync(index)) {
@@ -143,11 +141,12 @@ for (const row of rows(readFileSync(index, "utf8"))) {
     write(join(DATA, `${slot}.json`), JSON.stringify(picture, null, 2) + "\n");
     placed.push(`${slot}: picture`);
   } else if (slot === PHOTO) skip("his photo must be a picture");
+  else if (CARDS.includes(slot)) skip("a card takes a picture of the real document");
   else if (kind === ".json") {
     try {
       const data = JSON.parse(readFileSync(source, "utf8"));
       // A picture named inside the piece comes along, under the slot's own name.
-      for (const key of ["image", "still", "frame"]) {
+      for (const key of ["image"]) {
         if (typeof data[key] !== "string" || data[key].startsWith("/")) continue;
         const picture = resolve(dirname(source), data[key]);
         if (!existsSync(picture)) throw new Error(`its ${key} is not there`);
@@ -166,14 +165,14 @@ for (const row of rows(readFileSync(index, "utf8"))) {
       .map((paragraph) => paragraph.replace(/\s+/g, " ").trim())
       .filter((paragraph) => paragraph && !paragraph.startsWith("#"));
     if (paragraphs.length === 0) skip("the file is empty");
-    else if (LINES.includes(slot)) {
+    else if (slot === READING) {
       write(join(DATA, `${slot}.json`), JSON.stringify({ lines: paragraphs }, null, 2) + "\n");
       placed.push(`${slot}: live text`);
-    } else if (GALLERY.includes(slot)) {
+    } else {
       const data = { title: row.caption || undefined, text: paragraphs };
       write(join(DATA, `${slot}.json`), JSON.stringify(data, null, 2) + "\n");
       placed.push(`${slot}: live text`);
-    } else skip("this slot takes a picture or a .json file (see src/content/proof.ts)");
+    }
   } else skip("not a picture, a .json, a .md or a .txt file");
 }
 

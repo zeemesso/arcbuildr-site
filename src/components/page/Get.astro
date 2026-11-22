@@ -1,57 +1,35 @@
 ---
 /**
- * 5. Everything you get: eleven numbered cards, each with a live screen. A slot whose real piece is a
- * picture of the document shows that picture; otherwise the screen is drawn in the page.
+ * 5. What you get: seven numbered cards, each with its date, the step of the Show it comes from, what
+ * it does, and a screen. A screen is a picture of the real document; until that picture exists it is
+ * the card's own title on a plain panel. Card 05 is wide. An apply strip closes the section.
  */
 import Card from "./Card.astro";
 import Strip from "./Strip.astro";
-import Shot from "./screens/Shot.astro";
-import Doc from "./screens/Doc.astro";
-import Profile from "./screens/Profile.astro";
-import Look from "./screens/Look.astro";
-import Plan from "./screens/Plan.astro";
-import Scripts from "./screens/Scripts.astro";
-import Filming from "./screens/Filming.astro";
-import Calls from "./screens/Calls.astro";
-import Review from "./screens/Review.astro";
-import Monday from "./screens/Monday.astro";
-import Coach from "./screens/Coach.astro";
-import Area from "./screens/Area.astro";
 import { section } from "../../content/deck";
-import { shot, type Pieces } from "../../content/proof";
 const s = section(5);
-const cards: { n: string; id: keyof Pieces; Screen: typeof Doc; wide?: boolean }[] = [
-  { n: "01", id: "brand-strategy", Screen: Doc, wide: true },
-  { n: "02", id: "profile", Screen: Profile },
-  { n: "03", id: "visual-identity", Screen: Look },
-  { n: "04", id: "season-plan", Screen: Plan },
-  { n: "05", id: "script-1", Screen: Scripts },
-  { n: "06", id: "filming-plan", Screen: Filming },
-  { n: "07", id: "setup-checklist", Screen: Calls },
-  { n: "08", id: "review", Screen: Review },
-  { n: "09", id: "monday-message", Screen: Monday },
-  { n: "10", id: "ai-coach", Screen: Coach },
-  { n: "11", id: "client-area", Screen: Area, wide: true },
-];
+const numbers = s
+  .list("card ")
+  .filter(({ slot }) => slot.endsWith(", title"))
+  .map(({ slot }) => slot.slice(5, 7));
 ---
 
 <section class="get" id="get" aria-labelledby="get-h">
-  <div class="get__head" data-reveal>
-    <p class="label">{s.get("label")}</p>
-    <h2 class="h2" id="get-h">
+  <div class="get__head">
+    <p class="label" data-reveal>
+      {s.get("label")}
+    </p>
+    <h2 class="h2" id="get-h" data-reveal>
       {s.get("heading")}
     </h2>
-    <p class="get__line">{s.get("line under it")}</p>
   </div>
   <ol class="cards">
-    {cards.map(({ n, id, Screen, wide }) => {
-      const picture = id === "script-1" ? null : shot(id);
-      return (
-        <Card n={n} wide={wide}>
-          {picture ? <Shot {...picture} /> : <Screen />}
-        </Card>
-      );
-    })}
+    {numbers.map((n) => (
+      <Card n={n} wide={n === "05"} />
+    ))}
   </ol>
-  <Strip from={5} on="canvas" />
+  <p class="get__after" data-reveal>
+    {s.get("line under the cards")}
+  </p>
+  <Strip from={5} />
 </section>

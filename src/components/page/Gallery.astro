@@ -1,24 +1,22 @@
 ---
 /**
- * 6. Real work: a row of pieces that steps forward about every 2.5 seconds, with a pause button and
+ * 7. The work: a row of pieces that steps forward about every 2.5 seconds, with a pause button and
  * one tab per kind of piece. Only real pieces from Zyade's own Season One go here (src/content/proof.ts).
- * A tab with no piece is not shown. The whole section turns on by itself with the first real piece:
- * until then it is not on the page at all, so its words never stand above nothing.
+ * The whole section turns on by itself once its twelve slots hold real pieces: until then it is not on
+ * the page at all, so its words never stand above nothing.
  */
 import { section } from "../../content/deck";
-import { gallery } from "../../content/proof";
+import { gallery, workIsReady } from "../../content/proof";
 import { page } from "../../content/site";
-const s = section(6);
-const tabs = [1, 2, 3, 4]
-  .map((n) => ({ n, name: s.get(`tab ${n}`), pieces: gallery(n) }))
-  .filter((tab) => tab.pieces.length > 0);
-/** The switch: one real gallery piece, brought in by scripts/proof/import.mjs, shows the section. */
-const on = tabs.length > 0;
+const s = section(7);
+const tabs = [1, 2, 3, 4].map((n) => ({ n, name: s.get(`tab ${n}`), pieces: gallery(n) }));
+/** The switch: the twelve real pieces, brought in by scripts/proof/import.mjs, show the section. */
+const on = workIsReady();
 const { ui } = page;
 ---
 
 {on && (
-  <section class="window work" id="work" aria-labelledby="work-h">
+  <section class="work" id="work" aria-labelledby="work-h">
     <div class="work__head">
       <p class="label" data-reveal>
         {s.get("label")}
