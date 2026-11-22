@@ -1,16 +1,23 @@
 ---
 /**
- * 1. First screen: who it is for, the headline, one sentence, then the sales video (a 16:9 slot) under
- * "Watch this first", one button, and the founding count. The three wins follow it (Wins.astro).
+ * 1. First screen: who it is for, the headline, one sentence, one button and the founding count.
+ * With a film (VSL_VIDEO in src/config.ts) the sales video leads, a 16:9 block under its cue. Without
+ * one the block is not on the page at all, and the first screen is complete as it stands.
+ * The three wins follow it (Wins.astro).
  */
 import Vsl from "./Vsl.astro";
 import { founding, section } from "../../content/deck";
-import { FOUNDING_PLACES_LEFT, VSL_VIDEO } from "../../config";
+import { FOUNDING_PLACES_LEFT } from "../../config";
+interface Props {
+  /** The sales video's file, or "" while there is none. */
+  film: string;
+}
+const { film } = Astro.props;
 const s = section(1);
 const headline = s.get("headline");
 ---
 
-<section class="first" id="top" aria-labelledby="first-h">
+<section class:list={["first", { "first--film": film }]} id="top" aria-labelledby="first-h">
   <div class="first__words">
     <p class="label" data-enter style="--i:0">
       {s.get("label above the headline")}
@@ -22,20 +29,17 @@ const headline = s.get("headline");
       {s.get("line under it")}
     </p>
   </div>
-  <div class="first__watch" data-enter style="--i:3">
-    <p class="first__cue">
-      {s.get("video, label")}
-      <svg viewBox="0 0 24 24" aria-hidden="true">
-        <path d="M12 5v14M6 13l6 6 6-6"></path>
-      </svg>
-    </p>
-    <Vsl title={headline} poster={s.get("video, poster")} />
-    {!VSL_VIDEO && (
-      <p class="first__soon" data-vsl-soon>
-        {s.get("video, placeholder line")}
+  {film && (
+    <div class="first__watch" data-enter style="--i:3">
+      <p class="first__cue">
+        {s.get("video, label")}
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M12 5v14M6 13l6 6 6-6" />
+        </svg>
       </p>
-    )}
-  </div>
+      <Vsl src={film} title={headline} poster={s.get("video, poster")} />
+    </div>
+  )}
   <div class="first__foot" data-enter style="--i:4">
     <a class="btn" href="#apply" data-apply-open data-cta>
       {s.get("button")}

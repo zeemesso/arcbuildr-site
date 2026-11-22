@@ -1,4 +1,4 @@
-/* The quiet folio (DESIGN.md, section 12): the first screen with the sales video, the three wins,
+/* The quiet folio (DESIGN.md, section 12): the first screen (with the sales video once it exists), the three wins,
  * the iceberg, and the offer with its bonus stack and its product card.
  * Small type, long air, few surfaces. Painted with the names in tokens.css only. */
 
@@ -41,7 +41,7 @@
   text-wrap: pretty;
 }
 
-/* "Watch this first", the video, and the line that stands in for it until it is filmed. */
+/* "Watch this first" and the video: on the page only when there is a film. */
 .first__watch {
   display: grid;
   justify-items: center;
@@ -67,13 +67,6 @@
   stroke-width: 2.4;
   stroke-linecap: round;
   stroke-linejoin: round;
-}
-.first__soon {
-  max-width: 36rem;
-  color: var(--muted);
-  font-size: var(--text-sm);
-  line-height: 1.45;
-  text-wrap: balance;
 }
 /* The sales video: 16:9. Its width gives way on a short screen, so the button under it stays in view. */
 .vsl {
@@ -143,15 +136,6 @@ html:not(.js) .vsl__video + .vsl__poster {
   color: var(--ink);
   box-shadow: 0 0 0 0.5rem color-mix(in oklch, var(--color-card) 14%, transparent);
 }
-/* Until there is a photo of him: his initials in a circle. */
-.vsl__face {
-  width: clamp(3.25rem, 2.25rem + 4vw, 4.5rem);
-  height: clamp(3.25rem, 2.25rem + 4vw, 4.5rem);
-  background: var(--color-card);
-  color: var(--ink);
-  font-size: clamp(1rem, 0.75rem + 1.2vw, 1.375rem);
-  letter-spacing: -0.02em;
-}
 button.vsl__play {
   cursor: pointer;
   transition: scale 160ms var(--ease-enter);
@@ -220,6 +204,16 @@ button.vsl__play:active {
   .first__foot,
   .first__foot .btn {
     width: 100%;
+  }
+}
+/* Without a film the words carry the first screen: more room above them, and the button close under. */
+.first:not(.first--film) {
+  gap: clamp(1.75rem, 1.4rem + 1.4vw, 2.5rem);
+  padding-top: clamp(7.5rem, 5rem + 9vh, 11.5rem);
+}
+@media (max-width: 35.99rem) {
+  .first:not(.first--film) {
+    padding-top: clamp(6.25rem, 3rem + 8vh, 8rem);
   }
 }
 /* A short phone screen: tighter, so the button still shows without scrolling. */

@@ -33,22 +33,28 @@ test("sitemap lists home and privacy, and the sample page is gone", async ({ pag
 });
 
 test.describe("the page after a booking", () => {
-  test("shows him, the video slot and what happens next, in the deck's words", async ({ page }) => {
+  test("shows the two practical lines and what happens next, in the deck's words; the video only with its film", async ({
+    page,
+  }) => {
     await page.goto("/booked");
     await expect(page.locator("h1")).toHaveText(booked.get("heading, no name"));
-    for (const slot of ["practical 1", "practical 2", "video, title", "video, length"])
+    for (const slot of ["practical 1", "practical 2"])
       await expect(page.locator("#top")).toContainText(booked.get(slot));
+    for (const slot of ["video, title", "video, length"]) {
+      if (existsSync(`public${CONFIRMATION_VIDEO}`))
+        await expect(page.locator("#top")).toContainText(booked.get(slot));
+      else await expect(page.locator("main")).not.toContainText(booked.get(slot));
+    }
     await expect(page.locator("#next-h")).toHaveText(booked.get("next, title"));
     await expect(page.locator(".next__list > li")).toHaveCount(2);
     for (const slot of ["next 1", "next 2"])
       await expect(page.getByText(booked.get(slot), { exact: true })).toBeVisible();
-    // Him: the deck's poster line on the video slot, with his photo or his initials. Never a drawing.
-    const slot = page.locator("#top .video");
-    await expect(slot).toBeVisible();
-    if (!existsSync(`public${CONFIRMATION_VIDEO}`)) {
-      await expect(slot).toContainText(section(1).get("video, poster"));
-      await expect(slot.locator(".face")).toBeVisible();
-    }
+    // The video block is there only with its film: no poster, no stand-in and no title for a film that
+    // does not exist.
+    const film = existsSync(`public${CONFIRMATION_VIDEO}`);
+    await expect(page.locator("#top video")).toHaveCount(film ? 1 : 0);
+    await expect(page.locator("#top .done__video")).toHaveCount(film ? 1 : 0);
+    await expect(page.locator(".face, .video__poster")).toHaveCount(0);
     await expect(page.locator("main svg image, main canvas, .pixel, [class*=sprite]")).toHaveCount(
       0,
     );
@@ -227,7 +233,7 @@ test.describe("the page after a booking from a chat", () => {
   });
 });
 
-test("the /booked video slot takes the confirmation video, and shows a poster until it exists", async ({
+test("the /booked video block takes the confirmation video, and is not there until it exists", async ({
   page,
 }) => {
   const media: string[] = [];
@@ -240,10 +246,9 @@ test("the /booked video slot takes the confirmation video, and shows a poster un
     // Only its first bytes load before a press.
     await expect(video).toHaveAttribute("preload", "metadata");
   } else {
-    // Until he films it: a poster with him on it, no play button, and nothing to load.
+    // Until he films it: no block, no poster, nothing to press and nothing to load.
     await expect(video).toHaveCount(0);
-    await expect(page.locator("#top [data-poster]")).toBeVisible();
-    await expect(page.locator("#top [data-poster] button, #top [data-poster] a")).toHaveCount(0);
+    await expect(page.locator("#top [data-poster], #top figure")).toHaveCount(0);
     expect(media).toEqual([]);
   }
 });

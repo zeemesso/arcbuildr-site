@@ -1,0 +1,37 @@
+---
+/**
+ * Screen 03: a visual identity. The colors fill in, the two fonts are set, then one frame snaps to
+ * its framing lines. The colors are greys: the real ones are each client's own.
+ */
+import Cap from "./Cap.astro";
+import { labels } from "../../../content/screens";
+const [colorsCap, fontsCap, frameCap] = labels("03");
+const colors = [84, 62, 42, 24, 11].map(
+  (ink) => `color-mix(in oklch, var(--color-ink) ${ink}%, var(--color-card))`,
+);
+const fontsAt = 600 + colors.length * 220 + 200;
+---
+
+<figure class="screen s3" data-loop="10000" aria-hidden="true">
+  <div class="s3__sheet">
+    <Cap text={colorsCap} at={200} class="pop" />
+    <ul class="s3__colors">
+      {colors.map((color, n) => (
+        <li class="pop" data-at={600 + n * 220} style={`--c:${color}`} />
+      ))}
+    </ul>
+    <Cap text={fontsCap} at={fontsAt} class="pop" />
+    <ul class="s3__fonts">
+      {["72%", "46%"].map((width, n) => (
+        <li class="bars typed" data-at={fontsAt + 250 + n * 250}>
+          <i class:list={{ "is-strong": n === 0 }} style={`--w:${width}`} />
+        </li>
+      ))}
+    </ul>
+  </div>
+  <div class="s3__frame" data-at="2500">
+    <i class="s3__lines"></i>
+    <i class="s3__person"></i>
+  </div>
+  <Cap text={frameCap} at={2300} class="s3__cap pop" />
+</figure>

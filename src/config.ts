@@ -12,11 +12,11 @@ export const FOUNDING_PLACES_LEFT = 3;
 // The address shown on /privacy and in the footer.
 export const CONTACT_EMAIL = "hello@arcbuildr.co";
 // The sales video that leads the home page, 16:9. Put the file in public/video/ and set its path here,
-// for example "/video/season-one-vsl.mp4". While this is empty the slot shows its poster with no play
-// button, and the deck's placeholder line under it: there is nothing to play yet.
+// for example "/video/vsl.mp4". While this is empty the video block is not on the page at all: the
+// first screen is complete without it. On a preview, `?vsl=demo` shows the block with a test film.
 export const VSL_VIDEO = "";
 // The 75-second video on /booked: put the file at public/video/confirmation.mp4.
-// Until that file exists the card shows its poster and no play button (src/pages/booked.astro checks).
+// Until that file exists the page has no video block (src/pages/booked.astro checks).
 export const CONFIRMATION_VIDEO = "/video/confirmation.mp4";
 // Only for visitors who book the call from a chat, before they answer the 8 questions.
 // /booked shows its button only when the address says the booking came from a chat:
@@ -26,8 +26,8 @@ export const CONFIRMATION_VIDEO = "/video/confirmation.mp4";
 export const APPLICATION_AFTER_BOOKING_URL = "https://tally.so/r/9NZpVV";
 // The Cal.com event that is booked from a chat.
 export const CHAT_EVENT_SLUG = "15-minute-call-chat";
-// His face on the page (the video's poster, and "Who directs it"): a real photo of Zyade, as a path under public/ (for example "/proof/zyade.jpg").
-// While this is empty the page shows his initials in a circle. Never the pixel character, never a generated face.
+// His face on the sales video's poster: a real photo of Zyade, as a path under public/ (for example "/proof/zyade.jpg").
+// While this is empty the poster has no face. Never the pixel character, never a generated face.
 export const FOUNDER_PHOTO = "";
 // After a booking made in the calendar inside the page, the visitor goes here.
 export const BOOKED_PATH = "/booked";

@@ -1,0 +1,42 @@
+---
+/**
+ * Screen 01: the first page of a strategy document. Its paragraph is written in line by line, then
+ * its numbered points arrive one by one. Times are milliseconds into the loop.
+ */
+import Cap from "./Cap.astro";
+import { labels } from "../../../content/screens";
+const [first, second] = labels("01");
+const lines = ["100%", "96%", "88%", "94%", "58%"];
+const points = ["84%", "68%", "92%"];
+const after = 500 + lines.length * 260;
+---
+
+<figure class="screen" data-loop="10000" aria-hidden="true">
+  <div class="doc__back"></div>
+  <div class="doc">
+    <p class="doc__top" data-at="150">
+      <i class="doc__name"></i>
+    </p>
+    <div class="doc__part">
+      <Cap text={first} at={350} />
+      <div class="bars typed" data-at="500">
+        {lines.map((width, k) => (
+          <i style={`--w:${width};--k:${k}`} />
+        ))}
+      </div>
+    </div>
+    <div class="doc__part">
+      <Cap text={second} at={after} />
+      <ol class="doc__beliefs">
+        {points.map((width, n) => (
+          <li data-at={after + 200 + n * 300}>
+            <b>{n + 1}</b>
+            <span class="bars">
+              <i style={`--w:${width}`} />
+            </span>
+          </li>
+        ))}
+      </ol>
+    </div>
+  </div>
+</figure>

@@ -1,0 +1,16 @@
+---
+/** A label inside a screen: the deck's words, or nothing at all when the deck gives none. */
+interface Props {
+  text?: string | undefined;
+  /** When it arrives, in milliseconds into the loop. */
+  at?: number;
+  class?: string;
+}
+const { text, at, class: extra } = Astro.props;
+---
+
+{text && (
+  <p class:list={["cap", extra]} data-at={at}>
+    {text}
+  </p>
+)}

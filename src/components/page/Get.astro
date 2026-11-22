@@ -1,17 +1,38 @@
 ---
 /**
- * 5. What you get: seven numbered cards, each with its title, its date, the step of the Show it comes
- * from and what it does. A card has a picture panel only once the picture of the real document exists;
- * until then it is words under a hairline. Card 05 is wide. An apply strip closes the section.
+ * 5. What you get: seven numbered cards. Each has a small screen that moves (a drawing of the thing
+ * the card is about), its title, its date, the step of the Show it comes from and what it does.
+ * A card whose real document has a picture shows that picture in the screen's place.
+ * Card 05 is wide. An apply strip closes the section.
  */
 import Card from "./Card.astro";
 import Strip from "./Strip.astro";
+import Shot from "./screens/Shot.astro";
+import Doc from "./screens/Doc.astro";
+import Profile from "./screens/Profile.astro";
+import Look from "./screens/Look.astro";
+import Plan from "./screens/Plan.astro";
+import Piece from "./screens/Piece.astro";
+import Filming from "./screens/Filming.astro";
+import Direction from "./screens/Direction.astro";
 import { section } from "../../content/deck";
+import { CARD_PIECES, shot } from "../../content/proof";
+/** The drawn screen of each card, by the card's number. */
+const SCREENS = {
+  "01": Doc,
+  "02": Profile,
+  "03": Look,
+  "04": Plan,
+  "05": Piece,
+  "06": Filming,
+  "07": Direction,
+} as const;
+type N = keyof typeof SCREENS;
 const s = section(5);
 const numbers = s
   .list("card ")
   .filter(({ slot }) => slot.endsWith(", title"))
-  .map(({ slot }) => slot.slice(5, 7));
+  .map(({ slot }) => slot.slice(5, 7) as N);
 ---
 
 <section class="get" id="get" aria-labelledby="get-h">
@@ -24,9 +45,15 @@ const numbers = s
     </h2>
   </div>
   <ol class="cards">
-    {numbers.map((n) => (
-      <Card n={n} wide={n === "05"} />
-    ))}
+    {numbers.map((n) => {
+      const picture = shot(CARD_PIECES[n]);
+      const Screen = SCREENS[n];
+      return (
+        <Card n={n} wide={n === "05"}>
+          {picture ? <Shot {...picture} /> : <Screen />}
+        </Card>
+      );
+    })}
   </ol>
   <p class="get__after" data-reveal>
     {s.get("line under the cards")}

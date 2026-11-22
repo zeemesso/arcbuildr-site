@@ -60,7 +60,8 @@
   white-space: nowrap;
 }
 @media (min-width: 64rem) {
-  .done {
+  /* With the video: the words on one side, the video on the other. Without it the words stand alone. */
+  .done--film {
     grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
     align-items: center;
   }

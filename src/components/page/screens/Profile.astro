@@ -1,0 +1,85 @@
+---
+/**
+ * Screen 02: a public profile. Each old field fades and the rewritten one takes its place with a
+ * tick, then the three things to pin move into their order.
+ */
+import Cap from "./Cap.astro";
+import Tick from "./Tick.astro";
+import { labels } from "../../../content/screens";
+const [rewritten, pins, ready] = labels("02");
+// Bars for each field: what it said, then what it says now.
+const fields = [
+  { old: ["52%"], now: ["68%"] },
+  { old: ["38%"], now: ["46%"] },
+  { old: ["100%", "44%"], now: ["100%", "86%"] },
+  { old: ["30%"], now: ["58%"] },
+];
+const at = (n: number) => 900 + n * 400;
+const done = at(fields.length);
+// The pins start out of order (3, 1, 2) and move into place.
+const from = [1, 1, -2];
+---
+
+<figure class="screen" data-loop="10000" aria-hidden="true">
+  <div class="pf">
+    <Cap text={rewritten} at={300} class="pop" />
+    <div class="pf__head">
+      <i class="pf__avatar"></i>
+      <div class="pf__stack">
+        {fields.slice(0, 2).map((field, n) => (
+          <div class="fld" data-at={at(n)}>
+            <div class="fld__old">
+              {field.old.map((line) => (
+                <i style={`--w:${line}`} />
+              ))}
+            </div>
+            <div class="fld__new">
+              {field.now.map((line, k) => (
+                <i style={`--w:${line};--k:${k}`} />
+              ))}
+            </div>
+            <span class="fld__ok">
+              <Tick />
+            </span>
+          </div>
+        ))}
+      </div>
+    </div>
+    <i class="pf__rule"></i>
+    <div class="pf__stack">
+      {fields.slice(2).map((field, n) => (
+        <div class="fld" data-at={at(n + 2)}>
+          <div class="fld__old">
+            {field.old.map((line) => (
+              <i style={`--w:${line}`} />
+            ))}
+          </div>
+          <div class="fld__new">
+            {field.now.map((line, k) => (
+              <i style={`--w:${line};--k:${k}`} />
+            ))}
+          </div>
+          <span class="fld__ok">
+            <Tick />
+          </span>
+        </div>
+      ))}
+    </div>
+  </div>
+  <div class="pf__side">
+    <Cap text={pins} at={done} />
+    <ol class="pf__pins" data-at={done + 250}>
+      {from.map((offset, n) => (
+        <li style={`--from:${offset};--k:${n}`}>
+          <b>{n + 1}</b>
+        </li>
+      ))}
+    </ol>
+  </div>
+  {ready && (
+    <p class="pf__badge" data-at={done + 900}>
+      <Tick />
+      {ready}
+    </p>
+  )}
+</figure>

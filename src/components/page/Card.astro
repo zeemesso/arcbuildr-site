@@ -1,11 +1,10 @@
 ---
 /**
- * One card of "What you get": its number, its title, when it arrives, the step of the Show it comes
- * from and what it does. A card has a picture panel only when the picture of the real document exists
- * (src/content/proof.ts): until then it is words under a hairline, with no empty panel.
+ * One card of "What you get": its screen, its number, its title, when it arrives, the step of the Show
+ * it comes from and what it does. The screen is the default slot: a small drawing that moves, or the
+ * picture of the real document once it exists (Get.astro chooses).
  */
 import { section } from "../../content/deck";
-import { CARD_PIECES, shot } from "../../content/proof";
 interface Props {
   n: string;
   wide?: boolean;
@@ -13,30 +12,15 @@ interface Props {
 const { n, wide = false } = Astro.props;
 const s = section(5);
 const key = `card ${n}`;
-const title = s.get(`${key}, title`);
-const picture = n in CARD_PIECES ? shot(CARD_PIECES[n as keyof typeof CARD_PIECES]) : null;
 ---
 
-<li
-  class:list={["card", { "card--wide": wide, "card--plain": !picture }]}
-  data-reveal
-  data-card={n}
->
-  {picture && (
-    <div class="card__stage">
-      <img
-        src={picture.image}
-        alt={picture.alt}
-        width={picture.width}
-        height={picture.height}
-        loading="lazy"
-        decoding="async"
-      />
-    </div>
-  )}
+<li class:list={["card", { "card--wide": wide }]} data-reveal data-card={n}>
+  <div class="card__stage">
+    <slot />
+  </div>
   <div class="card__text">
     <span class="card__n">{n}</span>
-    <h3 class="card__h">{title}</h3>
+    <h3 class="card__h">{s.get(`${key}, title`)}</h3>
     <p class="card__meta">
       <span class="card__date">{s.get(`${key}, date`)}</span>
       <span class="card__from">{s.get(`${key}, from`)}</span>

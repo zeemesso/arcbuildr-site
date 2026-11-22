@@ -317,17 +317,6 @@ main:focus {
   min-width: 0;
   padding: 0 1.125rem;
 }
-/* With scripts, the button slides open only when no other apply button is on screen. */
-.js .bar:not(.has-cta) .bar__cta {
-  grid-template-columns: 0fr;
-  opacity: 0;
-  visibility: hidden;
-  transition:
-    grid-template-columns 200ms var(--ease-move),
-    opacity 150ms var(--ease-move),
-    visibility 0s 200ms;
-}
-
 /* The first screen lives in folio.css. The founding count's three dots are shared with the price. */
 .hang__dots {
   display: flex;

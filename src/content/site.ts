@@ -20,8 +20,6 @@ export const action = "Apply and pick a time";
 export const page = {
   /** The header's button, once the first button has left the screen. */
   pill: "Apply",
-  /** His initials stand in the circle until a real photo of him exists. */
-  founder: { initials: "ZM" },
   nav: "Sections",
   /** The three marks of the guarantee's timeline (the deck's screen note for section 10). */
   guarantee: { marks: ["Day 1", "Day 7", "Day 10"] },

@@ -1,6 +1,7 @@
 ---
 /**
- * The page after a booking (the deck's "The booked page"): him, the confirmation video, and what happens next.
+ * The page after a booking (the deck's "The booked page"): the confirmation, the video once its file exists,
+ * and what happens next.
  * The calendar inside the form sends people here when a booking succeeds; the first name and the email
  * are kept on the device, or come in the address when the booking page sends them.
  */
@@ -9,14 +10,13 @@ import "../styles/page/booked.css";
 import Home from "../layouts/Home.astro";
 import Bar from "../components/page/Bar.astro";
 import Foot from "../components/page/Foot.astro";
-import Video from "../components/page/Video.astro";
 import Application from "../components/application/Application.astro";
 import { section } from "../content/deck";
 import { booked } from "../content/site";
 import { APPLICATION_AFTER_BOOKING_URL, APPLICATION_MODE, CONFIRMATION_VIDEO } from "../config";
 
 const s = section("the booked page");
-// The slot takes the confirmation video. Until its file is in public/, the slot shows the poster.
+// The confirmation video shows once its file is in public/. Until then the block is not on the page.
 const video =
   CONFIRMATION_VIDEO && existsSync(new URL(`../../public${CONFIRMATION_VIDEO}`, import.meta.url))
     ? CONFIRMATION_VIDEO
@@ -27,7 +27,11 @@ const button = s.get("booked from a chat, button");
 
 <Home title={s.get("heading, no name")} description={s.get("practical 1")} noindex ownForm>
   <Bar slot="bar" cta={false} />
-  <section class="window done" id="top" aria-labelledby="done-h">
+  <section
+    class:list={["window", "done", { "done--film": video }]}
+    id="top"
+    aria-labelledby="done-h"
+  >
     <div class="done__words">
       <h1 class="done__h" id="done-h" data-booked={s.get("heading")} data-enter style="--i:0">
         {s.get("heading, no name")}
@@ -43,13 +47,22 @@ const button = s.get("booked from a chat, button");
         ))}
       </ul>
     </div>
-    <figure class="done__video" data-enter style="--i:2">
-      <figcaption>
-        <b>{s.get("video, title")}</b>
-        <span>{s.get("video, length")}</span>
-      </figcaption>
-      <Video src={video} title={s.get("video, title")} />
-    </figure>
+    {video && (
+      <figure class="done__video" data-enter style="--i:2">
+        <figcaption>
+          <b>{s.get("video, title")}</b>
+          <span>{s.get("video, length")}</span>
+        </figcaption>
+        <video
+          class="video"
+          controls
+          playsinline
+          preload="metadata"
+          aria-label={s.get("video, title")}
+          src={video}
+        ></video>
+      </figure>
+    )}
   </section>
 
   <section class="next" aria-labelledby="next-h">

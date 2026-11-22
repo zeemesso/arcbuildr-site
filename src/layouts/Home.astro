@@ -7,6 +7,7 @@ import "../styles/tokens.css";
 import "../styles/page/frame.css";
 import "../styles/page/sections.css";
 import "../styles/page/more.css";
+import "../styles/page/screens.css";
 import "../styles/page/folio.css";
 import Head from "./Head.astro";
 import { meta } from "../content/site";
@@ -50,6 +51,9 @@ const analyticsToken = import.meta.env.PUBLIC_CF_ANALYTICS_TOKEN;
     <!-- The page's own script comes before the visit counter: scripts run in this order, so another
          company's slow server can never hold the page's script up. -->
     <script>
+      // Preview builds only: `?vsl=demo` shows the page with a test film in the video block.
+      if (__PREVIEW__ && new URLSearchParams(location.search).get("vsl") === "demo")
+        location.replace("/demo/vsl/");
       import "../scripts/page";
       if (__PREVIEW__) import("../components/mountFeedback");
     </script>

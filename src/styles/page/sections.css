@@ -1,12 +1,11 @@
-/* The quiet folio (DESIGN.md, section 12), sections 2 to 6 and 10 to 13, the apply strips and the video
- * poster. A section sits on the paper itself, parted from the next by air and from its own parts by
+/* The quiet folio (DESIGN.md, section 12), sections 2 to 5 and 10 to 13, the apply strips and the video.
+ * A section sits on the paper itself, parted from the next by air and from its own parts by
  * hairlines. Only three of them are a surface: the framework, the guarantee and the last panel. */
 
 /* ---------- Shared pieces ---------- */
 .say,
 .creed,
 .get,
-.who,
 .fit,
 .faq {
   max-width: calc(var(--page) + 2 * var(--pad));
@@ -42,21 +41,6 @@
 .window--night .label {
   color: var(--on-night-muted);
 }
-.face {
-  flex: none;
-  display: grid;
-  place-items: center;
-  width: 3rem;
-  height: 3rem;
-  border-radius: 50%;
-  background: var(--ink);
-  color: var(--window);
-  font-size: var(--text-sm);
-  font-weight: 700;
-  letter-spacing: 0.02em;
-  object-fit: cover;
-}
-
 /* An apply strip: one sentence and the same button, under a hairline at the end of its section. */
 .strip {
   display: grid;
@@ -87,7 +71,7 @@
   }
 }
 
-/* A video slot: a player, or a poster with his face until he films it. */
+/* A video: the player on the page after a booking. */
 .video {
   display: block;
   width: 100%;
@@ -96,55 +80,6 @@
   background: var(--night);
   color: var(--on-night);
   object-fit: cover;
-}
-.video--poster {
-  position: relative;
-  display: grid;
-  place-content: center;
-  justify-items: center;
-  gap: 1rem;
-  padding: 1rem;
-  overflow: hidden;
-  isolation: isolate;
-  text-align: center;
-}
-/* A soft light behind him, so the poster is not a flat block. */
-.video--poster::before {
-  content: "";
-  position: absolute;
-  z-index: -1;
-  inset: -20%;
-  background: radial-gradient(
-    60% 60% at 50% 110%,
-    color-mix(in oklch, var(--color-accent) 30%, transparent),
-    transparent 70%
-  );
-}
-.video__face {
-  width: clamp(4rem, 12vw, 5.5rem);
-  height: clamp(4rem, 12vw, 5.5rem);
-  background: var(--window);
-  color: var(--ink);
-  font-size: clamp(1.25rem, 3.5vw, 1.625rem);
-  letter-spacing: -0.02em;
-}
-.video__who {
-  max-width: 22rem;
-  color: var(--on-night-muted);
-  font-size: var(--text-sm);
-  line-height: 1.4;
-  text-wrap: balance;
-}
-.video__note {
-  position: absolute;
-  right: 1rem;
-  bottom: 1rem;
-  padding: 0.25rem 0.75rem;
-  border-radius: var(--radius-pill);
-  background: var(--hair-night);
-  font-family: var(--font-mono);
-  font-size: var(--text-xs);
-  letter-spacing: 0.04em;
 }
 
 /* ---------- 2. The problem: type on the paper, then the list and two paragraphs ---------- */
@@ -463,23 +398,15 @@
   align-content: start;
   gap: 1.25rem;
 }
-/* A card with no picture yet is words under a hairline: no empty panel stands in for the picture. */
-.card--plain {
-  padding-top: 1.25rem;
-  border-top: 1px solid var(--hair);
-}
-/* The panel exists only with a picture of the real document in it. */
+/* The stage: a small square of paper the screen is drawn on (src/styles/page/screens.css). */
 .card__stage {
-  aspect-ratio: 16 / 10;
+  position: relative;
+  container-type: inline-size;
+  aspect-ratio: 4 / 3;
   border-radius: var(--r-window);
   background: var(--color-paper-2);
   overflow: hidden;
-}
-.card__stage img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: top;
+  isolation: isolate;
 }
 .card__text {
   display: grid;
@@ -546,123 +473,6 @@
     grid-template-columns: subgrid;
     column-gap: clamp(1.5rem, 4vw, 3.5rem);
     align-items: center;
-  }
-  /* With no picture: its number, title and date on one side, what it does on the other. */
-  .card--wide.card--plain .card__text {
-    grid-column: 1 / -1;
-    grid-template-columns: subgrid;
-    /* The last row takes what the body needs beyond the title and the date, so those two stay together. */
-    grid-template-rows: auto auto auto 1fr;
-    column-gap: clamp(1.5rem, 4vw, 3.5rem);
-  }
-  .card--wide.card--plain .card__text > * {
-    grid-column: 1;
-  }
-  .card--wide.card--plain .card__body {
-    grid-column: 2;
-    grid-row: 2 / span 3;
-    margin-top: 0;
-  }
-}
-
-/* ---------- 6. Who directs it: the words, and his photo once there is one ---------- */
-.who__grid {
-  display: grid;
-  gap: clamp(2rem, 6vw, 5rem);
-}
-.who__photo {
-  aspect-ratio: 4 / 5;
-  border-radius: var(--r-window);
-  background: var(--color-paper-2);
-  overflow: hidden;
-}
-.who__photo img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-.who__words,
-.who__top,
-.who__lead,
-.who__more {
-  display: grid;
-  align-content: start;
-  justify-items: start;
-  gap: 1rem;
-  text-wrap: pretty;
-}
-.who__words {
-  row-gap: 1.25rem;
-}
-/* Until there is a photo: his initials, a small round mark beside the heading. */
-.who__head {
-  display: flex;
-  align-items: center;
-  gap: 0.875rem;
-}
-.who__mark {
-  width: 2.75rem;
-  height: 2.75rem;
-  font-size: 0.875rem;
-}
-.who__lead > p {
-  max-width: var(--measure);
-  color: var(--muted);
-  line-height: 1.6;
-}
-.who__lead > p:first-child {
-  color: var(--ink);
-}
-.who__more {
-  width: 100%;
-}
-.who__ways {
-  display: grid;
-  width: 100%;
-  max-width: var(--measure);
-}
-.who__ways li {
-  display: grid;
-  grid-template-columns: 1.75rem minmax(0, 1fr);
-  gap: 0.75rem;
-  padding-block: 1rem;
-  border-top: 1px solid var(--hair);
-  line-height: 1.5;
-}
-.who__ways li:last-child {
-  border-bottom: 1px solid var(--hair);
-}
-.who__ways b {
-  padding-top: 0.3125rem;
-  color: var(--muted);
-  font-family: var(--font-mono);
-  font-size: 0.6875rem;
-  font-weight: 500;
-  letter-spacing: 0.1em;
-}
-.who__small {
-  max-width: var(--measure);
-  color: var(--muted);
-  font-size: var(--text-sm);
-  line-height: 1.5;
-}
-@media (min-width: 60rem) {
-  /* With his photo: the photo beside the words, and it stays in view while they pass. */
-  .who__grid:not(.who__grid--plain) {
-    grid-template-columns: minmax(0, 0.78fr) minmax(0, 1fr);
-    align-items: start;
-  }
-  .who__photo {
-    position: sticky;
-    top: 6.5rem;
-  }
-  /* Without it the words take the width: who we are on one side, what he does first on the other. */
-  .who__grid--plain .who__words {
-    grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
-    column-gap: clamp(2rem, 6vw, 5rem);
-  }
-  .who__grid--plain .who__top {
-    grid-column: 1 / -1;
   }
 }
 

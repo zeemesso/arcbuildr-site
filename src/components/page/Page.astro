@@ -1,0 +1,57 @@
+---
+/**
+ * The home page, section by section. The home page uses it as it is; the preview-only demo
+ * (src/pages/demo/[film].astro) gives it a test film, so the video block can be seen before he films.
+ */
+import Home from "../../layouts/Home.astro";
+import Bar from "./Bar.astro";
+import First from "./First.astro";
+import Wins from "./Wins.astro";
+import Problem from "./Problem.astro";
+import Beliefs from "./Beliefs.astro";
+import Framework from "./Framework.astro";
+import Get from "./Get.astro";
+import Gallery from "./Gallery.astro";
+import Berg from "./Berg.astro";
+import Offer from "./Offer.astro";
+import Guarantee from "./Guarantee.astro";
+import Fit from "./Fit.astro";
+import Faq from "./Faq.astro";
+import Apply from "./Apply.astro";
+import Foot from "./Foot.astro";
+import Application from "../application/Application.astro";
+import { section } from "../../content/deck";
+import { VSL_VIDEO } from "../../config";
+interface Props {
+  /** The sales video's file. The home page takes VSL_VIDEO; the demo gives its test film. */
+  film?: string;
+  noindex?: boolean;
+}
+const { film = VSL_VIDEO, noindex = false } = Astro.props;
+// The header's links are the sections' own labels.
+const links = [
+  { text: section(4).get("label"), href: "#framework" },
+  { text: section(5).get("label"), href: "#get" },
+  { text: section(9).get("label"), href: "#offer" },
+  { text: section(12).get("label"), href: "#questions" },
+];
+---
+
+<Home noindex={noindex}>
+  <Bar slot="bar" links={links} />
+  <First film={film} />
+  <Wins />
+  <Problem />
+  <Beliefs />
+  <Framework />
+  <Get />
+  <Gallery />
+  <Berg />
+  <Offer />
+  <Guarantee />
+  <Fit />
+  <Faq />
+  <Apply />
+  <Foot slot="after" />
+  <Application slot="after" />
+</Home>

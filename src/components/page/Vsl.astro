@@ -1,35 +1,34 @@
 ---
 /**
- * The sales video that leads the page: a 16:9 slot. With a file (VSL_VIDEO in src/config.ts) it is a
- * poster with a play button, then the player. Until he films it, the poster alone: his photo, or his
- * initials until a photo exists, with the deck's line on it. No play button: there is nothing to play.
+ * The sales video that leads the page: a 16:9 block. A poster with a play button, then the player.
+ * The poster carries his photo when there is one, and the deck's line on who he is.
+ * It is rendered only when there is a film to play (First.astro).
  */
-import Face from "./Face.astro";
 import { page } from "../../content/site";
-import { FOUNDER_PHOTO, VSL_VIDEO } from "../../config";
+import { FOUNDER_PHOTO } from "../../config";
 import { founderPhoto } from "../../content/proof";
 interface Props {
+  /** The film's file. */
+  src: string;
   /** What the video is, for a screen reader: the page's own headline. */
   title: string;
   /** The line on the poster: who he is, in the deck's words. */
   poster: string;
 }
-const { title, poster } = Astro.props;
+const { src, title, poster } = Astro.props;
 const photo = FOUNDER_PHOTO || founderPhoto();
 ---
 
 <figure class="vsl" data-vsl>
-  {VSL_VIDEO && (
-    <video
-      class="vsl__video"
-      controls
-      playsinline
-      preload="none"
-      aria-label={title}
-      src={VSL_VIDEO}
-      data-vsl-video
-    />
-  )}
+  <video
+    class="vsl__video"
+    controls
+    playsinline
+    preload="none"
+    aria-label={title}
+    src={src}
+    data-vsl-video
+  ></video>
   <div class:list={["vsl__poster", { "vsl__poster--photo": photo }]} data-vsl-poster>
     <svg class="vsl__arc" viewBox="0 0 400 225" aria-hidden="true" focusable="false">
       <path d="M-20 300 A 220 220 0 0 1 420 300"></path>
@@ -37,15 +36,11 @@ const photo = FOUNDER_PHOTO || founderPhoto();
       <path d="M100 300 A 100 100 0 0 1 300 300"></path>
     </svg>
     {photo && <img class="vsl__photo" src={photo} alt="" loading="eager" decoding="async" />}
-    {VSL_VIDEO ? (
-      <button class="vsl__play" type="button" data-vsl-play aria-label={page.ui.play}>
-        <svg viewBox="0 0 24 24" aria-hidden="true">
-          <path d="M8 5.5v13l11-6.5z" />
-        </svg>
-      </button>
-    ) : (
-      !photo && <Face size={72} class="vsl__face" />
-    )}
+    <button class="vsl__play" type="button" data-vsl-play aria-label={page.ui.play}>
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M8 5.5v13l11-6.5z"></path>
+      </svg>
+    </button>
     <p class="vsl__who">{poster}</p>
   </div>
 </figure>

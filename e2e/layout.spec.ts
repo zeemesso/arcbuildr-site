@@ -1,3 +1,5 @@
+import { existsSync } from "node:fs";
+import { CONFIRMATION_VIDEO } from "../src/config";
 import { expect, test } from "@playwright/test";
 import { open, stub } from "./stubs";
 
@@ -60,15 +62,17 @@ test("mobile interactive targets are at least 44px", async ({ page }, info) => {
 
 // /booked: on a phone it reads heading, the two practical lines, the video, what happens next.
 // On a desktop the video sits beside the heading, and what happens next is under both.
+// Without the film there is no video block: heading, the two lines, what happens next.
 test("/booked reads in order on a phone, and puts the video beside the heading on a desktop", async ({
   page,
 }) => {
+  const film = existsSync(`public${CONFIRMATION_VIDEO}`);
   const tops = async () => {
     const found: Record<string, { x: number; y: number; bottom: number }> = {};
     for (const [name, selector] of Object.entries({
       h1: "main h1",
       notes: ".done__notes",
-      video: "main .video",
+      ...(film ? { video: "main .video" } : {}),
       next: "#next-h",
     })) {
       const box = (await page.locator(selector).boundingBox())!;
@@ -82,16 +86,21 @@ test("/booked reads in order on a phone, and puts the video beside the heading o
   await page.evaluate(() => document.fonts.ready);
   const phone = await tops();
   expect(phone.h1!.y).toBeLessThan(phone.notes!.y);
-  expect(phone.notes!.bottom).toBeLessThanOrEqual(phone.video!.y);
-  expect(phone.video!.bottom).toBeLessThanOrEqual(phone.next!.y);
+  expect(phone.notes!.bottom).toBeLessThanOrEqual((phone.video ?? phone.next)!.y);
+  if (film) expect(phone.video!.bottom).toBeLessThanOrEqual(phone.next!.y);
   for (const width of [1280, 1440]) {
     await page.setViewportSize({ width, height: 900 });
     await page.goto("/booked");
     await page.evaluate(() => document.fonts.ready);
     const desk = await tops();
+    expect(desk.notes!.bottom, `${width}`).toBeLessThan(desk.next!.y);
+    if (!film) {
+      await expect(page.locator("main .video, main figure")).toHaveCount(0);
+      continue;
+    }
     expect(desk.video!.x, `${width}`).toBeGreaterThan(desk.h1!.x + 300);
     expect(desk.video!.y, `${width}`).toBeLessThan(desk.notes!.bottom);
-    expect(Math.max(desk.video!.bottom, desk.notes!.bottom), `${width}`).toBeLessThan(desk.next!.y);
+    expect(desk.video!.bottom, `${width}`).toBeLessThan(desk.next!.y);
   }
 });
 

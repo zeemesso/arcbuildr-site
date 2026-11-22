@@ -12,14 +12,13 @@ const first = section(1);
 const get = section(5);
 const offer = section(9);
 const door = section("the apply window");
-/** The 13 sections, in the deck's order: the deck's key, and the id each has on the page. */
+/** The page's sections, in the deck's order: the deck's key, and the id each has on the page. */
 const SECTIONS: [number | string, string][] = [
   [1, "top"],
   [2, "problem"],
   [3, "believe"],
   [4, "framework"],
   [5, "get"],
-  [6, "who"],
   [7, "work"],
   [8, "weeks"],
   [9, "offer"],
@@ -31,7 +30,8 @@ const SECTIONS: [number | string, string][] = [
 /**
  * Section 7, the gallery, is on the page only once its twelve real pieces exist. The pieces are files in
  * src/content/proof/, which git ignores, so this is false until `node scripts/proof/import.mjs` brings
- * them in. One line of section 6 and one line of section 8 point at that work and wait with it.
+ * them in. One line of section 8 points at that work and waits with it.
+ * Section 6 of the deck ("Who directs it") is no longer on the page (23 Nov).
  */
 const PROOF = "src/content/proof";
 const has = (id: string) => existsSync(`${PROOF}/${id}.json`);
@@ -39,9 +39,9 @@ const workOn = [1, 2, 3, 4].every((tab) => [1, 2, 3].every((n) => has(`gallery-$
 const readingOn = workOn && has("script-1-full");
 /** A line the page holds back, with the reason. */
 const waits = (key: number | string, slot: string) =>
-  (key === 6 && slot.startsWith("item 2") && !workOn) ||
   (key === 8 && slot === "free 3" && !readingOn) ||
-  (key === 1 && slot === "video, placeholder line" && !!VSL_VIDEO);
+  // The video's own lines are on the page only with a film to play.
+  (key === 1 && slot.startsWith("video, ") && (slot === "video, placeholder line" || !VSL_VIDEO));
 const CARDS = Array.from({ length: 7 }, (_, n) => String(n + 1).padStart(2, "0"));
 
 test.describe("the home page", () => {
@@ -55,7 +55,7 @@ test.describe("the home page", () => {
     await expect(page.locator("#a-name")).toBeFocused();
   });
 
-  test("the first screen carries the callout, the headline, one line, the video, the button, its line and the tab", async ({
+  test("the first screen carries the callout, the headline, one line, the button, its line and the tab", async ({
     page,
   }) => {
     await page.goto("/");
@@ -63,7 +63,6 @@ test.describe("the home page", () => {
     const top = page.locator("#top");
     await expect(top.locator(".label")).toHaveText(first.get("label above the headline"));
     await expect(top.locator(".first__line")).toHaveText(first.get("line under it"));
-    await expect(top.locator(".first__cue")).toHaveText(first.get("video, label"));
     await expect(top.locator("[data-cta]")).toHaveText(first.get("button"));
     await expect(top.locator(".first__under")).toHaveText(first.get("under the button"));
     await expect(top.locator(".first__places")).toHaveText(founding(first.get("hanging tab")));
@@ -71,7 +70,7 @@ test.describe("the home page", () => {
     await expect(top.locator("a, button")).toHaveCount(VSL_VIDEO ? 2 : 1);
     expect(await top.textContent()).not.toMatch(/USD|\$/);
     // From top to bottom, in that order.
-    const order = [".label", "h1", ".first__line", ".first__cue", "[data-vsl]", "[data-cta]"];
+    const order = [".label", "h1", ".first__line", "[data-cta]", ".first__under"];
     const tops = [];
     for (const selector of order) tops.push((await top.locator(selector).boundingBox())!.y);
     expect(tops).toEqual([...tops].sort((a, b) => a - b));
@@ -83,7 +82,12 @@ test.describe("the home page", () => {
     await page.goto("/");
     const ids = await page.locator("main > section").evaluateAll((els) => els.map((el) => el.id));
     expect(ids).toEqual(SECTIONS.map(([, id]) => id).filter((id) => id !== "work" || workOn));
-    expect(SECTIONS).toHaveLength(13);
+    expect(SECTIONS).toHaveLength(12);
+    // "Who directs it" is gone: no section, no link to it, none of its words.
+    await expect(page.locator('#who, a[href$="#who"]')).toHaveCount(0);
+    expect(squash(await page.locator("body").textContent())).not.toContain(
+      squash(section(6).get("heading")),
+    );
   });
 
   for (const [index, [key, id]] of SECTIONS.entries()) {
@@ -140,40 +144,51 @@ test.describe("the home page", () => {
     ]);
   });
 
-  test("the first screen leads with the sales video: 16:9, his name on the poster, no play mark until it is filmed", async ({
+  test("with no film, the first screen has no video block, no cue and no placeholder: it reads complete", async ({
     page,
   }) => {
+    test.skip(!!VSL_VIDEO, "The film is in");
     await page.goto("/");
-    const slot = page.locator("#top [data-vsl]");
-    const box = (await slot.boundingBox())!;
-    expect(box.width / box.height).toBeCloseTo(16 / 9, 1);
-    await expect(slot.locator("[data-vsl-poster]")).toBeVisible();
-    // The poster says who he is, once, in the deck's words.
-    await expect(slot.locator(".vsl__who")).toHaveText(first.get("video, poster"));
-    // The video comes after the headline and before the button.
-    const headline = (await page.locator("h1").boundingBox())!;
-    const button = (await page.locator("#top [data-cta]").boundingBox())!;
-    expect(box.y).toBeGreaterThan(headline.y + headline.height - 1);
-    expect(button.y).toBeGreaterThan(box.y + box.height - 1);
-    const soon = page.locator("#top [data-vsl-soon]");
-    if (VSL_VIDEO) {
-      // With a film: the play mark is back, it starts the film, and the placeholder line is gone.
-      await expect(soon).toHaveCount(0);
+    const top = page.locator("#top");
+    await expect(top.locator("[data-vsl], video, .first__cue, [data-vsl-soon]")).toHaveCount(0);
+    const text = squash(await page.locator("body").textContent());
+    for (const slot of ["video, label", "video, placeholder line", "video, poster"])
+      expect(text, slot).not.toContain(squash(first.get(slot)));
+    // The button follows the line with no hole where the video would be.
+    const line = (await top.locator(".first__line").boundingBox())!;
+    const button = (await top.locator("[data-cta]").boundingBox())!;
+    expect(button.y - (line.y + line.height)).toBeLessThan(64);
+  });
+
+  for (const path of ["/demo/vsl/", "/?vsl=demo"]) {
+    test(`the video block, with a test film (${path}): the cue, 16:9, the poster line, a play button that plays`, async ({
+      page,
+    }) => {
+      await page.goto(path);
+      await page.waitForURL(/\/demo\/vsl\/$/);
+      const top = page.locator("#top");
+      await expect(top.locator(".first__cue")).toHaveText(first.get("video, label"));
+      const slot = top.locator("[data-vsl]");
+      const box = (await slot.boundingBox())!;
+      expect(box.width / box.height).toBeCloseTo(16 / 9, 1);
+      await expect(slot.locator(".vsl__who")).toHaveText(first.get("video, poster"));
+      // The video comes after the headline and before the button.
+      const headline = (await page.locator("h1").boundingBox())!;
+      const button = (await top.locator("[data-cta]").boundingBox())!;
+      expect(box.y).toBeGreaterThan(headline.y + headline.height - 1);
+      expect(button.y).toBeGreaterThan(box.y + box.height - 1);
+      // No placeholder line, no drawn or generated face.
+      await expect(top.locator("[data-vsl-soon]")).toHaveCount(0);
+      await expect(slot.locator(".vsl__face, canvas")).toHaveCount(0);
       await press(slot.locator("button[data-vsl-play]"));
       await expect(slot).toHaveClass(/is-playing/);
-      await expect(slot.locator("video")).toHaveAttribute("src", VSL_VIDEO);
-    } else {
-      // Until he films it: no play mark, nothing to press, no player, and the line under the frame.
-      await expect(slot.locator(".vsl__play, button, a, video")).toHaveCount(0);
-      await expect(soon).toHaveText(first.get("video, placeholder line"));
-      const line = (await soon.boundingBox())!;
-      expect(line.y).toBeGreaterThan(box.y + box.height - 1);
-      expect(line.y + line.height).toBeLessThan(button.y + 1);
-    }
-    // His initials stand in until a real photo of him exists: never a drawn or generated face.
-    if (!(await slot.locator("img").count()))
-      await expect(slot.locator(".vsl__face")).toHaveText(words.founder.initials);
-  });
+      await expect
+        .poll(() => slot.locator("video").evaluate((el: HTMLVideoElement) => el.currentTime))
+        .toBeGreaterThan(0);
+      // The demo page is never for a search engine.
+      await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content", /noindex/);
+    });
+  }
 
   test("three wins follow the first screen, each with its title and its line", async ({ page }) => {
     await page.goto("/");
@@ -254,7 +269,7 @@ test.describe("the home page", () => {
     }
   });
 
-  test("a card has a picture panel only with a real picture: no empty panel, nothing invented", async ({
+  test("each of the seven cards has its screen: a drawing that moves, or the picture of the real document", async ({
     page,
   }) => {
     await page.goto("/");
@@ -272,67 +287,26 @@ test.describe("the home page", () => {
         .locator(".card__n, .card__h, .card__meta")
         .evaluateAll((els) => els.map((el) => el.getBoundingClientRect().top));
       expect(tops).toEqual([...tops].sort((a, b) => a - b));
-      if (await stage.count()) {
-        // The panel comes with a real picture of the document, which has words for someone who cannot see it.
-        await expect(stage.locator("img")).toHaveCount(1);
+      await expect(stage.locator("figure.screen[data-loop]")).toHaveCount(1);
+      if (await stage.locator("img").count()) {
+        // The picture of the real document has words for someone who cannot see it.
         expect((await stage.locator("img").getAttribute("alt"))!.length).toBeGreaterThan(0);
         continue;
       }
-      // No picture yet: no panel, no drawing, no stand-in. The card is words under a hairline.
-      await expect(card.locator("svg, img, figure, [data-loop]")).toHaveCount(0);
-      const look = await card.evaluate((el) => {
-        const style = getComputedStyle(el);
-        return { paint: style.backgroundColor, line: style.borderTopWidth };
+      // A drawing: shapes, with only the deck's labels as words, and nothing for a screen reader to read.
+      await expect(stage.locator("figure.screen")).toHaveAttribute("aria-hidden", "true");
+      const labels = get.list(`card ${n}, screen label`).map(({ words }) => words);
+      const said = (await stage.locator(".cap").allTextContents()).map((text) => text.trim());
+      expect(said).toEqual(labels);
+      const others = await stage.evaluate((el) => {
+        const copy = el.cloneNode(true) as HTMLElement;
+        copy.querySelectorAll(".cap, b").forEach((node) => node.remove());
+        return (copy.textContent ?? "").trim();
       });
-      expect(look.paint).toBe("rgba(0, 0, 0, 0)");
-      expect(look.line).toBe("1px");
-    }
-  });
-
-  test("who directs it has a photo panel only with a real photo: his initials are a small mark by the heading", async ({
-    page,
-  }) => {
-    await page.goto("/");
-    const who = page.locator("#who");
-    await who.scrollIntoViewIfNeeded();
-    const panel = who.locator("[data-who-photo]");
-    const mark = who.locator("[data-who-mark]");
-    if (await panel.count()) {
-      await expect(panel.locator("img")).toHaveCount(1);
-      await expect(mark).toHaveCount(0);
-      return;
-    }
-    await expect(mark).toHaveText(words.founder.initials);
-    const [m, h, grid] = await Promise.all([
-      mark.boundingBox(),
-      who.locator("h2").boundingBox(),
-      who.locator(".who__grid").boundingBox(),
-    ]);
-    // Small and round, on the heading's own line, before it.
-    expect(m!.width).toBeLessThanOrEqual(48);
-    expect(Math.round(m!.width)).toBe(Math.round(m!.height));
-    expect(m!.x + m!.width).toBeLessThanOrEqual(h!.x);
-    expect(m!.y + m!.height / 2).toBeGreaterThan(h!.y);
-    expect(m!.y + m!.height / 2).toBeLessThan(h!.y + h!.height);
-    // No empty frame: nothing in the section is a painted panel without a picture.
-    const painted = await who.locator(".who__grid *").evaluateAll(
-      (els) =>
-        els.filter((el) => {
-          const box = el.getBoundingClientRect();
-          const paint = getComputedStyle(el).backgroundColor;
-          return box.width > 120 && box.height > 120 && paint !== "rgba(0, 0, 0, 0)";
-        }).length,
-    );
-    expect(painted).toBe(0);
-    // The words take the width: on a wide screen the list sits beside the paragraphs.
-    if (page.viewportSize()!.width >= 960) {
-      const [lead, more] = await Promise.all([
-        who.locator(".who__lead").boundingBox(),
-        who.locator(".who__more").boundingBox(),
-      ]);
-      expect(more!.x).toBeGreaterThan(lead!.x + lead!.width - 1);
-      expect(Math.abs(more!.y - lead!.y)).toBeLessThanOrEqual(1);
-      expect(more!.x + more!.width).toBeGreaterThan(grid!.x + grid!.width * 0.9);
+      expect(others).toBe("");
+      // Nothing of the drawing runs out of its stage's width.
+      const frame = (await stage.boundingBox())!;
+      expect(frame.height).toBeGreaterThan(120);
     }
   });
 
@@ -342,9 +316,7 @@ test.describe("the home page", () => {
     test.skip(workOn, "The twelve real pieces are in");
     await page.goto("/");
     const text = squash(await page.locator("body").textContent());
-    expect(text).not.toContain(squash(section(6).get("item 2, shown with section 7")));
     expect(text).not.toContain(squash(section(8).get("free 3")));
-    await expect(page.locator("#who .who__ways li")).toHaveCount(2);
     await expect(page.locator("#weeks .berg__items--free li")).toHaveCount(2);
     // No grey bar, no "coming soon", no empty frame anywhere on the page.
     await expect(
@@ -386,14 +358,13 @@ test.describe("the home page", () => {
     expect(text).not.toMatch(/\binstall|\.zip\b|\.md\b|terminal|\bprompt\b|\bAPI\b|\brepo\b/i);
   });
 
-  test("an apply button closes sections 5, 6, 9 and 11, and each opens the same form", async ({
+  test("an apply button closes sections 5, 9 and 11, and each opens the same form", async ({
     page,
   }) => {
     await page.goto("/");
     const form = page.locator(".apply");
     for (const [n, id] of [
       [5, "get"],
-      [6, "who"],
       [9, "offer"],
       [11, "fit"],
     ] as const) {
@@ -413,7 +384,7 @@ test.describe("the home page", () => {
       await expect(form, id).toBeHidden();
     }
     // The other sections have none, and the final panel has the two fields.
-    await expect(page.locator("main .strip")).toHaveCount(4);
+    await expect(page.locator("main .strip")).toHaveCount(3);
     await expect(page.locator("#apply form[data-apply-entry] input")).toHaveCount(2);
     await expect(page.locator("#apply form button")).toHaveText(door.get("button"));
   });
@@ -687,15 +658,22 @@ test.describe("the home page in motion", () => {
     await expect(card).toHaveClass(/is-in/);
   });
 
-  test("the header's button shows once the first button has left the screen", async ({ page }) => {
+  test("the header's button never disappears: at the top, in the middle and at the end of the page", async ({
+    page,
+  }) => {
     await page.goto("/");
-    const bar = page.locator(".bar");
-    await expect(page.locator("#top [data-cta]")).toBeInViewport();
-    await expect(bar).not.toHaveClass(/has-cta/);
-    await page.locator(".cards > .card").nth(1).scrollIntoViewIfNeeded();
-    await expect(bar).toHaveClass(/has-cta/);
-    await expect(page.locator(".bar__cta")).toBeVisible();
-    await expect(page.locator(".bar__cta")).toHaveText(words.pill);
+    const button = page.locator(".bar__cta");
+    await expect(button).toHaveText(words.pill);
+    const height = await page.evaluate(() => document.documentElement.scrollHeight);
+    for (const at of [0, 0.25, 0.5, 0.75, 1]) {
+      await page.evaluate(
+        (y) => scrollTo({ top: y, behavior: "instant" }),
+        Math.round(height * at),
+      );
+      await expect(button, `at ${at * 100}% of the page`).toBeInViewport({ ratio: 1 });
+      await expect(button).toHaveCSS("opacity", "1");
+      await expect(button).toHaveCSS("visibility", "visible");
+    }
   });
 
   test("the first button and the header's button open the same form", async ({ page }) => {
@@ -754,15 +732,85 @@ test.describe("the iceberg on a phone", () => {
 test.describe("a phone's first screen", () => {
   test.use({ reducedMotion: "reduce" });
   for (const width of [360, 375, 390, 414]) {
-    test(`${width} x 650: the headline, the video and the apply button show without scrolling`, async ({
+    test(`${width} x 650: the headline and the apply button show without scrolling`, async ({
       page,
     }) => {
       await page.setViewportSize({ width, height: 650 });
       await page.goto("/");
+      for (const selector of ["h1", "#top .first__line", "#top [data-cta]"])
+        await expect(page.locator(selector)).toBeInViewport({ ratio: 1 });
+    });
+    test(`${width} x 650, with a film: the headline, the video and the apply button show without scrolling`, async ({
+      page,
+    }) => {
+      await page.setViewportSize({ width, height: 650 });
+      await page.goto("/demo/vsl/");
       for (const selector of ["h1", "#top [data-vsl]", "#top [data-cta]"])
         await expect(page.locator(selector)).toBeInViewport({ ratio: 1 });
     });
   }
+});
+
+test.describe("the header's button at every width", () => {
+  test.use({ reducedMotion: "reduce" });
+  for (const width of [320, 360, 390, 600, 768, 1024, 1440, 1920]) {
+    test(`${width} px: the button is whole, in the header, clear of the logo, from top to bottom`, async ({
+      page,
+    }) => {
+      await page.setViewportSize({ width, height: 800 });
+      await page.goto("/");
+      const button = page.locator(".bar__cta");
+      const height = await page.evaluate(() => document.documentElement.scrollHeight);
+      for (const at of [0, 0.5, 1]) {
+        await page.evaluate(
+          (y) => scrollTo({ top: y, behavior: "instant" }),
+          Math.round(height * at),
+        );
+        await expect(button).toBeInViewport({ ratio: 1 });
+        const [b, logo] = await Promise.all([
+          button.boundingBox(),
+          page.locator(".bar__pill > :first-child").boundingBox(),
+        ]);
+        expect(b!.x).toBeGreaterThanOrEqual(logo!.x + logo!.width);
+        expect(b!.x + b!.width).toBeLessThanOrEqual(width);
+        // Large enough to press with a thumb.
+        expect(b!.height).toBeGreaterThanOrEqual(36);
+      }
+      expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(
+        width,
+      );
+    });
+  }
+});
+
+test.describe("the moving screens", () => {
+  test("7 of 7: each card's screen plays while it is on screen, and stops when it leaves", async ({
+    page,
+  }) => {
+    await page.goto("/");
+    let moving = 0;
+    for (const n of CARDS) {
+      const screen = page.locator(`[data-card="${n}"] figure.screen[data-loop]`);
+      await screen.scrollIntoViewIfNeeded();
+      await expect(screen).toHaveClass(/is-looping/);
+      // Its parts arrive one after the other.
+      await expect.poll(() => screen.locator(".on").count()).toBeGreaterThan(1);
+      moving++;
+    }
+    expect(moving).toBe(7);
+    await page.evaluate(() => scrollTo({ top: 0, behavior: "instant" }));
+    await expect(page.locator('[data-card="07"] figure.screen')).not.toHaveClass(/is-looping/);
+  });
+
+  test("with reduced motion every screen shows finished and nothing loops", async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await page.goto("/");
+    await page.locator('[data-card="03"]').scrollIntoViewIfNeeded();
+    await page.waitForTimeout(400);
+    await expect(page.locator("figure.screen.is-looping")).toHaveCount(0);
+    for (const part of await page.locator('[data-card="03"] .screen [data-at]').all())
+      await expect(part).toHaveCSS("opacity", "1");
+  });
 });
 
 test.describe("without JavaScript", () => {

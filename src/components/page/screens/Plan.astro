@@ -1,0 +1,54 @@
+---
+/**
+ * Screen 04: the content plan, one line for every piece. Its rows appear one after the other, each
+ * with its lines written in.
+ */
+import Cap from "./Cap.astro";
+import Tick from "./Tick.astro";
+import { labels, tags } from "../../../content/screens";
+const [first, second, job] = labels("04");
+const jobs = tags("04");
+const rows = [
+  ["78%", "64%"],
+  ["70%", "86%"],
+  ["58%", "74%"],
+  ["82%", "60%"],
+  ["66%", "80%"],
+  ["74%", "56%"],
+  ["62%", "84%"],
+];
+---
+
+<figure
+  class:list={["screen", "s4", { "s4--jobs": jobs.length }]}
+  data-loop="10000"
+  aria-hidden="true"
+>
+  <div class="s4__sheet">
+    {(first || second) && (
+      <p class="s4__top pop" data-at="150">
+        {first && <span class="cap">{first}</span>}
+        {second && <span class="cap">{second}</span>}
+      </p>
+    )}
+    <ol class="s4__weeks">
+      {rows.map((row, n) => (
+        <li class="pop" data-at={500 + n * 300}>
+          <b>{n + 1}</b>
+          <span class="bars typed" data-at={560 + n * 300}>
+            {row.map((width, k) => (
+              <i style={`--w:${width};--k:${k}`} />
+            ))}
+          </span>
+          {jobs.length > 0 && <span class="s4__job">{jobs[n % jobs.length]}</span>}
+        </li>
+      ))}
+    </ol>
+  </div>
+  {job && (
+    <p class="pf__badge" data-at={500 + rows.length * 300 + 300}>
+      <Tick />
+      {job}
+    </p>
+  )}
+</figure>

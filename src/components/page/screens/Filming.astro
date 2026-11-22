@@ -1,0 +1,32 @@
+---
+/**
+ * Screen 06: the filming plan and the phone guide. Six pieces slide into one sitting, then the
+ * guide's page fills in line by line.
+ */
+import Cap from "./Cap.astro";
+import { labels } from "../../../content/screens";
+const [sitting, guide] = labels("06");
+---
+
+<figure class="screen s6" data-loop="10000" aria-hidden="true">
+  <div class="s6__plan">
+    <Cap text={sitting} at={150} class="pop" />
+    <ol class="s6__tray">
+      {Array.from({ length: 6 }, (_, n) => (
+        <li data-at={500 + n * 280} style={`--k:${n}`}>
+          <b>{n + 1}</b>
+          <i />
+        </li>
+      ))}
+    </ol>
+  </div>
+  <div class="s6__guide">
+    <Cap text={guide} at={2300} class="pop" />
+    <i class="s6__phone pop" data-at="2400"></i>
+    <div class="bars typed" data-at="2700">
+      {["100%", "82%", "94%", "68%", "88%"].map((width, k) => (
+        <i style={`--w:${width};--k:${k}`} />
+      ))}
+    </div>
+  </div>
+</figure>

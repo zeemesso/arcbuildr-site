@@ -33,6 +33,13 @@ try {
     throw new Error("main robots.txt is wrong");
   const home = readFileSync("dist-main/index.html", "utf8");
   if (home.includes('content="noindex"')) throw new Error("main home page is noindex");
+  // The video block's demo, with its test film, is for previews only.
+  const demo = (dir) => files(dir).filter((f) => /\/demo\/|vsl-demo/.test(f));
+  if (demo("dist-preview").length < 2)
+    throw new Error("preview build has no /demo/vsl/ page or film");
+  if (demo("dist-main").length)
+    throw new Error(`main build carries the demo: ${demo("dist-main")}`);
+  if (/vsl=demo|\/demo\/vsl/.test(home)) throw new Error("main home page knows the demo's address");
   const sitemap = readFileSync("dist-main/sitemap.xml", "utf8");
   const urls = [...sitemap.matchAll(/<loc>(.*?)<\/loc>/g)].map((match) => match[1]);
   if (

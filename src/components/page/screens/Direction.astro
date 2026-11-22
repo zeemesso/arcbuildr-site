@@ -1,0 +1,44 @@
+---
+/**
+ * Screen 07: the creative direction. A message is written and sent, a question comes back, and it
+ * is answered.
+ */
+import Cap from "./Cap.astro";
+import Tick from "./Tick.astro";
+import { labels } from "../../../content/screens";
+const [reviewed, day, message, answer] = labels("07");
+---
+
+<figure class="screen s9" data-loop="10000" aria-hidden="true">
+  <Cap text={day} at={150} class="s9__day pop" />
+  {reviewed && (
+    <p class="pf__badge s9__reviewed" data-at="2700">
+      <Tick />
+      {reviewed}
+    </p>
+  )}
+  <div class="s9__msg" data-at="2300">
+    {message && <p class="cap">{message}</p>}
+    <div class="bars typed" data-at="400">
+      {["94%", "100%", "86%", "97%", "58%"].map((width, k) => (
+        <i style={`--w:${width};--k:${k}`} />
+      ))}
+    </div>
+    <span class="s9__sent" data-at="2500">
+      <Tick />
+    </span>
+  </div>
+  <div class="s9__ask pop" data-at="3100">
+    <span class="bars">
+      <i style="--w:78%"></i>
+      <i style="--w:46%"></i>
+    </span>
+  </div>
+  <div class="s9__answer pop" data-at="3900">
+    {answer && <p class="cap">{answer}</p>}
+    <span class="bars">
+      <i class="is-strong" style="--w:88%"></i>
+      <i class="is-strong" style="--w:62%"></i>
+    </span>
+  </div>
+</figure>

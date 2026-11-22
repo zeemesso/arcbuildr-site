@@ -1,0 +1,14 @@
+---
+/**
+ * Preview builds only: the home page with a test film in the video block, so Zyade can see the block
+ * before the real film exists. `/?vsl=demo` on a preview leads here. A main build makes no such page
+ * and carries no test film (scripts/verify-main-build.mjs checks).
+ */
+import Page from "../../components/page/Page.astro";
+export function getStaticPaths() {
+  return __PREVIEW__ ? [{ params: { film: "vsl" } }] : [];
+}
+const film = __PREVIEW__ ? (await import("../../assets/vsl-demo.mp4?url")).default : "";
+---
+
+<Page film={film} noindex />
