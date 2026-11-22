@@ -13,7 +13,7 @@ import Foot from "../components/page/Foot.astro";
 import Application from "../components/application/Application.astro";
 import { section } from "../content/deck";
 import { booked } from "../content/site";
-import { APPLICATION_AFTER_BOOKING_URL, APPLICATION_MODE, CONFIRMATION_VIDEO } from "../config";
+import { CONFIRMATION_VIDEO } from "../config";
 
 const s = section("the booked page");
 // The confirmation video shows once its file is in public/. Until then the block is not on the page.
@@ -21,7 +21,6 @@ const video =
   CONFIRMATION_VIDEO && existsSync(new URL(`../../public${CONFIRMATION_VIDEO}`, import.meta.url))
     ? CONFIRMATION_VIDEO
     : "";
-const native = APPLICATION_MODE === "native";
 const button = s.get("booked from a chat, button");
 ---
 
@@ -76,15 +75,9 @@ const button = s.get("booked from a chat, button");
           <p data-note>{s.get("next 1")}</p>
           <div class="next__chat" data-chat hidden>
             <p data-chat-first>{s.get("booked from a chat, in place of next 1")}</p>
-            {native ? (
-              <button class="btn" type="button" data-apply-open data-chat-action>
-                {button}
-              </button>
-            ) : (
-              <a class="btn" href={APPLICATION_AFTER_BOOKING_URL} data-chat-action>
-                {button}
-              </a>
-            )}
+            <button class="btn" type="button" data-apply-open data-chat-action>
+              {button}
+            </button>
             <p class="next__saved" data-chat-saved role="status" hidden>
               {booked.saved}
             </p>
@@ -114,7 +107,7 @@ const button = s.get("booked from a chat, button");
     </ol>
   </section>
   <Foot slot="after" />
-  {native && <Application kind="prep" slot="after" />}
+  <Application kind="prep" slot="after" />
   <!-- Inside the page, so it comes before the visit counter (see Home.astro). -->
   <Fragment slot="after">
     <script>

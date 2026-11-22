@@ -1,14 +1,13 @@
-/* The application layer: one question per screen, on the page that opened it.
- * One swappable part. It carries every name it paints with, so it looks the same on the home page and on /booked.
- * Motion follows the 20 rules; numbers in comments are the rule numbers. */
+/* The layer the site shows around the application. The questions are a form on Tally, in Tally's own
+ * popup; this layer holds what comes after it (the calendar, or the lines that end the form) and the
+ * plain form that opens when the questions cannot load.
+ * It carries every name it paints with, so it looks the same on the home page and on /booked. */
 
 .apply {
   --f-canvas: var(--color-paper-2);
   --f-sheet: var(--color-card);
   --f-ink: var(--color-ink);
   --f-muted: var(--color-ink-muted);
-  --f-chip: var(--color-paper-2);
-  --f-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
   --f-radius: 1.75rem;
   --f-radius-in: 1rem;
   --f-gap: 0.75rem;
@@ -70,11 +69,11 @@
   min-height: 0;
 }
 
-/* Top: logo, the count, close, and the progress line under them. */
+/* Top: the logo and the close button. */
 .apply__top {
   position: relative;
   display: grid;
-  grid-template-columns: 1fr auto auto;
+  grid-template-columns: 1fr auto;
   align-items: center;
   gap: 0.5rem;
   min-height: 3.5rem;
@@ -88,24 +87,7 @@
 .js .apply .logo path {
   animation: none;
 }
-.apply__count {
-  white-space: pre;
-  font-family: var(--f-mono);
-  font-size: var(--text-xs);
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--f-muted);
-  font-variant-numeric: tabular-nums;
-}
-.apply__count[hidden] {
-  display: none;
-}
-.apply__count b {
-  color: var(--f-ink);
-  font-weight: 600;
-}
-.apply__x,
-.apply__back {
+.apply__x {
   display: grid;
   place-items: center;
   flex: none;
@@ -117,16 +99,9 @@
   background: transparent;
   color: inherit;
   cursor: pointer;
-  transition:
-    scale 120ms var(--f-out),
-    background-color var(--dur-fast) var(--f-inout),
-    opacity var(--dur-fast) var(--f-inout);
+  transition: scale 120ms var(--f-out);
 }
-.apply__back {
-  background: var(--f-chip);
-}
-.apply__x svg,
-.apply__back svg {
+.apply__x svg {
   width: 1.25rem;
   height: 1.25rem;
   fill: none;
@@ -135,84 +110,41 @@
   stroke-linecap: round;
   stroke-linejoin: round;
 }
-.apply__x:active,
-.apply__back:active {
-  scale: 0.97; /* 4 */
-}
-.apply__x:disabled,
-.apply__back:disabled {
-  opacity: 0.35;
-  cursor: default;
-}
-.apply__progress {
-  position: absolute;
-  inset: auto 0 0;
-  height: 3px;
-  background: var(--f-chip);
-  overflow: hidden;
-}
-.apply__progress span {
-  display: block;
-  height: 100%;
-  border-radius: 0 3px 3px 0;
-  background: var(--color-accent);
-  transform: scaleX(0);
-  transform-origin: left;
-  transition: transform 300ms var(--f-inout); /* 9 */
+.apply__x:active {
+  scale: 0.97;
 }
 
-/* Middle: the question and its field. Only this part scrolls. */
-.apply__stage {
-  display: flex;
-  flex-direction: column;
+/* The plain form: one line that says why it is here, a name, an email and the button. */
+.plain {
+  display: grid;
+  align-content: center;
+  gap: 0.875rem;
+  width: 100%;
+  max-width: 30rem;
   min-height: 0;
+  margin-inline: auto;
   padding: 1.5rem var(--apply-pad) 0.75rem;
   overflow-y: auto;
-  overscroll-behavior: contain;
-  scrollbar-width: none;
 }
-.apply__body {
-  width: 100%;
-  max-width: 38rem;
-  margin-inline: auto;
-}
-.apply__hi {
-  margin-bottom: 0.875rem;
-  color: var(--f-muted);
-  font-size: var(--text-sm);
-  text-wrap: pretty;
-}
-.apply__hi:empty {
+.plain .q__err:empty {
   display: none;
 }
-.apply__steps {
-  position: relative;
-}
-/* Every screen is in the page, so the next field can take the cursor in the same turn as the tap. */
-.q {
-  position: absolute;
-  inset: 0 0 auto;
-  display: grid;
-  gap: 0.875rem;
-  visibility: hidden;
-  opacity: 0;
-}
-.q.is-current {
-  position: relative;
-  visibility: visible;
-  opacity: 1;
-}
-.q.is-leaving {
-  visibility: visible;
-  pointer-events: none;
-}
-.q__label {
-  font-family: var(--font-display);
-  font-weight: var(--f-q-weight, 700);
-  font-size: clamp(1.375rem, 1.05rem + 1.6vw, 2rem);
-  letter-spacing: -0.03em;
-  line-height: 1.14;
+.plain__lead {
+  margin-bottom: 0.5rem;
+  font-size: clamp(1.25rem, 1.05rem + 1vw, 1.625rem);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
   text-wrap: balance;
+}
+.plain__field {
+  display: grid;
+  gap: 0.375rem;
+}
+.plain__label {
+  color: var(--f-muted);
+  font-size: var(--text-sm);
+  font-weight: 600;
 }
 .q__field {
   display: block;
@@ -227,7 +159,6 @@
   /* 16 px or more, so a phone does not zoom in on focus. */
   font-size: max(1rem, var(--text-base));
   line-height: 1.4;
-  resize: none;
   transition:
     border-color var(--dur-fast) var(--f-inout),
     box-shadow var(--dur-fast) var(--f-inout);
@@ -241,7 +172,7 @@
   box-shadow: 0 0 0 3px color-mix(in oklch, var(--f-ink) 10%, transparent);
   outline: none;
 }
-.has-err .q__field {
+.plain [aria-invalid="true"] {
   border-color: var(--color-error);
   box-shadow: 0 0 0 3px color-mix(in oklch, var(--color-error) 14%, transparent);
 }
@@ -250,139 +181,8 @@
   font-size: var(--text-sm);
   font-weight: 600;
 }
-.q__err {
-  margin-top: -0.25rem;
-}
-.q__err[hidden] {
-  display: none;
-}
 
-/* The plain form: a name, an email and the button. It takes the questions' place when saving fails,
-   or when the script stops. */
-.plain {
-  display: grid;
-  gap: 0.875rem;
-}
-.plain[hidden],
-.plain .q__err:empty,
-.is-plain .apply__steps,
-.is-plain .apply__hi,
-.is-dead .apply__back,
-.is-dead .apply__hint,
-.is-dead .apply__count,
-.is-dead .apply__progress,
-.is-dead .apply__anyway {
-  display: none;
-}
-.plain__field {
-  display: grid;
-  gap: 0.375rem;
-}
-.plain__label {
-  color: var(--f-muted);
-  font-size: var(--text-sm);
-  font-weight: 600;
-}
-.plain [aria-invalid="true"] {
-  border-color: var(--color-error);
-  box-shadow: 0 0 0 3px color-mix(in oklch, var(--color-error) 14%, transparent);
-}
-
-/* Choices: big rows. A tap picks one and moves on. */
-.q__choices {
-  display: grid;
-  gap: 0.5rem;
-}
-.choice {
-  position: relative;
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  min-height: 3.5rem;
-  padding: 0.5rem 1rem;
-  border: 1px solid var(--color-rule);
-  border-radius: var(--f-radius-in);
-  background: var(--color-field);
-  cursor: pointer;
-  overflow: hidden;
-  isolation: isolate;
-  -webkit-tap-highlight-color: transparent;
-  transition:
-    scale 120ms var(--f-out),
-    border-color var(--dur-fast) var(--f-inout);
-}
-.choice:active {
-  scale: 0.97; /* 4, with no bounce on release (13) */
-}
-.choice input {
-  position: absolute;
-  inset: 0;
-  opacity: 0;
-  margin: 0;
-  cursor: pointer;
-}
-/* 17: the picked colour comes in under a mask, from the left. */
-.choice::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  background: var(--f-pick, color-mix(in oklch, var(--color-accent) 14%, var(--color-card)));
-  clip-path: inset(0 100% 0 0);
-  transition: clip-path 200ms var(--f-out);
-}
-.choice:has(:checked) {
-  border-color: var(--f-pick-line, var(--color-accent));
-}
-.choice:has(:checked)::before {
-  clip-path: inset(0);
-}
-.choice:has(:focus-visible) {
-  outline: 2px solid var(--color-focus);
-  outline-offset: 2px;
-}
-.choice kbd,
-.apply__hint kbd {
-  display: none;
-  place-items: center;
-  min-width: 1.5rem;
-  height: 1.5rem;
-  padding: 0 0.3rem;
-  border: 1px solid var(--color-rule);
-  border-radius: 0.375rem;
-  background: var(--f-sheet);
-  font-family: var(--f-mono);
-  font-size: var(--text-xs);
-  font-weight: 600;
-}
-.choice span {
-  flex: 1;
-  font-weight: 500;
-}
-/* 18: the tick comes in with a little blur. */
-.choice__tick {
-  width: 1.25rem;
-  height: 1.25rem;
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 2.25;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  opacity: 0;
-  filter: blur(3px);
-  scale: 0.8;
-  transition:
-    opacity 160ms var(--f-out),
-    filter 160ms var(--f-out),
-    scale 160ms var(--f-out);
-}
-.choice:has(:checked) .choice__tick {
-  opacity: 1;
-  filter: blur(0);
-  scale: 1;
-}
-
-/* Bottom: the note for the save, Back, and the one button that moves on. It never changes place. */
+/* Bottom: what is happening, and the button. */
 .apply__foot {
   display: grid;
   gap: 0.625rem;
@@ -390,7 +190,7 @@
 }
 .apply__foot > * {
   width: 100%;
-  max-width: 38rem;
+  max-width: 30rem;
   margin-inline: auto;
 }
 .apply__note {
@@ -398,16 +198,12 @@
   font-size: var(--text-sm);
   text-wrap: pretty;
 }
-/* Centred like the buttons under it (".apply p" resets the margin the footer gives its children). */
+/* Centred like the button under it (".apply p" resets the margin the footer gives its children). */
 .apply .apply__note {
   margin-inline: auto;
 }
 .apply__note:empty {
   display: none;
-}
-.apply__note.is-alarm {
-  color: var(--color-error);
-  font-weight: 600;
 }
 .apply__actions {
   display: flex;
@@ -417,6 +213,13 @@
 }
 .apply__ok {
   position: relative;
+  flex: 1;
+  display: inline-grid;
+  grid-auto-flow: column;
+  place-content: center;
+  place-items: center;
+  gap: 0.5rem;
+  min-height: 3.25rem;
   padding: 0 1.5rem;
   border: 0;
   border-radius: var(--radius-pill);
@@ -428,39 +231,16 @@
   transition:
     scale 120ms var(--f-out),
     background-color var(--dur-fast) var(--f-inout);
-  flex: 1;
-  display: inline-grid;
-  grid-auto-flow: column;
-  place-content: center;
-  place-items: center;
-  gap: 0.5rem;
-  min-height: 3.25rem;
 }
 .apply__ok:hover {
   background: var(--color-accent-hover);
 }
 .apply__ok:active {
-  scale: 0.97; /* 4. No bounce on release (13). */
-}
-.apply__ok.is-sent::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  box-shadow: 0 0 0 0 var(--color-accent);
-  animation: apply-pulse 600ms var(--f-out) 1; /* 8 */
-}
-@keyframes apply-pulse {
-  to {
-    box-shadow: 0 0 0 14px transparent;
-  }
+  scale: 0.97;
 }
 .apply__ok-label {
   grid-area: 1 / 2;
   white-space: nowrap;
-}
-.apply__ok-label.is-old {
-  pointer-events: none;
 }
 .apply__spin {
   grid-area: 1 / 1;
@@ -472,7 +252,7 @@
     width 160ms var(--f-out),
     opacity 160ms var(--f-out);
 }
-/* A slow network shows that it is working: the button turns and says so. */
+/* A slow network shows that it is working: the button turns. */
 .is-busy .apply__spin {
   width: 1.125rem;
   border: 2px solid color-mix(in oklch, currentColor 30%, transparent);
@@ -480,7 +260,7 @@
   opacity: 1;
   animation: apply-turn 700ms linear infinite;
 }
-.is-busy .apply__ok {
+.apply__ok.is-busy {
   cursor: progress;
 }
 @keyframes apply-turn {
@@ -498,59 +278,11 @@
   font-weight: 600;
   text-underline-offset: 0.2em;
 }
-.apply__anyway[hidden],
-.apply__hint {
+.apply__anyway[hidden] {
   display: none;
 }
-.apply__hint {
-  color: var(--f-muted);
-  font-size: var(--text-sm);
-  white-space: nowrap;
-}
 
-/* With the keyboard up there is little room: tighten, keep the field and the button. */
-.apply.is-tight .apply__top {
-  min-height: 3rem;
-}
-.apply.is-tight .apply__stage {
-  padding-top: 0.875rem;
-}
-.apply.is-tight .apply__hi {
-  margin-bottom: 0.5rem;
-}
-.apply.is-tight .q {
-  gap: 0.625rem;
-}
-.apply.is-tight .q__label {
-  font-size: 1.25rem;
-}
-.apply.is-tight .apply__foot {
-  padding-bottom: 0.5rem;
-}
-
-/* A keyboard and a pointer: show the keys. */
-@media (hover: hover) and (pointer: fine) {
-  .choice kbd,
-  .apply__hint kbd {
-    display: inline-grid;
-  }
-  .apply__hint {
-    display: inline;
-  }
-  .is-busy .apply__hint,
-  .apply__anyway:not([hidden]) ~ .apply__hint {
-    display: none;
-  }
-  .choice:hover {
-    border-color: var(--f-ink);
-  }
-  .apply__x:hover,
-  .apply__back:hover:not(:disabled) {
-    background: color-mix(in oklch, var(--f-ink) 8%, transparent);
-  }
-}
-
-/* Wider screens: the sheet is a window on the canvas, like the page's own. */
+/* A wide screen: the layer is a sheet in the middle of the page. */
 @media (min-width: 48rem) {
   .apply {
     --apply-pad: 2rem;
@@ -564,36 +296,13 @@
     box-shadow: var(--shadow-lift);
     overflow: hidden;
   }
-  .apply__stage {
-    padding-top: 2rem;
-  }
-  .apply__body {
-    margin-block: auto;
-  }
-  .apply__actions {
-    flex-wrap: nowrap;
-  }
-  .apply__ok {
-    flex: none;
-    min-width: 13.5rem;
-  }
-  .apply__anyway {
-    flex: none;
-    padding: 0 1rem;
-  }
   .apply__foot {
     padding-bottom: 1.75rem;
   }
 }
-
 @media (prefers-reduced-motion: reduce) {
-  .apply__progress span,
-  .choice,
-  .choice::before,
-  .choice__tick,
   .apply__spin,
-  .apply__x,
-  .apply__back {
+  .apply__x {
     transition: none;
   }
   .is-busy .apply__spin {
@@ -601,7 +310,7 @@
   }
 }
 
-/* After the last answer is saved: the calendar, or the two lines for a budget under the lowest price. */
+/* After the form is sent: the calendar, or the two lines for a budget under the lowest price. */
 .apply__form[hidden],
 .apply__after[hidden],
 .apply__end[hidden],
@@ -677,10 +386,6 @@
     width: min(100%, 68rem);
     height: min(100%, 50rem);
   }
-}
-.apply.is-after .apply__count,
-.apply.is-after .apply__progress {
-  visibility: hidden;
 }
 @media (prefers-reduced-motion: no-preference) {
   .apply__end:not([hidden]) p,

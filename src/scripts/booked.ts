@@ -1,7 +1,7 @@
 // The page after a booking. The booking page can send the first name and the email along.
 // A name is letters only and an email is a plain address, so nothing else can be shown here or passed on.
 import { BOOKED_KEY, resendPending, startApplication } from "./application";
-import { APPLICATION_MODE, CHAT_EVENT_SLUG } from "../config";
+import { CHAT_EVENT_SLUG } from "../config";
 
 const query = new URLSearchParams(location.search);
 // The calendar inside our form leaves the name and email on this device; a booking page can send them in the address.
@@ -38,28 +38,20 @@ if (chat && fromChat) {
   const action = chat.querySelector<HTMLElement>("[data-chat-action]")!;
   document.querySelector<HTMLElement>("[data-note]")!.hidden = true;
   chat.hidden = false;
-  if (APPLICATION_MODE === "native") {
-    // Our own form opens on this page, starts at the first question when the email is known, and stays here.
-    // If the form cannot start, the rest of this page still runs.
-    try {
-      startApplication({
-        kind: "prep",
-        seed: { name, email },
-        done: () => {
-          action.hidden = true;
-          chat.querySelector<HTMLElement>("[data-chat-first]")!.hidden = true;
-          chat.querySelector<HTMLElement>("[data-chat-saved]")!.hidden = false;
-        },
-      });
-    } catch {
-      /* As above. */
-    }
-  } else if (action instanceof HTMLAnchorElement) {
-    // The button's address is ours; only the checked name and email are added to it.
-    const address = new URL(action.href);
-    if (name) address.searchParams.set("name", name);
-    if (email) address.searchParams.set("email", email);
-    action.href = address.href;
+  // The questions open on this page, with the name and email filled, and the page stays here.
+  // If they cannot start, the rest of this page still runs.
+  try {
+    startApplication({
+      kind: "prep",
+      seed: { name, email },
+      done: () => {
+        action.hidden = true;
+        chat.querySelector<HTMLElement>("[data-chat-first]")!.hidden = true;
+        chat.querySelector<HTMLElement>("[data-chat-saved]")!.hidden = false;
+      },
+    });
+  } catch {
+    /* As above. */
   }
 }
 

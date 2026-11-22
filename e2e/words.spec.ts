@@ -1,10 +1,10 @@
 import { expect, test, type Page } from "@playwright/test";
 import { press } from "./press";
-import { calendar, ending, open, stub } from "./stubs";
+import { calendar, ending, plain, stub } from "./stubs";
 
 /**
  * The words the positioning dropped (VERDICT-3, rule 2). This reads what a visitor can meet on the home
- * page, in the form (its questions, both endings and the plain form) and on the page after a booking:
+ * page, around the form (both endings and the plain form) and on the page after a booking:
  * the text, the alt text, the labels, the page title and the meta tags.
  * "We don't chase viral." is the one allowed use of "viral".
  */
@@ -74,47 +74,44 @@ test("the home page says none of the dropped words: text, alt text, labels, titl
   expect(lines).toContain(await page.locator('meta[property="og:title"]').getAttribute("content"));
 });
 
-test("the form says none of them: every question, the error lines, both endings and the plain form", async ({
+// The questions themselves are on Tally, where this test cannot read them: they are checked against the
+// deck when the Tally form is edited. What the site says around the form is read here.
+test("the site's side of the form says none of them: the plain form, its error lines, and the ending", async ({
   page,
 }) => {
-  await stub(page);
-  await open(page, { name: "TEST Visitor", email: "test@example.com" });
-  check(await said(page), "the form, opened");
-  // Each question on screen in turn, with its error line showing.
-  for (const id of ["profile", "sell", "stranger"]) {
+  await stub(page, "fail", "blocked");
+  await page.goto("/");
+  await press(page.locator("#top [data-apply-open]").first());
+  await expect(plain(page)).toBeVisible();
+  check(await said(page), "the plain form");
+  for (const [name, email] of [
+    ["", ""],
+    ["TEST Visitor", "not-an-email"],
+    ["TEST Visitor", "test@example.com"],
+  ]) {
+    await plain(page).locator("input[name=name]").fill(name!);
+    await plain(page).locator("input[name=email]").fill(email!);
     await press(page.locator("[data-ok]"));
-    await expect(page.locator(".q.is-current [data-err]")).toBeVisible();
-    check(await said(page), `the form, ${id}, with its error`);
-    await page.locator(`.q.is-current #a-${id}`).fill("4");
-    await page.locator(`.q.is-current #a-${id}`).press("Enter");
-  }
-  for (const id of ["film", "count", "decides", "start"]) {
-    await expect(page.locator(`.q.is-current[data-id="${id}"]`)).toBeVisible();
-    check(await said(page), `the form, ${id}`);
-    await press(page.locator(`.q.is-current[data-id="${id}"] .choice`).first());
+    await expect(
+      page.locator("[data-plain-err], [data-note]").filter({ hasText: /\S/ }),
+    ).toBeVisible();
+    check(await said(page), `the plain form, sent with "${name}" and "${email}"`);
   }
   // The lowest budget: the ending with no calendar, which names the product.
-  await press(page.locator('.q.is-current[data-id="budget"] .choice').first());
+  await page.goto("/?apply=end&name=TEST+Visitor");
   await expect(ending(page)).toBeVisible();
   const low = await said(page);
-  check(low, "the form, the ending with no calendar");
+  check(low, "the ending with no calendar");
   expect(low.join(" ")).not.toContain("{product}");
 });
 
-test("the calendar's panel and the plain form say none of them", async ({ page }) => {
+test("the calendar's panel says none of them", async ({ page }) => {
   await stub(page);
-  await open(page, { name: "TEST Visitor", email: "test+b@example.com" });
-  for (const id of ["profile", "sell", "stranger"]) {
-    await page.locator(`.q.is-current #a-${id}`).fill("4");
-    await page.locator(`.q.is-current #a-${id}`).press("Enter");
-  }
-  for (const id of ["film", "count", "decides", "start"])
-    await press(page.locator(`.q.is-current[data-id="${id}"] .choice`).first());
-  await press(page.locator('.q.is-current[data-id="budget"] .choice').nth(1));
+  await page.goto("/?apply=calendar&name=TEST+Visitor&email=test%2Bb%40example.com");
   await expect(calendar(page).locator("iframe")).toBeVisible();
   // The plain form's lines are in the page from the start, so this reading holds them as well.
   const lines = await said(page);
-  check(lines, "the form, the calendar");
+  check(lines, "the calendar");
   expect(await page.locator("[data-plain]").count()).toBeGreaterThan(0);
 });
 

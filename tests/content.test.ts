@@ -4,13 +4,13 @@ import deck from "../src/content/deck.json" with { type: "json" };
 import { PRODUCT, founding, section } from "../src/content/deck";
 import {
   APPLICATION_AFTER_BOOKING_URL,
-  APPLICATION_MODE,
   APPLICATION_URL,
   BOOKED_PATH,
   BOOKING_URL,
   CHAT_EVENT_SLUG,
   CONFIRMATION_VIDEO,
   CONTACT_EMAIL,
+  TALLY_FORM,
   VSL_VIDEO,
 } from "../src/config";
 
@@ -181,7 +181,7 @@ describe("the deck", () => {
 });
 
 describe("the form and what follows it", () => {
-  it("asks the 8 questions, each with an error line, after the name and the email", () => {
+  it("knows the 8 questions of the Tally form, after the name and the email", () => {
     const { who, questions } = content.application;
     expect(who.map((step) => step.id)).toEqual(["name", "email"]);
     expect(questions.map((question) => question.id)).toEqual([
@@ -196,18 +196,16 @@ describe("the form and what follows it", () => {
     ]);
     for (const question of questions) {
       expect(question.q.length, question.id).toBeGreaterThan(0);
-      expect(question.err.length, question.id).toBeGreaterThan(0);
     }
     expect(questions.at(-1)).toMatchObject({ type: "choice" });
     expect(content.application.send.failed).toContain("still here");
   });
-  it("takes each question, hint and choice from the deck", () => {
+  it("takes each question and choice from the deck", () => {
     const form = section("the form");
     for (const question of content.application.questions) {
       expect(question.q).toBe(form.get(question.id));
       if (question.type === "choice")
         expect(`${question.options.join(". ")}.`).toBe(form.get(`${question.id}, choices`));
-      else expect(question.ph).toBe(form.get(`${question.id}, hint`));
     }
   });
   it("ends without a calendar for the lowest budget, with the deck's two lines", () => {
@@ -220,8 +218,8 @@ describe("the form and what follows it", () => {
       section("the form").get("budget, under 750, line 2"),
     ]);
   });
-  it("keeps the form one swappable part, with the hosted forms still on file", () => {
-    expect(["native", "embed"]).toContain(APPLICATION_MODE);
+  it("opens the Tally form, and keeps the form for chat bookings on file", () => {
+    expect(TALLY_FORM).toBe("M1aKGp");
     expect(APPLICATION_URL).toBe("https://tally.so/r/M1aKGp");
     expect(APPLICATION_AFTER_BOOKING_URL).toBe("https://tally.so/r/9NZpVV");
     expect(BOOKING_URL).toBe("https://cal.com/arcbuildr/15-minute-call");

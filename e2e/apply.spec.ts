@@ -1,78 +1,74 @@
 import { expect, test, type Page } from "@playwright/test";
 import { application as form, booked } from "../src/content/site";
 import { section } from "../src/content/deck";
-import { BOOKING_URL } from "../src/config";
-import { answer, press } from "./press";
-import { calendar, current, ending, layer, open as openForm, stub } from "./stubs";
+import { APPLICATION_URL, BOOKING_URL, TALLY_FORM } from "../src/config";
+import { press } from "./press";
+import {
+  answers,
+  apply,
+  calendar,
+  ending,
+  layer,
+  lowest,
+  open as openForm,
+  opened,
+  popup,
+  send,
+  stub,
+  submission,
+} from "./stubs";
+
+// The questions are a form on Tally, opened in Tally's popup. These tests cover the site's side: what
+// it hands the form, what it does when the form is sent, and what the visitor sees next. Tally itself
+// is a stand-in (e2e/stubs.ts).
 
 const who = { name: "TEST Visitor", email: "test+a@example.com" };
-/** The choices of one question, as the deck lists them. */
-const options = (id: string) => {
-  const question = form.questions.find((item) => item.id === id)!;
-  return question.type === "choice" ? question.options : [];
-};
-const answers: Record<string, string> = {
-  profile: "@test.visitor",
-  sell: "TEST: bookkeeping. One client is worth 2,000 USD.",
-  stranger: "TEST: that I do the books.",
-  film: options("film")[2]!,
-  count: options("count")[0]!,
-  decides: options("decides")[1]!,
-  start: options("start")[3]!,
-  budget: options("budget")[1]!,
-};
 const booking = `${BOOKING_URL}?${new URLSearchParams(who)}`;
 const KEY = "arcbuildr-application";
-
-const note = (page: Page) => page.locator("[data-apply] [data-note]");
 const open = (page: Page) => openForm(page, who);
-/** Answers the questions from `from` up to, not including, `until`. */
-async function type(page: Page, until = "budget", from = "profile") {
-  const ids = form.questions.map((question) => question.id as string);
-  for (const id of ids.slice(ids.indexOf(from), ids.indexOf(until)))
-    await answer(page, id, answers[id]!);
-  await expect(page.locator(`.q.is-current[data-id="${until}"]`)).toBeVisible();
-}
-const pickBudget = (page: Page) => press(current(page).locator(".choice").nth(1));
+const kept = (page: Page) => page.evaluate((key) => localStorage.getItem(key), KEY);
 
-for (const where of ["#apply"]) {
-  test(`${where}: an empty or wrong entry stays put, says why and clears as you type`, async ({
-    page,
-  }) => {
-    await stub(page);
-    await page.goto("/");
-    const name = page.locator(`${where} input[name=name]`);
-    const email = page.locator(`${where} input[name=email]`);
-    const errors = page.locator(`${where} [data-entry-err]`);
-    await press(page.locator(`${where} form button`));
-    await expect(errors.nth(0)).toHaveText(form.who[0].err);
-    await expect(name).toBeFocused();
-    await expect(name).toHaveAttribute("aria-invalid", "true");
-    await expect(layer(page)).toBeHidden();
-    await name.fill(who.name);
-    await expect(errors.nth(0)).toHaveText("");
-    await email.fill("bad@address");
-    await press(page.locator(`${where} form button`));
-    await expect(errors.nth(1)).toHaveText(form.who[1].err);
-    await expect(email).toBeFocused();
-    await expect(layer(page)).toBeHidden();
-    await email.fill(who.email);
-    await expect(errors.nth(1)).toHaveText("");
-  });
-}
+test("an empty or wrong entry stays put, says why and clears as you type", async ({ page }) => {
+  const calls = await stub(page);
+  await page.goto("/");
+  const name = page.locator("#apply input[name=name]");
+  const email = page.locator("#apply input[name=email]");
+  const errors = page.locator("#apply [data-entry-err]");
+  await press(page.locator("#apply form button"));
+  await expect(errors.nth(0)).toHaveText(form.who[0].err);
+  await expect(name).toBeFocused();
+  await expect(name).toHaveAttribute("aria-invalid", "true");
+  await name.fill(who.name);
+  await expect(errors.nth(0)).toHaveText("");
+  await email.fill("bad@address");
+  await press(page.locator("#apply form button"));
+  await expect(errors.nth(1)).toHaveText(form.who[1].err);
+  await expect(email).toBeFocused();
+  await email.fill(who.email);
+  await expect(errors.nth(1)).toHaveText("");
+  // Nothing opened, and Tally was never asked for anything.
+  await expect(popup(page)).toHaveCount(0);
+  await expect(layer(page)).toBeHidden();
+  expect(calls.forms).toHaveLength(0);
+});
 
-test("a name and an email open the form on the page and record one lead", async ({ page }) => {
+test("a name and an email open the Tally form with both filled, and record one lead", async ({
+  page,
+}) => {
   const calls = await stub(page);
   await page.goto("/?src=card&utm_source=test&other=1");
+  // Tally's script is not on the page until someone asks for the form.
+  await page.waitForLoadState("networkidle");
+  expect(calls.forms).toHaveLength(0);
   await page.locator("#apply input[name=name]").fill(who.name);
   await page.locator("#apply input[name=email]").fill(who.email);
   await page.locator("#apply input[name=email]").press("Enter");
-  await expect(layer(page)).toBeVisible();
-  await expect(layer(page)).toHaveAttribute("role", "dialog");
-  await expect(page.locator("[data-hi]")).toContainText("8 questions, about 3 minutes");
-  await expect(page.locator("[data-count]")).toHaveText("1");
-  await expect(current(page).locator("label")).toHaveText(form.questions[0].q);
-  await expect(page).toHaveURL(/#apply$/);
+  await expect(popup(page)).toBeVisible();
+  expect(await opened(page)).toEqual([{ id: TALLY_FORM, layout: "modal", hiddenFields: who }]);
+  expect(new URL(APPLICATION_URL).pathname).toBe(`/r/${TALLY_FORM}`);
+  // The site's own layer stays shut while the form is open, and the page has not moved.
+  await expect(layer(page)).toBeHidden();
+  expect(new URL(page.url()).pathname).toBe("/");
   await expect.poll(() => calls.leads.length).toBe(1);
   const body = new URLSearchParams(calls.leads[0]!.postData()!);
   expect(Object.fromEntries(body)).toMatchObject({
@@ -87,27 +83,24 @@ test("a name and an email open the form on the page and record one lead", async 
   expect(calls.applies).toHaveLength(0);
 });
 
-test("eight answers are saved once, then the calendar shows inside the page with name and email filled", async ({
+test("the form sent: the answers are saved once, then the calendar shows inside the page with name and email filled", async ({
   page,
 }) => {
   const calls = await stub(page);
-  await open(page);
-  await type(page);
-  await expect(page.locator("[data-count]")).toHaveText("8");
-  await expect(page.locator("[data-ok-label]")).toHaveText(form.finish);
-  await pickBudget(page);
+  await apply(page, who);
   await expect(calendar(page)).toBeVisible();
   const frame = calendar(page).locator("iframe");
   await expect(frame).toHaveAttribute("data-link", new URL(BOOKING_URL).pathname.slice(1));
   await expect(frame).toHaveAttribute("data-name", who.name);
   await expect(frame).toHaveAttribute("data-email", who.email);
-  // The form is gone, the layer stays, and nobody left the site.
-  await expect(current(page)).toBeHidden();
+  // Tally's popup is gone, so its own closing page is never the last thing read. Nobody left the site.
+  await expect(popup(page)).toHaveCount(0);
   await expect(layer(page)).toBeVisible();
+  await expect(layer(page)).toHaveAttribute("role", "dialog");
   await expect(ending(page)).toBeHidden();
   await expect(page.locator("[data-calendar-link]")).toBeHidden();
   expect(new URL(page.url()).pathname).toBe("/");
-  expect(calls.applies).toHaveLength(1);
+  await expect.poll(() => calls.applies.length).toBe(1);
   const sent = calls.applies[0]!;
   expect(sent.method()).toBe("POST");
   expect(sent.headers()["content-type"]).toContain("application/json");
@@ -121,28 +114,92 @@ test("eight answers are saved once, then the calendar shows inside the page with
     page: "/",
     trap: "",
   });
+  expect(body.plain).toBeUndefined();
   expect(body.id).toMatch(/^[A-Za-z0-9-]{8,64}$/);
   expect(body.tz).not.toBe("");
 });
 
-test("the answers leave this device only once they are saved", async ({ page }) => {
-  await stub(page);
+test("each answer finds its question by place when Tally's words differ from the deck's", async ({
+  page,
+}) => {
+  const calls = await stub(page);
   await open(page);
-  await type(page);
-  const kept = await page.evaluate((key) => JSON.parse(localStorage.getItem(key)!), KEY);
-  expect(kept.answers).toMatchObject({ profile: answers.profile, start: answers.start });
-  await pickBudget(page);
+  await send(page, submission(who, answers, { titles: (q) => `Tally says: ${q.slice(0, 12)}` }));
   await expect(calendar(page)).toBeVisible();
-  expect(await page.evaluate((key) => localStorage.getItem(key), KEY)).toBeNull();
+  await expect.poll(() => calls.applies.length).toBe(1);
+  expect(calls.applies[0]!.postDataJSON()).toMatchObject({ ...who, answers });
+});
+
+test("a button with no name opens the form empty, and the name and email typed in it are used", async ({
+  page,
+}) => {
+  const calls = await stub(page);
+  await page.goto("/");
+  await press(page.locator("#top [data-apply-open]").first());
+  await expect(popup(page)).toBeVisible();
+  expect(await opened(page)).toEqual([{ id: TALLY_FORM, layout: "modal", hiddenFields: {} }]);
+  // Nobody gave an email yet, so there is no lead to record.
+  expect(calls.leads).toHaveLength(0);
+  await send(page, submission(who, answers, { typed: true }));
+  await expect(calendar(page).locator("iframe")).toHaveAttribute("data-email", who.email);
+  await expect(calendar(page).locator("iframe")).toHaveAttribute("data-name", who.name);
+  await expect.poll(() => calls.applies.length).toBe(1);
+  expect(calls.applies[0]!.postDataJSON()).toMatchObject({ ...who, answers });
+});
+
+test("the header's button opens the form", async ({ page }) => {
+  await stub(page);
+  await page.goto("/");
+  await page.locator("#get").scrollIntoViewIfNeeded();
+  await press(page.locator(".bar__cta"));
+  await expect(popup(page)).toBeVisible();
+});
+
+test("the form closed without sending leaves the page as it was, and opens again", async ({
+  page,
+}) => {
+  const calls = await stub(page);
+  await open(page);
+  await press(page.locator("[data-tally-close]"));
+  await expect(popup(page)).toHaveCount(0);
+  await expect(layer(page)).toBeHidden();
+  expect(calls.applies).toHaveLength(0);
+  await press(page.locator("#apply form button"));
+  await expect(popup(page)).toBeVisible();
+});
+
+test("the answers stay on this device until they are saved", async ({ page }) => {
+  const calls = await stub(page, "hang");
+  await apply(page, who);
+  // The calendar does not wait for the save.
+  await expect(calendar(page)).toBeVisible();
+  const waiting = JSON.parse((await kept(page))!);
+  expect(waiting).toMatchObject({ ...who, answers, kind: "application" });
+  // The next page that loads sends them once more, under the same id, and then lets go of them.
+  calls.save = "ok";
+  await page.goto("/");
+  await expect.poll(() => kept(page)).toBeNull();
+  expect(calls.applies.at(-1)!.postDataJSON()).toMatchObject({ id: waiting.id, ...who, answers });
+});
+
+test("when the sheet refuses the whole application, a plain row with the same id is saved", async ({
+  page,
+}) => {
+  const calls = await stub(page, "plain only");
+  await apply(page, who);
+  await expect(calendar(page)).toBeVisible();
+  await expect.poll(() => calls.applies.length).toBe(2);
+  const [first, second] = calls.applies.map((request) => request.postDataJSON());
+  expect(first.plain).toBeUndefined();
+  expect(second).toMatchObject({ id: first.id, ...who, answers, plain: true });
+  await expect.poll(() => kept(page)).toBeNull();
 });
 
 test("someone who applied in this visit goes straight to the calendar the second time", async ({
   page,
 }) => {
   const calls = await stub(page);
-  await open(page);
-  await type(page);
-  await pickBudget(page);
+  await apply(page, who);
   await expect(calendar(page)).toBeVisible();
   await page.goto("/");
   await page.locator("#apply input[name=name]").fill(who.name);
@@ -150,114 +207,15 @@ test("someone who applied in this visit goes straight to the calendar the second
   await press(page.locator("#apply form button"));
   await expect(calendar(page)).toBeVisible();
   await expect(calendar(page).locator("iframe")).toHaveAttribute("data-email", who.email);
+  await expect(popup(page)).toHaveCount(0);
   expect(calls.applies).toHaveLength(1);
 });
 
-test("a question left empty, typed or picked, says what to fix", async ({ page }) => {
-  await stub(page);
-  await open(page);
-  await press(page.locator("[data-ok]"));
-  await expect(current(page).locator("[data-err]")).toBeVisible();
-  await expect(current(page).locator("[data-err]")).toHaveText(form.questions[0].err);
-  await expect(current(page).locator("#a-profile")).toHaveAttribute("aria-invalid", "true");
-  await current(page).locator("#a-profile").fill(answers.profile!);
-  await expect(current(page).locator("[data-err]")).toBeHidden();
-  await type(page, "count");
-  await press(page.locator("[data-ok]"));
-  await expect(current(page).locator("[data-err]")).toHaveText(form.questions[4].err);
-  await expect(page.locator('.q.is-current[data-id="count"]')).toBeVisible();
-  await answer(page, "count", answers.count!);
-  await expect(page.locator('.q.is-current[data-id="decides"]')).toBeVisible();
-});
-
-test("Back returns to the question before, with its answer", async ({ page }) => {
-  await stub(page);
-  await open(page);
-  await type(page, "stranger");
-  await press(page.locator("[data-back]"));
-  await expect(current(page).locator("#a-sell")).toHaveValue(answers.sell!);
-  await page.goBack();
-  await expect(current(page).locator("#a-profile")).toHaveValue(answers.profile!);
-  await expect(layer(page)).toBeVisible();
-});
-
-test("a refresh comes back to the same question with everything typed", async ({ page }) => {
-  await stub(page);
-  await open(page);
-  await type(page, "film");
-  await page.reload();
-  await expect(layer(page)).toBeVisible();
-  await expect(page.locator('.q.is-current[data-id="film"]')).toBeVisible();
-  await press(page.locator("[data-back]"));
-  await expect(current(page).locator("#a-stranger")).toHaveValue(answers.stranger!);
-});
-
-test("closing keeps the answers, and opening again says so", async ({ page }) => {
-  await stub(page);
-  await open(page);
-  await type(page, "stranger");
-  await page.keyboard.press("Escape");
-  await expect(layer(page)).toBeHidden();
-  await expect(page).not.toHaveURL(/#apply$/);
-  await press(page.locator("#apply form button"));
-  await expect(layer(page)).toBeVisible();
-  await expect(page.locator("[data-hi]")).toHaveText(form.again);
-  await expect(page.locator('.q.is-current[data-id="stranger"]')).toBeVisible();
-  await press(page.locator("[data-close]"));
-  await expect(layer(page)).toBeHidden();
-});
-
-test("when saving fails the form says so, keeps every answer and saves on the next try", async ({
-  page,
-}) => {
+test("the page after booking saves answers that had not saved", async ({ page }) => {
   const calls = await stub(page, "fail");
-  await open(page);
-  await type(page);
-  await pickBudget(page);
-  await expect(note(page)).toHaveText(form.send.failed);
-  await expect(page.locator("[data-ok-label]")).toHaveText(form.send.retry);
-  await expect(page.locator("[data-anyway]")).toBeVisible();
-  await expect(page.locator("[data-anyway]")).toHaveText(form.send.anyway);
-  await expect(page).toHaveURL(/#apply$/);
-  const kept = await page.evaluate((key) => JSON.parse(localStorage.getItem(key)!), KEY);
-  expect(kept.answers).toEqual(answers);
-  calls.save = "ok";
-  await press(page.locator("[data-ok]"));
+  await apply(page, who);
   await expect(calendar(page)).toBeVisible();
-  expect(calls.applies).toHaveLength(2);
-  // The second try is the same application, so the sheet can tell it from a new one.
-  expect(calls.applies[1]!.postDataJSON().id).toBe(calls.applies[0]!.postDataJSON().id);
-});
-
-test("with no connection the form says so, keeps the answers and saves when the connection is back", async ({
-  page,
-  context,
-}) => {
-  const calls = await stub(page);
-  await open(page);
-  await type(page);
-  await context.setOffline(true);
-  await pickBudget(page);
-  await expect(note(page)).toHaveText(form.send.offline);
-  const kept = await page.evaluate((key) => JSON.parse(localStorage.getItem(key)!), KEY);
-  expect(kept.answers).toEqual(answers);
-  expect(calls.applies).toHaveLength(0);
-  // Back online: the form sends by itself, once, and moves on.
-  await context.setOffline(false);
-  await expect(calendar(page)).toBeVisible();
-  expect(calls.applies).toHaveLength(1);
-});
-
-test("Pick a time anyway books with the answers kept, and the page after booking saves them", async ({
-  page,
-}) => {
-  const calls = await stub(page, "fail");
-  await open(page);
-  await type(page);
-  await pickBudget(page);
-  await expect(page.locator("[data-anyway]")).toBeVisible();
-  await press(page.locator("[data-anyway]"));
-  await page.waitForURL(booking);
+  await expect.poll(() => calls.applies.length).toBe(2);
   const id = calls.applies[0]!.postDataJSON().id;
   calls.save = "ok";
   await page.goto("/booked?attendeeName=TEST+Visitor&email=test%2Ba%40example.com");
@@ -265,7 +223,7 @@ test("Pick a time anyway books with the answers kept, and the page after booking
   await expect(page.locator("[data-resend-retry]")).toBeHidden();
   const again = calls.applies.at(-1)!.postDataJSON();
   expect(again).toMatchObject({ id, ...who, answers, kind: "application", page: "/booked" });
-  expect(await page.evaluate((key) => localStorage.getItem(key), KEY)).toBeNull();
+  expect(await kept(page)).toBeNull();
   // Nothing is left to send on the next visit.
   const count = calls.applies.length;
   await page.reload();
@@ -277,94 +235,33 @@ test("the page after booking says when the answers still have not saved, and off
   page,
 }) => {
   const calls = await stub(page, "fail");
-  await open(page);
-  await type(page);
-  await pickBudget(page);
-  await press(page.locator("[data-anyway]"));
-  await page.waitForURL(booking);
+  await apply(page, who);
+  await expect(calendar(page)).toBeVisible();
+  await expect.poll(() => calls.applies.length).toBe(2);
   await page.goto("/booked");
   await expect(page.locator("[data-resend-note]")).toHaveText(booked.unsent);
   const retry = page.locator("[data-resend-retry]");
   await expect(retry).toBeVisible();
   await expect(retry).toHaveText(booked.retry);
-  expect(await page.evaluate((key) => localStorage.getItem(key), KEY)).not.toBeNull();
+  expect(await kept(page)).not.toBeNull();
   calls.save = "ok";
   await press(retry);
   await expect(page.locator("[data-resend-note]")).toHaveText(booked.resent);
   await expect(retry).toBeHidden();
 });
 
-test("the trap field is out of reach for people and empty in what is sent", async ({ page }) => {
-  await stub(page);
-  await open(page);
-  const trap = page.locator("[data-trap]");
-  await expect(trap).not.toBeInViewport();
-  await expect(trap).toHaveAttribute("tabindex", "-1");
-  await expect(page.locator(".apply__trap")).toHaveAttribute("aria-hidden", "true");
-});
-
-test("the form opens from a link on another page", async ({ page }) => {
-  await stub(page);
-  await page.goto("/privacy");
-  await press(page.locator("header a[data-apply]"));
-  await expect(page).toHaveURL(/\/#apply$/);
-  await expect(layer(page)).toBeVisible();
-  await expect(current(page).locator("#a-name")).toBeVisible();
-  await current(page).locator("#a-name").fill(who.name);
-  await current(page).locator("#a-name").press("Enter");
-  await current(page).locator("#a-email").fill("not-an-email");
-  await current(page).locator("#a-email").press("Enter");
-  await expect(current(page).locator("[data-err]")).toHaveText(form.who[1].err);
-  await current(page).locator("#a-email").fill(who.email);
-  await current(page).locator("#a-email").press("Enter");
-  await expect(current(page).locator("#a-profile")).toBeVisible();
-});
-
-test("the header's button opens the form", async ({ page }) => {
-  await stub(page);
-  await page.goto("/");
-  await page.locator("#get").scrollIntoViewIfNeeded();
-  await press(page.locator(".bar__cta"));
-  await expect(layer(page)).toBeVisible();
-  await expect(current(page).locator("#a-name")).toBeVisible();
-});
-
-test("keyboard only: Enter moves on and letters pick the choices", async ({ page }, info) => {
-  test.skip(info.project.name !== "desktop", "A keyboard run");
+test("a budget under 750 USD ends with the deck's two lines, and no calendar", async ({ page }) => {
   const calls = await stub(page);
-  await open(page);
-  await type(page, "film");
-  const picks = { film: "e", count: "b", decides: "a", start: "d", budget: "c" };
-  for (const [id, letter] of Object.entries(picks)) {
-    await expect(page.locator(`.q.is-current[data-id="${id}"]`)).toBeVisible();
-    await page.keyboard.press(letter);
-  }
-  await expect(calendar(page)).toBeVisible();
-  expect(calls.applies[0]!.postDataJSON().answers).toMatchObject({
-    film: options("film")[4],
-    count: options("count")[1],
-    decides: options("decides")[0],
-    start: options("start")[3],
-    budget: options("budget")[2],
-  });
-});
-
-test("a budget under 750 USD ends the form with the deck's message, and no calendar", async ({
-  page,
-}) => {
-  const calls = await stub(page);
-  await open(page);
-  await type(page);
-  await expect(page.locator("[data-ok-label]")).toHaveText(form.finish);
-  await press(current(page).locator(".choice").first());
+  await apply(page, who, { ...answers, budget: lowest });
   await expect(ending(page)).toBeVisible();
   const lines = ["budget, under 750, line 1", "budget, under 750, line 2"].map((slot) =>
     section("the form").get(slot).replace("{name}", "TEST"),
   );
   await expect(ending(page).locator("p")).toHaveText(lines);
+  await expect(popup(page)).toHaveCount(0);
   // The answers are saved all the same, with the budget they picked.
-  expect(calls.applies).toHaveLength(1);
-  expect(calls.applies[0]!.postDataJSON().answers.budget).toBe(options("budget")[0]);
+  await expect.poll(() => calls.applies.length).toBe(1);
+  expect(calls.applies[0]!.postDataJSON().answers.budget).toBe(lowest);
   // No calendar: not on the page, not loaded, and no link to one.
   await expect(calendar(page)).toBeHidden();
   await expect(layer(page).locator("iframe")).toHaveCount(0);
@@ -377,6 +274,7 @@ test("a budget under 750 USD ends the form with the deck's message, and no calen
   await press(page.locator("#apply form button"));
   await expect(ending(page)).toBeVisible();
   await expect(calendar(page)).toBeHidden();
+  await expect(popup(page)).toHaveCount(0);
   expect(calls.applies).toHaveLength(1);
   expect(calls.calendars).toHaveLength(0);
 });
@@ -384,19 +282,89 @@ test("a budget under 750 USD ends the form with the deck's message, and no calen
 test("a budget under 750 USD gets no way round to the calendar when saving fails", async ({
   page,
 }) => {
-  await stub(page, "fail");
+  const calls = await stub(page, "fail");
+  await apply(page, who, { ...answers, budget: lowest });
+  await expect(ending(page)).toBeVisible();
+  await expect(layer(page).locator("a:visible")).toHaveCount(0);
+  expect(calls.calendars).toHaveLength(0);
+  expect(await kept(page)).not.toBeNull();
+});
+
+// The site cannot stop a frame from another site moving the whole page, so the form on Tally must
+// have no "redirect on completion". If it has one, the answers are still saved before the page leaves.
+test("a form still set on Tally to redirect: the answers are saved before the page leaves", async ({
+  page,
+}) => {
+  const calls = await stub(page);
+  // Another site takes a moment to answer, as a real one does.
+  await page.route("https://cal.com/**", async (route) => {
+    await new Promise((resolve) => setTimeout(resolve, 600));
+    await route.fulfill({ contentType: "text/html", body: "<title>Booking stand-in</title>" });
+  });
   await open(page);
-  await type(page);
-  await press(current(page).locator(".choice").first());
-  await expect(note(page)).toHaveText(form.send.failed);
-  await expect(page.locator("[data-anyway]")).toBeHidden();
+  await send(page, submission(who), booking);
+  await page.waitForURL(booking);
+  expect(calls.applies).toHaveLength(1);
+  expect(calls.applies[0]!.postDataJSON()).toMatchObject({ ...who, answers });
+});
+
+test("back from the form as a full page: the calendar opens, and the address is cleaned", async ({
+  page,
+}) => {
+  const calls = await stub(page);
+  await page.goto(`/?apply=calendar&${new URLSearchParams(who)}`);
+  await expect(calendar(page).locator("iframe")).toHaveAttribute("data-email", who.email);
+  await expect(calendar(page).locator("iframe")).toHaveAttribute("data-name", who.name);
+  expect(new URL(page.url()).search).toBe("");
+  // The answers are on Tally: this page has none to save.
+  expect(calls.applies).toHaveLength(0);
+  expect(calls.forms).toHaveLength(0);
+});
+
+test("back from the form as a full page with the lowest budget: the two lines, and no calendar", async ({
+  page,
+}) => {
+  const calls = await stub(page);
+  const markup = '<img src=x onerror="document.title=1">';
+  await page.goto(`/?apply=end&name=${encodeURIComponent("TEST " + markup)}`);
+  await expect(ending(page)).toBeVisible();
+  await expect(ending(page).locator("p").first()).toHaveText(
+    section("the form").get("budget, under 750, line 1").replace("{name}", "TEST"),
+  );
+  await expect(layer(page).locator("img")).toHaveCount(0);
+  await expect(calendar(page)).toBeHidden();
+  expect(new URL(page.url()).search).toBe("");
+  expect(calls.calendars).toHaveLength(0);
+});
+
+test("the layer closes with its button, with Escape and with Back", async ({ page }) => {
+  await stub(page);
+  for (const how of ["button", "Escape", "Back"]) {
+    await page.goto(`/?apply=calendar&${new URLSearchParams(who)}`);
+    await expect(layer(page)).toBeVisible();
+    await expect(page).toHaveURL(/#apply$/);
+    if (how === "button") await press(layer(page).locator("[data-close]"));
+    else if (how === "Escape") await layer(page).locator("[data-close]").press("Escape");
+    else await page.goBack();
+    await expect(layer(page), how).toBeHidden();
+    await expect(page, how).not.toHaveURL(/#apply$/);
+  }
+});
+
+test("the apply link on another page leads to the two fields", async ({ page }) => {
+  const calls = await stub(page);
+  await page.goto("/privacy");
+  await press(page.locator("header a[data-apply]"));
+  await expect(page).toHaveURL(/\/#apply$/);
+  await expect(page.locator("#apply input[name=name]")).toBeInViewport();
+  await expect(popup(page)).toHaveCount(0);
+  await expect(layer(page)).toBeHidden();
+  expect(calls.forms).toHaveLength(0);
 });
 
 test("a finished booking lands on /booked, greeted by first name", async ({ page }) => {
   await stub(page);
-  await open(page);
-  await type(page);
-  await pickBudget(page);
+  await apply(page, who);
   await expect(calendar(page).locator("iframe")).toBeVisible();
   await page.evaluate(() => (window as unknown as { __booked: () => void }).__booked());
   await page.waitForURL("**/booked");
@@ -419,9 +387,7 @@ test("when the calendar cannot load, a link to the booking page takes its place"
 }) => {
   await stub(page);
   await page.route("https://app.cal.com/**", (route) => route.abort());
-  await open(page);
-  await type(page);
-  await pickBudget(page);
+  await apply(page, who);
   const link = page.locator("[data-calendar-link]");
   await expect(link).toBeVisible();
   await expect(link).toHaveAttribute("href", booking);

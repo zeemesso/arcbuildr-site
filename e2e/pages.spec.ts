@@ -7,9 +7,9 @@ import {
   page as words,
 } from "../src/content/site";
 import { section } from "../src/content/deck";
-import { CONFIRMATION_VIDEO } from "../src/config";
-import { answer, press } from "./press";
-import { current, layer, stub } from "./stubs";
+import { APPLICATION_AFTER_BOOKING_URL, CONFIRMATION_VIDEO } from "../src/config";
+import { press } from "./press";
+import { layer, opened, plain, popup, send, stub, submission } from "./stubs";
 
 const booked = section("the booked page");
 const named = (name: string) => booked.get("heading").replace("{name}", name);
@@ -115,6 +115,11 @@ test.describe("the page after a booking from a chat", () => {
     decides: options("decides")[0]!,
     start: options("start")[1]!,
   };
+  // The lowest budget ends nothing here: they have a call already.
+  const given = { ...answers, budget: options("budget")[0]! };
+  const CHAT_FORM = APPLICATION_AFTER_BOOKING_URL.slice(
+    APPLICATION_AFTER_BOOKING_URL.lastIndexOf("/") + 1,
+  );
 
   test("without a chat booking the page stays as it is", async ({ page }) => {
     for (const query of [
@@ -149,28 +154,27 @@ test.describe("the page after a booking from a chat", () => {
       await expect(page.locator("main form")).toHaveCount(0);
       await expect(page.locator(".bar__cta")).toHaveCount(0);
 
-      // The name and email are known, so the form starts at the first question.
+      // The questions open here, in the popup of the form for chat bookings, with what is known filled.
+      const person = { name: "TEST", email: "test+chat@example.com" };
       await press(button(page));
-      await expect(layer(page)).toBeVisible();
-      await expect(layer(page)).toHaveAttribute("data-kind", "prep");
-      await expect(page.locator("[data-hi]")).toHaveText(form.hiPrep.replace("{name}", "TEST"));
-      for (const [id, value] of Object.entries(answers)) await answer(page, id, value);
-      await expect(page.locator('.q.is-current[data-id="budget"]')).toBeVisible();
-      await expect(page.locator("[data-ok-label]")).toHaveText(form.finishPrep);
-      await press(current(page).locator(".choice").first());
+      await expect(popup(page)).toBeVisible();
+      expect(await opened(page)).toEqual([
+        { id: CHAT_FORM, layout: "modal", hiddenFields: person },
+      ]);
+      await send(page, submission(person, given, { formId: CHAT_FORM }));
 
-      // Saved: the layer closes, the page says so, and nobody is sent to a calendar.
+      // Saved: the popup closes, the page says so, and nobody is sent to a calendar.
       await expect(page.getByText(status.saved)).toBeVisible();
+      await expect(popup(page)).toHaveCount(0);
       await expect(layer(page)).toBeHidden();
       await expect(button(page)).toBeHidden();
       await expect(page).toHaveURL(/\/booked\?/);
-      expect(calls.applies).toHaveLength(1);
+      await expect.poll(() => calls.applies.length).toBe(1);
       expect(calls.applies[0]!.postDataJSON()).toMatchObject({
         kind: "prep",
-        name: "TEST",
-        email: "test+chat@example.com",
+        ...person,
         page: "/booked",
-        answers: { ...answers, budget: options("budget")[0] },
+        answers: given,
       });
       // They are already a lead: the booking made the row. And no calendar loads here.
       expect(calls.leads).toHaveLength(0);
@@ -186,25 +190,50 @@ test.describe("the page after a booking from a chat", () => {
       void dialog.dismiss();
     });
     const markup = '"><img src=x onerror=alert(1)>';
-    for (const [query, start] of [
-      ["", "name"],
-      [`&attendeeName=${encodeURIComponent(markup)}&email=test%40example.com`, "name"],
-      [`&name=${"a".repeat(60)}&email=not-an-email`, "name"],
-      [`&attendeeName=TEST&email=${encodeURIComponent("x@y.zz" + markup)}`, "email"],
-      [`&attendeeName=TEST&email=${encodeURIComponent("javascript:alert(1)")}`, "email"],
-      [`&attendeeName=TEST&email=${"a".repeat(250)}%40example.com`, "email"],
-      ["&attendeeName=TEST&email=test%40example.com&url=https%3A%2F%2Fexample.org", "profile"],
+    const good = "test@example.com";
+    for (const [query, known] of [
+      ["", {}],
+      [`&attendeeName=${encodeURIComponent(markup)}&email=test%40example.com`, { email: good }],
+      [`&name=${"a".repeat(60)}&email=not-an-email`, {}],
+      [`&attendeeName=TEST&email=${encodeURIComponent("x@y.zz" + markup)}`, { name: "TEST" }],
+      [`&attendeeName=TEST&email=${encodeURIComponent("javascript:alert(1)")}`, { name: "TEST" }],
+      [`&attendeeName=TEST&email=${"a".repeat(250)}%40example.com`, { name: "TEST" }],
+      [
+        "&attendeeName=TEST&email=test%40example.com&url=https%3A%2F%2Fexample.org",
+        { name: "TEST", email: good },
+      ],
     ] as const) {
       await page.goto("/booked?via=chat" + query);
       await page.evaluate(() => localStorage.clear());
       await page.reload();
       await expect(button(page), query).toBeVisible();
       await press(button(page));
-      // The form asks for whatever the address did not give in a plain form.
-      await expect(current(page).locator(`#a-${start}`), query).toBeVisible();
+      // The form is handed what passed the check and nothing else; it asks for the rest itself.
+      await expect(popup(page), query).toBeVisible();
+      expect((await opened(page))[0]!.hiddenFields, query).toEqual(known);
       await expect(page.locator("main img, [data-apply] img"), query).toHaveCount(0);
     }
     expect(dialogs).toEqual([]);
+  });
+
+  test("when Tally cannot be reached, a name and an email are saved from this page", async ({
+    page,
+  }) => {
+    const calls = await stub(page, "ok", "blocked");
+    await page.goto("/booked?via=chat&attendeeName=TEST&email=test%2Bchat%40example.com");
+    await press(button(page));
+    await expect(plain(page)).toBeVisible();
+    await expect(plain(page).locator("input[name=email]")).toHaveValue("test+chat@example.com");
+    await press(page.locator("[data-ok]"));
+    await expect(page.getByText(status.saved)).toBeVisible();
+    await expect(layer(page)).toBeHidden();
+    expect(calls.applies[0]!.postDataJSON()).toMatchObject({
+      kind: "prep",
+      name: "TEST",
+      email: "test+chat@example.com",
+      plain: true,
+    });
+    expect(calls.calendars).toHaveLength(0);
   });
 
   test("on a phone the button and its words stay inside the screen", async ({ page }) => {

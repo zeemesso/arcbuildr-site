@@ -1,11 +1,10 @@
-// The application is one swappable part (src/components/application/).
-// "native": our own form on this site, one question per screen. Its answers go to POST /api/apply.
-// "embed": a form hosted elsewhere. The two fields send the name and email to APPLICATION_URL, and that
-// form sends people on to the booking page itself. To swap: set this to "embed" and set APPLICATION_URL.
-export const APPLICATION_MODE: "native" | "embed" = "native";
-// Used in "embed" mode only. This is the form the site used until 21 Nov 2026.
-export const APPLICATION_URL = "https://tally.so/r/M1aKGp";
-// Where the native form sends people once their answers are saved. Name and email are added to it.
+// The application is a form on Tally ("Arcbuildr application"). The site opens it in Tally's popup with
+// the name and email filled, and takes over when it is submitted: the answers go to POST /api/apply,
+// then the calendar opens inside the page (src/scripts/application.ts).
+export const TALLY_FORM = "M1aKGp";
+// The same form as a full page: where people go when the popup cannot load. Name and email are added to it.
+export const APPLICATION_URL = `https://tally.so/r/${TALLY_FORM}`;
+// Where the calendar's link leads when the calendar cannot load inside the page. Name and email are added to it.
 export const BOOKING_URL = "https://cal.com/arcbuildr/15-minute-call";
 // Changed by hand the day a client pays; 0 to 3.
 export const FOUNDING_PLACES_LEFT = 3;
@@ -21,8 +20,8 @@ export const CONFIRMATION_VIDEO = "/video/confirmation.mp4";
 // Only for visitors who book the call from a chat, before they answer the 8 questions.
 // /booked shows its button only when the address says the booking came from a chat:
 // `via=chat`, or `eventTypeSlug` equal to CHAT_EVENT_SLUG.
-// In "native" mode the button opens our own form on /booked, which saves and stays there.
-// In "embed" mode it opens this address: the same application with no redirect to the booking page at its end.
+// Its button opens the Tally form in the popup, on /booked, and the page stays there.
+// If the popup cannot load it opens this address: the same questions with no booking page at their end.
 export const APPLICATION_AFTER_BOOKING_URL = "https://tally.so/r/9NZpVV";
 // The Cal.com event that is booked from a chat.
 export const CHAT_EVENT_SLUG = "15-minute-call-chat";

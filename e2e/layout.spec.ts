@@ -1,7 +1,7 @@
 import { existsSync } from "node:fs";
 import { CONFIRMATION_VIDEO } from "../src/config";
 import { expect, test } from "@playwright/test";
-import { open, stub } from "./stubs";
+import { calendar, ending, plain, stub } from "./stubs";
 
 const overflow = () => document.documentElement.scrollWidth - document.documentElement.clientWidth;
 const PAGES = ["/", "/booked", "/booked?via=chat", "/privacy"];
@@ -104,21 +104,39 @@ test("/booked reads in order on a phone, and puts the video beside the heading o
   }
 });
 
-test("the open application fits the screen at every phone width, with no sideways scroll", async ({
+test("the site's own layer fits the screen at every phone width, with no sideways scroll", async ({
   page,
 }) => {
-  await stub(page);
+  await stub(page, "ok", "blocked");
   for (const width of [320, 375, 414, 768]) {
     await page.setViewportSize({ width, height: 650 });
-    await page.goto("/");
-    await page.evaluate(() => localStorage.clear());
-    await open(page, { name: "TEST Visitor", email: "test@example.com" });
-    for (const selector of [".q.is-current .q__label", ".q.is-current #a-profile", "[data-ok]"]) {
-      const box = (await page.locator(selector).boundingBox())!;
+    const inside = async (selector: string) => {
+      const box = (await page.locator(selector).first().boundingBox())!;
       expect(box.x, `${width} ${selector}`).toBeGreaterThanOrEqual(0);
       expect(box.x + box.width, `${width} ${selector}`).toBeLessThanOrEqual(width);
       expect(box.y + box.height, `${width} ${selector}`).toBeLessThanOrEqual(650);
-    }
-    expect(await page.evaluate(overflow), `${width}`).toBeLessThanOrEqual(0);
+    };
+    // The plain form, which opens when Tally cannot be reached.
+    await page.goto("/");
+    await page.evaluate(() => (localStorage.clear(), sessionStorage.clear()));
+    await page.locator("#apply input[name=name]").fill("TEST Visitor");
+    await page.locator("#apply input[name=email]").fill("test@example.com");
+    await page.locator("#apply input[name=email]").press("Enter");
+    await expect(plain(page)).toBeVisible();
+    for (const selector of [".plain__lead", "[data-plain=name]", "[data-plain=email]", "[data-ok]"])
+      await inside(selector);
+    expect(await page.evaluate(overflow), `${width} plain`).toBeLessThanOrEqual(0);
+    // The ending with no calendar.
+    await page.goto("/?apply=end&name=TEST+Visitor");
+    await expect(ending(page)).toBeVisible();
+    await inside("[data-apply-end] p");
+    await inside("[data-apply-end] p + p");
+    await inside("[data-close]");
+    expect(await page.evaluate(overflow), `${width} ending`).toBeLessThanOrEqual(0);
+    // The calendar's panel.
+    await page.goto("/?apply=calendar&name=TEST+Visitor&email=test%40example.com");
+    await expect(calendar(page).locator("iframe")).toBeVisible();
+    await inside("[data-apply-calendar] h2");
+    expect(await page.evaluate(overflow), `${width} calendar`).toBeLessThanOrEqual(0);
   }
 });

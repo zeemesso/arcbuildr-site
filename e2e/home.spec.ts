@@ -4,6 +4,7 @@ import { PRODUCT, founding, section } from "../src/content/deck";
 import { page as words } from "../src/content/site";
 import { VSL_VIDEO } from "../src/config";
 import { press } from "./press";
+import { popup, stub } from "./stubs";
 
 /** Letters and digits only: a row the page splits into cells still reads the same, word for word. */
 const squash = (text: string | null) => (text ?? "").replace(/[^\p{L}\p{N}]+/gu, "");
@@ -49,10 +50,11 @@ test.describe("the home page", () => {
 
   test("the page's script does not wait for the visit counter", async ({ page }) => {
     // The visit counter's server never answers here. The form must still open.
+    await stub(page);
     await page.route(/cloudflareinsights\.com/, () => new Promise(() => {}));
     await page.goto("/", { waitUntil: "commit" });
     await press(page.locator("#top [data-apply-open]").first());
-    await expect(page.locator("#a-name")).toBeFocused();
+    await expect(popup(page)).toBeVisible();
   });
 
   test("the first screen carries the callout, the headline, one line, the button, its line and the tab", async ({
@@ -361,8 +363,8 @@ test.describe("the home page", () => {
   test("an apply button closes sections 5, 9 and 11, and each opens the same form", async ({
     page,
   }) => {
+    await stub(page);
     await page.goto("/");
-    const form = page.locator(".apply");
     for (const [n, id] of [
       [5, "get"],
       [9, "offer"],
@@ -378,10 +380,9 @@ test.describe("the home page", () => {
         true,
       );
       await press(button);
-      await expect(form, id).toBeVisible();
-      await expect(form.locator("#a-name"), id).toBeFocused();
-      await page.keyboard.press("Escape");
-      await expect(form, id).toBeHidden();
+      await expect(popup(page), id).toBeVisible();
+      await press(page.locator("[data-tally-close]"));
+      await expect(popup(page), id).toHaveCount(0);
     }
     // The other sections have none, and the final panel has the two fields.
     await expect(page.locator("main .strip")).toHaveCount(3);
@@ -677,16 +678,15 @@ test.describe("the home page in motion", () => {
   });
 
   test("the first button and the header's button open the same form", async ({ page }) => {
+    await stub(page);
     await page.goto("/");
     await press(page.locator("#top [data-apply-open]"));
-    const form = page.locator(".apply");
-    await expect(form).toBeVisible();
-    await expect(form.locator("#a-name")).toBeFocused();
-    await page.keyboard.press("Escape");
-    await expect(form).toBeHidden();
+    await expect(popup(page)).toBeVisible();
+    await press(page.locator("[data-tally-close]"));
+    await expect(popup(page)).toHaveCount(0);
     await page.locator(".cards > .card").nth(1).scrollIntoViewIfNeeded();
     await press(page.locator(".bar__cta"));
-    await expect(form).toBeVisible();
+    await expect(popup(page)).toBeVisible();
   });
 });
 

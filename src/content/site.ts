@@ -27,27 +27,21 @@ export const page = {
   ui: { pause: "Pause the gallery", close: "Close", play: "Play the video" },
 };
 
-export type Question = { id: string; q: string; err: string } & (
-  { type: "link" | "long"; ph: string } | { type: "choice"; options: string[] }
+export type Question = { id: string; q: string } & (
+  { type: "link" | "long" } | { type: "choice"; options: string[] }
 );
-/** The form's questions, hints and choices are the deck's ("The form"). The deck lists choices as "A. B. C." */
+/**
+ * The form is on Tally. Its questions and choices are the deck's ("The form"), written there by hand; the
+ * site keeps the same list to recognize each answer when Tally hands a finished form over, and to check
+ * it before it is saved. The deck lists choices as "A. B. C."
+ */
 const form = section("the form");
 const choices = (id: string) => form.get(`${id}, choices`).replace(/\.$/, "").split(". ");
 const budgets = choices("budget");
 
 export const application = {
   label: "Application",
-  hi: form.get("greeting"),
-  hiPrep: "Hi {name}. 8 questions, about 3 minutes.",
-  again: "Welcome back. Your answers are still here.",
-  next: "Next",
-  finish: "Save and pick a time",
-  finishPrep: "Save my answers",
-  back: "Back",
-  close: "Close. Your answers are kept.",
-  progress: "Questions answered",
-  of: "of",
-  enter: "or press Enter",
+  close: "Close",
   /** A field people never see. Only a program fills it. */
   trap: "Leave this field empty",
   who: [
@@ -55,53 +49,17 @@ export const application = {
     { id: "email", q: form.get("email"), ph: "Email", err: "Check your email address." },
   ],
   questions: [
-    {
-      id: "profile",
-      q: form.get("profile"),
-      type: "link",
-      ph: form.get("profile, hint"),
-      err: "Add a link to your profile, or your handle.",
-    },
-    {
-      id: "sell",
-      q: form.get("sell"),
-      type: "long",
-      ph: form.get("sell, hint"),
-      err: "A few words are enough.",
-    },
-    {
-      id: "stranger",
-      q: form.get("stranger"),
-      type: "long",
-      ph: form.get("stranger, hint"),
-      err: "A few words are enough.",
-    },
-    { id: "film", q: form.get("film"), type: "choice", options: choices("film"), err: "Pick one." },
-    {
-      id: "count",
-      q: form.get("count"),
-      type: "choice",
-      options: choices("count"),
-      err: "Pick one.",
-    },
-    {
-      id: "decides",
-      q: form.get("decides"),
-      type: "choice",
-      options: choices("decides"),
-      err: "Pick one.",
-    },
-    {
-      id: "start",
-      q: form.get("start"),
-      type: "choice",
-      options: choices("start"),
-      err: "Pick one.",
-    },
-    { id: "budget", q: form.get("budget"), type: "choice", options: budgets, err: "Pick one." },
+    { id: "profile", q: form.get("profile"), type: "link" },
+    { id: "sell", q: form.get("sell"), type: "long" },
+    { id: "stranger", q: form.get("stranger"), type: "long" },
+    { id: "film", q: form.get("film"), type: "choice", options: choices("film") },
+    { id: "count", q: form.get("count"), type: "choice", options: choices("count") },
+    { id: "decides", q: form.get("decides"), type: "choice", options: choices("decides") },
+    { id: "start", q: form.get("start"), type: "choice", options: choices("start") },
+    { id: "budget", q: form.get("budget"), type: "choice", options: budgets },
   ] as Question[],
   /**
-   * A budget under the lowest price ends the form here: the answers are saved, these two lines show,
+   * A budget under the lowest price ends here: the answers are saved, these two lines show,
    * and no calendar opens.
    */
   tooLow: {
@@ -109,23 +67,18 @@ export const application = {
     option: budgets[0]!,
     lines: [form.get("budget, under 750, line 1"), form.get("budget, under 750, line 2")],
   },
-  /** The calendar, inside the page, once the answers are saved. */
+  /** The calendar, inside the page, once the form is sent. */
   calendar: { title: "Pick a time" },
   send: {
     busy: "Saving",
-    done: "Saved",
-    saving: "Saving your answers. Then the calendar opens.",
-    savingPrep: "Saving your answers.",
-    slow: "Still saving. Your answers are safe here.",
     failed: "Your answers did not save. They are still here.",
     offline: "No connection. Your answers are kept here. Try again when you are back online.",
-    retry: "Try again",
     anyway: "Pick a time anyway",
     booked: "Pick a time",
   },
   /**
-   * The plain form: a name, an email and one button. It takes the questions' place when saving fails.
-   * These two lines show when the form's script stops; the browser then posts the form itself.
+   * The plain form: a name, an email and one button. It opens when the questions cannot load. When the
+   * site's script stops, the browser posts the same form itself.
    */
   plain: {
     broken: "The questions stopped working. Your name and email are enough.",
@@ -164,7 +117,7 @@ export const privacy = {
   description:
     "What Arcbuildr collects when you use this site, why, who else handles it, and how to ask us to delete it.",
   h1: "Privacy",
-  updated: "Last updated: 21 November 2026",
+  updated: "Last updated: 23 November 2026",
   /** A string is a paragraph. An array of strings is a list. `{email}` is CONTACT_EMAIL. */
   sections: [
     {
@@ -196,7 +149,8 @@ export const privacy = {
       body: [
         "These services handle your details for us:",
         [
-          "Cloudflare hosts this site and its application form, and counts visits without cookies.",
+          "Cloudflare hosts this site and counts visits without cookies.",
+          "Tally runs the application form.",
           "Cal.com runs the booking page.",
           "Google Sheets (Google) holds our list of applications.",
           "Resend sends us an email when someone applies.",

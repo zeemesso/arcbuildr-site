@@ -6,10 +6,8 @@
  * POST /api/apply: the name and email are saved, and the person goes on to the booking page with both filled.
  */
 import { founding, section } from "../../content/deck";
-import { APPLICATION_MODE, APPLICATION_URL } from "../../config";
 const s = section("the apply window");
 const steps = s.list("step ").map(({ words }) => words);
-const native = APPLICATION_MODE === "native";
 const under = founding(s.get("under the button"));
 ---
 
@@ -29,14 +27,7 @@ const under = founding(s.get("under the button"));
     </p>
   </div>
   <div class="final__box" data-reveal>
-    <form
-      class="entry"
-      action={native ? "/api/apply" : APPLICATION_URL}
-      method={native ? "post" : "get"}
-      novalidate={!native}
-      data-apply-entry
-      data-cta
-    >
+    <form class="entry" action="/api/apply" method="post" data-apply-entry data-cta>
       <label class="entry__field">
         <span class="sr-only">{s.get("field 1")}</span>
         <input
@@ -46,7 +37,7 @@ const under = founding(s.get("under the button"));
           placeholder={s.get("field 1")}
           enterkeyhint="next"
           maxlength="200"
-          required={native}
+          required
         />
         <span class="entry__err" data-entry-err role="alert"></span>
       </label>
@@ -62,8 +53,8 @@ const under = founding(s.get("under the button"));
           placeholder={s.get("field 2")}
           enterkeyhint="go"
           maxlength="320"
-          required={native}
-          pattern={native ? "[^\\s@]+@[^\\s@]+\\.[^\\s@]{2,}" : undefined}
+          required
+          pattern={"[^\\s@]+@[^\\s@]+\\.[^\\s@]{2,}"}
         />
         <span class="entry__err" data-entry-err role="alert"></span>
       </label>

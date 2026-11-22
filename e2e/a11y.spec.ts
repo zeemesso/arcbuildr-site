@@ -2,7 +2,7 @@ import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
 import { meta } from "../src/content/site";
 import { press } from "./press";
-import { calendar, ending, open, stub } from "./stubs";
+import { calendar, ending, plain, stub } from "./stubs";
 // Reduced motion puts every section in its final state, which is the state to check.
 test.use({ reducedMotion: "reduce" });
 for (const path of ["/", "/booked", "/booked?via=chat", "/privacy"]) {
@@ -24,38 +24,24 @@ for (const path of ["/", "/booked", "/booked?via=chat", "/privacy"]) {
     expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
   });
 }
-test("the application passes axe on a text question, on the choices, on an error and on both endings", async ({
+test("the site's own layer passes axe: the plain form, its error, and the ending with no calendar", async ({
   page,
 }) => {
-  await stub(page);
-  await open(page, { name: "TEST Visitor", email: "test@example.com" });
+  await stub(page, "ok", "blocked");
+  await page.goto("/");
+  await press(page.locator("#top [data-apply-open]").first());
+  await expect(plain(page)).toBeVisible();
   expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
   await press(page.locator("[data-ok]"));
-  await expect(page.locator(".q.is-current [data-err]")).toBeVisible();
+  await expect(page.locator("[data-plain-err]")).not.toHaveText("");
   expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
-  for (const id of ["profile", "sell", "stranger"]) {
-    await page.locator(`.q.is-current #a-${id}`).fill("4");
-    await page.locator(`.q.is-current #a-${id}`).press("Enter");
-  }
-  await expect(page.locator('.q.is-current[data-id="film"]')).toBeVisible();
-  expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
-  for (const id of ["film", "count", "decides", "start"])
-    await press(page.locator(`.q.is-current[data-id="${id}"] .choice`).first());
-  // The lowest budget: the ending with no calendar.
-  await press(page.locator('.q.is-current[data-id="budget"] .choice').first());
+  await page.goto("/?apply=end&name=TEST+Visitor");
   await expect(ending(page)).toBeVisible();
   expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
 });
 test("the calendar's panel passes axe", async ({ page }) => {
   await stub(page);
-  await open(page, { name: "TEST Visitor", email: "test+b@example.com" });
-  for (const id of ["profile", "sell", "stranger"]) {
-    await page.locator(`.q.is-current #a-${id}`).fill("4");
-    await page.locator(`.q.is-current #a-${id}`).press("Enter");
-  }
-  for (const id of ["film", "count", "decides", "start"])
-    await press(page.locator(`.q.is-current[data-id="${id}"] .choice`).first());
-  await press(page.locator('.q.is-current[data-id="budget"] .choice').nth(1));
+  await page.goto("/?apply=calendar&name=TEST+Visitor&email=test%2Bb%40example.com");
   await expect(calendar(page).locator("iframe")).toBeVisible();
   // The frame's inside is Cal.com's, and here a stand-in: only our own panel is checked.
   expect((await new AxeBuilder({ page }).exclude("iframe").analyze()).violations).toEqual([]);
