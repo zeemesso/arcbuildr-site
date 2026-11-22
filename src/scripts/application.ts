@@ -266,9 +266,14 @@ export function readSubmission(payload: Submission, words: Words, given: Who) {
     take(called("email")) ||
     take(called(words.who[1]?.q ?? "")) ||
     take((field) => field.type === "INPUT_EMAIL");
-  // Whatever else is hidden (the package, a name or email already taken above) is not an answer.
+  // Whatever else is hidden (the package), and the form's own name and email questions, are not answers.
+  const asked = [...words.who.map((who) => called(who.q)), called("name"), called("email")];
   for (const field of fields)
-    if (field.type === "HIDDEN_FIELDS" || called("name")(field) || called("email")(field))
+    if (
+      field.type === "HIDDEN_FIELDS" ||
+      field.type === "INPUT_EMAIL" ||
+      asked.some((test) => test(field))
+    )
       field.used = true;
   const answers: Record<string, string> = {};
   for (const question of words.questions) answers[question.id] = take(called(question.q));

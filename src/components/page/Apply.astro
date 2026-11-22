@@ -73,7 +73,7 @@ const under = founding(s.get("under the button"));
       <img
         class="final__audit"
         src={audit.image}
-        alt={audit.alt}
+        alt={s.find("audit picture, words for a screen reader") ?? audit.alt}
         width={audit.width}
         height={audit.height}
         loading="lazy"

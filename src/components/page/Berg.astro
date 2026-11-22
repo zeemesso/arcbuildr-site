@@ -26,6 +26,8 @@ const free = s
     words,
     proof: s.isProof(slot),
     picture: s.find(`${slot}, picture`) !== undefined ? audit : null,
+    // What the picture shows, for someone who cannot see it: the deck's own line.
+    alt: s.find(`${slot}, picture, words for a screen reader`) ?? "",
   }))
   .filter(({ proof }) => !proof || read);
 const bands = s.list("band ").map(({ words }) => lead(words));
@@ -155,7 +157,7 @@ const step = (FLOOR - WATER) / bands.length;
     <div class="berg__list">
       <p class="berg__group">{s.get("above the water, label")}</p>
       <ul class="berg__items berg__items--free">
-        {free.map(({ words, proof, picture }) => (
+        {free.map(({ words, proof, picture, alt }) => (
           <li data-reveal>
             <i class="berg__key" />
             <div>
@@ -175,7 +177,7 @@ const step = (FLOOR - WATER) / bands.length;
                 <img
                   class="berg__shot"
                   src={picture.image}
-                  alt={picture.alt}
+                  alt={alt || picture.alt}
                   width={picture.width}
                   height={picture.height}
                   loading="lazy"

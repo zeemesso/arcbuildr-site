@@ -85,6 +85,9 @@ const flow = s.list("flow ").filter(({ slot }) => /^flow \d+$/.test(slot));
         </li>
       ))}
     </ul>
-    <p class="product__small">{s.get("add-on, small line")}</p>
+    <div class="product__small">
+      <p>{s.get("add-on, small line")}</p>
+      <p data-credit>{s.get("add-on, credit")}</p>
+    </div>
   </div>
 </article>

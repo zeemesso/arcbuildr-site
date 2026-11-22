@@ -147,6 +147,30 @@ test("a button with no name opens the form empty, and the name and email typed i
   expect(calls.applies[0]!.postDataJSON()).toMatchObject({ ...who, answers });
 });
 
+test("the form's own first screen: empty hidden fields, the two questions it asks, then 8 answers taken in order", async ({
+  page,
+}) => {
+  // The shape of the form on 23 Nov 2026: the hidden name, email and package are always in what Tally
+  // hands over, empty when the page gave none; then "First, your name." and "And your email."; then the
+  // 8 questions, here with words that are not the deck's, so they can only be told by their place.
+  const calls = await stub(page);
+  await page.goto("/");
+  await press(page.locator("#top [data-apply-open]").first());
+  await expect(popup(page)).toBeVisible();
+  const sent = submission(who, answers, { typed: true, titles: (q) => `Reworded: ${q.length}` });
+  const empty = ["name", "email", "package"].map((title) => ({
+    id: `hidden-${title}`,
+    title,
+    type: "HIDDEN_FIELDS",
+    answer: { value: "", raw: "" },
+  }));
+  await send(page, { ...sent, fields: [...empty, ...sent.fields] });
+  await expect(calendar(page).locator("iframe")).toHaveAttribute("data-email", who.email);
+  await expect(calendar(page).locator("iframe")).toHaveAttribute("data-name", who.name);
+  await expect.poll(() => calls.applies.length).toBe(1);
+  expect(calls.applies[0]!.postDataJSON()).toMatchObject({ ...who, answers });
+});
+
 test("the header's button opens the form", async ({ page }) => {
   await stub(page);
   await page.goto("/");
@@ -250,12 +274,14 @@ test("the page after booking says when the answers still have not saved, and off
   await expect(retry).toBeHidden();
 });
 
-test("a budget under 750 USD ends with the deck's two lines, and no calendar", async ({ page }) => {
+test("a budget under 750 USD ends with the deck's three lines, and no calendar", async ({
+  page,
+}) => {
   const calls = await stub(page);
   await apply(page, who, { ...answers, budget: lowest });
   await expect(ending(page)).toBeVisible();
-  const lines = ["budget, under 750, line 1", "budget, under 750, line 2"].map((slot) =>
-    section("the form, on tally").get(slot).replace("{name}", "TEST"),
+  const lines = [1, 2, 3].map((n) =>
+    section("the form, on tally").get(`budget, under 750, line ${n}`).replace("{name}", "TEST"),
   );
   await expect(ending(page).locator("p")).toHaveText(lines);
   await expect(popup(page)).toHaveCount(0);

@@ -53,6 +53,8 @@ const placed = (key: number | string, slot: string) =>
   (key === 4 && /, tag$/.test(slot)) ||
   (key === 5 && /, (label \d|tags)$/.test(slot)) ||
   (key === 8 && /^(package \d, (badge|price|price after)|bonus \d, with|sample, .+)$/.test(slot));
+/** A line the deck writes for a screen reader: a picture's description or a button's name, never shown. */
+const unseen = (slot: string) => /, words for a screen reader$/.test(slot);
 /** A line the page shows one sentence at a time, each in its own row. */
 const split = (slot: string) => /, tags$|^sample, angles$/.test(slot);
 const CARDS = Array.from({ length: 7 }, (_, n) => String(n + 1).padStart(2, "0"));
@@ -128,6 +130,8 @@ test.describe("the home page", () => {
       for (const { slot, words } of section(key).list("")) {
         // A note for a real piece has no words of its own. A gallery tab shows only once it has a piece.
         if (!words || /^tab \d/.test(slot)) continue;
+        // A line written for a screen reader names a picture or a button: it is not text on the page.
+        if (unseen(slot)) continue;
         const said = squash(founding(words));
         if (waits(key, slot)) {
           expect(body, `${slot} waits`).not.toContain(said);
@@ -389,6 +393,29 @@ test.describe("the home page", () => {
       // Nothing of the drawing runs out of its stage's width.
       const frame = (await stage.boundingBox())!;
       expect(frame.height).toBeGreaterThan(120);
+    }
+  });
+
+  test("his audit's picture is described in the deck's words, and nothing of it is on the page before it exists", async ({
+    page,
+  }) => {
+    await page.goto("/");
+    const places: [string, string][] = [
+      ["#water img.berg__shot", section(7).get("free 2, picture, words for a screen reader")],
+      [
+        "#apply img.final__audit",
+        section("the apply window").get("audit picture, words for a screen reader"),
+      ],
+    ];
+    for (const [where, words] of places) {
+      expect(words.length, where).toBeGreaterThan(20);
+      if (has("audit")) {
+        await expect(page.locator(where)).toHaveAttribute("alt", words);
+        continue;
+      }
+      // No picture yet: no frame, no placeholder, and no description of a picture that is not there.
+      await expect(page.locator(where)).toHaveCount(0);
+      expect(await page.locator("main").innerHTML()).not.toContain(words);
     }
   });
 
@@ -688,7 +715,11 @@ test.describe("the home page", () => {
         .locator(selector)
         .first()
         .evaluate((el) => parseFloat(getComputedStyle(el).fontSize));
-    await expect(card.locator(".product__small")).toHaveText(offer.get("add-on, small line"));
+    // The small line, and right under it, in the same type, the credit for buying it alone first.
+    await expect(card.locator(".product__small p")).toHaveText([
+      offer.get("add-on, small line"),
+      offer.get("add-on, credit"),
+    ]);
     expect(await px(".product__small")).toBeLessThan(await px(".product__body"));
     expect(await px(".product__small")).toBeLessThanOrEqual(await px(".product__inside li"));
     // ChatGPT and Claude are named in words only: no mark of either company, anywhere in the card.
@@ -880,7 +911,10 @@ test.describe("the home page in motion", () => {
     // The button covers the frame, so a press anywhere on the film turns the sound on.
     const [frame, box] = await Promise.all([slot.boundingBox(), sound.boundingBox()]);
     expect(Math.round(box!.width)).toBe(Math.round(frame!.width));
-    expect((await sound.getAttribute("aria-label"))!.length).toBeGreaterThan(0);
+    await expect(sound).toHaveAttribute(
+      "aria-label",
+      section(1).get("video, sound button, words for a screen reader"),
+    );
     const before = (await state()).time;
     await press(sound);
     await expect(sound).toBeHidden();

@@ -57,7 +57,7 @@ const rows = s.list("stack row ").map(({ words }) => {
   const cut = words.lastIndexOf(". ");
   return { name: words.slice(0, cut), value: words.slice(cut + 2).replace(/\.$/, "") };
 });
-/** "Clarity: 4,160 USD. Founding price: 750 USD." → the name, the hired-out total, the price. */
+/** "12 pieces: 4,160 USD. Founding price: 750 USD." → the name, the hired-out total, the price. */
 const totals = s.list("stack total, package ").map(({ words }) => {
   const cut = /^(.+?): ([\d,]+ USD)\. (.+?): ([\d,]+ USD)\.$/.exec(words);
   if (!cut) throw new Error(`deck: a stack total is not "Name: total. Label: price.": ${words}`);

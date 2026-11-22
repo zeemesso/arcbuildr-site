@@ -6,7 +6,7 @@ import {
   notFound,
   page as words,
 } from "../src/content/site";
-import { section } from "../src/content/deck";
+import { PACKAGES, section } from "../src/content/deck";
 import { APPLICATION_AFTER_BOOKING_URL, CONFIRMATION_VIDEO } from "../src/config";
 import { press } from "./press";
 import { layer, opened, plain, popup, send, stub, submission } from "./stubs";
@@ -87,9 +87,9 @@ test.describe("the page after a booking", () => {
       );
       await page.reload();
     };
-    await arrive({ name: "TEST", email: "test@example.com", package: "Recognition" });
+    await arrive({ name: "TEST", email: "test@example.com", package: PACKAGES.p24 });
     await expect(page.locator("[data-picked]")).toBeVisible();
-    await expect(page.locator("[data-picked]")).toHaveText(line("Recognition"));
+    await expect(page.locator("[data-picked]")).toHaveText(line(PACKAGES.p24));
     // It stands above "What happens next".
     const [picked, next] = await Promise.all([
       page.locator("[data-picked]").boundingBox(),

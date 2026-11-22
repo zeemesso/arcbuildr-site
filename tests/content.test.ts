@@ -73,6 +73,8 @@ describe("the words", () => {
       expect(text, path).not.toMatch(/\bseasons?\b/i);
       expect(text, path).not.toMatch(/\b(day|week)s? \d/i);
       expect(text, path).not.toMatch(/watch this first/i);
+      // The packages have no names: each is called by its size.
+      expect(text, path).not.toMatch(/\b(Clarity|Recognition|Momentum)\b/);
     }
   });
   it("hold no install steps, file names or version numbers", () => {
@@ -112,7 +114,8 @@ describe("the deck", () => {
   });
   it("names the product and the three packages once, and fills them in wherever a line calls for them", () => {
     expect(PRODUCT).toBe("Say It Plain");
-    expect(PACKAGES).toEqual({ p12: "Clarity", p24: "Recognition", p36: "Momentum" });
+    // A package has no name of its own: it is called by its size.
+    expect(PACKAGES).toEqual({ p12: "12 pieces", p24: "24 pieces", p36: "36 pieces" });
     expect(section(8).get("add-on, name")).toBe(PRODUCT);
     expect([1, 2, 3].map((n) => section(8).get(`package ${n}, name`))).toEqual(
       Object.values(PACKAGES),
@@ -133,7 +136,8 @@ describe("the deck", () => {
       for (const part of ["name", "plain meaning", "becomes"])
         expect(show.get(`step ${n}, ${part}`).length, `${n} ${part}`).toBeGreaterThan(0);
     expect(show.list("output ").filter(({ slot }) => /^output \d$/.test(slot))).toHaveLength(5);
-    expect(show.get("output 5, tag")).toContain(PACKAGES.p24);
+    // The fifth output comes with the two larger packages only, and its tag says so by their sizes.
+    expect(show.get("output 5, tag")).toMatch(/24 or 36 pieces/);
     expect(show.list("step ").filter(({ slot }) => /^step \d$/.test(slot))).toHaveLength(5);
     expect(show.get("chain line").length).toBeGreaterThan(0);
   });
@@ -150,11 +154,14 @@ describe("the deck", () => {
   });
   it("shows three packages: 12, 24 and 36 pieces, the middle one marked, each with one button", () => {
     const offer = section(8);
-    expect([1, 2, 3].map((n) => offer.get(`package ${n}, size`).match(/^\d+/)?.[0])).toEqual([
-      "12",
-      "24",
-      "36",
+    expect([1, 2, 3].map((n) => offer.get(`package ${n}, name`))).toEqual([
+      "12 pieces",
+      "24 pieces",
+      "36 pieces",
     ]);
+    // The small label above the name is the package's length.
+    for (const n of [1, 2, 3])
+      expect(offer.get(`package ${n}, size`)).toMatch(/^\d+ (days|weeks)$/);
     expect([1, 2, 3].map((n) => offer.find(`package ${n}, badge`))).toEqual([
       undefined,
       "Most Popular",
@@ -270,15 +277,14 @@ describe("the form and what follows it", () => {
         expect(`${question.options.join(". ")}.`).toBe(form.get(`${question.id}, choices`));
     }
   });
-  it("ends without a calendar for the lowest budget, with the deck's two lines", () => {
+  it("ends without a calendar for the lowest budget, with the deck's three lines", () => {
     const { tooLow, questions } = content.application;
     const budget = questions.find((question) => question.id === "budget")!;
     expect(budget.type === "choice" && budget.options[0]).toBe("Under 750 USD");
     expect(tooLow).toMatchObject({ id: "budget", option: "Under 750 USD" });
-    expect(tooLow.lines).toEqual([
-      section("the form, on tally").get("budget, under 750, line 1"),
-      section("the form, on tally").get("budget, under 750, line 2"),
-    ]);
+    expect(tooLow.lines).toEqual(
+      [1, 2, 3].map((n) => section("the form, on tally").get(`budget, under 750, line ${n}`)),
+    );
   });
   it("opens the Tally form, and keeps the form for chat bookings on file", () => {
     expect(TALLY_FORM).toBe("M1aKGp");

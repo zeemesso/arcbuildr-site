@@ -26,7 +26,6 @@ export const page = {
     pause: "Pause the gallery",
     close: "Close",
     play: "Play the video",
-    sound: "Turn the sound on",
   },
 };
 
@@ -62,20 +61,21 @@ export const application = {
     { id: "budget", q: form.get("budget"), type: "choice", options: budgets },
   ] as Question[],
   /**
-   * A budget under the lowest price ends here: the answers are saved, these two lines show,
+   * A budget under the lowest price ends here: the answers are saved, these lines show,
    * and no calendar opens.
    */
   tooLow: {
     id: "budget",
     option: budgets[0]!,
-    lines: [form.get("budget, under 750, line 1"), form.get("budget, under 750, line 2")],
+    lines: [1, 2, 3].map((n) => form.get(`budget, under 750, line ${n}`)),
   },
   /** The calendar, inside the page, once the form is sent. */
   calendar: { title: "Pick a time" },
   send: {
     busy: "Saving",
     failed: "Your answers did not save. They are still here.",
-    offline: "No connection. Your answers are kept here. Try again when you are back online.",
+    offline:
+      "No connection. Your name and email are kept here. Try again when you are back online.",
     anyway: "Pick a time anyway",
     booked: "Pick a time",
   },

@@ -20,6 +20,8 @@ const BANNED: [string, RegExp][] = [
   ["a long dash", /[\u2012\u2013\u2014\u2015]/],
   ["Season", /\bseasons?\b/i],
   ["a date (day N, week N)", /\b(day|week)s? \d/i],
+  // The packages have no names (Zyade, 23 Nov 2026): each is called by its size.
+  ["a package's old name", /\b(Clarity|Recognition|Momentum)\b/],
 ];
 /** Nothing announces a film that is not there. */
 const NO_FILM = /watch this first/i;
@@ -130,10 +132,13 @@ test("the banned list catches what it should, and leaves a length alone", () => 
     "Day 1. Your interview.",
     "Weeks 3 to 8",
     "After week 8",
+    "Everything in Clarity, with 24 pieces.",
+    "With Recognition and Momentum",
   ])
     expect(caught(line), line).toBe(true);
   for (const line of [
     "24 pieces, 8 weeks",
+    "A brand people recognize",
     "12 pieces, 21 days",
     "30 more days of answers",
     "an answer within 3 days",

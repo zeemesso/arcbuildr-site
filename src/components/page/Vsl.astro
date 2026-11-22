@@ -7,6 +7,7 @@
  * It is rendered only when there is a film to play (First.astro).
  */
 import { page } from "../../content/site";
+import { section } from "../../content/deck";
 import { FOUNDER_PHOTO } from "../../config";
 import { founderPhoto } from "../../content/proof";
 interface Props {
@@ -45,7 +46,13 @@ const photo = FOUNDER_PHOTO || founderPhoto();
     </button>
     <p class="vsl__who">{poster}</p>
   </div>
-  <button class="vsl__sound" type="button" data-vsl-sound aria-label={page.ui.sound} hidden>
+  <button
+    class="vsl__sound"
+    type="button"
+    data-vsl-sound
+    aria-label={section(1).get("video, sound button, words for a screen reader")}
+    hidden
+  >
     <span class="vsl__play vsl__play--sound">
       <svg viewBox="0 0 24 24" aria-hidden="true">
         <path d="M4 9.5h3.5L12 6v12l-4.5-3.5H4z"></path>

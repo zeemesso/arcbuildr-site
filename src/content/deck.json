@@ -21,6 +21,10 @@
           "Zyade Messaoudi, creative director and co-founder"
         ],
         [
+          "video, sound button, words for a screen reader",
+          "Turn the sound on"
+        ],
+        [
           "button",
           "Apply and pick a time"
         ],
@@ -269,7 +273,7 @@
         ],
         [
           "output 5, tag",
-          "With {p24} and {p36}"
+          "With 24 or 36 pieces"
         ],
         [
           "output 5",
@@ -514,7 +518,7 @@
         ],
         [
           "line under the cards",
-          "{p24} and {p36} add {product} and more time with me. The packages are below."
+          "The two larger packages add {product} and more time with me. The packages are below."
         ],
         [
           "apply strip",
@@ -631,6 +635,10 @@
           "[ZYADE'S AUDIT: his own one-page audit, made from his own account. Shows only once it exists and he has approved it.]"
         ],
         [
+          "free 2, picture, words for a screen reader",
+          "A one-page audit, made from Zyade's own account: the 3 things his videos leave unclear."
+        ],
+        [
           "free 3",
           "A real piece to read, from my own account. [CLIENT ZERO: piece 1 of Zyade's plan, readable in full]"
         ],
@@ -672,7 +680,7 @@
         ],
         [
           "band 8",
-          "With {p24} and {p36}: {product}, set up with you on a call, two more calls with me, and the live Group Reviews."
+          "With 24 or 36 pieces: {product}, set up with you on a call, two more calls with me, and the live Group Reviews."
         ],
         [
           "band 9",
@@ -697,7 +705,7 @@
         ],
         [
           "package 1, size",
-          "12 pieces, 21 days"
+          "21 days"
         ],
         [
           "package 1, name",
@@ -741,7 +749,7 @@
         ],
         [
           "package 2, size",
-          "24 pieces, 8 weeks"
+          "8 weeks"
         ],
         [
           "package 2, name",
@@ -761,7 +769,7 @@
         ],
         [
           "package 2, item 1",
-          "Everything in {p12}, with 24 pieces."
+          "Everything in the 12-piece package, with 24 pieces."
         ],
         [
           "package 2, item 2",
@@ -781,7 +789,7 @@
         ],
         [
           "package 3, size",
-          "36 pieces, 12 weeks"
+          "12 weeks"
         ],
         [
           "package 3, name",
@@ -801,7 +809,7 @@
         ],
         [
           "package 3, item 1",
-          "Everything in {p24}, with 36 pieces."
+          "Everything in the 24-piece package, with 36 pieces."
         ],
         [
           "package 3, item 2",
@@ -845,7 +853,7 @@
         ],
         [
           "bonus 1, with",
-          "With {p24} and {p36}"
+          "With 24 or 36 pieces"
         ],
         [
           "bonus 1, body",
@@ -861,7 +869,7 @@
         ],
         [
           "bonus 2, with",
-          "Two with {p24}, three with {p36}"
+          "Two with 24 pieces, three with 36 pieces"
         ],
         [
           "bonus 2, body",
@@ -901,7 +909,7 @@
         ],
         [
           "add-on, label",
-          "Premium add-on, included with {p24} and {p36}"
+          "Premium add-on, included with 24 or 36 pieces"
         ],
         [
           "add-on, name",
@@ -1013,7 +1021,7 @@
         ],
         [
           "sample, checks",
-          "Facts. Limits. Stories. People. Opening. One idea, one ask. Your voice. Only you. Natural wording. Length."
+          "Facts. Limits. Stories. People. Opening. One idea, one ask. Sounds like you. Only you. Natural wording. Length."
         ],
         [
           "sample, result",
@@ -1026,6 +1034,10 @@
         [
           "add-on, small line",
           "It runs inside your own ChatGPT Plus or paid Claude account. Read each piece before you film it."
+        ],
+        [
+          "add-on, credit",
+          "If you buy it on its own, its 147 USD comes off any package you start within 60 days."
         ],
         [
           "stack title",
@@ -1188,7 +1200,7 @@
         ],
         [
           "answer 1",
-          "One 45-minute interview, with nothing to prepare. Then you read what we send and answer within 3 days. You film in sittings of 6 pieces or fewer, about 4 for 24 pieces. {p24} and {p36} add one 20-minute setup call and two 15-minute calls. Editing and posting stay with you or your editor."
+          "One 45-minute interview, with nothing to prepare. Then you read what we send and answer within 3 days. You film in sittings of 6 pieces or fewer, about 4 for 24 pieces. The two larger packages add one 20-minute setup call and two 15-minute calls. Editing and posting stay with you or your editor."
         ],
         [
           "question 2",
@@ -1228,7 +1240,7 @@
         ],
         [
           "answer 6",
-          "You can get words that way. What you won't get is the direction behind them: someone deciding what you're known for, setting one look, giving every piece its job, and reviewing each one before you film. That is the work we do, starting from a 45-minute interview with you. Once that direction exists, {product} lets you keep working inside it on your own. That's why it comes with {p24} and {p36} and doesn't replace them."
+          "You can get words that way. What you won't get is the direction behind them: someone deciding what you're known for, setting one look, giving every piece its job, and reviewing each one before you film. That is the work we do, starting from a 45-minute interview with you. Once that direction exists, {product} lets you keep working inside it on your own. That's why it comes with the two larger packages and doesn't replace them."
         ],
         [
           "question 7",
@@ -1273,15 +1285,15 @@
         ],
         [
           "package 1 name",
-          "Clarity"
+          "12 pieces"
         ],
         [
           "package 2 name",
-          "Recognition"
+          "24 pieces"
         ],
         [
           "package 3 name",
-          "Momentum"
+          "36 pieces"
         ]
       ]
     },
@@ -1335,6 +1347,10 @@
         [
           "audit picture",
           "[ZYADE'S AUDIT: the same picture as `free 2, picture`, beside the two fields. Shows only once it exists.]"
+        ],
+        [
+          "audit picture, words for a screen reader",
+          "A one-page audit, made from Zyade's own account: the 3 things his videos leave unclear."
         ]
       ]
     },
@@ -1424,6 +1440,10 @@
         [
           "budget, under 750, line 2",
           "I'll email you about {product}, our own product, priced at 147 USD: the Show's method and the working files to make your own ready-to-film pieces."
+        ],
+        [
+          "budget, under 750, line 3",
+          "If you buy it, its 147 USD comes off any package you start within 60 days."
         ]
       ]
     },
@@ -1448,7 +1468,7 @@
         ],
         [
           "next, package line, only when a package was picked",
-          "You picked {package}. On the call, I tell you if it's the right one for you."
+          "You picked {package}. On the call, I tell you if that's the right size for you."
         ],
         [
           "next, title",
