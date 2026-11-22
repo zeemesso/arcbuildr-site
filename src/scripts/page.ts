@@ -38,7 +38,12 @@ if (bar && actions.length) {
 
 // The application: every apply button opens the same form.
 // A page that starts the form itself (the page after a booking) says so.
-if (!root.hasAttribute("data-own-form")) startApplication();
+// If the form cannot start, the page goes on: the two fields then post by themselves (POST /api/apply).
+try {
+  if (!root.hasAttribute("data-own-form")) startApplication();
+} catch {
+  /* As above. */
+}
 
 // Live screens. A figure with data-loop plays while it is on screen:
 //   data-at     the element gets "on" at this time (ms into the loop) and keeps it until the reset;

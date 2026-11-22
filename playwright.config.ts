@@ -27,8 +27,18 @@ export default defineConfig({
       name: "desktop",
       use: { viewport: { width: 1280, height: 800 }, launchOptions: { executablePath } },
     },
-    // The iPhone engine, where most visitors are. Opt in, because it needs
-    // `npx playwright install webkit`: PW_WEBKIT=1 npx playwright test --project=iphone
-    ...(process.env.PW_WEBKIT ? [{ name: "iphone", use: { ...devices["iPhone 13"] } }] : []),
+    // The iPhone engine, where most visitors are, and the same engine as desktop Safari. Opt in, because
+    // they need `npx playwright install webkit`: PW_WEBKIT=1 npx playwright test --project=iphone
+    // (or --project=safari).
+    ...(process.env.PW_WEBKIT
+      ? [
+          { name: "iphone", use: { ...devices["iPhone 13"] } },
+          { name: "safari", use: { ...devices["Desktop Safari"] } },
+        ]
+      : []),
+    // The Google Chrome installed on this computer: PW_CHROME=1 npx playwright test --project=chrome
+    ...(process.env.PW_CHROME
+      ? [{ name: "chrome", use: { channel: "chrome", viewport: { width: 1280, height: 800 } } }]
+      : []),
   ],
 });

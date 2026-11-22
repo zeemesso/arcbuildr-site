@@ -33,6 +33,7 @@ const words = {
     saving: prep ? copy.send.savingPrep : copy.send.saving,
     savingShort: copy.send.savingPrep,
   },
+  plain: copy.plain,
 };
 ---
 
@@ -73,7 +74,12 @@ const words = {
         </div>
       </header>
 
-      <form class="apply__form" data-apply-form novalidate>
+      {/* The script answers this form. If the script stops, the browser posts it to the same endpoint itself. */}
+      <form class="apply__form" data-apply-form novalidate method="post" action="/api/apply">
+        <input type="hidden" name="kind" value={kind} />
+        <input type="hidden" name="ref" />
+        <input type="hidden" name="tz" />
+        <input type="hidden" name="page" />
         <div class="apply__trap" aria-hidden="true">
           <label>
             {copy.trap}
@@ -181,6 +187,29 @@ const words = {
                   </p>
                 </section>
               ))}
+            </div>
+            {/* The plain form: it takes the questions' place when saving fails, or when the script stops. */}
+            <div class="plain" data-apply-plain hidden>
+              {copy.who.map((item) => (
+                <label class="plain__field">
+                  <span class="plain__label">{item.q}</span>
+                  <input
+                    class="q__field"
+                    data-plain={item.id}
+                    name={item.id}
+                    type={item.id === "email" ? "email" : "text"}
+                    inputmode={item.id === "email" ? "email" : undefined}
+                    pattern={item.id === "email" ? "[^\\s@]+@[^\\s@]+\\.[^\\s@]{2,}" : undefined}
+                    autocomplete={item.id === "email" ? "email" : "given-name"}
+                    autocapitalize={item.id === "email" ? "none" : "words"}
+                    autocorrect="off"
+                    spellcheck="false"
+                    maxlength={item.id === "email" ? 320 : 200}
+                    placeholder={item.ph}
+                  />
+                </label>
+              ))}
+              <p class="q__err" data-plain-err role="alert" />
             </div>
           </div>
         </div>

@@ -124,6 +124,14 @@ export const application = {
     anyway: "Pick a time anyway",
     booked: "Pick a time",
   },
+  /**
+   * The plain form: a name, an email and one button. It takes the questions' place when saving fails.
+   * These two lines show when the form's script stops; the browser then posts the form itself.
+   */
+  plain: {
+    broken: "The questions stopped working. Your name and email are enough.",
+    send: "Send",
+  },
 };
 
 /**

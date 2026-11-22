@@ -1,8 +1,9 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { Env } from "../src/lib/env";
-import { handleApply, parseApplication } from "../src/lib/apply";
+import { handleApply, parseApplication, parsePlain, PLAIN_MARK } from "../src/lib/apply";
 import { LEAD_KEYS } from "../src/lib/sheets";
 import { application as form } from "../src/content/site";
+import { BOOKED_PATH, BOOKING_URL } from "../src/config";
 import worker from "../src/worker";
 
 const SHEETS_URL = "https://storage.example.test/exec";
@@ -222,7 +223,7 @@ describe("apply handler", () => {
       expect(fetchMock).not.toHaveBeenCalled();
     },
   );
-  it.each(["application/x-www-form-urlencoded", "text/plain", "application/json-evil", ""])(
+  it.each(["multipart/form-data", "text/plain", "application/json-evil", ""])(
     "returns 415 for %j",
     async (type) => {
       await answer(await handleApply(post(valid, { "Content-Type": type }), env), 415, false);
@@ -307,5 +308,183 @@ describe("apply handler", () => {
   it("accepts the answer of a script that saved the lead row only", async () => {
     fetchMock.mockImplementationOnce(async () => Response.json({ ok: true }));
     await answer(await handleApply(post(), env), 200, true);
+  });
+});
+
+/** What a browser sends when it posts the form itself: the fields, urlencoded. */
+function native(fields: Record<string, string>, headers: HeadersInit = {}) {
+  return new Request("https://site.test/api/apply", {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded", ...headers },
+    body: new URLSearchParams(fields).toString(),
+  });
+}
+const bookingFor = (name: string, email: string) =>
+  `${BOOKING_URL}?${new URLSearchParams({ name, email })}`;
+function moved(response: Response, to: string) {
+  expect(response.status).toBe(303);
+  expect(response.headers.get("Location")).toBe(to);
+  expect(response.headers.get("cache-control")).toBe("no-store");
+}
+
+describe("parsePlain", () => {
+  it("takes a name and an email alone, and marks the row", () => {
+    const result = parsePlain({ name: " TEST  Person ", email: "Person@Example.test" });
+    expect(result).toMatchObject({
+      ok: true,
+      trapped: false,
+      kind: "application",
+      tooLow: false,
+      lead: { name: "TEST Person", email: "person@example.test", need: PLAIN_MARK, budget: "" },
+    });
+  });
+  it("keeps the answers that are valid and drops a choice the form does not offer", () => {
+    const result = parsePlain({
+      ...valid,
+      answers: { profile: "@test.person", sell: "Bookkeeping.", film: "Something else", budget: 5 },
+    });
+    if (!result.ok) throw new Error("Expected a plain application");
+    expect(result.lead.instagram).toBe("@test.person");
+    expect(result.lead.need).toBe(`${PLAIN_MARK} / Bookkeeping.`);
+    expect(result.lead.budget).toBe("");
+    expect(result.lead.channel).toBe("ig");
+  });
+  it("knows a budget under the lowest price", () => {
+    const result = parsePlain({ ...valid, answers: { budget: form.tooLow.option } });
+    expect(result).toMatchObject({ ok: true, tooLow: true });
+  });
+  it.each([
+    null,
+    [],
+    "text",
+    { name: "", email: "a@b.test" },
+    { name: "TEST", email: "bad" },
+    { name: "TEST", email: 5 },
+  ])("refuses %j", (body) => {
+    expect(parsePlain(body)).toEqual({ ok: false });
+  });
+});
+
+describe("apply handler, the plain form", () => {
+  it("saves a name and an email as one marked lead row when the script asks for the plain form", async () => {
+    const body = { id: valid.id, name: valid.name, email: valid.email, answers: {}, plain: true };
+    await answer(await handleApply(post(body), env), 200, true);
+    const out = sent();
+    expect(Object.keys(out).sort()).toEqual(["lead", "token"]);
+    expect(Object.keys(out.lead).sort()).toEqual([...LEAD_KEYS].sort());
+    expect(out.lead).toMatchObject({ name: valid.name, timestamp: NOW, need: PLAIN_MARK });
+  });
+  it("saves the whole application when the plain form carries every answer", async () => {
+    await answer(await handleApply(post({ ...valid, plain: true }), env), 200, true);
+    const out = sent();
+    expect(out.application).toMatchObject({ id: valid.id, kind: "application" });
+    expect(out.application.answers).toHaveLength(9);
+    expect(out.lead.need).not.toContain(PLAIN_MARK);
+  });
+  it("still refuses half an application that does not ask for the plain form", async () => {
+    await answer(await handleApply(post({ ...valid, answers: {} }), env), 400, false);
+    await answer(await handleApply(post({ ...valid, answers: {}, plain: "yes" }), env), 400, false);
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+  it("says so when the plain form did not save", async () => {
+    fetchMock.mockImplementationOnce(async () => Response.json({ ok: false }));
+    await answer(await handleApply(post({ ...valid, answers: {}, plain: true }), env), 502, false);
+  });
+});
+
+describe("apply handler, a form posted by the browser itself", () => {
+  const fields = { name: "TEST Person", email: "Person@Example.test" };
+  it("saves the name and the email, then sends the person to the booking page with both filled", async () => {
+    const response = await handleApply(native(fields, { Origin: "https://site.test" }), env);
+    moved(response, bookingFor("TEST Person", "person@example.test"));
+    const out = sent();
+    expect(Object.keys(out).sort()).toEqual(["lead", "token"]);
+    expect(out.lead).toMatchObject({ name: "TEST Person", email: "person@example.test" });
+    expect(out.lead.need).toBe(PLAIN_MARK);
+  });
+  it("goes through the Worker route", async () => {
+    const response = await worker.fetch(native(fields) as Parameters<typeof worker.fetch>[0], env, {
+      waitUntil: vi.fn(),
+    } as unknown as ExecutionContext);
+    moved(response, bookingFor("TEST Person", "person@example.test"));
+  });
+  it.each(["rejected", "throw", "not set up"])(
+    "sends the person on even when the sheet did not save: %s",
+    async (failure) => {
+      fetchMock.mockImplementationOnce(async () => {
+        if (failure === "throw") throw new Error("offline");
+        return Response.json({ ok: false });
+      });
+      const where = failure === "not set up" ? { ...env, SHEETS_URL: "" } : env;
+      moved(
+        await handleApply(native(fields), where),
+        bookingFor("TEST Person", "person@example.test"),
+      );
+    },
+  );
+  it.each([{ name: "", email: "a@b.test" }, { name: "TEST", email: "a@b" }, {}])(
+    "sends %j back to the two fields and saves nothing",
+    async (bad) => {
+      moved(await handleApply(native(bad as Record<string, string>), env), "/#apply");
+      expect(fetchMock).not.toHaveBeenCalled();
+    },
+  );
+  it("saves the whole application, under the page's id, when every answer came along", async () => {
+    const response = await handleApply(native({ ...fields, ...answers, ref: valid.id }), env);
+    moved(response, bookingFor("TEST Person", "person@example.test"));
+    const out = sent();
+    expect(out.application).toMatchObject({ id: valid.id, kind: "application" });
+    expect(out.application.answers).toHaveLength(9);
+  });
+  it("gives an application its own id when the browser had none to send", async () => {
+    await handleApply(native({ ...fields, ...answers }), env);
+    await handleApply(native({ ...fields, ...answers, ref: "bad id" }), env);
+    const ids = fetchMock.mock.calls.map(
+      (call) => JSON.parse(call[1]!.body as string).application.id,
+    );
+    expect(ids[0]).toMatch(/^[A-Za-z0-9-]{8,64}$/);
+    expect(ids[1]).toMatch(/^[A-Za-z0-9-]{8,64}$/);
+    expect(ids[0]).not.toBe(ids[1]);
+  });
+  it("keeps the answers that came along in the lead row", async () => {
+    await handleApply(native({ ...fields, profile: "@test.person", sell: "Bookkeeping." }), env);
+    expect(sent().lead).toMatchObject({
+      instagram: "@test.person",
+      need: `${PLAIN_MARK} / Bookkeeping.`,
+    });
+  });
+  it("sends someone who booked from a chat back to the page after the booking", async () => {
+    moved(await handleApply(native({ ...fields, kind: "prep" }), env), BOOKED_PATH);
+  });
+  it("offers no calendar to a budget under the lowest price", async () => {
+    moved(await handleApply(native({ ...fields, budget: form.tooLow.option }), env), "/");
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+  it("never takes the next page from the request", async () => {
+    const response = await handleApply(
+      native({ ...fields, next: "https://foreign.test", Location: "https://foreign.test" }),
+      env,
+    );
+    expect(response.headers.get("Location")).toBe(bookingFor("TEST Person", "person@example.test"));
+  });
+  it("moves a filled trap on and saves nothing", async () => {
+    moved(
+      await handleApply(native({ ...fields, company: "Acme" }), env),
+      bookingFor("TEST Person", "person@example.test"),
+    );
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+  it("refuses a foreign Origin and a body that is too large", async () => {
+    await answer(
+      await handleApply(native(fields, { Origin: "https://foreign.test" }), env),
+      403,
+      false,
+    );
+    await answer(
+      await handleApply(native({ ...fields, sell: "x".repeat(16385) }), env),
+      413,
+      false,
+    );
+    expect(fetchMock).not.toHaveBeenCalled();
   });
 });

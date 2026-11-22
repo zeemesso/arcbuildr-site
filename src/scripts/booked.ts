@@ -40,15 +40,20 @@ if (chat && fromChat) {
   chat.hidden = false;
   if (APPLICATION_MODE === "native") {
     // Our own form opens on this page, starts at the first question when the email is known, and stays here.
-    startApplication({
-      kind: "prep",
-      seed: { name, email },
-      done: () => {
-        action.hidden = true;
-        chat.querySelector<HTMLElement>("[data-chat-first]")!.hidden = true;
-        chat.querySelector<HTMLElement>("[data-chat-saved]")!.hidden = false;
-      },
-    });
+    // If the form cannot start, the rest of this page still runs.
+    try {
+      startApplication({
+        kind: "prep",
+        seed: { name, email },
+        done: () => {
+          action.hidden = true;
+          chat.querySelector<HTMLElement>("[data-chat-first]")!.hidden = true;
+          chat.querySelector<HTMLElement>("[data-chat-saved]")!.hidden = false;
+        },
+      });
+    } catch {
+      /* As above. */
+    }
   } else if (action instanceof HTMLAnchorElement) {
     // The button's address is ours; only the checked name and email are added to it.
     const address = new URL(action.href);

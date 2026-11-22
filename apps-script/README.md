@@ -18,6 +18,7 @@ Both endpoints post JSON to the Apps Script web app at `SHEETS_URL`. The body ca
 - The question texts come from the deck. The script finds a column by its exact heading first, then by a pattern for the answer's `id`, so a reworded question keeps its column and the old heading stays until someone renames it.
 - A script that knows applications adds one row to the answers tab ("Tally application", or "Tally prep" for `prep`), under the headings already there. An `id` it already has adds nothing. It answers `{ "ok": true, "application": true }`. Its own sync then adds the Leads row with the status `applied`.
 - A script that does not know applications saves `lead` as a Leads row with the status `new` and answers `{ "ok": true }`. `lead` carries the same answers, so nothing is lost.
+- The plain form (a name, an email and one button: what a visitor gets when saving fails, when the form's script stops, or when no script ran) posts to the same endpoint. With all 8 answers valid it is saved as above. Otherwise the Worker sends `{ token, lead }` alone, as `POST /api/lead` does: one Leads row with the status `new`, whose `need` starts with `Plain form: the questions did not run or did not save`, followed by the answers that came along. The script needs no change for it.
 - Any other answer means not saved. The form then says so, keeps what was typed on the visitor's device and offers another try with the same `id`.
 
 ## Dates

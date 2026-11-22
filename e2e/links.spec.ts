@@ -1,6 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { BOOKING_URL } from "../src/config";
-test("all page links resolve, and the entry forms fall back to the booking page", async ({
+test("all page links resolve, and the entry forms fall back to the save endpoint", async ({
   page,
 }) => {
   for (const path of ["/", "/booked", "/privacy", "/404"]) {
@@ -21,8 +20,12 @@ test("all page links resolve, and the entry forms fall back to the booking page"
         if (url.hash) expect(await response.text()).toContain(`id="${url.hash.slice(1)}"`);
       }
     }
-    for (const form of await page.locator("main form").all())
-      await expect(form).toHaveAttribute("action", BOOKING_URL);
+    // With no script the browser posts the two fields itself: they are saved, then the Worker sends the
+    // person to the booking page (tests/apply.test.ts, e2e/fallback.spec.ts).
+    for (const form of await page.locator("main form").all()) {
+      await expect(form).toHaveAttribute("action", "/api/apply");
+      await expect(form).toHaveAttribute("method", "post");
+    }
     // The site sends nobody to a hosted form any more.
     await expect(page.locator('a[href*="tally.so"], form[action*="tally.so"]')).toHaveCount(0);
   }

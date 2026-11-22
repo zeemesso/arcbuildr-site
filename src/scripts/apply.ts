@@ -14,6 +14,8 @@ export type ApplyData = {
   sent_at: string;
   /** The field no person sees. A program that fills it is not saved. */
   trap: string;
+  /** The plain form sent this: a name and an email are enough, and the answers that are valid are kept. */
+  plain?: boolean;
 };
 export type ApplyOptions = {
   /** Saves the answers. Must reject when they were not saved. */
@@ -129,6 +131,7 @@ export function initApply(options: ApplyOptions) {
       | "booked",
       string
     >;
+    plain: { broken: string; send: string };
   };
   const root = document.documentElement;
   const calm = matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -159,6 +162,10 @@ export function initApply(options: ApplyOptions) {
   const afterWrap = layer.querySelector<HTMLElement>("[data-apply-after]");
   const endPanel = layer.querySelector<HTMLElement>("[data-apply-end]");
   const calPanel = layer.querySelector<HTMLElement>("[data-apply-calendar]");
+  const plainBox = $("[data-apply-plain]");
+  const plainName = $<HTMLInputElement>("[data-plain=name]");
+  const plainEmail = $<HTMLInputElement>("[data-plain=email]");
+  const plainErr = $("[data-plain-err]");
 
   // ---- What was typed stays on this device until the sheet has it. ----
   let state = fresh();
@@ -212,6 +219,8 @@ export function initApply(options: ApplyOptions) {
   let finished = false;
   let greeted = false;
   let told = false;
+  let plain = false;
+  let dead = false;
   let pointerAt = 0;
   let pageY = 0;
   let origin: HTMLElement | null = null;
@@ -304,6 +313,93 @@ export function initApply(options: ApplyOptions) {
   vv?.addEventListener("resize", fit);
   vv?.addEventListener("scroll", fit);
   addEventListener("resize", fit);
+
+  // ---- The plain form: a name, an email and the button. It takes the questions' place when saving
+  // fails. When this script itself stops, the same form is posted by the browser, with no script. ----
+  function showPlain() {
+    plain = true;
+    plainName.value = state.name;
+    plainEmail.value = state.email;
+    plainBox.hidden = false;
+    layer.classList.add("is-plain");
+  }
+  function hidePlain() {
+    plain = false;
+    plainBox.hidden = true;
+    layer.classList.remove("is-plain");
+  }
+  function plainOk() {
+    const bad = !plainName.value.trim()
+      ? plainName
+      : !EMAIL.test(plainEmail.value.trim())
+        ? plainEmail
+        : null;
+    plainErr.textContent = !bad ? "" : bad === plainName ? words.errName : words.errEmail;
+    bad?.setAttribute("aria-invalid", "true");
+    bad?.focus({ preventScroll: true });
+    return !bad;
+  }
+  /** The layer with nothing but the plain form in it, once this script has stopped. */
+  function plainLayer(on: boolean) {
+    layer.hidden = !on;
+    root.classList.toggle("apply-open", on);
+    for (const el of outside) el.inert = on;
+    if (on) plainName.focus({ preventScroll: true });
+  }
+  /**
+   * Something in here threw. Nothing is retried and nothing more is run: the person gets the plain form,
+   * with what they typed still in it, and the browser posts it to the same endpoint by itself.
+   */
+  function crash() {
+    if (dead) return;
+    dead = true;
+    try {
+      stopTimers();
+      abort?.abort();
+      form.hidden = false;
+      form.noValidate = false;
+      for (const entry of entries) entry.noValidate = false;
+      if (afterWrap) afterWrap.hidden = true;
+      layer.classList.remove("is-busy", "is-after", "is-calendar");
+      layer.classList.add("is-plain", "is-dead");
+      stage.inert = false;
+      closeButton.disabled = false;
+      closeButton.onclick = () => plainLayer(false);
+      plainBox.hidden = false;
+      plainName.required = plainEmail.required = true;
+      plainName.value = state.name;
+      plainEmail.value = state.email;
+      const set = (name: string, value: string) => {
+        (form.elements.namedItem(name) as HTMLInputElement).value = value;
+      };
+      set("ref", state.id);
+      set("page", location.pathname);
+      set("tz", Intl.DateTimeFormat().resolvedOptions().timeZone);
+      note.textContent = words.plain.broken;
+      note.classList.add("is-alarm");
+      okLabel.textContent = words.plain.send;
+      plainLayer(true);
+    } catch {
+      /* The page's own two fields still post by themselves. */
+    }
+  }
+  /** Runs one of the form's actions. An error in it hands over to the plain form. */
+  const safe =
+    <A extends unknown[]>(fn: (...args: A) => unknown) =>
+    (...args: A) => {
+      if (dead) return;
+      try {
+        fn(...args);
+      } catch {
+        crash();
+      }
+    };
+  /** The same, for an action that takes the browser's place, until this script has stopped. */
+  const instead = (fn: () => void) => (event: Event) => {
+    if (dead) return;
+    event.preventDefault();
+    safe(fn)();
+  };
 
   // ---- Small parts ----
   /** 16, 18: the old label and the new one overlap, crossfading with a little blur. */
@@ -435,6 +531,7 @@ export function initApply(options: ApplyOptions) {
     state.step = next;
     keep();
     unfail();
+    if (plain) hidePlain();
     for (const step of steps) {
       if (step === to || step === from) continue;
       step.classList.remove("is-current", "is-leaving");
@@ -622,6 +719,7 @@ export function initApply(options: ApplyOptions) {
   }
   function fail(offline: boolean) {
     failed = true;
+    showPlain();
     say(offline ? words.send.offline : words.send.failed, true);
     relabel(words.send.retry);
     if (options.booking) anyway.href = options.booking(who());
@@ -637,8 +735,17 @@ export function initApply(options: ApplyOptions) {
         { once: true },
       );
   }
-  async function send() {
+  const send = () => {
+    if (!dead) sendNow().catch(crash);
+  };
+  async function sendNow() {
     if (busy || finished) return;
+    if (plain) {
+      if (!plainOk()) return;
+      state.name = plainName.value;
+      state.email = plainEmail.value.trim();
+      keep();
+    }
     unfail();
     if (isOffline()) return fail(true);
     busy = true;
@@ -661,6 +768,7 @@ export function initApply(options: ApplyOptions) {
       page: location.pathname,
       sent_at: new Date().toISOString(),
       trap: trap?.value ?? "",
+      ...(plain && { plain }),
     };
     let saved = false;
     try {
@@ -687,7 +795,7 @@ export function initApply(options: ApplyOptions) {
     }
     relabel(words.send.done);
     ok.classList.add("is-sent"); // 8: one pulse.
-    window.setTimeout(leave, calm ? 0 : 400);
+    window.setTimeout(safe(leave), calm ? 0 : 400);
   }
 
   function forward() {
@@ -711,6 +819,11 @@ export function initApply(options: ApplyOptions) {
   }
   function back() {
     if (busy) return;
+    // From the plain form, Back shows the last question again.
+    if (plain) {
+      show(at, 1, false);
+      return focusStep();
+    }
     if (depth() > 0) return history.back();
     if (at > 0) {
       history.replaceState({ apply: at - 1, depth: 0 }, "", HASH);
@@ -720,9 +833,14 @@ export function initApply(options: ApplyOptions) {
   }
 
   // ---- Listening ----
-  form.addEventListener("input", (event) => {
+  const typed = (event: Event) => {
     const target = event.target;
     if (!(target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement)) return;
+    if (target === plainName || target === plainEmail) {
+      target.removeAttribute("aria-invalid");
+      plainErr.textContent = "";
+      return;
+    }
     const i = steps.findIndex((step) => step.contains(target));
     if (i < 0) return;
     const step = steps[i];
@@ -734,31 +852,43 @@ export function initApply(options: ApplyOptions) {
     unfail();
     if (target instanceof HTMLTextAreaElement) grow(target);
     if (!busy && !finished) settle();
-  });
+  };
+  form.addEventListener("input", safe(typed));
   stage.addEventListener("pointerdown", () => {
     pointerAt = performance.now();
   });
   // A tapped choice moves on at once. A choice changed with the arrow keys waits for Enter.
-  form.addEventListener("change", (event) => {
-    const target = event.target;
-    if (
-      target instanceof HTMLInputElement &&
-      target.type === "radio" &&
-      performance.now() - pointerAt < 800
-    )
-      forward();
-  });
+  form.addEventListener(
+    "change",
+    safe((event: Event) => {
+      const target = event.target;
+      if (
+        target instanceof HTMLInputElement &&
+        target.type === "radio" &&
+        performance.now() - pointerAt < 800
+      )
+        forward();
+    }),
+  );
   form.addEventListener("submit", (event) => {
+    // Once this script has stopped, the browser posts the form itself. It only needs a connection.
+    if (dead) {
+      if (isOffline()) {
+        event.preventDefault();
+        note.textContent = words.send.offline;
+      }
+      return;
+    }
     event.preventDefault();
-    forward();
+    safe(forward)();
   });
-  backButton.addEventListener("click", back);
-  closeButton.addEventListener("click", shut);
+  backButton.addEventListener("click", safe(back));
+  closeButton.addEventListener("click", safe(shut));
   anyway.addEventListener("click", () => {
     state.pending = true;
     keep();
   });
-  layer.addEventListener("keydown", (event) => {
+  const keyed = (event: KeyboardEvent) => {
     if (event.isComposing) return;
     const target = event.target as HTMLElement;
     if (event.key === "Escape") return shut();
@@ -770,7 +900,7 @@ export function initApply(options: ApplyOptions) {
       return;
     }
     // A letter picks a choice and moves on.
-    if (busy || finished || steps[at]?.dataset.type !== "choice") return;
+    if (plain || busy || finished || steps[at]?.dataset.type !== "choice") return;
     if (event.key.length !== 1 || event.metaKey || event.ctrlKey || event.altKey) return;
     const radio = radiosOf(at)[event.key.toUpperCase().charCodeAt(0) - 65];
     if (!radio) return;
@@ -778,8 +908,9 @@ export function initApply(options: ApplyOptions) {
     radio.checked = true;
     radio.dispatchEvent(new Event("input", { bubbles: true }));
     forward();
-  });
-  addEventListener("popstate", (event) => {
+  };
+  layer.addEventListener("keydown", safe(keyed));
+  const moved = (event: PopStateEvent) => {
     const now = event.state as { apply?: number } | null;
     if (now && typeof now.apply === "number" && steps[now.apply]) {
       if (busy) cancelSend();
@@ -794,15 +925,19 @@ export function initApply(options: ApplyOptions) {
       show(target, target < at ? -1 : 1);
       focusStep();
     } else closeLayer();
-  });
+  };
+  addEventListener("popstate", safe(moved));
   // Back from the booking page: the answers are in, so the button only goes to the calendar again.
-  addEventListener("pageshow", (event) => {
-    if (!event.persisted || !finished) return;
-    lock(false);
-    ok.classList.remove("is-sent");
-    say("");
-    okLabel.textContent = words.send.booked;
-  });
+  addEventListener(
+    "pageshow",
+    safe((event: PageTransitionEvent) => {
+      if (!event.persisted || !finished) return;
+      lock(false);
+      ok.classList.remove("is-sent");
+      say("");
+      okLabel.textContent = words.send.booked;
+    }),
+  );
 
   // The two fields on the page: checked in place, then the layer opens from them.
   for (const entry of entries) {
@@ -818,40 +953,46 @@ export function initApply(options: ApplyOptions) {
         if (error) error.textContent = "";
       });
     }
-    entry.addEventListener("submit", (event) => {
-      event.preventDefault();
-      name.value = name.value.trim();
-      email.value = email.value.trim();
-      const bad = !name.value ? name : !EMAIL.test(email.value) ? email : null;
-      if (bad) {
-        const error = errorFor(bad);
-        if (error) error.textContent = bad === name ? words.errName : words.errEmail;
-        bad.setAttribute("aria-invalid", "true");
-        bad.focus();
-        return;
-      }
-      state.name = name.value;
-      state.email = email.value;
-      // Already applied in this visit: straight to the calendar, no second form.
-      if (bookedAs() === email.value.toLowerCase()) {
-        finished = true;
-        returnTo = entry.querySelector<HTMLElement>("button");
-        return leave();
-      }
-      claim();
-      begin(entry, entry.querySelector<HTMLElement>("button"));
-    });
+    // Once this script has stopped, the browser posts the two fields itself.
+    entry.addEventListener(
+      "submit",
+      instead(() => {
+        name.value = name.value.trim();
+        email.value = email.value.trim();
+        const bad = !name.value ? name : !EMAIL.test(email.value) ? email : null;
+        if (bad) {
+          const error = errorFor(bad);
+          if (error) error.textContent = bad === name ? words.errName : words.errEmail;
+          bad.setAttribute("aria-invalid", "true");
+          bad.focus();
+          return;
+        }
+        state.name = name.value;
+        state.email = email.value;
+        // Already applied in this visit: straight to the calendar, no second form.
+        if (bookedAs() === email.value.toLowerCase()) {
+          finished = true;
+          returnTo = entry.querySelector<HTMLElement>("button");
+          return leave();
+        }
+        claim();
+        begin(entry, entry.querySelector<HTMLElement>("button"));
+      }),
+    );
   }
   for (const opener of document.querySelectorAll<HTMLElement>("[data-apply-open]")) {
     opener.addEventListener("click", (event) => {
       event.preventDefault();
-      begin(opener, opener);
+      // Once this script has stopped, a button opens the plain form.
+      if (dead) plainLayer(true);
+      else safe(begin)(opener, opener);
     });
   }
 
   // A refresh in the middle comes back to the same question, with everything typed.
-  paint();
-  if (location.hash === HASH) {
+  safe(() => {
+    paint();
+    if (location.hash !== HASH) return;
     if (bookedAs()) history.replaceState(null, "", location.pathname + location.search);
     else {
       const start = startIndex();
@@ -861,5 +1002,5 @@ export function initApply(options: ApplyOptions) {
       show(start, 1, false);
       focusStep();
     }
-  }
+  })();
 }

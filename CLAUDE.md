@@ -98,6 +98,8 @@ Changed on 2026-11-22, later (L1-P11 redesign, branch `l1-p11-page`):
 - The iceberg is one drawing in `src/components/page/Berg.astro`. Its sky, water and ice colours are in `tokens.css`.
 - The offer shows the deck's stack as a ledger (a row with a figure alone), a product card (a row with a sentence and a figure) and a bonus stack (a row with no figure).
 - `AI_MARKS` is `"names"`: no company's mark is on the page.
+- The form never leaves anyone stuck. When saving fails, the plain form (name, email, one button) takes the questions' place and saves through `POST /api/apply` with `plain: true`. When the form's script throws, never arrives or is off, the browser posts the form itself to the same endpoint: the Worker saves a marked row in Leads and sends the person on to the booking page. The failure paths are in `e2e/fallback.spec.ts`.
+- Two more opt-in browser projects: `PW_WEBKIT=1 npx playwright test --project=safari` and `PW_CHROME=1 npx playwright test --project=chrome` (the Chrome installed on this Mac).
 
 ## STATUS
 
