@@ -1,8 +1,8 @@
 ---
 /**
- * One card of "What you get": its number, when it arrives, the step of the Show it comes from, its
- * title, what it does, and its screen. The screen is a picture of the real document (src/content/proof.ts);
- * until that picture exists, the screen is the card's own title on a plain panel.
+ * One card of "What you get": its number, its title, when it arrives, the step of the Show it comes
+ * from and what it does. A card has a picture panel only when the picture of the real document exists
+ * (src/content/proof.ts): until then it is words under a hairline, with no empty panel.
  */
 import { section } from "../../content/deck";
 import { CARD_PIECES, shot } from "../../content/proof";
@@ -17,10 +17,13 @@ const title = s.get(`${key}, title`);
 const picture = n in CARD_PIECES ? shot(CARD_PIECES[n as keyof typeof CARD_PIECES]) : null;
 ---
 
-<li class:list={["card", { "card--wide": wide }]} data-reveal data-card={n}>
-  <div class:list={["card__stage", { "card__stage--shot": picture }]}>
-    <span class="card__n">{n}</span>
-    {picture ? (
+<li
+  class:list={["card", { "card--wide": wide, "card--plain": !picture }]}
+  data-reveal
+  data-card={n}
+>
+  {picture && (
+    <div class="card__stage">
       <img
         src={picture.image}
         alt={picture.alt}
@@ -29,12 +32,11 @@ const picture = n in CARD_PIECES ? shot(CARD_PIECES[n as keyof typeof CARD_PIECE
         loading="lazy"
         decoding="async"
       />
-    ) : (
-      <h3 class="card__h">{title}</h3>
-    )}
-  </div>
+    </div>
+  )}
   <div class="card__text">
-    {picture && <h3 class="card__h">{title}</h3>}
+    <span class="card__n">{n}</span>
+    <h3 class="card__h">{title}</h3>
     <p class="card__meta">
       <span class="card__date">{s.get(`${key}, date`)}</span>
       <span class="card__from">{s.get(`${key}, from`)}</span>

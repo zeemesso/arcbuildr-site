@@ -118,7 +118,12 @@ test("the calendar's panel and the plain form say none of them", async ({ page }
   expect(await page.locator("[data-plain]").count()).toBeGreaterThan(0);
 });
 
-for (const path of ["/booked", "/booked?via=chat", "/booked?attendeeName=TEST+Visitor"]) {
+for (const path of [
+  "/booked",
+  "/booked?via=chat",
+  "/booked?attendeeName=TEST+Visitor",
+  "/privacy",
+]) {
   test(`${path} says none of them`, async ({ page }) => {
     await page.goto(path);
     check(await said(page), path);

@@ -2,8 +2,8 @@
  * Real pieces of Zyade's own Season One ("client zero"). Each visual marked [CLIENT ZERO: ...] in the copy
  * deck reads one piece here. A piece is a JSON file in src/content/proof/, brought in by
  * `node scripts/proof/import.mjs`. That folder is not in git: this repository is public, and the pieces
- * stay out of it until Zyade approves them. A piece that is not there yet is `null`: a card then shows
- * its own title on a plain panel, and the gallery stays off the page. Nothing is ever invented to fill a slot.
+ * stay out of it until Zyade approves them. A piece that is not there yet is `null`: a card then has
+ * no picture panel, and the gallery stays off the page. Nothing is ever invented to fill a slot.
  */
 const files = import.meta.glob<unknown>("./proof/*.json", { eager: true, import: "default" });
 

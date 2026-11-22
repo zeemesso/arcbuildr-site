@@ -453,65 +453,46 @@
   }
 }
 
-/* ---------- 5. What you get: seven cards, each with a screen ---------- */
+/* ---------- 5. What you get: seven cards ---------- */
 .cards {
   display: grid;
-  gap: clamp(2.5rem, 2rem + 3vw, 4.5rem) clamp(1.5rem, 4vw, 3.5rem);
+  gap: clamp(2rem, 1.5rem + 2.5vw, 3.5rem) clamp(1.5rem, 4vw, 3.5rem);
 }
 .card {
   display: grid;
   align-content: start;
   gap: 1.25rem;
 }
-/* The screen: a picture of the real document, or the card's own title on a plain panel. */
+/* A card with no picture yet is words under a hairline: no empty panel stands in for the picture. */
+.card--plain {
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--hair);
+}
+/* The panel exists only with a picture of the real document in it. */
 .card__stage {
-  position: relative;
-  display: grid;
-  align-content: end;
-  aspect-ratio: 2 / 1;
-  padding: clamp(1.25rem, 3vw, 2rem);
+  aspect-ratio: 16 / 10;
   border-radius: var(--r-window);
   background: var(--color-paper-2);
   overflow: hidden;
 }
-.card__n {
-  position: absolute;
-  top: clamp(1.125rem, 3vw, 1.75rem);
-  left: clamp(1.25rem, 3vw, 2rem);
-}
-.card__stage .card__h {
-  max-width: 16ch;
-  font-size: clamp(1.375rem, 1.15rem + 1vw, 1.875rem);
-  letter-spacing: var(--track);
-  line-height: 1.12;
-}
-.card__h {
-  font-size: 1.25rem;
-  font-weight: 600;
-  line-height: 1.2;
-  text-wrap: balance;
-}
-.card__stage--shot {
-  aspect-ratio: 16 / 10;
-  padding: 0;
-}
-.card__stage--shot img {
+.card__stage img {
   width: 100%;
   height: 100%;
   object-fit: cover;
   object-position: top;
 }
-.card__stage--shot .card__n {
-  z-index: 1;
-  padding: 0.125rem 0.5rem;
-  border-radius: var(--radius-pill);
-  background: var(--window);
-  color: var(--ink);
-}
 .card__text {
   display: grid;
+  align-content: start;
   justify-items: start;
   gap: 0.625rem;
+}
+.card__h {
+  font-size: clamp(1.375rem, 1.2rem + 0.7vw, 1.75rem);
+  font-weight: 600;
+  letter-spacing: var(--track);
+  line-height: 1.15;
+  text-wrap: balance;
 }
 .card__meta {
   display: flex;
@@ -543,6 +524,7 @@
 }
 .card__body {
   max-width: var(--measure);
+  margin-top: 0.25rem;
   color: var(--muted);
   line-height: 1.55;
   text-wrap: pretty;
@@ -558,23 +540,37 @@
   .cards {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
-  /* The wide card: its screen on one side, its words on the other. */
+  /* The wide card runs across both columns: its picture on one side, its words on the other. */
   .card--wide {
     grid-column: 1 / -1;
     grid-template-columns: subgrid;
     column-gap: clamp(1.5rem, 4vw, 3.5rem);
     align-items: center;
   }
+  /* With no picture: its number, title and date on one side, what it does on the other. */
+  .card--wide.card--plain .card__text {
+    grid-column: 1 / -1;
+    grid-template-columns: subgrid;
+    /* The last row takes what the body needs beyond the title and the date, so those two stay together. */
+    grid-template-rows: auto auto auto 1fr;
+    column-gap: clamp(1.5rem, 4vw, 3.5rem);
+  }
+  .card--wide.card--plain .card__text > * {
+    grid-column: 1;
+  }
+  .card--wide.card--plain .card__body {
+    grid-column: 2;
+    grid-row: 2 / span 3;
+    margin-top: 0;
+  }
 }
 
-/* ---------- 6. Who directs it: his photo, then the words ---------- */
+/* ---------- 6. Who directs it: the words, and his photo once there is one ---------- */
 .who__grid {
   display: grid;
   gap: clamp(2rem, 6vw, 5rem);
 }
 .who__photo {
-  display: grid;
-  place-items: center;
   aspect-ratio: 4 / 5;
   border-radius: var(--r-window);
   background: var(--color-paper-2);
@@ -585,35 +581,45 @@
   height: 100%;
   object-fit: cover;
 }
-.who__face {
-  width: 5.5rem;
-  height: 5.5rem;
-  font-size: 1.5rem;
-  letter-spacing: -0.02em;
-}
-.who__words {
+.who__words,
+.who__top,
+.who__lead,
+.who__more {
   display: grid;
   align-content: start;
   justify-items: start;
   gap: 1rem;
   text-wrap: pretty;
 }
-.who__words .h2 {
-  margin-bottom: 0.25rem;
+.who__words {
+  row-gap: 1.25rem;
 }
-.who__words > p:not(.label) {
+/* Until there is a photo: his initials, a small round mark beside the heading. */
+.who__head {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+}
+.who__mark {
+  width: 2.75rem;
+  height: 2.75rem;
+  font-size: 0.875rem;
+}
+.who__lead > p {
   max-width: var(--measure);
   color: var(--muted);
   line-height: 1.6;
 }
-.who__words > .h2 + p:not(.label) {
+.who__lead > p:first-child {
   color: var(--ink);
+}
+.who__more {
+  width: 100%;
 }
 .who__ways {
   display: grid;
   width: 100%;
   max-width: var(--measure);
-  margin-block: 0.5rem 0.25rem;
 }
 .who__ways li {
   display: grid;
@@ -634,12 +640,15 @@
   font-weight: 500;
   letter-spacing: 0.1em;
 }
-.who__words > .who__small {
+.who__small {
+  max-width: var(--measure);
+  color: var(--muted);
   font-size: var(--text-sm);
   line-height: 1.5;
 }
 @media (min-width: 60rem) {
-  .who__grid {
+  /* With his photo: the photo beside the words, and it stays in view while they pass. */
+  .who__grid:not(.who__grid--plain) {
     grid-template-columns: minmax(0, 0.78fr) minmax(0, 1fr);
     align-items: start;
   }
@@ -647,11 +656,13 @@
     position: sticky;
     top: 6.5rem;
   }
-}
-/* Until there is a photo, his initials do not need a tall panel on a phone. */
-@media (max-width: 59.99rem) {
-  .who__photo:not(:has(img)) {
-    aspect-ratio: 16 / 7;
+  /* Without it the words take the width: who we are on one side, what he does first on the other. */
+  .who__grid--plain .who__words {
+    grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+    column-gap: clamp(2rem, 6vw, 5rem);
+  }
+  .who__grid--plain .who__top {
+    grid-column: 1 / -1;
   }
 }
 

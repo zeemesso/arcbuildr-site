@@ -1,8 +1,9 @@
 ---
 /**
- * 6. Who directs it: his photo on one side (his initials until a real photo exists), the words on the
- * other. No video here: the first screen's video carries who we are. An apply strip closes it.
- * The item that points to the work shows only while "The work" is on the page.
+ * 6. Who directs it. With a real photo of him: the photo on one side, the words on the other. Until
+ * then there is no empty panel: the words take the width, and his initials are a small round mark
+ * beside the heading. No video here: the first screen's video carries who we are. An apply strip
+ * closes it. The item that points to the work shows only while "The work" is on the page.
  */
 import Strip from "./Strip.astro";
 import { section } from "../../content/deck";
@@ -18,37 +19,46 @@ const items = s
 ---
 
 <section class="who" id="who" aria-labelledby="who-h">
-  <div class="who__grid">
-    <div class="who__photo" data-reveal data-who-photo>
-      {photo ? (
+  <div class:list={["who__grid", { "who__grid--plain": !photo }]}>
+    {photo && (
+      <div class="who__photo" data-reveal data-who-photo>
         <img src={photo} alt="" loading="lazy" decoding="async" />
-      ) : (
-        <span class="face who__face" aria-hidden="true">
-          {page.founder.initials}
-        </span>
-      )}
-    </div>
+      </div>
+    )}
     <div class="who__words">
-      <p class="label" data-reveal>
-        {s.get("label")}
-      </p>
-      <h2 class="h2" id="who-h" data-reveal>
-        {s.get("heading")}
-      </h2>
-      {s.list("paragraph").map(({ words }) => (
-        <p data-reveal>{words}</p>
-      ))}
-      <ol class="who__ways">
-        {items.map((words, n) => (
-          <li data-reveal style={`--i:${n}`}>
-            <b aria-hidden="true">{n + 1}</b>
-            <span>{words}</span>
-          </li>
+      <div class="who__top">
+        <p class="label" data-reveal>
+          {s.get("label")}
+        </p>
+        <div class="who__head" data-reveal>
+          {!photo && (
+            <span class="face who__mark" aria-hidden="true" data-who-mark>
+              {page.founder.initials}
+            </span>
+          )}
+          <h2 class="h2" id="who-h">
+            {s.get("heading")}
+          </h2>
+        </div>
+      </div>
+      <div class="who__lead">
+        {s.list("paragraph").map(({ words }) => (
+          <p data-reveal>{words}</p>
         ))}
-      </ol>
-      <p class="who__small" data-reveal>
-        {s.get("small line")}
-      </p>
+      </div>
+      <div class="who__more">
+        <ol class="who__ways">
+          {items.map((words, n) => (
+            <li data-reveal style={`--i:${n}`}>
+              <b aria-hidden="true">{n + 1}</b>
+              <span>{words}</span>
+            </li>
+          ))}
+        </ol>
+        <p class="who__small" data-reveal>
+          {s.get("small line")}
+        </p>
+      </div>
     </div>
   </div>
   <Strip from={6} />

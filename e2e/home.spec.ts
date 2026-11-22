@@ -254,7 +254,7 @@ test.describe("the home page", () => {
     }
   });
 
-  test("a card with no real picture shows its own title on a plain panel, and nothing invented", async ({
+  test("a card has a picture panel only with a real picture: no empty panel, nothing invented", async ({
     page,
   }) => {
     await page.goto("/");
@@ -262,19 +262,77 @@ test.describe("the home page", () => {
     for (const [index, n] of CARDS.entries()) {
       const card = page.locator(".cards > .card").nth(index);
       const stage = card.locator(".card__stage");
-      const title = get.get(`card ${n}, title`);
-      // The title is said once, in the card.
-      await expect(card.locator(".card__h")).toHaveText(title);
-      if (await stage.locator("img").count()) {
-        // A real picture of the document: it has words for someone who cannot see it.
+      // Its number, its title as a heading, the date, the step and the body: said once, in this order.
+      await expect(card.locator(".card__n")).toHaveText(n);
+      await expect(card.locator("h3.card__h")).toHaveText(get.get(`card ${n}, title`));
+      await expect(card.locator(".card__date")).toHaveText(get.get(`card ${n}, date`));
+      await expect(card.locator(".card__from")).toHaveText(get.get(`card ${n}, from`));
+      await expect(card.locator(".card__body")).toHaveText(get.get(`card ${n}, body`));
+      const tops = await card
+        .locator(".card__n, .card__h, .card__meta")
+        .evaluateAll((els) => els.map((el) => el.getBoundingClientRect().top));
+      expect(tops).toEqual([...tops].sort((a, b) => a - b));
+      if (await stage.count()) {
+        // The panel comes with a real picture of the document, which has words for someone who cannot see it.
+        await expect(stage.locator("img")).toHaveCount(1);
         expect((await stage.locator("img").getAttribute("alt"))!.length).toBeGreaterThan(0);
         continue;
       }
-      // Its number and its title, and nothing else.
-      expect(squash(await stage.textContent())).toBe(squash(`${n} ${title}`));
-      await expect(stage.locator("svg, img, figure, [data-loop]")).toHaveCount(0);
-      await expect(card.locator(".card__date")).toHaveText(get.get(`card ${n}, date`));
-      await expect(card.locator(".card__from")).toHaveText(get.get(`card ${n}, from`));
+      // No picture yet: no panel, no drawing, no stand-in. The card is words under a hairline.
+      await expect(card.locator("svg, img, figure, [data-loop]")).toHaveCount(0);
+      const look = await card.evaluate((el) => {
+        const style = getComputedStyle(el);
+        return { paint: style.backgroundColor, line: style.borderTopWidth };
+      });
+      expect(look.paint).toBe("rgba(0, 0, 0, 0)");
+      expect(look.line).toBe("1px");
+    }
+  });
+
+  test("who directs it has a photo panel only with a real photo: his initials are a small mark by the heading", async ({
+    page,
+  }) => {
+    await page.goto("/");
+    const who = page.locator("#who");
+    await who.scrollIntoViewIfNeeded();
+    const panel = who.locator("[data-who-photo]");
+    const mark = who.locator("[data-who-mark]");
+    if (await panel.count()) {
+      await expect(panel.locator("img")).toHaveCount(1);
+      await expect(mark).toHaveCount(0);
+      return;
+    }
+    await expect(mark).toHaveText(words.founder.initials);
+    const [m, h, grid] = await Promise.all([
+      mark.boundingBox(),
+      who.locator("h2").boundingBox(),
+      who.locator(".who__grid").boundingBox(),
+    ]);
+    // Small and round, on the heading's own line, before it.
+    expect(m!.width).toBeLessThanOrEqual(48);
+    expect(Math.round(m!.width)).toBe(Math.round(m!.height));
+    expect(m!.x + m!.width).toBeLessThanOrEqual(h!.x);
+    expect(m!.y + m!.height / 2).toBeGreaterThan(h!.y);
+    expect(m!.y + m!.height / 2).toBeLessThan(h!.y + h!.height);
+    // No empty frame: nothing in the section is a painted panel without a picture.
+    const painted = await who.locator(".who__grid *").evaluateAll(
+      (els) =>
+        els.filter((el) => {
+          const box = el.getBoundingClientRect();
+          const paint = getComputedStyle(el).backgroundColor;
+          return box.width > 120 && box.height > 120 && paint !== "rgba(0, 0, 0, 0)";
+        }).length,
+    );
+    expect(painted).toBe(0);
+    // The words take the width: on a wide screen the list sits beside the paragraphs.
+    if (page.viewportSize()!.width >= 960) {
+      const [lead, more] = await Promise.all([
+        who.locator(".who__lead").boundingBox(),
+        who.locator(".who__more").boundingBox(),
+      ]);
+      expect(more!.x).toBeGreaterThan(lead!.x + lead!.width - 1);
+      expect(Math.abs(more!.y - lead!.y)).toBeLessThanOrEqual(1);
+      expect(more!.x + more!.width).toBeGreaterThan(grid!.x + grid!.width * 0.9);
     }
   });
 

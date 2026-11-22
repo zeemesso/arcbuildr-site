@@ -173,7 +173,7 @@ export const privacy = {
       id: "p-who",
       title: "Who we are",
       body: [
-        "Arcbuildr plans and writes short video series for business owners. It is run by Zyade. To ask about your details, write to {email}.",
+        "Arcbuildr directs the brand and content of coaches, consultants and service owners who are the face of their business. It is run by Zyade. To ask about your details, write to {email}.",
       ],
     },
     {
