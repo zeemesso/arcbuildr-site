@@ -1,0 +1,91 @@
+---
+/**
+ * The product card's sample, moving: an idea is typed, three angles appear, one is picked, the piece's
+ * title and opening line appear, then ten checks tick one by one. The tag and its note stay on it the
+ * whole time: the owner is invented, and the screen says so. Every word is the deck's (section 8,
+ * "sample"). Without scripts, and with reduced motion, it shows finished. No app's mark is on it.
+ */
+import Tick from "./Tick.astro";
+import { section } from "../../../content/deck";
+const s = section(8);
+/** The deck lists short things as sentences: "A. B. C." */
+const list = (words: string) =>
+  words
+    .split(". ")
+    .map((item) => item.replace(/\.$/, "").trim())
+    .filter(Boolean);
+const idea = s.get("sample, idea").split(" ");
+const angles = list(s.get("sample, angles"));
+const checks = list(s.get("sample, checks"));
+const title = s.get("sample, piece title");
+// The angle that becomes the piece is the one whose words are the piece's title.
+const picked = Math.max(0, angles.indexOf(title));
+const typed = 600 + idea.length * 110;
+const anglesAt = typed + 500;
+const pickAt = anglesAt + angles.length * 160 + 900;
+const pieceAt = pickAt + 700;
+const checksAt = pieceAt + 900;
+const doneAt = checksAt + 200 + checks.length * 170;
+---
+
+<figure class="sample" data-sample data-loop={doneAt + 5200}>
+  <figcaption class="sample__top">
+    <span class="sample__tag">{s.get("sample, tag")}</span>
+    <span class="sample__note">{s.get("sample, note")}</span>
+  </figcaption>
+
+  <div class="sample__idea pop" data-at="250">
+    <p class="cap">{s.get("sample, idea label")}</p>
+    <p class="sample__said typed" data-at="600">
+      {idea.map((word, k) => (
+        <span class="w" style={`--k:${k}`}>
+          {word}{" "}
+        </span>
+      ))}
+    </p>
+  </div>
+
+  <div class="sample__angles">
+    <p class="cap pop" data-at={anglesAt}>
+      {s.get("sample, angles label")}
+    </p>
+    <ol>
+      {angles.map((angle, k) => (
+        <li class="pop" data-at={anglesAt + 100 + k * 160}>
+          <b>{k + 1}</b>
+          <span>{angle}</span>
+          {k === picked && <i class="sample__pick" data-at={pickAt} />}
+        </li>
+      ))}
+    </ol>
+  </div>
+
+  <div class="sample__piece pop" data-at={pieceAt}>
+    <p class="sample__title">{title}</p>
+    <p class="cap">{s.get("sample, opening label")}</p>
+    <p class="sample__opening">{s.get("sample, opening")}</p>
+  </div>
+
+  <div class="sample__checks">
+    <p class="cap pop" data-at={checksAt}>
+      {s.get("sample, checks label")}
+    </p>
+    <ul>
+      {checks.map((check, k) => (
+        <li data-at={checksAt + 200 + k * 170}>
+          <Tick />
+          {check}
+        </li>
+      ))}
+    </ul>
+    <p class="sample__end">
+      <span class="pop" data-at={doneAt}>
+        {s.get("sample, result")}
+      </span>
+      <span class="sample__badge pop" data-at={doneAt + 400}>
+        <Tick />
+        {s.get("sample, badge")}
+      </span>
+    </p>
+  </div>
+</figure>

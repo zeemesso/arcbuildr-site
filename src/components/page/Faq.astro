@@ -1,13 +1,17 @@
 ---
 /**
- * 12. Questions: numbered rows that open and close, the first one open, the heading in a left column.
+ * 11. Questions: numbered rows that open and close, the first one open, the heading in a left column.
  * The rows are <details>, so they work without scripts.
  */
 import { section } from "../../content/deck";
-const s = section(12);
+const s = section(11);
 const questions = s.list("question ").map(({ slot, words }) => {
   const n = slot.split(" ")[1];
-  return { n, q: words, a: s.list(`answer ${n}`).map((item) => item.words) };
+  // "answer 1" and "answer 1, …" are its paragraphs; "answer 10" is another question's.
+  const answers = s
+    .list(`answer ${n}`)
+    .filter((item) => item.slot === `answer ${n}` || item.slot.startsWith(`answer ${n},`));
+  return { n, q: words, a: answers.map((item) => item.words) };
 });
 ---
 

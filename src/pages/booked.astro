@@ -49,15 +49,15 @@ const button = s.get("booked from a chat, button");
     {video && (
       <figure class="done__video" data-enter style="--i:2">
         <figcaption>
-          <b>{s.get("video, title")}</b>
-          <span>{s.get("video, length")}</span>
+          <b>{s.get("video, title, only once the film exists")}</b>
+          <span>{s.get("video, length, only once the film exists")}</span>
         </figcaption>
         <video
           class="video"
           controls
           playsinline
           preload="metadata"
-          aria-label={s.get("video, title")}
+          aria-label={s.get("video, title, only once the film exists")}
           src={video}
         ></video>
       </figure>
@@ -65,6 +65,12 @@ const button = s.get("booked from a chat, button");
   </section>
 
   <section class="next" aria-labelledby="next-h">
+    <p
+      class="next__package"
+      data-picked={s.get("next, package line, only when a package was picked")}
+      role="status"
+      hidden
+    ></p>
     <h2 class="h2" id="next-h" data-reveal>
       {s.get("next, title")}
     </h2>

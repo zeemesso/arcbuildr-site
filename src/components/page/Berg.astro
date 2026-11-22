@@ -1,24 +1,32 @@
 ---
 /**
- * 8. The 12 weeks: the iceberg. One drawing: a small tip above the waterline (what is free), and under
- * it the big mass of ice, cut into nine bands, with water around it. Each band is tied by its color to
- * one line of the list. On a phone the picture comes first, then the list with its color keys.
+ * 7. Under the water: the iceberg. One drawing: a small tip above the waterline (what is free), and
+ * under it the big mass of ice, cut into nine bands, with water around it. Each band is a piece of the
+ * work, tied by its color and its number to one line of the list. On a phone the picture comes first, then the list with its color keys.
  * The free thing that is a real piece to read shows only while "The work" is on the page.
  */
 import { section } from "../../content/deck";
-import { reading, workIsReady } from "../../content/proof";
-const s = section(8);
-/** "Day 1. Your interview, 45 minutes." → the first sentence is the key, the rest explains it. */
+import { auditPicture, reading, workIsReady } from "../../content/proof";
+const s = section(7);
+/**
+ * "The Lead. We decide what you're known for." → a short opening (up to its full stop or its colon)
+ * leads, the rest explains it. A band that is one sentence has no such opening.
+ */
 const lead = (words: string) => {
-  const cut = words.indexOf(". ");
-  return cut < 0
-    ? ([words, ""] as const)
-    : ([words.slice(0, cut + 1), words.slice(cut + 2)] as const);
+  const cut = /^(.{1,40}?[.:]) (.+)$/.exec(words);
+  return cut ? ([cut[1]!, cut[2]!] as const) : (["", words] as const);
 };
 const read = workIsReady() ? reading() : null;
+const audit = auditPicture();
+// A free thing can have a picture slot beside it (`free 2, picture`): his own audit, once it exists.
 const free = s
   .list("free ")
-  .map(({ slot, words }) => ({ words, proof: s.isProof(slot) }))
+  .filter(({ slot }) => /^free \d+$/.test(slot))
+  .map(({ slot, words }) => ({
+    words,
+    proof: s.isProof(slot),
+    picture: s.find(`${slot}, picture`) !== undefined ? audit : null,
+  }))
   .filter(({ proof }) => !proof || read);
 const bands = s.list("band ").map(({ words }) => lead(words));
 
@@ -36,7 +44,7 @@ const MASS_LIGHT = "92,132 140,132 122,206 98,300 44,312 38,250 60,186";
 const step = (FLOOR - WATER) / bands.length;
 ---
 
-<section class="berg" id="weeks" aria-labelledby="berg-h" data-berg>
+<section class="berg" id="water" aria-labelledby="berg-h" data-berg>
   <div class="berg__head">
     <p class="label" data-reveal>
       {s.get("label")}
@@ -44,9 +52,6 @@ const step = (FLOOR - WATER) / bands.length;
     <h2 class="h2" id="berg-h" data-reveal>
       {s.get("heading")}
     </h2>
-    <p class="berg__line" data-reveal>
-      {s.get("line under it")}
-    </p>
   </div>
 
   <div class="berg__grid">
@@ -117,7 +122,7 @@ const step = (FLOOR - WATER) / bands.length;
             />
           ))}
         </g>
-        {bands.map(([key], n) => (
+        {bands.map((_, n) => (
           <text
             class="berg-name"
             data-band={n + 1}
@@ -125,7 +130,7 @@ const step = (FLOOR - WATER) / bands.length;
             y={WATER + n * step + step / 2}
             style={`--i:${n};fill:var(--on-band-${n + 1})`}
           >
-            {key.replace(/\.$/, "")}
+            {String(n + 1).padStart(2, "0")}
           </text>
         ))}
 
@@ -150,7 +155,7 @@ const step = (FLOOR - WATER) / bands.length;
     <div class="berg__list">
       <p class="berg__group">{s.get("above the water, label")}</p>
       <ul class="berg__items berg__items--free">
-        {free.map(({ words, proof }) => (
+        {free.map(({ words, proof, picture }) => (
           <li data-reveal>
             <i class="berg__key" />
             <div>
@@ -166,6 +171,17 @@ const step = (FLOOR - WATER) / bands.length;
               ) : (
                 <p>{words}</p>
               )}
+              {picture && (
+                <img
+                  class="berg__shot"
+                  src={picture.image}
+                  alt={picture.alt}
+                  width={picture.width}
+                  height={picture.height}
+                  loading="lazy"
+                  decoding="async"
+                />
+              )}
             </div>
           </li>
         ))}
@@ -176,10 +192,14 @@ const step = (FLOOR - WATER) / bands.length;
       <p class="berg__group">{s.get("below the water, label")}</p>
       <ol class="berg__items">
         {bands.map(([key, rest], n) => (
-          <li data-band={n + 1} data-reveal style={`--c:var(--band-${n + 1})`}>
-            <i class="berg__key" />
+          <li
+            data-band={n + 1}
+            data-reveal
+            style={`--c:var(--band-${n + 1});--on:var(--on-band-${n + 1})`}
+          >
+            <i class="berg__key">{String(n + 1).padStart(2, "0")}</i>
             <p>
-              <b>{key}</b> {rest}
+              {key && <b>{key}</b>} {rest}
             </p>
           </li>
         ))}

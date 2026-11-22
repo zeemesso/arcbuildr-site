@@ -1,4 +1,4 @@
-/* 7. The work: the gallery. A row of real pieces that steps, with its tabs and its pause button.
+/* 6. The work: the gallery. A row of real pieces that steps, with its tabs and its pause button.
  * It is on the page only once its twelve pieces are real (src/content/proof.ts). */
 
 .work {
@@ -15,17 +15,10 @@
 .work__head .h2 {
   max-width: 22ch;
 }
-.work__line,
-.work__after {
+.work__line {
   max-width: 38rem;
   font-size: var(--text-lg);
   text-wrap: pretty;
-}
-.work__after {
-  margin-top: 0.5rem;
-  padding-inline: var(--pad);
-  color: var(--muted);
-  font-size: var(--text-base);
 }
 .reel__row {
   display: flex;

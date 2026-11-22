@@ -134,7 +134,7 @@ const CAL_READY_MS = 12000;
  * after the form is sent. A finished booking sends the person to BOOKED_PATH: Cal.com's own
  * redirect is a paid feature, so the embed's booking event is what tells the page.
  */
-function calendar(into: HTMLElement, who: Who, failed: () => void) {
+function calendar(into: HTMLElement, who: Who, failed: () => void, picked = "") {
   const host = window as unknown as { Cal?: CalApi };
   // Cal.com's loader, written out: calls made before its script arrives wait in a queue it reads.
   const cal: CalApi =
@@ -177,7 +177,12 @@ function calendar(into: HTMLElement, who: Who, failed: () => void) {
       try {
         sessionStorage.setItem(
           BOOKED_KEY,
-          JSON.stringify({ name: who.name.split(/\s+/)[0] || "", email: who.email }),
+          JSON.stringify({
+            name: who.name.split(/\s+/)[0] || "",
+            email: who.email,
+            // The package whose card opened the form, when one did: the next page says which.
+            package: picked,
+          }),
         );
       } catch {
         /* Storage may be off: the page after the booking then greets without a name. */
@@ -337,6 +342,8 @@ export function startApplication(options: { kind?: Kind; seed?: Who; done?: () =
     `${BOOKING_URL}?${new URLSearchParams({ name: who.name, email: who.email })}`;
 
   let who: Who = { name: options.seed?.name ?? "", email: options.seed?.email ?? "" };
+  /** The name of the package whose card opened the form, when one did. */
+  let picked = "";
   let shown = false;
   let returnTo: HTMLElement | null = null;
   let busy = false;
@@ -373,7 +380,7 @@ export function startApplication(options: { kind?: Kind; seed?: Who; done?: () =
   function after(what: "end" | "calendar") {
     if (!afterWrap || !endPanel || !calPanel) return;
     try {
-      sessionStorage.setItem(OUTCOME, JSON.stringify({ what, ...who }));
+      sessionStorage.setItem(OUTCOME, JSON.stringify({ what, ...who, package: picked }));
     } catch {
       /* Storage may be off. */
     }
@@ -397,21 +404,27 @@ export function startApplication(options: { kind?: Kind; seed?: Who; done?: () =
     if (mounted) return;
     mounted = true;
     const link = calPanel.querySelector<HTMLAnchorElement>("[data-calendar-link]");
-    calendar(calPanel.querySelector<HTMLElement>("[data-calendar]")!, who, () => {
-      if (!link) return;
-      link.href = booking(who);
-      link.hidden = false;
-    });
+    calendar(
+      calPanel.querySelector<HTMLElement>("[data-calendar]")!,
+      who,
+      () => {
+        if (!link) return;
+        link.href = booking(who);
+        link.hidden = false;
+      },
+      picked,
+    );
   }
   /** Already applied in this visit: what they saw then, with no second form. */
   function before(): "end" | "calendar" | null {
     try {
       const seen = JSON.parse(sessionStorage.getItem(OUTCOME) || "null") as
-        ({ what?: string } & Partial<Who>) | null;
+        ({ what?: string; package?: string } & Partial<Who>) | null;
       if (!seen || (seen.what !== "end" && seen.what !== "calendar")) return null;
       if (who.email && seen.email && who.email.toLowerCase() !== seen.email.toLowerCase())
         return null;
       who = { name: who.name || seen.name || "", email: who.email || seen.email || "" };
+      picked ||= String(seen.package ?? "");
       return seen.what;
     } catch {
       return null;
@@ -596,6 +609,7 @@ export function startApplication(options: { kind?: Kind; seed?: Who; done?: () =
     opener.addEventListener("click", (event) => {
       event.preventDefault();
       const chosen = opener.dataset.package;
+      if (chosen) picked = chosen;
       void begin(opener, chosen ? { package: chosen } : {});
     });
   }

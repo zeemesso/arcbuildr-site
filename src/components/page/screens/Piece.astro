@@ -33,31 +33,33 @@ const lines = [
       </div>
     </div>
   </div>
-  <div class="s5__shots">
-    <Cap text={shots} at={1300} class="pop" />
-    <ol>
-      {["70%", "86%", "58%"].map((width, n) => (
-        <li class="pop" data-at={1500 + n * 220}>
-          <b>{n + 1}</b>
-          <span class="bars">
-            <i style={`--w:${width}`} />
-          </span>
-        </li>
-      ))}
-    </ol>
-  </div>
-  <div class="s5__card" data-at="2500">
-    <div class="s5__back"></div>
-    <div class="s5__face">
-      {card && <p class="cap">{card}</p>}
-      <ul class="bars">
-        {["82%", "94%", "66%"].map((width, n) => (
-          <li class:list={{ "is-kept": n === 1 }}>
-            <i class:list={{ "is-strong": n === 1 }} style={`--w:${width}`} />
+  <div class="s5__side">
+    <div class="s5__shots">
+      <Cap text={shots} at={1300} class="pop" />
+      <ol>
+        {["70%", "86%", "58%"].map((width, n) => (
+          <li class="pop" data-at={1500 + n * 220}>
+            <b>{n + 1}</b>
+            <span class="bars">
+              <i style={`--w:${width}`} />
+            </span>
           </li>
         ))}
-      </ul>
-      {keep && <p class="cap s5__keep">{keep}</p>}
+      </ol>
     </div>
+    <div class="s5__card" data-at="2500">
+      <div class="s5__back"></div>
+      <div class="s5__face">
+        {card && <p class="cap">{card}</p>}
+        <ul class="bars">
+          {["82%", "94%", "66%"].map((width, n) => (
+            <li class:list={{ "is-kept": n === 1 }}>
+              <i class:list={{ "is-strong": n === 1 }} style={`--w:${width}`} />
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
+    <Cap text={keep} at={3200} class="pop s5__keep" />
   </div>
 </figure>

@@ -1,13 +1,16 @@
 ---
 /**
- * 1. First screen: who it is for, the headline, one sentence, one button and the founding count.
- * With a film (VSL_VIDEO in src/config.ts) the sales video leads, a 16:9 block under its cue. Without
- * one the block is not on the page at all, and the first screen is complete as it stands.
+ * 1. First screen: who it is for, the headline, one sentence, one button, who is speaking and the
+ * founding count.
+ * With a film (VSL_VIDEO in src/config.ts) the sales video sits between the line and the button, a
+ * 16:9 block with no label above it. Without one the block is not on the page at all, and the first
+ * screen is complete as it stands.
  * The three wins follow it (Wins.astro).
  */
 import Vsl from "./Vsl.astro";
 import { founding, section } from "../../content/deck";
-import { FOUNDING_PLACES_LEFT } from "../../config";
+import { founderPhoto } from "../../content/proof";
+import { FOUNDER_PHOTO, FOUNDING_PLACES_LEFT } from "../../config";
 interface Props {
   /** The sales video's file, or "" while there is none. */
   film: string;
@@ -15,6 +18,9 @@ interface Props {
 const { film } = Astro.props;
 const s = section(1);
 const headline = s.get("headline");
+// Who "I" is: one line, with his photo beside it once a real one exists. Never a drawn face.
+const who = s.find("who, with his photo once it exists");
+const face = FOUNDER_PHOTO || founderPhoto();
 ---
 
 <section class:list={["first", { "first--film": film }]} id="top" aria-labelledby="first-h">
@@ -31,13 +37,7 @@ const headline = s.get("headline");
   </div>
   {film && (
     <div class="first__watch" data-enter style="--i:3">
-      <p class="first__cue">
-        {s.get("video, label")}
-        <svg viewBox="0 0 24 24" aria-hidden="true">
-          <path d="M12 5v14M6 13l6 6 6-6" />
-        </svg>
-      </p>
-      <Vsl src={film} title={headline} poster={s.get("video, poster")} />
+      <Vsl src={film} title={headline} poster={s.get("video, poster, only once the film exists")} />
     </div>
   )}
   <div class="first__foot" data-enter style="--i:4">
@@ -47,6 +47,12 @@ const headline = s.get("headline");
         <path d="M5 12h14M13 6l6 6-6 6"></path>
       </svg>
     </a>
+    {who && (
+      <p class="first__who" data-who>
+        {face && <img src={face} alt="" width="40" height="40" decoding="async" />}
+        {who}
+      </p>
+    )}
     <p class="first__under">{s.get("under the button")}</p>
     <p class="first__places">
       <span class="hang__dots" aria-hidden="true">

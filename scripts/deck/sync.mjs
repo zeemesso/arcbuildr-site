@@ -2,7 +2,7 @@
 // The deck is written outside this repo. Each section's words sit between <!-- copy --> and <!-- /copy -->,
 // one slot per line: `slot name` then the words. Nothing here rewrites a word.
 //
-//   node scripts/deck/sync.mjs                 reads ~/fable-sprint/L1-P12/deck-v3.md
+//   node scripts/deck/sync.mjs                 reads ~/fable-sprint/L1-P12/deck-v4.md
 //   node scripts/deck/sync.mjs path/to/deck.md reads that file
 //   node scripts/deck/sync.mjs --check         exits 1 when deck.json no longer matches the deck
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
@@ -13,27 +13,31 @@ import { fileURLToPath } from "node:url";
 const args = process.argv.slice(2);
 const check = args.includes("--check");
 const given = args.find((arg) => !arg.startsWith("--"));
-const source = given ?? join(homedir(), "fable-sprint", "L1-P12", "deck-v3.md");
+const source = given ?? join(homedir(), "fable-sprint", "L1-P12", "deck-v4.md");
 if (!source || !existsSync(source)) {
   console.error("deck: no deck file found");
   process.exit(1);
 }
 
 /**
- * Sections by number: `## 4. The framework` is section "4". A part of a section with its own heading
- * (`### The form`) takes that heading, in small letters, as its key. The words before the first
- * heading (the product's name) are the section "names".
+ * Sections by number: `## 4. How it works` is section "4". A part of a section with its own heading
+ * (`### The booked page`) takes that heading, in small letters, as its key. The words before the first
+ * numbered section (the product's and the packages' names) are the section "names", whatever notes
+ * and headings stand around them.
  */
 export function parseDeck(text) {
   const sections = {};
   let key = "names";
   let title = "Names";
   let inside = false;
+  let numbered = false;
   for (const raw of text.split("\n")) {
     const line = raw.trim();
     const heading = line.match(/^##\s+(?:(\d+)\.\s+)?(.+)$/);
     const part = line.match(/^###\s+(.+)$/);
     if (heading) {
+      numbered ||= Boolean(heading[1]);
+      if (!numbered) continue;
       key = heading[1] ?? heading[2].toLowerCase();
       title = heading[2];
       continue;

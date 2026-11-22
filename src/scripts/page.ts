@@ -99,6 +99,54 @@ if (!calm && loops.length) {
   });
 }
 
+// The five steps: on a wide screen one tab is open at a time, and they take turns until someone picks one.
+const steps = document.querySelector<HTMLElement>("[data-steps]");
+if (steps) {
+  const wide = matchMedia("(min-width: 64rem)");
+  const items = [...steps.querySelectorAll<HTMLElement>(".steps__step")];
+  const TURN = 5000;
+  let turn = 0;
+  let picked = false;
+  const show = (index: number) => {
+    steps.dataset.active = String(index + 1);
+    items.forEach((item, n) => {
+      const on = !wide.matches || n === index;
+      item.classList.toggle("is-on", n === index);
+      item.querySelector("button")?.setAttribute("aria-expanded", String(on));
+    });
+  };
+  const rest = () => {
+    clearTimeout(turn);
+    steps.classList.remove("is-turning");
+  };
+  const run = () => {
+    rest();
+    if (calm || picked || !wide.matches) return;
+    steps.style.setProperty("--turn", `${TURN}ms`);
+    // Restart the line from empty.
+    void steps.offsetWidth;
+    steps.classList.add("is-turning");
+    turn = window.setTimeout(() => {
+      show((Number(steps.dataset.active) || 1) % items.length);
+      run();
+    }, TURN);
+  };
+  items.forEach((item, n) =>
+    item.querySelector("button")?.addEventListener("click", () => {
+      if (!wide.matches) return;
+      picked = true;
+      rest();
+      show(n);
+    }),
+  );
+  show(0);
+  wide.addEventListener("change", () => show((Number(steps.dataset.active) || 1) - 1));
+  new IntersectionObserver(
+    ([entry]) => (entry?.isIntersecting && !document.hidden ? run() : rest()),
+    { threshold: 0.4 },
+  ).observe(steps);
+}
+
 // The gallery: its row steps forward about every 2.5 seconds while it is on screen, until it is paused.
 const reel = document.querySelector<HTMLElement>("[data-reel]");
 if (reel) {
@@ -185,15 +233,42 @@ if (reel) {
   }
 }
 
-// The sales video: the poster's button starts it, then the player's own controls take over.
+// The sales video. On arrival it plays without sound, under one button that turns the sound on and
+// starts it from the top. Where a browser will not start it, the poster's play button does. Either way
+// the player's own controls take over from there.
 const vsl = document.querySelector<HTMLElement>("[data-vsl]");
 const film = vsl?.querySelector<HTMLVideoElement>("[data-vsl-video]");
-vsl?.querySelector("[data-vsl-play]")?.addEventListener("click", () => {
-  vsl.classList.add("is-playing");
-  film?.focus({ preventScroll: true });
-  // A browser may refuse to start a video; its controls are showing by then, so nothing is lost.
-  film?.play().catch(() => {});
-});
+if (vsl && film) {
+  const sound = vsl.querySelector<HTMLButtonElement>("[data-vsl-sound]");
+  const silent = (on: boolean) => {
+    film.muted = film.loop = on;
+    film.controls = !on;
+    vsl.classList.toggle("is-silent", on);
+    if (sound) sound.hidden = !on;
+  };
+  const start = () => {
+    silent(false);
+    vsl.classList.add("is-playing");
+    film.currentTime = 0;
+    film.focus({ preventScroll: true });
+    // A browser may refuse to start a video; its controls are showing by then, so nothing is lost.
+    film.play().catch(() => {});
+  };
+  vsl.querySelector("[data-vsl-play]")?.addEventListener("click", start);
+  sound?.addEventListener("click", start);
+  const saving = (navigator as { connection?: { saveData?: boolean } }).connection?.saveData;
+  if (sound && !saving && !matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    film.muted = film.loop = true;
+    film.controls = false;
+    film.play().then(
+      () => {
+        silent(true);
+        vsl.classList.add("is-playing");
+      },
+      () => silent(false),
+    );
+  }
+}
 
 // The iceberg: a line of the list and its band light up together, on hover, on focus, and (on a wide
 // screen, where the picture stays beside the list) as the line passes the middle of the screen.

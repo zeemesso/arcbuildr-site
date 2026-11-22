@@ -1,6 +1,6 @@
-/* The quiet folio (DESIGN.md, section 12), sections 2 to 5 and 10 to 13, the apply strips and the video.
+/* The quiet folio (DESIGN.md, sections 12 and 14), sections 2 to 5 and 9 to 12, the apply strips and the video.
  * A section sits on the paper itself, parted from the next by air and from its own parts by
- * hairlines. Only three of them are a surface: the framework, the guarantee and the last panel. */
+ * hairlines. Only three of them are a surface: How it works, the guarantee and the last panel. */
 
 /* ---------- Shared pieces ---------- */
 .say,
@@ -223,168 +223,442 @@
   }
 }
 
-/* ---------- 4. The framework: one chain in a dark window ---------- */
-.show {
+/* ---------- 4. How it works: the diagram in a dark window, then five steps ---------- */
+.how {
   padding: clamp(2.5rem, 1.5rem + 5vw, 5rem) clamp(1.25rem, 4.5vw, 4rem);
-  --link: 0.75rem;
 }
-.show__head {
+.how__head {
   display: grid;
   justify-items: start;
   gap: 1rem;
   max-width: 44rem;
   margin-bottom: clamp(2.5rem, 1.5rem + 5vw, 4.5rem);
 }
-.show__lead {
+.how__lead {
   color: var(--on-night-muted);
   font-size: var(--lead);
   line-height: 1.55;
   text-wrap: pretty;
 }
-/* On a phone the chain runs top to bottom, with its line down the left. */
-.chain {
-  --gap: 2.5rem;
+/* On a phone the diagram is one column: what you bring, a short stem, the hub, a stem, what you get. */
+.flow {
   display: grid;
-  gap: var(--gap);
 }
-.chain__link {
-  position: relative;
+.flow__col {
   display: grid;
-  align-content: start;
-  justify-items: start;
-  gap: 0.5rem;
-  padding-left: 2rem;
+  gap: 0.75rem;
 }
-.chain__dot {
-  position: absolute;
-  left: 0;
-  top: 0.3rem;
-  width: var(--link);
-  height: var(--link);
-  border-radius: 50%;
-  background: var(--color-accent);
-}
-/* The two ends are rings: the chain starts with the owner and ends with the piece. */
-.chain__link--end .chain__dot {
-  background: none;
-  box-shadow: inset 0 0 0 2px var(--color-accent);
-}
-/* The line from one link to the next: a faint track, and the fill that runs along it. */
-.chain__link::before,
-.chain__link::after {
-  content: "";
-  position: absolute;
-  left: calc(var(--link) / 2 - 0.5px);
-  top: calc(0.3rem + var(--link) + 0.375rem);
-  bottom: calc(-1 * var(--gap) + 0.075rem);
-  width: 1px;
-}
-.chain__link::before {
-  background: var(--hair-night);
-}
-.chain__link::after {
-  background: var(--color-accent);
-  transform-origin: top left;
-}
-.chain__link--last::before,
-.chain__link--last::after {
-  content: none;
-}
-.js .chain__link::after {
-  scale: 1 0;
-}
-.js .chain__link.is-in::after {
-  scale: 1 1;
-  transition: scale 700ms var(--ease-move) 300ms;
-}
-.chain__n {
+.flow__label {
   color: var(--on-night-muted);
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.1em;
+  line-height: 1.4;
+  text-transform: uppercase;
+}
+/* The middle column's label carries a small director's mark. */
+.flow__label--mark {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--on-night);
+}
+.flow__label--mark svg {
+  flex: none;
+  width: 1.125rem;
+  height: 1.125rem;
+  fill: none;
+  stroke: var(--color-accent);
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.flow__cards {
+  display: grid;
+  gap: 0.5rem;
+}
+.flow__card {
+  display: grid;
+  align-content: center;
+  justify-items: start;
+  gap: 0.125rem;
+  padding: 0.875rem 1rem;
+  border-radius: var(--r-inner);
+  background: color-mix(in oklch, var(--color-card) 6%, var(--night));
+  box-shadow: inset 0 0 0 1px var(--hair-night);
+  color: var(--on-night-muted);
+  font-size: var(--text-sm);
+  line-height: 1.45;
+  text-wrap: pretty;
+}
+.flow__card b {
+  color: var(--on-night);
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.3;
+}
+/* Which packages the last card comes with. */
+.flow__tag {
+  margin-bottom: 0.375rem;
+  padding: 0.1875rem 0.5rem;
+  border-radius: var(--radius-pill);
+  background: color-mix(in oklch, var(--color-accent) 24%, var(--night));
+  color: var(--on-night);
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
+  letter-spacing: 0.08em;
+  line-height: 1.4;
+  text-transform: uppercase;
+}
+/* The hub is the heavy middle: the one light sheet in the dark window. */
+.hub {
+  display: grid;
+  gap: 1.25rem;
+  padding: clamp(1.25rem, 1rem + 1.4vw, 2rem);
+  border-radius: var(--r-inner);
+  background: var(--window);
+  color: var(--ink);
+}
+.hub__line {
+  font-size: var(--lead);
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  line-height: 1.35;
+  text-wrap: balance;
+}
+.hub__steps {
+  display: grid;
+}
+.hub__steps li {
+  display: grid;
+  grid-template-columns: 1.75rem minmax(0, 1fr);
+  column-gap: 0.5rem;
+  row-gap: 0.25rem;
+  padding-block: 1rem;
+  border-top: 1px solid var(--hair);
+}
+.hub__steps li:last-child {
+  padding-bottom: 0;
+}
+.hub__steps li > * {
+  grid-column: 2;
+}
+.hub__steps .hub__n {
+  grid-column: 1;
+  grid-row: 1;
+  align-self: center;
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.06em;
 }
 /* The step's name is large; its plain meaning sits right under it, never apart from it. */
-.chain__name {
-  font-size: clamp(1.625rem, 1.35rem + 1.1vw, 2.125rem);
+.hub__name {
+  font-size: clamp(1.375rem, 1.2rem + 0.8vw, 1.75rem);
   font-weight: 600;
   letter-spacing: var(--track);
   line-height: 1.1;
 }
-.chain__plain {
+.hub__plain {
   line-height: 1.45;
   text-wrap: pretty;
 }
-.chain__becomes {
+.hub__becomes {
   display: grid;
   grid-template-columns: 1rem minmax(0, 1fr);
-  gap: 0.5rem;
-  width: 100%;
-  margin-block: 0.5rem 0.25rem;
-  padding-block: 0.75rem;
-  border-block: 1px solid var(--hair-night);
-  color: var(--color-accent);
+  gap: 0.375rem;
+  margin-top: 0.25rem;
+  /* The words in ink, the arrow in the accent: the accent is too light for small words on white. */
+  color: var(--ink);
   font-size: var(--text-sm);
   font-weight: 600;
   line-height: 1.4;
   text-wrap: pretty;
 }
-.chain__becomes svg {
+.hub__becomes svg {
   width: 1rem;
   height: 1rem;
   margin-top: 0.125rem;
   fill: none;
-  stroke: currentColor;
+  stroke: var(--color-accent-text);
   stroke-width: 2.2;
   stroke-linecap: round;
   stroke-linejoin: round;
 }
-.chain__title {
-  font-size: 1.125rem;
-  font-weight: 600;
-  line-height: 1.3;
+/* A connector: a faint track, and the fill that runs along it once the diagram is on screen. */
+.flow__pipes {
+  position: relative;
+  justify-self: center;
+  width: 1px;
+  height: 2rem;
+  margin-block: 0.375rem;
+  background: var(--hair-night);
 }
-.chain__body {
-  color: var(--on-night-muted);
-  font-size: var(--text-sm);
-  line-height: 1.55;
-  text-wrap: pretty;
+.flow__pipes svg {
+  display: none;
 }
-.show__close {
+.flow__pipes::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--color-accent);
+  transform-origin: top;
+}
+.js .flow__pipes::after {
+  scale: 1 0;
+}
+.js .flow.is-in .flow__pipes::after {
+  scale: 1 1;
+  transition: scale 500ms var(--ease-move) 500ms;
+}
+.js .flow.is-in .flow__pipes--out::after {
+  transition-delay: 1300ms;
+}
+.how__close {
   max-width: 44rem;
-  margin-top: clamp(2.5rem, 1.5rem + 5vw, 4.5rem);
-  padding-top: clamp(1.5rem, 3vw, 2rem);
-  border-top: 1px solid var(--hair-night);
+  margin-top: clamp(2rem, 1.5rem + 3vw, 3.5rem);
   font-size: var(--lead);
   line-height: 1.5;
   text-wrap: pretty;
 }
-/* On a wide screen the chain runs left to right: the interview, the three steps, the piece. */
+/* On a wide screen the three stand side by side, the labels in one row, the connectors between. */
 @media (min-width: 64rem) {
-  .chain {
-    --gap: clamp(1.25rem, 2.2vw, 2.25rem);
-    grid-template-columns: 0.8fr repeat(3, 1fr) 0.8fr;
+  .flow {
+    grid-template-columns:
+      minmax(0, 1fr) clamp(2rem, 4vw, 3.5rem) minmax(0, 1.25fr) clamp(2rem, 4vw, 3.5rem)
+      minmax(0, 1fr);
+    grid-template-rows: auto 1fr;
+    row-gap: 0.75rem;
   }
-  .chain__link {
-    padding: 2.25rem 0 0;
+  .flow__col {
+    display: contents;
   }
-  .chain__dot {
-    top: 0;
+  .flow__label {
+    grid-row: 1;
   }
-  .chain__link::before,
-  .chain__link::after {
-    left: calc(var(--link) + 0.5rem);
-    right: calc(-1 * var(--gap) + 0.5rem);
-    top: calc(var(--link) / 2 - 0.5px);
-    bottom: auto;
+  .flow__col--in > * {
+    grid-column: 1;
+  }
+  .flow__col--hub > * {
+    grid-column: 3;
+  }
+  .flow__col--out > * {
+    grid-column: 5;
+  }
+  .flow__cards,
+  .hub,
+  .flow__pipes {
+    grid-row: 2;
+  }
+  /* Every card in a column is as tall as the others, so each connector meets the middle of its card. */
+  .flow__cards {
+    grid-auto-rows: 1fr;
+  }
+  .hub {
+    align-content: center;
+  }
+  .flow__pipes {
+    justify-self: stretch;
     width: auto;
-    height: 1px;
+    height: auto;
+    margin: 0;
+    background: none;
   }
-  .js .chain__link::after {
+  .flow__pipes--in {
+    grid-column: 2;
+  }
+  .flow__pipes--out {
+    grid-column: 4;
+  }
+  .flow__pipes::after {
+    content: none;
+  }
+  .flow__pipes svg {
+    display: block;
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+  }
+  .flow__pipes path {
+    fill: none;
+    stroke: var(--hair-night);
+    stroke-width: 1.5;
+    vector-effect: non-scaling-stroke;
+  }
+  .flow__run path {
+    stroke: var(--color-accent);
+  }
+  /* The fill is uncovered from the left: into the hub first, then out of it. */
+  .js .flow__run {
+    clip-path: inset(-0.25rem 100% -0.25rem 0);
+  }
+  .js .flow.is-in .flow__run {
+    clip-path: inset(-0.25rem 0 -0.25rem 0);
+    transition: clip-path 800ms var(--ease-move) 500ms;
+  }
+  .js .flow.is-in .flow__pipes--out .flow__run {
+    transition-delay: 1500ms;
+  }
+}
+
+/* The five steps: numbered tabs. */
+.steps {
+  display: grid;
+  gap: 0.5rem;
+  margin-top: clamp(2.5rem, 1.5rem + 5vw, 4.5rem);
+  padding-top: clamp(1.5rem, 3vw, 2.25rem);
+  border-top: 1px solid var(--hair-night);
+}
+.steps__step {
+  position: relative;
+  display: grid;
+  align-content: start;
+  gap: 0.625rem;
+  padding: 1.125rem;
+  border-radius: var(--r-inner);
+  background: color-mix(in oklch, var(--color-card) 6%, var(--night));
+  overflow: hidden;
+}
+.steps__h {
+  font: inherit;
+}
+.steps__h button {
+  display: grid;
+  gap: 0.625rem;
+  width: 100%;
+  min-height: 2.75rem;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: default;
+}
+.steps__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.steps__n {
+  color: var(--on-night-muted);
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.06em;
+}
+.steps__step svg {
+  width: 1.5rem;
+  height: 1.5rem;
+  fill: none;
+  stroke: var(--color-accent);
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.steps__t {
+  font-size: 1.125rem;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  line-height: 1.25;
+}
+.steps__text {
+  color: var(--on-night-muted);
+  line-height: 1.55;
+  text-wrap: pretty;
+}
+.steps__bar {
+  display: none;
+}
+@media (min-width: 64rem) {
+  .js .steps {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    transition: grid-template-columns 600ms var(--ease-enter);
+  }
+  .js .steps[data-active="1"] {
+    grid-template-columns: 2.6fr 1fr 1fr 1fr 1fr;
+  }
+  .js .steps[data-active="2"] {
+    grid-template-columns: 1fr 2.6fr 1fr 1fr 1fr;
+  }
+  .js .steps[data-active="3"] {
+    grid-template-columns: 1fr 1fr 2.6fr 1fr 1fr;
+  }
+  .js .steps[data-active="4"] {
+    grid-template-columns: 1fr 1fr 1fr 2.6fr 1fr;
+  }
+  .js .steps[data-active="5"] {
+    grid-template-columns: 1fr 1fr 1fr 1fr 2.6fr;
+  }
+  .js .steps__step {
+    min-height: 14rem;
+    transition: background-color 300ms var(--ease-move);
+  }
+  .js .steps__h button {
+    cursor: pointer;
+  }
+  /* The whole tab is the target. */
+  .js .steps__h button::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+  }
+  .js .steps__step:not(.is-on) .steps__text {
+    display: none;
+  }
+  .js .steps__step:not(.is-on):hover {
+    background: color-mix(in oklch, var(--color-card) 11%, var(--night));
+  }
+  .js .steps__step.is-on {
+    background: var(--window);
+    color: var(--ink);
+  }
+  .js .steps__step.is-on .steps__n,
+  .js .steps__step.is-on .steps__text {
+    color: var(--muted);
+  }
+  .js .steps__step.is-on svg {
+    stroke: var(--color-accent-text);
+  }
+  .js .steps__step.is-on .steps__text {
+    max-width: 30rem;
+    animation: steps-in 500ms var(--ease-enter) 120ms backwards;
+  }
+  /* The line that fills while a tab has its turn. */
+  .js .steps__bar {
+    display: block;
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    height: 2px;
+    background: var(--color-accent);
     scale: 0 1;
+    transform-origin: left;
   }
-  /* The links arrive in order, and each line fills once its link is there. */
-  .js .chain__link.is-in {
-    transition-delay: calc(var(--i) * 380ms);
+  .js .steps.is-turning .steps__step.is-on .steps__bar {
+    animation: steps-turn var(--turn, 5s) linear forwards;
   }
-  .js .chain__link.is-in::after {
-    transition: scale 380ms linear calc(var(--i) * 380ms + 240ms);
+}
+@keyframes steps-in {
+  from {
+    opacity: 0;
+    translate: 0 0.5rem;
+  }
+}
+@keyframes steps-turn {
+  to {
+    scale: 1 1;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .js .flow__pipes::after {
+    scale: 1 1;
+  }
+  .js .flow__run {
+    clip-path: none;
   }
 }
 
@@ -408,6 +682,16 @@
   overflow: hidden;
   isolation: isolate;
 }
+/* The wide card's screen holds three labelled parts: on a narrow stage its labels run to two lines, so
+ * the stage is a square there. */
+.card--wide .card__stage {
+  aspect-ratio: 1;
+}
+@media (min-width: 64rem) {
+  .card--wide .card__stage {
+    aspect-ratio: 4 / 3;
+  }
+}
 .card__text {
   display: grid;
   align-content: start;
@@ -420,16 +704,6 @@
   letter-spacing: var(--track);
   line-height: 1.15;
   text-wrap: balance;
-}
-.card__meta {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 0.25rem 1rem;
-  line-height: 1.4;
-}
-.card__date {
-  font-weight: 600;
 }
 /* The step of the Show it comes from. */
 .card__from {
@@ -476,7 +750,7 @@
   }
 }
 
-/* ---------- 10. Guarantee: one quiet tinted panel ---------- */
+/* ---------- 9. Guarantee: one quiet tinted panel ---------- */
 .promise {
   display: grid;
   gap: clamp(1.75rem, 4vw, 3rem);
@@ -494,71 +768,6 @@
   letter-spacing: var(--track);
   line-height: 1.06;
   text-wrap: balance;
-}
-/* Day 1, day 7, day 10: the stretch from 7 to 10 is the refund window. */
-.days {
-  position: relative;
-  height: 3.75rem;
-  max-width: 26rem;
-  margin-inline: 0.5rem 1rem;
-  border-top: 1.5px solid color-mix(in oklch, var(--color-sage) 40%, transparent);
-}
-.days::after {
-  content: "";
-  position: absolute;
-  left: 66.667%;
-  right: 0;
-  top: -4px;
-  height: 6px;
-  border-radius: 3px;
-  background: var(--color-sage);
-  transform-origin: left;
-}
-.days li {
-  position: absolute;
-  top: -0.4375rem;
-  display: grid;
-  justify-items: center;
-  gap: 0.625rem;
-  translate: -50% 0;
-  font-family: var(--font-mono);
-  font-size: var(--text-xs);
-  letter-spacing: 0.04em;
-  white-space: nowrap;
-}
-.days li:nth-child(1) {
-  left: 0;
-  justify-items: start;
-  translate: -0.375rem 0;
-}
-.days li:nth-child(2) {
-  left: 66.667%;
-}
-.days li:nth-child(3) {
-  left: 100%;
-  justify-items: end;
-  translate: calc(-100% + 0.375rem) 0;
-}
-.days i {
-  z-index: 1;
-  width: 0.75rem;
-  height: 0.75rem;
-  border-radius: 50%;
-  background: var(--tint-sage);
-  box-shadow: inset 0 0 0 1.5px var(--color-sage);
-}
-.days li:nth-child(n + 2) i {
-  background: var(--color-sage);
-}
-.days li:nth-child(n + 2) span {
-  font-weight: 700;
-}
-.js .days[data-reveal]::after {
-  scale: 0 1;
-}
-.js .days[data-reveal].is-in::after {
-  scale: 1 1;
-  transition: scale 900ms var(--ease-enter) 400ms;
 }
 .promise__words {
   display: grid;
@@ -585,12 +794,15 @@
   }
 }
 
-/* ---------- 11. Fit: two plain lists ---------- */
+/* ---------- 10. Fit: two plain lists ---------- */
 .fit__cols {
   display: grid;
   gap: clamp(2rem, 6vw, 5rem);
 }
 .fit__col h3 {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
   padding-bottom: 0.875rem;
   font-size: 1.125rem;
   font-weight: 600;
@@ -621,6 +833,13 @@
 .fit__col--not svg {
   stroke: var(--color-clay);
 }
+.fit__col .fit__icon {
+  flex: none;
+  width: 2rem;
+  height: 2rem;
+  margin-top: 0;
+  stroke-width: 1.75;
+}
 .fit__col--not li {
   color: var(--muted);
 }
@@ -631,7 +850,7 @@
   }
 }
 
-/* ---------- 12. Questions: rows that open ---------- */
+/* ---------- 11. Questions: rows that open ---------- */
 .faq {
   display: grid;
   gap: clamp(1.5rem, 4vw, 2.5rem);
@@ -719,7 +938,7 @@
   }
 }
 
-/* ---------- 13. Apply: the last dark panel ---------- */
+/* ---------- 12. Apply: the last dark panel ---------- */
 .final {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
@@ -800,6 +1019,14 @@
   font-size: var(--text-sm);
   text-align: center;
   text-wrap: balance;
+}
+/* His own audit, beside the two fields, once the picture exists. */
+.final__audit {
+  display: block;
+  width: min(100%, 18rem);
+  height: auto;
+  margin: 1.25rem auto 0;
+  border-radius: 0.75rem;
 }
 .final__steps {
   display: grid;

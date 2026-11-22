@@ -1,7 +1,9 @@
 ---
 /**
- * The sales video that leads the page: a 16:9 block. A poster with a play button, then the player.
- * The poster carries his photo when there is one, and the deck's line on who he is.
+ * The sales video that leads the page: a 16:9 block. On arrival the film plays without sound, under one
+ * button that turns the sound on and starts it again from the top; then the player's own controls take
+ * over. Where a browser will not start a film by itself, or the visitor asked for less motion, a poster
+ * with a play button stands there instead: his photo when there is one, and the deck's line on who he is.
  * It is rendered only when there is a film to play (First.astro).
  */
 import { page } from "../../content/site";
@@ -43,4 +45,12 @@ const photo = FOUNDER_PHOTO || founderPhoto();
     </button>
     <p class="vsl__who">{poster}</p>
   </div>
+  <button class="vsl__sound" type="button" data-vsl-sound aria-label={page.ui.sound} hidden>
+    <span class="vsl__play vsl__play--sound">
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M4 9.5h3.5L12 6v12l-4.5-3.5H4z"></path>
+        <path d="M16 9l5 6M21 9l-5 6"></path>
+      </svg>
+    </span>
+  </button>
 </figure>

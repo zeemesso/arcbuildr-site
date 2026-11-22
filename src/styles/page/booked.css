@@ -74,6 +74,19 @@
   margin-inline: auto;
   padding: clamp(3.5rem, 8vw, 6.5rem) calc(var(--frame) + clamp(0.75rem, 2vw, 1.5rem));
 }
+/* Which package they picked, when a package card opened the form. */
+.next__package {
+  max-width: var(--measure);
+  padding: 0.875rem 1.125rem;
+  border-radius: var(--r-inner);
+  background: var(--tint-accent);
+  font-weight: 600;
+  line-height: 1.45;
+  text-wrap: pretty;
+}
+.next__package[hidden] {
+  display: none;
+}
 .next__list {
   display: grid;
   gap: 0.625rem;

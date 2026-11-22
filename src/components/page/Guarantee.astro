@@ -1,11 +1,9 @@
 ---
 /**
- * 10. Guarantee: one quiet window, large type, no picture. A small timeline of three marks: day 1,
- * day 7, day 10, with the stretch from day 7 to day 10 highlighted.
+ * 9. Guarantee: one quiet window, large type, no picture and no dates.
  */
 import { section } from "../../content/deck";
-import { page } from "../../content/site";
-const s = section(10);
+const s = section(9);
 const paragraphs = s.list("paragraph").map(({ words }) => words);
 ---
 
@@ -18,14 +16,6 @@ const paragraphs = s.list("paragraph").map(({ words }) => words);
       {s.get("heading")}
     </h2>
   </div>
-  <ol class="days" data-reveal aria-hidden="true">
-    {page.guarantee.marks.map((mark) => (
-      <li>
-        <i />
-        <span>{mark}</span>
-      </li>
-    ))}
-  </ol>
   <div class="promise__words">
     <p class="promise__first" data-reveal>
       {paragraphs[0]}

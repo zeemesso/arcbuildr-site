@@ -1,14 +1,14 @@
 ---
 /**
- * 7. The work: a row of pieces that steps forward about every 2.5 seconds, with a pause button and
- * one tab per kind of piece. Only real pieces from Zyade's own Season One go here (src/content/proof.ts).
+ * 6. The work: a row of pieces that steps forward about every 2.5 seconds, with a pause button and
+ * one tab per kind of piece. Only real pieces from Zyade's own account go here (src/content/proof.ts).
  * The whole section turns on by itself once its twelve slots hold real pieces: until then it is not on
  * the page at all, so its words never stand above nothing.
  */
 import { section } from "../../content/deck";
 import { gallery, workIsReady } from "../../content/proof";
 import { page } from "../../content/site";
-const s = section(7);
+const s = section(6);
 const tabs = [1, 2, 3, 4].map((n) => ({ n, name: s.get(`tab ${n}`), pieces: gallery(n) }));
 /** The switch: the twelve real pieces, brought in by scripts/proof/import.mjs, show the section. */
 const on = workIsReady();
@@ -78,10 +78,6 @@ const { ui } = page;
         </button>
       </div>
     </div>
-
-    <p class="work__after" data-reveal>
-      {s.get("line under the gallery")}
-    </p>
 
     <dialog class="zoom" data-zoom-box aria-labelledby="work-h">
       <button type="button" class="zoom__x" data-zoom-close aria-label={ui.close}>

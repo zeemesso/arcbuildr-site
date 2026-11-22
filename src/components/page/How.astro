@@ -1,0 +1,165 @@
+---
+/**
+ * 4. How it works: a diagram in a dark window, then five steps.
+ * The diagram: what the owner brings (three cards), what we decide (the hub: the Show's three steps,
+ * each with its name, its plain meaning right under it and what it becomes), what the owner gets (five
+ * cards, the last with the packages it comes with). Connectors join the three and fill in order.
+ * The steps are numbered tabs: on a wide screen one is open at a time and they take turns. On a phone
+ * the diagram stacks and every step is open. Without scripts every step is open too.
+ */
+import { section } from "../../content/deck";
+const s = section(4);
+/** "Your interview. 45 minutes with me." → the first sentence leads, the rest explains. */
+const lead = (words: string) => {
+  const cut = words.indexOf(". ");
+  return cut < 0
+    ? ([words, ""] as const)
+    : ([words.slice(0, cut + 1), words.slice(cut + 2)] as const);
+};
+/** A slot whose name is a prefix and a number alone ("step 1", never "step 01, name"). */
+const numbered = (prefix: string) =>
+  s.list(prefix).filter(({ slot }) => /^\d+$/.test(slot.slice(prefix.length)));
+const inputs = numbered("input ").map(({ words }) => lead(words));
+const outputs = numbered("output ").map(({ slot, words }) => ({
+  text: lead(words),
+  tag: s.find(`${slot}, tag`),
+}));
+const decided = s
+  .list("step ")
+  .filter(({ slot }) => slot.endsWith(", name"))
+  .map(({ slot, words }) => {
+    const key = slot.replace(", name", "");
+    return {
+      n: key.replace("step ", ""),
+      name: words,
+      plain: s.get(`${key}, plain meaning`),
+      becomes: s.get(`${key}, becomes`),
+    };
+  });
+const steps = numbered("step ").map(({ words }) => lead(words));
+// One small drawing per step: talk, decide, write, film, review.
+const icons = [
+  "M5 6.5h14v9H11l-4 3.5v-3.500H5z",
+  "M7 3.5h7l4 4V20.500H7zM14 3.500v4h4M10 12h5M10 15.500h5",
+  "M4.5 19.500l1-4.500 9.500-9.500 3.500 3.500L9 18.500zM13 7.500l3.500 3.500",
+  "M8 2.500h8a1.500 1.500 0 0 1 1.500 1.500v16a1.500 1.500 0 0 1-1.500 1.500H8A1.500 1.500 0 0 1 6.500 20V4A1.500 1.500 0 0 1 8 2.500zM12 15.500a3 3 0 1 0 0-6 3 3 0 0 0 0 6z",
+  "M4 5.500h16v14H4zM4 9.500h16M8.500 3v4M15.500 3v4M8.500 14.500l2.500 2.500 4.500-5",
+];
+// The connectors, on a sheet 100 wide and 300 high: each card's middle to the hub's middle.
+const middles = (count: number) =>
+  Array.from({ length: count }, (_, n) => ((n + 0.5) * 300) / count);
+const bend = (from: number, to: number) => `M0 ${from} C55 ${from} 45 ${to} 100 ${to}`;
+const pipesIn = middles(inputs.length).map((y) => bend(y, 150));
+const pipesOut = middles(outputs.length).map((y) => bend(150, y));
+---
+
+<section class="window window--night how" id="how" aria-labelledby="how-h">
+  <div class="how__head">
+    <p class="label" data-reveal>
+      {s.get("label")}
+    </p>
+    <h2 class="h2" id="how-h" data-reveal>
+      {s.get("heading")}
+    </h2>
+    <p class="how__lead" data-reveal>
+      {s.get("paragraph")}
+    </p>
+  </div>
+
+  <div class="flow" data-flow data-reveal>
+    <div class="flow__col flow__col--in">
+      <p class="flow__label">{s.get("diagram, left label")}</p>
+      <ul class="flow__cards">
+        {inputs.map(([title, rest]) => (
+          <li class="flow__card">
+            <b>{title}</b> {rest}
+          </li>
+        ))}
+      </ul>
+    </div>
+    <div class="flow__pipes flow__pipes--in" aria-hidden="true">
+      {["flow__track", "flow__run"].map((layer) => (
+        <svg class={layer} viewBox="0 0 100 300" preserveAspectRatio="none" focusable="false">
+          {pipesIn.map((d) => (
+            <path d={d} />
+          ))}
+        </svg>
+      ))}
+    </div>
+    <div class="flow__col flow__col--hub">
+      <p class="flow__label flow__label--mark">
+        {/* A director's mark of our own: the board that opens a take. */}
+        <svg viewBox="0 0 24 24" aria-hidden="true" data-director-mark>
+          <path d="M4 10.5h16V19a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 19z" />
+          <path d="M4 10.5l-.7-3.1 15.7-3.5.7 3.1z" />
+          <path d="M7.6 6.5l1.9 2.8M12 5.5l1.9 2.8M16.4 4.5l1.6 2.4" />
+        </svg>
+        {s.get("diagram, hub label")}
+      </p>
+      <div class="hub" data-hub>
+        <p class="hub__line">{s.get("hub, line")}</p>
+        <ol class="hub__steps">
+          {decided.map(({ n, name, plain, becomes }) => (
+            <li>
+              <span class="hub__n">{n}</span>
+              <h3 class="hub__name">{name}</h3>
+              <p class="hub__plain">{plain}</p>
+              <p class="hub__becomes">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M5 12h14M13 6l6 6-6 6" />
+                </svg>
+                <span>{becomes}</span>
+              </p>
+            </li>
+          ))}
+        </ol>
+      </div>
+    </div>
+    <div class="flow__pipes flow__pipes--out" aria-hidden="true">
+      {["flow__track", "flow__run"].map((layer) => (
+        <svg class={layer} viewBox="0 0 100 300" preserveAspectRatio="none" focusable="false">
+          {pipesOut.map((d) => (
+            <path d={d} />
+          ))}
+        </svg>
+      ))}
+    </div>
+    <div class="flow__col flow__col--out">
+      <p class="flow__label">{s.get("diagram, right label")}</p>
+      <ul class="flow__cards">
+        {outputs.map(({ text: [title, rest], tag }) => (
+          <li class="flow__card">
+            {tag && <span class="flow__tag">{tag}</span>}
+            <b>{title}</b> {rest}
+          </li>
+        ))}
+      </ul>
+    </div>
+  </div>
+
+  <ol class="steps" data-steps data-active="1">
+    {steps.map(([title, rest], n) => (
+      <li class:list={["steps__step", { "is-on": n === 0 }]} data-reveal style={`--i:${n}`}>
+        <h3 class="steps__h">
+          <button type="button" aria-expanded="true" aria-controls={`step-${n + 1}`}>
+            <span class="steps__top">
+              <span class="steps__n">{String(n + 1).padStart(2, "0")}</span>
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d={icons[n]} />
+              </svg>
+            </span>
+            <span class="steps__t">{title}</span>
+          </button>
+        </h3>
+        <p class="steps__text" id={`step-${n + 1}`}>
+          {rest}
+        </p>
+        <i class="steps__bar" aria-hidden="true" />
+      </li>
+    ))}
+  </ol>
+
+  <p class="how__close" data-reveal>
+    {s.get("chain line")}
+  </p>
+</section>

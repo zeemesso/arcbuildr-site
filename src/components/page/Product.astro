@@ -1,11 +1,13 @@
 ---
 /**
- * The product card: our own product, shown as a product page in small. Its label, its name, its price,
- * one line, what it is, what's inside, and what it needs. The cover is drawn (the arc, on a dark sheet
- * with two sheets behind it); every word is the deck's (section 9, "add-on").
+ * The product card: our own product, shown as a product page in small, in its own frame. Its label, its
+ * name, its price and what it is; the flow from an idea to a piece (three steps, each with a small
+ * drawing); one moving sample (screens/Sample.astro); what's inside; and what it runs in, by name only.
+ * Every word is the deck's (section 8, "add-on", "flow", "inside", "sample").
  */
+import Sample from "./screens/Sample.astro";
 import { section } from "../../content/deck";
-const s = section(9);
+const s = section(8);
 const value = s.get("add-on, value");
 /** The figure in the price line ("147 USD") is set apart. */
 const figure = /[\d,]+ USD/.exec(value);
@@ -19,20 +21,10 @@ const inside = s.list("inside ").map(({ words }) => {
     ? (["", words] as const)
     : ([words.slice(0, cut + 1), words.slice(cut + 2)] as const);
 });
+const flow = s.list("flow ").filter(({ slot }) => /^flow \d+$/.test(slot));
 ---
 
 <article class="product" data-product data-reveal aria-labelledby="product-h">
-  <div class="product__shot" aria-hidden="true">
-    <span class="product__sheet"></span>
-    <span class="product__sheet"></span>
-    <span class="product__cover">
-      <svg viewBox="0 0 120 150" focusable="false">
-        <path class="product__ring" d="M14 118 A 46 46 0 0 1 106 118"></path>
-        <path class="product__ring" d="M30 118 A 30 30 0 0 1 90 118"></path>
-        <path class="product__arc" d="M46 118 A 14 14 0 0 1 74 118"></path>
-      </svg>
-    </span>
-  </div>
   <div class="product__words">
     <p class="product__label">{s.get("add-on, label")}</p>
     <h3 class="product__name" id="product-h">
@@ -45,7 +37,40 @@ const inside = s.list("inside ").map(({ words }) => {
     </p>
     <p class="product__line">{s.get("add-on, line")}</p>
     <p class="product__body">{s.get("add-on, body")}</p>
+
+    <div class="pflow" data-flow-picture>
+      <h4>{s.get("flow title")}</h4>
+      <ol>
+        <li>
+          <span class="pflow__pic pflow__pic--idea" aria-hidden="true">
+            <i></i>
+            <i></i>
+          </span>
+          <p>{flow[0]?.words}</p>
+        </li>
+        <li>
+          <span class="pflow__pic pflow__pic--piece" aria-hidden="true">
+            <i></i>
+            <i></i>
+            <i></i>
+            <i></i>
+          </span>
+          <p>{flow[1]?.words}</p>
+        </li>
+        <li>
+          <span class="pflow__pic pflow__pic--checks" aria-hidden="true">
+            {Array.from({ length: 10 }, () => (
+              <i />
+            ))}
+          </span>
+          <p>{flow[2]?.words}</p>
+        </li>
+      </ol>
+    </div>
   </div>
+
+  <Sample />
+
   <div class="product__inside">
     <h4>{s.get("add-on, inside title")}</h4>
     <ul>

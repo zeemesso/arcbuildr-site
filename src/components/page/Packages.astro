@@ -1,0 +1,202 @@
+---
+/**
+ * 8. The packages, in the deck's order: three package cards side by side, the founding places, the
+ * bonuses, the product card, then the stack: what the same work costs hired out, and one total for each
+ * package beside its founding price. An apply strip closes it.
+ * A card has two parts split by a line: the size label, the name, the outcome and what's in it above;
+ * the price and the one button below. The card with the deck's badge stands taller and is the only one
+ * with a filled button. On a phone one card shows at a time, under three tabs, the marked one first;
+ * the tabs are radio buttons, so they need no script, and a browser that cannot follow them shows the
+ * three cards one above the other.
+ * A card's button hands its package's name to the form and to the page after a booking (`data-package`).
+ */
+import Strip from "./Strip.astro";
+import Product from "./Product.astro";
+import Bonuses from "./Bonuses.astro";
+import { founding, section } from "../../content/deck";
+import { FOUNDING_PLACES_LEFT } from "../../config";
+const s = section(8);
+/** "Founding price: 750 USD" → what the figure is, and the figure. */
+const figure = (words: string) => {
+  const cut = /^(.*?):? ?([\d,]+ USD.*?)\.?$/.exec(words);
+  return cut ? ([cut[1]!, cut[2]!] as const) : (["", words] as const);
+};
+const packages = s
+  .list("package ")
+  .filter(({ slot }) => slot.endsWith(", name"))
+  .map(({ slot, words }) => {
+    const key = slot.replace(", name", "");
+    const size = s.get(`${key}, size`);
+    return {
+      n: key.replace("package ", ""),
+      name: words,
+      size,
+      badge: s.find(`${key}, badge`),
+      outcome: s.get(`${key}, outcome`),
+      price: figure(s.get(`${key}, price`)),
+      after: s.get(`${key}, price after`),
+      items: s.list(`${key}, item `).map((item) => item.words),
+      button: s.get(`${key}, button`),
+    };
+  });
+const paragraphs = s.list("paragraph").map(({ words }) => words);
+const bonuses = s
+  .list("bonus ")
+  .filter(({ slot }) => slot.endsWith(", name"))
+  .map(({ slot, words }) => {
+    const key = slot.replace(", name", "");
+    return {
+      name: words,
+      value: s.get(`${key}, value`),
+      held: s.get(`${key}, with`),
+      body: s.get(`${key}, body`),
+    };
+  });
+/** A row of the stack: "Brand Strategy. 1,250 USD." The figure is the last sentence. */
+const rows = s.list("stack row ").map(({ words }) => {
+  const cut = words.lastIndexOf(". ");
+  return { name: words.slice(0, cut), value: words.slice(cut + 2).replace(/\.$/, "") };
+});
+/** "Clarity: 4,160 USD. Founding price: 750 USD." → the name, the hired-out total, the price. */
+const totals = s.list("stack total, package ").map(({ words }) => {
+  const cut = /^(.+?): ([\d,]+ USD)\. (.+?): ([\d,]+ USD)\.$/.exec(words);
+  if (!cut) throw new Error(`deck: a stack total is not "Name: total. Label: price.": ${words}`);
+  return { name: cut[1]!, total: cut[2]!, label: cut[3]!, price: cut[4]! };
+});
+---
+
+<section class="offer" id="packages" aria-labelledby="offer-h">
+  <div class="offer__head">
+    <p class="label" data-reveal>
+      {s.get("label")}
+    </p>
+    <h2 class="h2" id="offer-h" data-reveal>
+      {s.get("heading")}
+    </h2>
+    <p class="offer__lead" data-reveal>
+      {paragraphs[0]}
+    </p>
+  </div>
+
+  <div class="plans-box" data-plans-box>
+    <div class="plans__tabs" role="radiogroup" aria-labelledby="offer-h" data-plans-tabs>
+      {packages.map(({ n, name, badge }) => (
+        <label class="plans__tab">
+          <input type="radio" name="plan" value={n} checked={!!badge} />
+          <span>{name}</span>
+        </label>
+      ))}
+    </div>
+    <ol class="plans" data-plans>
+      {packages.map(({ n, name, size, badge, outcome, price, after, items, button }, at) => (
+        <li
+          class:list={["plan", { "plan--marked": badge }]}
+          data-plan={n}
+          data-reveal
+          style={`--i:${at}`}
+        >
+          <div class="plan__main">
+            <div class="plan__top">
+              <p class="plan__size">{size}</p>
+              {badge && <p class="plan__badge">{badge}</p>}
+            </div>
+            <h3 class="plan__name">{name}</h3>
+            <p class="plan__outcome">{outcome}</p>
+            <ul class="plan__items">
+              {items.map((item) => (
+                <li>
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M6.5 12.5l3.5 3.5 7.5-8" />
+                  </svg>
+                  <span>{item}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div class="plan__foot">
+            <p class="plan__price">
+              <span>{price[0]}</span>
+              <b>{price[1]}</b>
+              <small>{after}</small>
+            </p>
+            <a
+              class:list={["btn", "plan__btn", { "btn--line": !badge }]}
+              href="#apply"
+              data-apply-open
+              data-package={name}
+            >
+              {button}
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M5 12h14M13 6l6 6-6 6" />
+              </svg>
+            </a>
+          </div>
+        </li>
+      ))}
+    </ol>
+  </div>
+  <div class="plans__under" data-reveal>
+    {s.list("under the cards").map(({ words }) => (
+      <p>{words}</p>
+    ))}
+  </div>
+
+  <div class="founding" data-reveal>
+    <p class="founding__line">
+      <span class="hang__dots" aria-hidden="true">
+        {[0, 1, 2].map((n) => (
+          <i data-taken={n >= FOUNDING_PLACES_LEFT ? "" : undefined} />
+        ))}
+      </span>
+      {founding(s.get("founding line"))}
+    </p>
+    <div class="founding__more">
+      {paragraphs.slice(1).map((words) => (
+        <p>{words}</p>
+      ))}
+    </div>
+  </div>
+
+  <div class="offer__part">
+    <h3 class="offer__title" data-reveal>
+      {s.get("bonus title")}
+    </h3>
+    <Bonuses items={bonuses} />
+  </div>
+
+  <Product />
+
+  <div class="offer__part stack">
+    <h3 class="offer__title" data-reveal>
+      {s.get("stack title")}
+    </h3>
+    <ol class="ledger" data-ledger data-reveal>
+      {rows.map(({ name, value }) => (
+        <li class="ledger__row">
+          <span class="ledger__name">{name}</span>
+          <span class="ledger__value">{value}</span>
+        </li>
+      ))}
+    </ol>
+    <p class="offer__note" data-reveal>
+      {s.get("stack note")}
+    </p>
+    <ol class="sums" data-sums data-reveal>
+      {totals.map(({ name, total, label, price }) => (
+        <li class="sum">
+          <h4 class="sum__name">{name}</h4>
+          <p class="sum__total">{total}</p>
+          <p class="sum__price">
+            <span>{label}</span>
+            <b>{price}</b>
+          </p>
+        </li>
+      ))}
+    </ol>
+    <p class="sum__note" data-reveal>
+      {s.get("line under the stack")}
+    </p>
+  </div>
+
+  <Strip from={8} />
+</section>

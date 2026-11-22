@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import * as content from "../src/content/site";
 import deck from "../src/content/deck.json" with { type: "json" };
-import { PRODUCT, founding, section } from "../src/content/deck";
+import { PACKAGES, PRODUCT, founding, section } from "../src/content/deck";
 import {
   APPLICATION_AFTER_BOOKING_URL,
   APPLICATION_URL,
@@ -24,7 +24,7 @@ function strings(value: unknown, path = ""): [string, string][] {
 const all = [...strings(content, "site"), ...strings(deck.sections, "deck")];
 /** A note for a real piece is never shown, so it is not checked as page words. */
 const shown = all.map(
-  ([path, text]) => [path, text.replace(/\[CLIENT ZERO:[^\]]*\]/g, "")] as const,
+  ([path, text]) => [path, text.replace(/\[(?:CLIENT ZERO|ZYADE'S AUDIT):[^\]]*\]/g, "")] as const,
 );
 /** The privacy page is not the deck's: it names what the site's own code does. */
 const page = shown.filter(([path]) => !path.startsWith("site.privacy"));
@@ -68,6 +68,13 @@ describe("the words", () => {
       );
     }
   });
+  it("say no Season and no date: a length (8 weeks, 21 days) is not a date", () => {
+    for (const [path, text] of shown) {
+      expect(text, path).not.toMatch(/\bseasons?\b/i);
+      expect(text, path).not.toMatch(/\b(day|week)s? \d/i);
+      expect(text, path).not.toMatch(/watch this first/i);
+    }
+  });
   it("hold no install steps, file names or version numbers", () => {
     for (const [path, text] of shown) {
       expect(text, path).not.toMatch(
@@ -78,12 +85,12 @@ describe("the words", () => {
 });
 
 describe("the deck", () => {
-  it("has the 12 numbered sections, then the names, the apply window, the form, the booked page and the head", () => {
+  it("has the 11 numbered sections, then the names, the apply window, the form, the booked page and the head", () => {
     expect(Object.keys(deck.sections)).toEqual([
-      ...Array.from({ length: 12 }, (_, n) => String(n + 1)),
+      ...Array.from({ length: 11 }, (_, n) => String(n + 1)),
       "names",
       "the apply window",
-      "the form",
+      "the form, on tally",
       "the booked page",
       "title and description",
     ]);
@@ -92,91 +99,146 @@ describe("the deck", () => {
     for (const [slot, text] of strings(deck.sections["1"]))
       expect(text, slot).not.toMatch(/USD|\$/);
   });
-  it("gives the first screen a video with its label, its poster line and its placeholder line, and three wins", () => {
+  it("gives the first screen three wins, his name line, and a video only once the film exists", () => {
     const first = section(1);
-    for (const slot of ["video, label", "video, poster", "video, placeholder line"])
-      expect(first.get(slot).length, slot).toBeGreaterThan(0);
     expect(first.list("win ")).toHaveLength(6);
-    // Removed by VERDICT-3: no founder line and no line under the wins.
-    expect(first.find("founder line")).toBeUndefined();
-    expect(first.find("small line under the wins")).toBeUndefined();
+    expect(first.get("who, with his photo once it exists")).toContain("Zyade");
+    expect(first.get("video, poster, only once the film exists").length).toBeGreaterThan(0);
+    // Nothing announces a film that is not there.
+    for (const slot of ["video, label", "video, placeholder line", "video, poster"])
+      expect(first.find(slot), slot).toBeUndefined();
     // The film is not made yet: the slot is empty until Zyade sets it.
     expect(typeof VSL_VIDEO).toBe("string");
   });
-  it("names the product once, and fills its name in wherever a line calls for it", () => {
+  it("names the product and the three packages once, and fills them in wherever a line calls for them", () => {
     expect(PRODUCT).toBe("Say It Plain");
-    expect(section(9).get("add-on, name")).toBe(PRODUCT);
+    expect(PACKAGES).toEqual({ p12: "Clarity", p24: "Recognition", p36: "Momentum" });
+    expect(section(8).get("add-on, name")).toBe(PRODUCT);
+    expect([1, 2, 3].map((n) => section(8).get(`package ${n}, name`))).toEqual(
+      Object.values(PACKAGES),
+    );
     for (const [path, text] of strings(content, "site"))
-      expect(text, path).not.toContain("{product}");
-    expect(section("the form").get("budget, under 750, line 2")).toContain(PRODUCT);
+      expect(text, path).not.toMatch(/\{(product|p12|p24|p36)\}/);
+    for (const key of Object.keys(deck.sections))
+      for (const { slot, words } of section(key).list(""))
+        expect(words, `${key} ${slot}`).not.toMatch(/\{(product|p12|p24|p36)\}/);
+    expect(section("the form, on tally").get("budget, under 750, line 2")).toContain(PRODUCT);
   });
-  it("builds the framework as a chain: a start, three steps, an end", () => {
+  it("lays How it works out as You bring, We decide, You get, then five steps", () => {
     const show = section(4);
-    for (const n of ["01", "02", "03"])
-      for (const part of ["name", "plain meaning", "becomes", "body"])
-        expect(show.get(`step ${n}, ${part}`).length, `${n} ${part}`).toBeGreaterThan(0);
-    for (const slot of ["start, title", "start, line", "end, title", "end, line", "chain line"])
+    for (const slot of ["diagram, left label", "diagram, hub label", "diagram, right label"])
       expect(show.get(slot).length, slot).toBeGreaterThan(0);
+    expect(show.list("input ")).toHaveLength(3);
+    for (const n of ["01", "02", "03"])
+      for (const part of ["name", "plain meaning", "becomes"])
+        expect(show.get(`step ${n}, ${part}`).length, `${n} ${part}`).toBeGreaterThan(0);
+    expect(show.list("output ").filter(({ slot }) => /^output \d$/.test(slot))).toHaveLength(5);
+    expect(show.get("output 5, tag")).toContain(PACKAGES.p24);
+    expect(show.list("step ").filter(({ slot }) => /^step \d$/.test(slot))).toHaveLength(5);
+    expect(show.get("chain line").length).toBeGreaterThan(0);
   });
-  it("has 7 cards, each with a date, a title, the step it comes from and a body", () => {
+  it("has 7 cards, each with a title, the step it comes from, a body and labels for its screen, and no date", () => {
     const get = section(5);
     for (let n = 1; n <= 7; n++) {
       const card = String(n).padStart(2, "0");
-      for (const part of ["date", "title", "from", "body"])
+      for (const part of ["title", "from", "body", "label 1", "label 2"])
         expect(get.get(`card ${card}, ${part}`).length, `${card} ${part}`).toBeGreaterThan(0);
+      expect(get.find(`card ${card}, date`)).toBeUndefined();
     }
     expect(get.find("card 08, title")).toBeUndefined();
-    expect(get.find("card 05, body 2")).toBeUndefined();
+    expect(get.get("card 04, tags")).toBe("Reach. Like. Believe. Buy.");
   });
-  it("shows the stack: two core rows, four priced documents, one included, then the bonuses and the product", () => {
-    const offer = section(9);
+  it("shows three packages: 12, 24 and 36 pieces, the middle one marked, each with one button", () => {
+    const offer = section(8);
+    expect([1, 2, 3].map((n) => offer.get(`package ${n}, size`).match(/^\d+/)?.[0])).toEqual([
+      "12",
+      "24",
+      "36",
+    ]);
+    expect([1, 2, 3].map((n) => offer.find(`package ${n}, badge`))).toEqual([
+      undefined,
+      "Most Popular",
+      undefined,
+    ]);
+    expect([1, 2, 3].map((n) => offer.get(`package ${n}, price`).match(/[\d,]+ USD/)?.[0])).toEqual(
+      ["750 USD", "1,000 USD", "1,250 USD"],
+    );
+    for (const n of [1, 2, 3]) {
+      for (const part of ["outcome", "price after", "button"])
+        expect(offer.get(`package ${n}, ${part}`).length, `${n} ${part}`).toBeGreaterThan(0);
+      // Aesthetory's frame: four lines at most in a card.
+      const items = offer.list(`package ${n}, item `);
+      expect(items.length, `package ${n}`).toBeGreaterThan(0);
+      expect(items.length, `package ${n}`).toBeLessThanOrEqual(4);
+    }
+    expect(offer.get("package 2, item 2")).toContain(PRODUCT);
+    expect(offer.list("under the cards")).toHaveLength(2);
+    expect(founding(offer.get("founding line"))).toMatch(/\d of 3 places left/);
+  });
+  it("shows the stack: seven priced rows, four bonuses, and one total for each package that adds up", () => {
+    const offer = section(8);
     const rows = offer.list("stack row ").map(({ words }) => words);
-    expect(rows).toHaveLength(7);
-    expect(rows.map((row) => row.match(/(The core|[\d,]+ USD|Included)\.$/)?.[1])).toEqual([
-      "The core",
-      "The core",
+    expect(rows.map((row) => row.match(/([\d,]+ USD(?: each)?)\.$/)?.[1])).toEqual([
       "1,250 USD",
       "150 USD",
       "1,000 USD",
       "1,760 USD",
-      "Included",
-    ]);
-    expect([1, 2, 3, 4].map((n) => offer.get(`bonus ${n}, value`).replace(/\.$/, ""))).toEqual([
+      "147 USD",
       "58 USD",
-      "525 USD",
+      "175 USD each",
+    ]);
+    expect([1, 2, 3, 4].map((n) => offer.get(`bonus ${n}, value`))).toEqual([
+      "58 USD",
+      "175 USD each",
       "Included",
       "Included",
     ]);
     for (const n of [1, 2, 3, 4])
-      for (const part of ["name", "body"])
+      for (const part of ["name", "with", "body"])
         expect(offer.get(`bonus ${n}, ${part}`).length).toBeGreaterThan(0);
-    expect(offer.list("inside ")).toHaveLength(3);
-    expect(offer.get("add-on, label")).toBe("Premium add-on, included in Season One");
-    expect(offer.get("stack total")).toContain("4,890 USD");
-    // The priced rows, the product and the two valued bonuses add up to the total.
-    expect(1250 + 150 + 1000 + 1760 + 147 + 58 + 525).toBe(4890);
+    expect(offer.list("inside ")).toHaveLength(8);
+    expect(offer.list("flow ").filter(({ slot }) => /^flow \d$/.test(slot))).toHaveLength(3);
     expect(offer.get("add-on, value")).toContain("147 USD");
+    const totals = [1, 2, 3].map((n) => offer.get(`stack total, package ${n}`));
+    expect(totals.map((line) => line.match(/[\d,]+ USD/g))).toEqual([
+      ["4,160 USD", "750 USD"],
+      ["4,715 USD", "1,000 USD"],
+      ["4,890 USD", "1,250 USD"],
+    ]);
+    // The four documents; then the product, the Setup Call and two Group Reviews; then a third review.
+    const documents = 1250 + 150 + 1000 + 1760;
+    expect(documents).toBe(4160);
+    expect(documents + 147 + 58 + 2 * 175).toBe(4715);
+    expect(documents + 147 + 58 + 3 * 175).toBe(4890);
   });
-  it("shows six prices and the founding places", () => {
-    const offer = section(9);
-    const rows = offer.list("price row ").map(({ words }) => words);
-    expect(rows).toHaveLength(3);
-    expect(rows.join(" ").match(/[\d,]+ USD/g)).toHaveLength(6);
-    expect(founding(offer.get("founding line"))).toMatch(/\d of 3 places left/);
+  it("shows a sample of the product: an idea, three angles, the piece, ten checks", () => {
+    const offer = section(8);
+    expect(offer.get("sample, tag")).toBe("Sample");
+    expect(offer.get("sample, angles").split(". ")).toHaveLength(3);
+    expect(offer.get("sample, angles")).toContain(offer.get("sample, piece title"));
+    expect(offer.get("sample, checks").split(". ")).toHaveLength(10);
+    // ChatGPT and Claude by name only, in the one line that says where the product runs.
+    expect(offer.get("add-on, small line")).toMatch(/ChatGPT.*Claude/);
   });
-  it("explains nine bands under the water, each starting with its day or its weeks", () => {
-    const bands = section(8).list("band ");
+  it("explains nine bands under the water, and none starts with a day or a week", () => {
+    const bands = section(7).list("band ");
     expect(bands).toHaveLength(9);
-    for (const { words } of bands) expect(words).toMatch(/^(Day|Weeks|After week|For life)/);
+    for (const { words } of bands) expect(words).not.toMatch(/^(Day|Weeks?|After week)\b/);
+    expect(section(7).find("line under it")).toBeUndefined();
   });
-  it("puts an apply strip after sections 5, 6, 9 and 11", () => {
-    for (const n of [5, 6, 9, 11]) expect(section(n).get("apply strip").length).toBeGreaterThan(0);
-    for (const n of [1, 2, 3, 4, 7, 8, 10, 12])
+  it("puts an apply strip after sections 5, 8 and 10", () => {
+    for (const n of [5, 8, 10]) expect(section(n).get("apply strip").length).toBeGreaterThan(0);
+    for (const n of [1, 2, 3, 4, 6, 7, 9, 11])
       expect(section(n).find("apply strip")).toBeUndefined();
   });
-  it("answers nine questions", () => {
-    expect(section(12).list("question ")).toHaveLength(9);
-    expect(section(12).list("answer ")).toHaveLength(9);
+  it("answers ten questions", () => {
+    expect(section(11).list("question ")).toHaveLength(10);
+    expect(section(11).list("answer ")).toHaveLength(10);
+  });
+  it("hides the notes to the build: a real piece or his own audit is never shown as words", () => {
+    for (const key of Object.keys(deck.sections))
+      for (const { slot, words } of section(key).list(""))
+        expect(words, `${key} ${slot}`).not.toMatch(/\[(CLIENT ZERO|ZYADE'S AUDIT)/);
   });
 });
 
@@ -201,7 +263,7 @@ describe("the form and what follows it", () => {
     expect(content.application.send.failed).toContain("still here");
   });
   it("takes each question and choice from the deck", () => {
-    const form = section("the form");
+    const form = section("the form, on tally");
     for (const question of content.application.questions) {
       expect(question.q).toBe(form.get(question.id));
       if (question.type === "choice")
@@ -214,8 +276,8 @@ describe("the form and what follows it", () => {
     expect(budget.type === "choice" && budget.options[0]).toBe("Under 750 USD");
     expect(tooLow).toMatchObject({ id: "budget", option: "Under 750 USD" });
     expect(tooLow.lines).toEqual([
-      section("the form").get("budget, under 750, line 1"),
-      section("the form").get("budget, under 750, line 2"),
+      section("the form, on tally").get("budget, under 750, line 1"),
+      section("the form, on tally").get("budget, under 750, line 2"),
     ]);
   });
   it("opens the Tally form, and keeps the form for chat bookings on file", () => {

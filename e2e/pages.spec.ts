@@ -33,14 +33,18 @@ test("sitemap lists home and privacy, and the sample page is gone", async ({ pag
 });
 
 test.describe("the page after a booking", () => {
-  test("shows the two practical lines and what happens next, in the deck's words; the video only with its film", async ({
+  test("shows the three practical lines and what happens next, in the deck's words; the video only with its film", async ({
     page,
   }) => {
     await page.goto("/booked");
     await expect(page.locator("h1")).toHaveText(booked.get("heading, no name"));
-    for (const slot of ["practical 1", "practical 2"])
-      await expect(page.locator("#top")).toContainText(booked.get(slot));
-    for (const slot of ["video, title", "video, length"]) {
+    await expect(page.locator("#top .done__notes li")).toHaveText(
+      ["practical 1", "practical 2", "practical 3"].map((slot) => booked.get(slot)),
+    );
+    for (const slot of [
+      "video, title, only once the film exists",
+      "video, length, only once the film exists",
+    ]) {
       if (existsSync(`public${CONFIRMATION_VIDEO}`))
         await expect(page.locator("#top")).toContainText(booked.get(slot));
       else await expect(page.locator("main")).not.toContainText(booked.get(slot));
@@ -64,8 +68,44 @@ test.describe("the page after a booking", () => {
     // The chat lines are for chat bookings only.
     await expect(page.getByText(booked.get("booked from a chat, line"))).toBeHidden();
     await expect(page.locator("[data-resend]")).toBeHidden();
-    // Two short lines and two steps: no wall of instructions.
-    expect((await page.locator("main").innerText()).split(/\s+/).length).toBeLessThan(140);
+    // No package was picked in this visit: the line that names one is not shown.
+    await expect(page.locator("[data-picked]")).toBeHidden();
+    // Three short lines and two steps: no wall of instructions.
+    expect((await page.locator("main").innerText()).split(/\s+/).length).toBeLessThan(160);
+  });
+
+  test("names the package that was picked, only when one was, and only a plain name", async ({
+    page,
+  }) => {
+    const line = (name: string) =>
+      booked.get("next, package line, only when a package was picked").replace("{package}", name);
+    const arrive = async (kept: Record<string, string>) => {
+      await page.goto("/booked");
+      await page.evaluate(
+        (value) => sessionStorage.setItem("arcbuildr-booked", JSON.stringify(value)),
+        kept,
+      );
+      await page.reload();
+    };
+    await arrive({ name: "TEST", email: "test@example.com", package: "Recognition" });
+    await expect(page.locator("[data-picked]")).toBeVisible();
+    await expect(page.locator("[data-picked]")).toHaveText(line("Recognition"));
+    // It stands above "What happens next".
+    const [picked, next] = await Promise.all([
+      page.locator("[data-picked]").boundingBox(),
+      page.locator("#next-h").boundingBox(),
+    ]);
+    expect(picked!.y + picked!.height).toBeLessThanOrEqual(next!.y);
+    // No package: no line. Anything that is not a plain name: no line, and nothing of it on the page.
+    await arrive({ name: "TEST", email: "test@example.com" });
+    await expect(page.locator("[data-picked]")).toBeHidden();
+    await arrive({
+      name: "TEST",
+      email: "test@example.com",
+      package: "<img src=x onerror=alert(1)>",
+    });
+    await expect(page.locator("[data-picked]")).toBeHidden();
+    await expect(page.locator("[data-picked] img")).toHaveCount(0);
   });
 
   test("greets by first name from the address or from the device, and only a plain name", async ({

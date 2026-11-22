@@ -9,19 +9,35 @@ import { FOUNDING_PLACES_LEFT } from "../config";
 type Slot = [name: string, words: string];
 const sections = data.sections as unknown as Record<string, { title: string; slots: Slot[] }>;
 
-/** A visual that must be a real piece of Zyade's own Season One. The words inside are a note, never shown. */
-const CLIENT_ZERO = /\s*\[CLIENT ZERO:[^\]]*\]/g;
+/**
+ * A visual that must be a real thing of Zyade's own: a piece from his account ([CLIENT ZERO: ...]) or his
+ * own audit ([ZYADE'S AUDIT: ...]). The words inside are a note to the build, never shown.
+ */
+const CLIENT_ZERO = /\s*\[(?:CLIENT ZERO|ZYADE'S AUDIT):[^\]]*\]/g;
 
+const named = (slot: string) => sections.names?.slots.find(([name]) => name === slot)?.[1] ?? "";
 /** The digital product's name. The deck writes it once and puts `{product}` everywhere else. */
-export const PRODUCT = sections.names?.slots.find(([slot]) => slot === "product name")?.[1] ?? "";
-
-/** A slot's words as the page shows them: the note of a real-piece slot off, the product's name in. */
-const shown = (words: string) => {
-  if (words.includes("{product}") && !PRODUCT) throw new Error("deck: no product name");
-  return words.replace(CLIENT_ZERO, "").replaceAll("{product}", PRODUCT).trim();
+export const PRODUCT = named("product name");
+/** The three packages' names, written once too: `{p12}`, `{p24}` and `{p36}` in a line. */
+export const PACKAGES = {
+  p12: named("package 1 name"),
+  p24: named("package 2 name"),
+  p36: named("package 3 name"),
 };
+const NAMES: Record<string, string> = { product: PRODUCT, ...PACKAGES };
 
-/** A section by its number, or a part of section 13 by its heading ("the form", "the booked page"). */
+/** A slot's words as the page shows them: the note of a real-piece slot off, the names in. */
+const shown = (words: string) =>
+  words
+    .replace(CLIENT_ZERO, "")
+    // `{name}` is the visitor's first name: the form fills it, not the deck.
+    .replace(/\{(product|p12|p24|p36)\}/g, (_, key: string) => {
+      if (!NAMES[key]) throw new Error(`deck: no name for {${key}}`);
+      return NAMES[key];
+    })
+    .trim();
+
+/** A section by its number, or a part of the last section by its heading ("the booked page"). */
 export function section(key: number | string) {
   const found = sections[String(key)];
   if (!found) throw new Error(`deck: no section "${key}"`);

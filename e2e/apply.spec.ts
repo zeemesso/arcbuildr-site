@@ -255,7 +255,7 @@ test("a budget under 750 USD ends with the deck's two lines, and no calendar", a
   await apply(page, who, { ...answers, budget: lowest });
   await expect(ending(page)).toBeVisible();
   const lines = ["budget, under 750, line 1", "budget, under 750, line 2"].map((slot) =>
-    section("the form").get(slot).replace("{name}", "TEST"),
+    section("the form, on tally").get(slot).replace("{name}", "TEST"),
   );
   await expect(ending(page).locator("p")).toHaveText(lines);
   await expect(popup(page)).toHaveCount(0);
@@ -329,7 +329,7 @@ test("back from the form as a full page with the lowest budget: the two lines, a
   await page.goto(`/?apply=end&name=${encodeURIComponent("TEST " + markup)}`);
   await expect(ending(page)).toBeVisible();
   await expect(ending(page).locator("p").first()).toHaveText(
-    section("the form").get("budget, under 750, line 1").replace("{name}", "TEST"),
+    section("the form, on tally").get("budget, under 750, line 1").replace("{name}", "TEST"),
   );
   await expect(layer(page).locator("img")).toHaveCount(0);
   await expect(calendar(page)).toBeHidden();
@@ -372,6 +372,29 @@ test("a finished booking lands on /booked, greeted by first name", async ({ page
     section("the booked page").get("heading").replace("{name}", "TEST"),
   );
   // The name and the email are kept on the device, never in the address.
+  expect(new URL(page.url()).search).toBe("");
+});
+
+test("a package card's button: the form is told the package, and /booked names it after the booking", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await stub(page);
+  await page.goto("/");
+  const name = section(8).get("package 3, name");
+  await press(page.locator('#packages [data-plan="3"] [data-apply-open]'));
+  await expect(popup(page)).toBeVisible();
+  expect((await opened(page)).at(-1)!.hiddenFields).toEqual({ package: name });
+  await send(page, submission(who, answers, { extra: { package: name } }));
+  await expect(calendar(page).locator("iframe")).toBeVisible();
+  await page.evaluate(() => (window as unknown as { __booked: () => void }).__booked());
+  await page.waitForURL("**/booked");
+  await expect(page.locator("[data-picked]")).toHaveText(
+    section("the booked page")
+      .get("next, package line, only when a package was picked")
+      .replace("{package}", name),
+  );
+  // Kept on the device, never in the address.
   expect(new URL(page.url()).search).toBe("");
 });
 

@@ -3,7 +3,9 @@ import { press } from "./press";
 import { calendar, ending, plain, stub } from "./stubs";
 
 /**
- * The words the positioning dropped (VERDICT-3, rule 2). This reads what a visitor can meet on the home
+ * The words the positioning dropped (VERDICT-3, rule 2), and the ones the packages dropped on 23 Nov:
+ * "Season", and any date ("Day 1", "Week 3", "Weeks 3 to 8"). A length is not a date: "8 weeks",
+ * "21 days" and "30 more days" stay, and so does the day the prices were checked. This reads what a visitor can meet on the home
  * page, around the form (both endings and the plain form) and on the page after a booking:
  * the text, the alt text, the labels, the page title and the meta tags.
  * "We don't chase viral." is the one allowed use of "viral".
@@ -16,7 +18,11 @@ const BANNED: [string, RegExp][] = [
   ["writers' room", /writers?['’]?s? room/i],
   ["in your voice", /in your voice/i],
   ["a long dash", /[\u2012\u2013\u2014\u2015]/],
+  ["Season", /\bseasons?\b/i],
+  ["a date (day N, week N)", /\b(day|week)s? \d/i],
 ];
+/** Nothing announces a film that is not there. */
+const NO_FILM = /watch this first/i;
 const ALLOWED_VIRAL = "We don't chase viral.";
 
 /** Everything the page says at this moment, to the eye, to a screen reader and to a shared link. */
@@ -43,9 +49,10 @@ const said = (page: Page) =>
     return found.map((text) => text.replace(/\s+/g, " ").trim()).filter(Boolean);
   });
 
-function check(lines: string[], where: string) {
+function check(lines: string[], where: string, film = false) {
   expect(lines.length, where).toBeGreaterThan(3);
   for (const line of lines) {
+    if (!film) expect(NO_FILM.test(line) ? line : "", `${where}: no film`).toBe("");
     // An address in a meta tag is not words.
     if (/^https?:\/\/\S+$/.test(line)) continue;
     for (const [name, banned] of BANNED)
@@ -113,6 +120,35 @@ test("the calendar's panel says none of them", async ({ page }) => {
   const lines = await said(page);
   check(lines, "the calendar");
   expect(await page.locator("[data-plain]").count()).toBeGreaterThan(0);
+});
+
+test("the banned list catches what it should, and leaves a length alone", () => {
+  const caught = (line: string) => BANNED.some(([, banned]) => banned.test(line));
+  for (const line of [
+    "Season One",
+    "your season",
+    "Day 1. Your interview.",
+    "Weeks 3 to 8",
+    "After week 8",
+  ])
+    expect(caught(line), line).toBe(true);
+  for (const line of [
+    "24 pieces, 8 weeks",
+    "12 pieces, 21 days",
+    "30 more days of answers",
+    "an answer within 3 days",
+    "Every Monday I write to you about last week",
+    "Checked on November 21, 2026.",
+  ])
+    expect(caught(line), line).toBe(false);
+  expect(NO_FILM.test("Watch this first")).toBe(true);
+});
+
+test("with a test film the video block still says none of them", async ({ page }) => {
+  await page.goto("/demo/vsl/");
+  await expect(page.locator("[data-vsl]")).toBeVisible();
+  // Even with a film, the page has no label above it: the deck gives none.
+  check(await said(page), "/demo/vsl/");
 });
 
 for (const path of [

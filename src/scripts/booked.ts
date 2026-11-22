@@ -8,9 +8,13 @@ const query = new URLSearchParams(location.search);
 const kept = (() => {
   try {
     const found = JSON.parse(sessionStorage.getItem(BOOKED_KEY) || "{}") as Record<string, unknown>;
-    return { name: String(found.name ?? ""), email: String(found.email ?? "") };
+    return {
+      name: String(found.name ?? ""),
+      email: String(found.email ?? ""),
+      package: String(found.package ?? ""),
+    };
   } catch {
-    return { name: "", email: "" };
+    return { name: "", email: "", package: "" };
   }
 })();
 const given = (
@@ -30,6 +34,13 @@ const email =
 
 const heading = document.querySelector<HTMLElement>("[data-booked]");
 if (heading && name) heading.textContent = heading.dataset.booked!.replace("{name}", name);
+
+// The package whose card opened the form, when one did: the page says which, in the deck's line.
+const picked = document.querySelector<HTMLElement>("[data-picked]");
+if (picked && /^[\p{L}\p{N} '’-]{1,40}$/u.test(kept.package)) {
+  picked.textContent = picked.dataset.picked!.replace("{package}", kept.package);
+  picked.hidden = false;
+}
 
 // Booked from a chat: the 8 questions are not answered yet, so they come first.
 const chat = document.querySelector<HTMLElement>("[data-chat]");

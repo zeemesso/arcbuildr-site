@@ -1,4 +1,4 @@
-/* The quiet folio (DESIGN.md, section 12): the first screen (with the sales video once it exists), the three wins,
+/* The quiet folio (DESIGN.md, sections 12 and 14): the first screen (with the sales video once it exists), the three wins,
  * the iceberg, and the offer with its bonus stack and its product card.
  * Small type, long air, few surfaces. Painted with the names in tokens.css only. */
 
@@ -41,32 +41,12 @@
   text-wrap: pretty;
 }
 
-/* "Watch this first" and the video: on the page only when there is a film. */
+/* The video: on the page only when there is a film. */
 .first__watch {
   display: grid;
   justify-items: center;
   gap: 0.875rem;
   width: 100%;
-}
-.first__cue {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.375rem;
-  color: var(--ink);
-  font-family: var(--font-mono);
-  font-size: 0.6875rem;
-  font-weight: 500;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-}
-.first__cue svg {
-  width: 0.875rem;
-  height: 0.875rem;
-  fill: none;
-  stroke: var(--color-accent);
-  stroke-width: 2.4;
-  stroke-linecap: round;
-  stroke-linejoin: round;
 }
 /* The sales video: 16:9. Its width gives way on a short screen, so the button under it stays in view. */
 .vsl {
@@ -152,6 +132,39 @@ button.vsl__play:active {
   translate: 6% 0;
   fill: currentColor;
 }
+/* While the film plays without sound: one button over the whole frame, with the sound mark in its middle. */
+.vsl__sound {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  background: color-mix(in oklch, var(--night) 24%, transparent);
+  cursor: pointer;
+}
+.vsl__sound[hidden] {
+  display: none;
+}
+.vsl__sound .vsl__play {
+  transition: scale 160ms var(--ease-enter);
+}
+.vsl__sound:hover .vsl__play {
+  scale: 1.06;
+}
+.vsl__sound:active .vsl__play {
+  scale: 0.96;
+}
+.vsl__play--sound svg {
+  translate: 0;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
 .vsl__photo {
   position: absolute;
   inset: 0;
@@ -228,6 +241,21 @@ button.vsl__play:active {
   }
 }
 
+/* Who is speaking: one line under the button, with his photo beside it once a real one exists. */
+.first__who {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.625rem;
+  font-weight: 600;
+  line-height: 1.4;
+}
+.first__who img {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
 /* ---------- The three wins ---------- */
 .wins {
   display: grid;
@@ -265,7 +293,7 @@ button.vsl__play:active {
   }
 }
 
-/* ---------- The 12 weeks: the iceberg ---------- */
+/* ---------- 7. Under the water: the iceberg ---------- */
 .berg {
   max-width: calc(var(--page) + 2 * var(--pad));
   margin-inline: auto;
@@ -295,12 +323,6 @@ button.vsl__play:active {
   justify-items: start;
   gap: 1rem;
   margin-bottom: clamp(2rem, 1.5rem + 3vw, 3.5rem);
-}
-.berg__line {
-  max-width: var(--measure);
-  color: var(--muted);
-  font-size: var(--lead);
-  text-wrap: pretty;
 }
 .berg__grid {
   display: grid;
@@ -398,11 +420,12 @@ button.vsl__play:active {
   fill: var(--color-ice);
   opacity: 0;
 }
+/* Each band's number, the same as on its line of the list. */
 .berg-name {
-  font-family: var(--font-display);
-  font-size: 11.5px;
-  font-weight: 600;
-  letter-spacing: 0.01em;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
   text-anchor: middle;
   dominant-baseline: central;
   pointer-events: none;
@@ -516,8 +539,8 @@ button.vsl__play:active {
 }
 .berg__items li {
   display: grid;
-  grid-template-columns: 0.8125rem 1fr;
-  gap: 0.875rem;
+  grid-template-columns: 1.5rem 1fr;
+  gap: 0.75rem;
   margin-inline: -0.75rem;
   padding: 0.625rem 0.75rem;
   border-radius: 0.75rem;
@@ -534,6 +557,7 @@ button.vsl__play:active {
   font-weight: 600;
 }
 .berg__key {
+  justify-self: center;
   width: 0.8125rem;
   height: 0.8125rem;
   margin-top: 0.34rem;
@@ -541,8 +565,32 @@ button.vsl__play:active {
   background: var(--c, var(--color-ice));
   box-shadow: inset 0 0 0 1px color-mix(in oklch, var(--color-water-deep) 30%, transparent);
 }
+/* A band's key carries its number, in the band's own color. */
+.berg__items li[data-band] .berg__key {
+  display: grid;
+  place-items: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  margin-top: 0;
+  border-radius: 0.375rem;
+  color: var(--on, var(--color-ink));
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
+  font-style: normal;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+}
 .berg__items li.is-hot {
   background: color-mix(in oklch, var(--color-water) 12%, var(--canvas));
+}
+/* His own audit, as a picture, under the line that names it. */
+.berg__shot {
+  display: block;
+  width: min(100%, 16rem);
+  height: auto;
+  margin-top: 0.75rem;
+  border-radius: 0.75rem;
+  box-shadow: var(--shadow-card);
 }
 .berg__read summary {
   cursor: pointer;
@@ -570,15 +618,11 @@ button.vsl__play:active {
   }
 }
 
-/* ---------- 9. The offer: the work, the bonuses, the product, the price ---------- */
+/* ---------- 8. The packages: three cards, the founding places, the bonuses, the product, the stack ---------- */
 .offer {
   max-width: calc(var(--page) + 2 * var(--pad));
   margin-inline: auto;
   padding: var(--air) var(--pad) 0;
-  --bonus-1: var(--tint-accent);
-  --bonus-2: var(--tint-sage);
-  --bonus-3: var(--tint-clay);
-  --bonus-4: var(--tint-taupe);
 }
 .offer__head {
   display: grid;
@@ -593,9 +637,9 @@ button.vsl__play:active {
   line-height: 1.55;
   text-wrap: pretty;
 }
-.offer__grid {
-  display: grid;
-  gap: clamp(2.5rem, 2rem + 3vw, 4.5rem) clamp(2rem, 6vw, 5rem);
+.offer__part,
+.product {
+  margin-top: clamp(3rem, 2rem + 5vw, 5.5rem);
 }
 .offer__title {
   padding-bottom: 0.875rem;
@@ -603,177 +647,311 @@ button.vsl__play:active {
   font-weight: 600;
   line-height: 1.3;
 }
-/* The work: a ledger. The core leads and is heavier; then a name and the figure beside it. */
-.ledger__row {
+
+/* The three packages. A card is two parts split by a line: what it is above, the price and the button below. */
+.plans {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  align-items: baseline;
-  gap: 0.375rem 1.5rem;
-  padding-block: 1rem;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1rem;
+}
+.plan {
+  display: grid;
+  grid-template-rows: 1fr auto;
+  border-radius: var(--r-window);
+  background: var(--window);
+  box-shadow: inset 0 0 0 1px var(--hair);
+}
+.plan__main,
+.plan__foot {
+  display: grid;
+  align-content: start;
+  padding: clamp(1.5rem, 1.25rem + 1vw, 2rem);
+}
+.plan__main {
+  gap: 0.75rem;
+}
+.plan__foot {
+  gap: 1.125rem;
   border-top: 1px solid var(--hair);
 }
-.ledger__row:last-child {
-  border-bottom: 1px solid var(--hair);
+/* The marked package: the one card with an ink edge, a lift and the filled button. */
+.plan--marked {
+  box-shadow:
+    inset 0 0 0 1.5px var(--ink),
+    var(--shadow-lift);
 }
-.ledger__name {
-  color: var(--muted);
-  line-height: 1.45;
-  text-wrap: pretty;
+/* On a phone: three tabs, one card at a time, the marked one first. The tabs are radio buttons. */
+.plans__tabs {
+  display: none;
 }
-.ledger__name b {
-  color: var(--ink);
-  font-weight: 600;
+@supports selector(:has(*)) {
+  @media (max-width: 59.99rem) {
+    .plans__tabs {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 0.25rem;
+      margin-bottom: 0.75rem;
+      padding: 0.25rem;
+      border-radius: 999px;
+      background: var(--tint);
+    }
+    .plans__tab {
+      position: relative;
+      display: grid;
+      place-items: center;
+      min-height: max(2.75rem, 44px);
+      border-radius: 999px;
+      color: var(--muted);
+      font-size: var(--text-sm);
+      font-weight: 600;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .plans__tab input {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      opacity: 0;
+      cursor: pointer;
+    }
+    .plans__tab:has(:checked) {
+      background: var(--window);
+      box-shadow: var(--shadow-card);
+      color: var(--ink);
+    }
+    .plans__tab:has(:focus-visible) {
+      outline: 2px solid var(--ink);
+      outline-offset: 2px;
+    }
+    .plans-box:has(input[value="1"]:checked) .plan:not([data-plan="1"]),
+    .plans-box:has(input[value="2"]:checked) .plan:not([data-plan="2"]),
+    .plans-box:has(input[value="3"]:checked) .plan:not([data-plan="3"]) {
+      display: none;
+    }
+  }
 }
-.ledger__value {
-  font-variant-numeric: tabular-nums;
-  white-space: nowrap;
+.plan__top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem 1rem;
+  flex-wrap: wrap;
 }
-.ledger__row--core {
-  padding-block: 1.25rem;
-}
-.ledger__row--core:first-child {
-  border-top: 1.5px solid var(--ink);
-}
-.ledger__row--core .ledger__name b {
-  display: block;
-  margin-bottom: 0.25rem;
-  font-size: var(--lead);
-  letter-spacing: -0.01em;
-  line-height: 1.3;
-}
-.ledger__row--core .ledger__value {
-  padding: 0.25rem 0.625rem;
-  border-radius: var(--radius-pill);
-  background: var(--night);
-  color: var(--on-night);
+.plan__size,
+.plan__badge {
   font-family: var(--font-mono);
   font-size: 0.6875rem;
-  letter-spacing: 0.08em;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  line-height: 1.4;
   text-transform: uppercase;
 }
-.ledger__row--included .ledger__value {
+.plan__size {
   color: var(--muted);
 }
-.offer__note {
+.plan__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  color: var(--ink);
+}
+.plan__badge::before {
+  content: "";
+  width: 0.375rem;
+  height: 0.375rem;
+  border-radius: 50%;
+  background: var(--color-accent);
+}
+.plan__name {
+  font-size: clamp(1.5rem, 1.3rem + 0.8vw, 1.875rem);
+  font-weight: 600;
+  letter-spacing: var(--track);
+  line-height: 1.1;
+}
+.plan__outcome {
+  font-size: var(--lead);
+  line-height: 1.4;
+  text-wrap: pretty;
+}
+.plan__price {
+  display: grid;
+  gap: 0.125rem;
+  color: var(--muted);
+  font-size: var(--text-sm);
+  line-height: 1.4;
+}
+.plan__price b {
+  color: var(--ink);
+  font-size: clamp(1.875rem, 1.6rem + 1.1vw, 2.375rem);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: var(--track);
+  line-height: 1.1;
+  white-space: nowrap;
+}
+.plan__price small {
+  font-size: inherit;
+}
+.plan__items {
+  display: grid;
+  align-content: start;
+  gap: 0.75rem;
+  padding-top: 0.5rem;
+}
+.plan__items li {
+  display: grid;
+  grid-template-columns: 1rem minmax(0, 1fr);
+  gap: 0.625rem;
+  font-size: var(--text-sm);
+  line-height: 1.5;
+  text-wrap: pretty;
+}
+.plan__items svg {
+  width: 1rem;
+  height: 1rem;
+  margin-top: 0.1875rem;
+  fill: none;
+  stroke: var(--color-accent-text);
+  stroke-width: 2.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.plan__btn {
+  width: 100%;
+  padding-inline: 1rem;
+}
+/* On the narrowest phones the button keeps its words whole and at full size: less padding, no arrow. */
+@media (max-width: 22.5rem) {
+  .plan__main,
+  .plan__foot {
+    padding: 1.25rem;
+  }
+  .plan__btn {
+    padding-inline: 0.5rem;
+  }
+  .plan__btn svg {
+    display: none;
+  }
+}
+.plans__under {
+  display: grid;
+  gap: 0.25rem;
   max-width: var(--measure);
-  margin-top: 1rem;
+  margin-top: 1.25rem;
   color: var(--muted);
   font-size: var(--text-sm);
   line-height: 1.5;
   text-wrap: pretty;
 }
+@media (min-width: 60rem) {
+  .plans {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    align-items: stretch;
+  }
+  /* The marked card stands above and below its neighbours. */
+  .plan--marked {
+    margin-block: -1rem;
+  }
+  .plan--marked .plan__main {
+    padding-top: calc(clamp(1.5rem, 1.25rem + 1vw, 2rem) + 1rem);
+  }
+  .plan--marked .plan__foot {
+    padding-bottom: calc(clamp(1.5rem, 1.25rem + 1vw, 2rem) + 1rem);
+  }
+  .plans__under {
+    margin-top: 2.25rem;
+  }
+}
 
-/* The bonus stack: one small card above the other, each with its cover, its name, its value and what it removes. */
+/* The founding places, and the two paragraphs that go with them. */
+.founding {
+  display: grid;
+  gap: 1rem;
+  margin-top: clamp(2.5rem, 2rem + 3vw, 4rem);
+  padding-top: clamp(1.5rem, 3vw, 2rem);
+  border-top: 1px solid var(--hair);
+}
+.founding__line {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  font-weight: 600;
+}
+.founding__more {
+  display: grid;
+  gap: 1rem 3rem;
+  color: var(--muted);
+  text-wrap: pretty;
+}
+@media (min-width: 56rem) {
+  .founding__more {
+    grid-template-columns: 1.4fr 1fr;
+  }
+}
+
+/* The bonuses: words under a hairline, four in a row on a wide screen. */
 .bonuses {
   display: grid;
-  gap: 0.625rem;
+  gap: 1.5rem clamp(1.5rem, 3vw, 2.5rem);
 }
 .bonus {
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
-  grid-template-areas: "cover name value" "cover body body";
-  align-items: center;
-  gap: 0.375rem 1rem;
-  padding: 1rem 1.125rem 1.125rem 1rem;
-  border-radius: 1.125rem;
-  background: var(--window);
-  box-shadow: var(--shadow-card);
+  align-content: start;
+  justify-items: start;
+  gap: 0.5rem;
+  padding-top: 1rem;
+  border-top: 1.5px solid var(--ink);
 }
-.bonus__cover {
-  grid-area: cover;
-  align-self: start;
-  display: grid;
-  place-items: center;
-  width: 3rem;
-  aspect-ratio: 1;
-  border-radius: 0.75rem;
-  background: var(--tone);
-}
-.bonus__cover svg {
-  width: 62%;
-  fill: none;
-  stroke: var(--ink);
-  stroke-width: 2.5;
-  stroke-linecap: round;
-  opacity: 0.8;
+.bonus__held {
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.1em;
+  line-height: 1.4;
+  text-transform: uppercase;
 }
 .bonus__name {
-  grid-area: name;
   margin: 0;
-  font-size: 1rem;
+  font-size: 1.125rem;
   font-weight: 600;
-  line-height: 1.35;
+  line-height: 1.3;
   text-wrap: balance;
 }
 .bonus__value {
-  grid-area: value;
-  padding: 0.25rem 0.625rem;
+  padding: 0.1875rem 0.625rem;
   border-radius: var(--radius-pill);
   box-shadow: inset 0 0 0 1px var(--hair);
-  font-family: var(--font-mono);
-  font-size: 0.6875rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  font-size: var(--text-sm);
+  font-variant-numeric: tabular-nums;
+  line-height: 1.5;
   white-space: nowrap;
 }
 .bonus__body {
-  grid-area: body;
   color: var(--muted);
   font-size: var(--text-sm);
   line-height: 1.5;
   text-wrap: pretty;
+}
+@media (min-width: 40rem) {
+  .bonuses {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (min-width: 64rem) {
+  .bonuses {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
 }
 
 /* The product card: its own frame, so it reads as a product and not as a row. */
 .product {
   display: grid;
-  gap: clamp(1.5rem, 4vw, 3rem);
+  gap: clamp(2rem, 1.5rem + 2.5vw, 3rem) clamp(2rem, 5vw, 4rem);
   padding: clamp(1.5rem, 1rem + 3vw, 3rem);
   border-radius: var(--r-window);
-  background: var(--window);
-  box-shadow: var(--shadow-card);
-}
-.product__shot {
-  position: relative;
-  width: clamp(5.5rem, 3.5rem + 8vw, 8.5rem);
-  aspect-ratio: 4 / 5;
-  margin: 0.375rem 1rem 0.375rem 0.25rem;
-}
-.product__sheet,
-.product__cover {
-  position: absolute;
-  inset: 0;
-  border-radius: 0.625rem;
-}
-.product__sheet {
-  background: var(--tint-taupe);
-  rotate: 7deg;
-  translate: 9% 2%;
-}
-.product__sheet + .product__sheet {
-  background: var(--tint-accent);
-  rotate: 3.5deg;
-  translate: 5% 1%;
-}
-.product__cover {
-  display: grid;
-  background: var(--night);
-  box-shadow: var(--shadow-card);
-  overflow: hidden;
-}
-.product__cover svg {
-  width: 100%;
-  height: 100%;
-  fill: none;
-  stroke-width: 2;
-  stroke-linecap: round;
-}
-.product__ring {
-  stroke: var(--hair-night);
-}
-.product__arc {
-  stroke: var(--color-accent);
-  stroke-width: 3;
+  background: var(--color-paper-2);
 }
 .product__words {
   display: grid;
@@ -782,7 +960,8 @@ button.vsl__play:active {
   gap: 0.75rem;
 }
 .product__label,
-.product__inside h4 {
+.product__inside h4,
+.pflow h4 {
   margin: 0;
   color: var(--muted);
   font-family: var(--font-mono);
@@ -830,10 +1009,93 @@ button.vsl__play:active {
   line-height: 1.55;
   text-wrap: pretty;
 }
+/* From an idea to a piece: three steps down a line, each with a small drawing of what happens. */
+.pflow {
+  display: grid;
+  gap: 1rem;
+  width: 100%;
+  margin-top: 1.25rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--hair);
+}
+.pflow ol {
+  display: grid;
+  gap: 1.25rem;
+}
+.pflow li {
+  position: relative;
+  display: grid;
+  grid-template-columns: 4.5rem minmax(0, 1fr);
+  align-items: center;
+  gap: 1rem;
+  font-size: var(--text-sm);
+  line-height: 1.5;
+  text-wrap: pretty;
+}
+/* The line from one drawing to the next. */
+.pflow li + li::before {
+  content: "";
+  position: absolute;
+  left: 2.25rem;
+  bottom: 100%;
+  height: 1.25rem;
+  border-left: 1.5px solid var(--color-accent);
+}
+.pflow__pic {
+  display: grid;
+  align-content: center;
+  gap: 0.3125rem;
+  width: 4.5rem;
+  aspect-ratio: 4 / 3;
+  padding: 0.625rem;
+  border-radius: 0.75rem;
+  background: var(--window);
+}
+.pflow__pic i {
+  display: block;
+  height: 0.3125rem;
+  border-radius: 0.1875rem;
+  background: var(--bar);
+}
+/* An idea, said: a speech bubble with two lines in it. */
+.pflow__pic--idea {
+  border-radius: 0.875rem 0.875rem 0.875rem 0.1875rem;
+  background: var(--tint-accent);
+}
+.pflow__pic--idea i {
+  background: var(--bar-strong);
+}
+.pflow__pic--idea i:last-child {
+  width: 58%;
+}
+/* The piece: a sheet, its title heavier than its lines. */
+.pflow__pic--piece i:first-child {
+  width: 62%;
+  background: var(--bar-strong);
+}
+.pflow__pic--piece i:last-child {
+  width: 74%;
+}
+/* Ten checks: two rows of five. */
+.pflow__pic--checks {
+  grid-template-columns: repeat(5, 1fr);
+  justify-items: center;
+  gap: 0.25rem;
+}
+.pflow__pic--checks i {
+  width: 0.4375rem;
+  height: 0.4375rem;
+  border-radius: 50%;
+  background: var(--color-sage);
+}
 .product__inside {
   display: grid;
   align-content: start;
   gap: 0.75rem;
+}
+.product__inside ul {
+  display: grid;
+  column-gap: clamp(2rem, 5vw, 4rem);
 }
 .product__inside li {
   display: grid;
@@ -845,9 +1107,6 @@ button.vsl__play:active {
   font-size: var(--text-sm);
   line-height: 1.5;
   text-wrap: pretty;
-}
-.product__inside li:last-child {
-  border-bottom: 1px solid var(--hair);
 }
 .product__inside li b {
   color: var(--ink);
@@ -864,171 +1123,127 @@ button.vsl__play:active {
   stroke-linejoin: round;
 }
 .product__small {
+  padding-top: 0.875rem;
+  border-top: 1px solid var(--hair);
   color: var(--muted);
-  font-size: var(--text-xs);
+  font-size: var(--text-sm);
   line-height: 1.5;
 }
+@media (min-width: 48rem) {
+  .product__inside ul {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (min-width: 60rem) {
+  .product {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 0.92fr);
+    align-items: start;
+  }
+  .product__inside {
+    grid-column: 1 / -1;
+  }
+}
 
-/* The total, beside the founding price: the price is the larger of the two. */
-.sum {
+/* The stack: what the same work costs hired out, a name and the figure beside it. */
+.ledger__row {
   display: grid;
-  gap: 1.25rem clamp(2rem, 6vw, 5rem);
-  padding-top: clamp(1.5rem, 3vw, 2rem);
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: baseline;
+  gap: 0.375rem 1.5rem;
+  padding-block: 0.875rem;
+  border-top: 1px solid var(--hair);
+}
+.ledger__row:first-child {
   border-top: 1.5px solid var(--ink);
 }
-.sum__total,
-.sum__price {
-  display: grid;
-  align-content: end;
-  gap: 0.375rem;
-  line-height: 1.4;
+.ledger__row:last-child {
+  border-bottom: 1px solid var(--hair);
+}
+.ledger__name {
+  font-weight: 600;
+  line-height: 1.45;
   text-wrap: pretty;
 }
-.sum b {
+.ledger__value {
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.offer__note {
+  max-width: var(--measure);
+  margin-top: 1rem;
+  color: var(--muted);
+  font-size: var(--text-sm);
+  line-height: 1.5;
+  text-wrap: pretty;
+}
+/* One total for each package, beside its founding price: the price is the larger of the two. */
+.sums {
+  display: grid;
+  margin-top: clamp(2rem, 1.5rem + 2.5vw, 3rem);
+  border-top: 1.5px solid var(--ink);
+}
+.sum {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: baseline;
+  gap: 0.25rem 1.5rem;
+  padding-block: 1.25rem;
+  border-bottom: 1px solid var(--hair);
+}
+.sum__name {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 600;
+  line-height: 1.3;
+}
+.sum__total {
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+  text-decoration: line-through;
+  text-decoration-thickness: 1px;
+  white-space: nowrap;
+}
+.sum__price {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  color: var(--muted);
+  font-size: var(--text-sm);
+}
+.sum__price b {
+  color: var(--ink);
+  font-size: var(--h2);
   font-weight: 600;
   font-variant-numeric: tabular-nums;
   letter-spacing: var(--track);
   line-height: 1.1;
   white-space: nowrap;
 }
-.sum__total {
-  color: var(--muted);
-}
-.sum__total b {
-  font-size: var(--h2);
-}
-.sum__price {
-  font-weight: 600;
-}
-.sum__price b {
-  font-size: var(--h1);
-}
 .sum__note {
   max-width: 46rem;
+  margin-top: 1.25rem;
   color: var(--muted);
   font-size: var(--text-sm);
   line-height: 1.5;
   text-wrap: pretty;
 }
 @media (min-width: 48rem) {
+  .sums {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    column-gap: clamp(1.5rem, 4vw, 3rem);
+  }
   .sum {
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-columns: 1fr;
+    align-content: start;
+    gap: 0.375rem;
   }
-  .sum__note {
-    grid-column: 1 / -1;
-  }
-}
-@media (min-width: 60rem) {
-  .offer__grid {
-    grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
-    align-items: start;
-  }
-  .product,
-  .sum {
-    grid-column: 1 / -1;
-  }
-  .product {
-    grid-template-columns: auto minmax(0, 1.1fr) minmax(0, 0.9fr);
-  }
-}
-@media (max-width: 35.99rem) {
-  .bonus {
-    grid-template-areas: "cover name" "cover value" "body body";
-    grid-template-columns: auto minmax(0, 1fr);
-  }
-  .bonus__value {
-    justify-self: start;
-  }
-}
-
-/* The six prices. */
-.sizes {
-  margin-top: clamp(2.5rem, 2rem + 3vw, 4.5rem);
-}
-.sizes__table {
-  width: 100%;
-  border-collapse: collapse;
-  text-align: left;
-}
-.sizes__table thead th {
-  padding: 0 0.75rem 0.75rem 0;
-  color: var(--muted);
-  font-family: var(--font-mono);
-  font-size: 0.6875rem;
-  font-weight: 500;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-}
-.sizes__table tbody th,
-.sizes__table td {
-  padding: 1rem 0.75rem 1rem 0;
-  border-top: 1px solid var(--hair);
-  font-weight: 400;
-  font-variant-numeric: tabular-nums;
-}
-.sizes__table tbody th,
-.sizes__table td:nth-child(4) {
-  font-weight: 600;
-}
-.sizes__table td:nth-child(5) {
-  color: var(--muted);
-}
-.sizes__founding {
-  display: flex;
-  align-items: center;
-  gap: 0.625rem;
-  margin-top: 1.5rem;
-  font-weight: 600;
-}
-.sizes__more {
-  display: grid;
-  gap: 1rem 3rem;
-  margin-top: 1.5rem;
-  color: var(--muted);
-  text-wrap: pretty;
-}
-@media (min-width: 56rem) {
-  .sizes__more {
-    grid-template-columns: 1.4fr 1fr;
-  }
-}
-/* On a phone each size is its own block, with the column's name beside each figure. */
-@media (max-width: 47.99rem) {
-  .sizes__table thead {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    overflow: hidden;
-    clip-path: inset(50%);
-  }
-  .sizes__table,
-  .sizes__table tbody {
+  .sum__price {
     display: grid;
-  }
-  .sizes__table tr {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 0.5rem 1rem;
-    padding-block: 1.125rem;
-    border-top: 1px solid var(--hair);
-  }
-  .sizes__table tbody th,
-  .sizes__table td {
-    display: grid;
+    justify-content: start;
     gap: 0.125rem;
-    padding: 0;
-    border: 0;
-  }
-  .sizes__table tbody th {
-    grid-column: 1 / -1;
-  }
-  .sizes__table td::before {
-    content: attr(data-col);
-    color: var(--muted);
-    font-family: var(--font-mono);
-    font-size: 0.6875rem;
-    font-weight: 500;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
+    margin-top: 0.5rem;
   }
 }

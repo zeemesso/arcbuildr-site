@@ -1,5 +1,5 @@
 /**
- * Real pieces of Zyade's own Season One ("client zero"). Each visual marked [CLIENT ZERO: ...] in the copy
+ * Real pieces from Zyade's own account ("client zero"). Each visual marked [CLIENT ZERO: ...] in the copy
  * deck reads one piece here. A piece is a JSON file in src/content/proof/, brought in by
  * `node scripts/proof/import.mjs`. That folder is not in git: this repository is public, and the pieces
  * stay out of it until Zyade approves them. A piece that is not there yet is `null`: a card then has
@@ -48,6 +48,15 @@ export function gallery(tab: number): GalleryPiece[] {
 /** His photo, when the import brought one (the slot "founder-photo"). A path under public/, or nothing. */
 export const founderPhoto = () =>
   (files["./proof/founder-photo.json"] as Partial<Shot> | undefined)?.image ?? "";
+
+/**
+ * His own one-page audit, as a picture (the slot "audit"): beside the second free thing of the iceberg
+ * and beside the two fields. Nothing until it exists and he has approved it.
+ */
+export function auditPicture(): Shot | null {
+  const found = files["./proof/audit.json"] as Partial<Shot> | undefined;
+  return found?.image ? { alt: "", ...found, image: found.image } : null;
+}
 
 /** The gallery has four tabs of three pieces. The section shows once every one of the twelve is real. */
 export const GALLERY_SLOTS = [1, 2, 3, 4].flatMap((tab) => [1, 2, 3].map((n) => ({ tab, n })));

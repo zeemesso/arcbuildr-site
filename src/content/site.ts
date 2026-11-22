@@ -21,21 +21,24 @@ export const page = {
   /** The header's button, once the first button has left the screen. */
   pill: "Apply",
   nav: "Sections",
-  /** The three marks of the guarantee's timeline (the deck's screen note for section 10). */
-  guarantee: { marks: ["Day 1", "Day 7", "Day 10"] },
   /** Names of controls for a screen reader. They are not shown. */
-  ui: { pause: "Pause the gallery", close: "Close", play: "Play the video" },
+  ui: {
+    pause: "Pause the gallery",
+    close: "Close",
+    play: "Play the video",
+    sound: "Turn the sound on",
+  },
 };
 
 export type Question = { id: string; q: string } & (
   { type: "link" | "long" } | { type: "choice"; options: string[] }
 );
 /**
- * The form is on Tally. Its questions and choices are the deck's ("The form"), written there by hand; the
+ * The form is on Tally. Its questions and choices are the deck's ("The form, on Tally"), set there by hand; the
  * site keeps the same list to recognize each answer when Tally hands a finished form over, and to check
  * it before it is saved. The deck lists choices as "A. B. C."
  */
-const form = section("the form");
+const form = section("the form, on tally");
 const choices = (id: string) => form.get(`${id}, choices`).replace(/\.$/, "").split(". ");
 const budgets = choices("budget");
 

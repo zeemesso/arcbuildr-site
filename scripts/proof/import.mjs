@@ -19,8 +19,19 @@
  *   .json                                   the same two, in the shapes of src/content/proof.ts
  *
  * A card of "What you get" takes a picture only: it shows the real document, never a drawing of it.
+ *
+ * Two pictures come from folders of their own, with or without an INDEX.md: his photo, the first picture
+ * in ~/fable-sprint/L1-P11/photo/ (the slot `founder-photo`), and his own one-page audit, the first
+ * picture in ~/fable-sprint/L1-P11/audit/ (the slot `audit`). A line of INDEX.md for either slot wins.
  */
-import { copyFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import {
+  copyFileSync,
+  existsSync,
+  mkdirSync,
+  readdirSync,
+  readFileSync,
+  writeFileSync,
+} from "node:fs";
 import { dirname, extname, join, resolve } from "node:path";
 import { homedir } from "node:os";
 import { fileURLToPath } from "node:url";
@@ -50,13 +61,15 @@ const GALLERY = [1, 2, 3, 4].flatMap((tab) => [1, 2, 3].map((n) => `gallery-${ta
 const READING = "script-1-full";
 const SLOTS = [...CARDS, ...GALLERY, READING];
 const PHOTO = "founder-photo";
+/** His own one-page audit: a picture, shown beside the audit's line and beside the two fields. */
+const AUDIT = "audit";
 const PICTURE = [".png", ".jpg", ".jpeg", ".webp", ".avif"];
 
-if (!existsSync(index)) {
-  console.log(`No pieces yet: ${index} does not exist. Nothing was changed.`);
-  console.log(`Slots filled: ${filledNow()} of ${SLOTS.length}.`);
-  process.exit(0);
-}
+/** The folders that hold one picture each, and the slot it fills. */
+const FOLDERS = [
+  [PHOTO, process.env.FOUNDER_PHOTO_DIR ?? join(homedir(), "fable-sprint/L1-P11/photo")],
+  [AUDIT, process.env.AUDIT_DIR ?? join(homedir(), "fable-sprint/L1-P11/audit")],
+];
 
 const clean = (cell) =>
   cell
@@ -126,13 +139,25 @@ const copy = (from, to) => {
   copyFileSync(from, to);
 };
 
-for (const row of rows(readFileSync(index, "utf8"))) {
+/** The first picture of each folder, as a row; the lines of INDEX.md come after, so they win. */
+const fromFolders = FOLDERS.flatMap(([slot, folder]) => {
+  if (!existsSync(folder)) return [];
+  const file = readdirSync(folder)
+    .filter((name) => !name.startsWith(".") && PICTURE.includes(extname(name).toLowerCase()))
+    .sort()[0];
+  return file ? [{ slot, file: join(folder, file), caption: "", personal: false }] : [];
+});
+if (!existsSync(index)) console.log(`No pieces yet: ${index} does not exist.`);
+const listed = existsSync(index) ? rows(readFileSync(index, "utf8")) : [];
+
+for (const row of [...fromFolders, ...listed]) {
   const slot = row.slot.toLowerCase();
   const source = resolve(dirname(index), row.file);
   const kind = extname(source).toLowerCase();
   const skip = (why) => left.push(`${row.slot} (${row.file}): ${why}`);
   if (row.personal) skip("marked personal");
-  else if (slot !== PHOTO && !SLOTS.includes(slot)) skip("not a slot of the page");
+  else if (slot !== PHOTO && slot !== AUDIT && !SLOTS.includes(slot))
+    skip("not a slot of the page");
   else if (!existsSync(source)) skip("the file is not there");
   else if (PICTURE.includes(kind)) {
     const name = slot === PHOTO ? `founder${kind}` : `${slot}${kind}`;
@@ -141,6 +166,7 @@ for (const row of rows(readFileSync(index, "utf8"))) {
     write(join(DATA, `${slot}.json`), JSON.stringify(picture, null, 2) + "\n");
     placed.push(`${slot}: picture`);
   } else if (slot === PHOTO) skip("his photo must be a picture");
+  else if (slot === AUDIT) skip("his audit must be a picture");
   else if (CARDS.includes(slot)) skip("a card takes a picture of the real document");
   else if (kind === ".json") {
     try {

@@ -218,6 +218,15 @@ main:focus {
 .btn:active {
   scale: 0.97;
 }
+/* A second button in a row that already has the one action: the same shape, drawn as a line. */
+.btn--line {
+  background: none;
+  box-shadow: inset 0 0 0 1.5px var(--ink);
+  color: var(--ink);
+}
+.btn--line:hover {
+  background: var(--tint);
+}
 .btn--quiet {
   padding: 0 1.125rem 0 0.5rem;
   background: var(--canvas);

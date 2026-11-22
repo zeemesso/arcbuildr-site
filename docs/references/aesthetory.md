@@ -37,4 +37,6 @@ Captured 2026-11-23 with Playwright (Chromium) at 1440 x 900 and 390 x 844: comp
 
 - Three cards in one row, a tier label on each, the flag on the middle one as plain text, the outcome first, then what is included, one button each, one filled button in the row.
 - The middle card stands taller than its neighbours.
-- What we leave: the tilt, the dark ground, the ringed ticks as icons, the tabs on a phone (ours stack, so every package is readable without a tap or a script).
+- A card in two parts split by a line: the label, the name, the outcome and the items above; the price, the smaller price line and the button below.
+- On a phone, one card at a time under three tabs, the middle one open first. Ours are radio buttons, so they work without a script; a browser that cannot follow them stacks the three cards.
+- What we leave: the tilt, the dark ground, the ringed ticks as icons.

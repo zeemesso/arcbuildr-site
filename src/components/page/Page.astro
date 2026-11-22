@@ -9,11 +9,11 @@ import First from "./First.astro";
 import Wins from "./Wins.astro";
 import Problem from "./Problem.astro";
 import Beliefs from "./Beliefs.astro";
-import Framework from "./Framework.astro";
+import How from "./How.astro";
 import Get from "./Get.astro";
 import Gallery from "./Gallery.astro";
 import Berg from "./Berg.astro";
-import Offer from "./Offer.astro";
+import Packages from "./Packages.astro";
 import Guarantee from "./Guarantee.astro";
 import Fit from "./Fit.astro";
 import Faq from "./Faq.astro";
@@ -30,10 +30,10 @@ interface Props {
 const { film = VSL_VIDEO, noindex = false } = Astro.props;
 // The header's links are the sections' own labels.
 const links = [
-  { text: section(4).get("label"), href: "#framework" },
+  { text: section(4).get("label"), href: "#how" },
   { text: section(5).get("label"), href: "#get" },
-  { text: section(9).get("label"), href: "#offer" },
-  { text: section(12).get("label"), href: "#questions" },
+  { text: section(8).get("label"), href: "#packages" },
+  { text: section(11).get("label"), href: "#questions" },
 ];
 ---
 
@@ -43,11 +43,11 @@ const links = [
   <Wins />
   <Problem />
   <Beliefs />
-  <Framework />
+  <How />
   <Get />
   <Gallery />
   <Berg />
-  <Offer />
+  <Packages />
   <Guarantee />
   <Fit />
   <Faq />
