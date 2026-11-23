@@ -27,8 +27,8 @@ const all = [
   ...strings(deck.sections, "deck"),
   ...strings(samples, "samples"),
 ];
-/** Say It Plain's own section (5b) and its sample screens: the one place "script" and "AI" are plain words. */
-const inPlain = (path: string) => /^(deck\.5b\. say it plain|samples)\./.test(path);
+/** Say It Plain's own block (8b) and its sample screen: the one place "script" and "AI" may be said. */
+const inPlain = (path: string) => /^(deck\.8b\. say it plain|samples)\./.test(path);
 /** A note for a real piece is never shown, so it is not checked as page words. */
 const shown = all.map(
   ([path, text]) => [path, text.replace(/\[(?:CLIENT ZERO|ZYADE'S AUDIT):[^\]]*\]/g, "")] as const,
@@ -53,12 +53,9 @@ describe("the words", () => {
       expect(text, path).not.toMatch(/\bkits?\b|ghostwrit|writers['’] room/i);
       expect(text, path).not.toMatch(/in your voice/i);
     }
-    // The section that may say them does say them, so the rule above is about a real difference.
+    // The block that may say "script" does say it, so the rule above is about a real difference.
     expect(
       page.filter(([path, text]) => inPlain(path) && /\bscripts?\b/i.test(text)).length,
-    ).toBeGreaterThan(0);
-    expect(
-      page.filter(([path, text]) => inPlain(path) && /\bAI\b/.test(text)).length,
     ).toBeGreaterThan(0);
     // "We don't chase viral." is the one place the word is used.
     const viral = page.filter(([, text]) => /viral/i.test(text));
@@ -103,11 +100,11 @@ describe("the words", () => {
 });
 
 describe("the deck", () => {
-  it("has the 11 numbered sections, then the names, Say It Plain (5b), the apply window, the form, the booked page and the head", () => {
+  it("has ten numbered sections (7, Under the water, is removed), then the names, Say It Plain (8b), the apply window, the form, the booked page and the head", () => {
     expect(Object.keys(deck.sections)).toEqual([
-      ...Array.from({ length: 11 }, (_, n) => String(n + 1)),
+      ...Array.from({ length: 11 }, (_, n) => String(n + 1)).filter((n) => n !== "7"),
       "names",
-      "5b. say it plain",
+      "8b. say it plain",
       "the apply window",
       "the form, on tally",
       "the booked page",
@@ -138,11 +135,11 @@ describe("the deck", () => {
   it("names the product and the three packages once, and fills them in wherever a line calls for them", () => {
     expect(PRODUCT).toBe("Say It Plain");
     expect(PACKAGES).toEqual({
-      p12: "Personal Brand Accelerator",
+      p12: "Pilot",
       p24: "Season One",
-      p36: "Season One Extended",
+      p36: "Full Season",
     });
-    expect(section("5b. say it plain").get("label")).toBe(PRODUCT);
+    expect(section("8b. say it plain").get("label")).toBe(PRODUCT);
     expect([1, 2, 3].map((n) => section(8).get(`package ${n}, name`))).toEqual(
       Object.values(PACKAGES),
     );
@@ -189,7 +186,7 @@ describe("the deck", () => {
     ]);
     expect([1, 2, 3].map((n) => offer.find(`package ${n}, badge`))).toEqual([
       undefined,
-      "Most Popular",
+      "Recommended",
       undefined,
     ]);
     expect([1, 2, 3].map((n) => offer.get(`package ${n}, price`).match(/[\d,]+ USD/)?.[0])).toEqual(
@@ -204,19 +201,20 @@ describe("the deck", () => {
       expect(items.length, `package ${n}`).toBeLessThanOrEqual(4);
     }
     expect(offer.get("package 2, item 2")).toContain(PRODUCT);
-    expect(offer.list("under the cards")).toHaveLength(2);
+    // Nothing stands under the cards: one paragraph, the section's lead, and no line after them.
+    expect(offer.list("under the cards")).toHaveLength(0);
+    expect(offer.list("paragraph")).toHaveLength(1);
   });
-  it("shows four bonuses, and no hired-out stack, product card or count of places in the packages", () => {
+  it("shows four bonuses with no dollar value, and no hired-out stack, product card or count of places in the packages", () => {
     const offer = section(8);
-    expect([1, 2, 3, 4].map((n) => offer.get(`bonus ${n}, value`))).toEqual([
-      "58 USD",
-      "175 USD each",
-      "Included",
-      "Included",
-    ]);
+    expect([1, 2, 3, 4].map((n) => offer.get(`bonus ${n}, value`))).toEqual(
+      Array.from({ length: 4 }, () => "Included"),
+    );
     for (const n of [1, 2, 3, 4])
-      for (const part of ["name", "with", "body"])
+      for (const part of ["name", "with", "body"]) {
         expect(offer.get(`bonus ${n}, ${part}`).length).toBeGreaterThan(0);
+        expect(offer.get(`bonus ${n}, ${part}`), `bonus ${n}, ${part}`).not.toMatch(/USD|\$/);
+      }
     for (const gone of [
       "stack",
       "add-on",
@@ -228,33 +226,33 @@ describe("the deck", () => {
     ])
       expect(offer.list(gone), gone).toHaveLength(0);
   });
-  it("gives Say It Plain its own section: five tools, the samples note, where it runs and the credit", () => {
-    const plain = section("5b. say it plain");
-    for (const n of [1, 2, 3, 4, 5])
-      for (const part of ["title", "line"])
-        expect(plain.get(`tool ${n}, ${part}`).length, `${n} ${part}`).toBeGreaterThan(0);
-    expect(plain.find("tool 6, title")).toBeUndefined();
+  it("keeps Say It Plain short: three steps, five things inside, one sample, where it runs and the credit", () => {
+    const plain = section("8b. say it plain");
+    expect(plain.list("step ")).toHaveLength(3);
+    expect(plain.list("inside ").filter(({ slot }) => /^inside \d+$/.test(slot))).toHaveLength(5);
+    expect(plain.get("inside title").length).toBeGreaterThan(0);
+    // The five-tools grid is gone.
+    expect(plain.list("tool ")).toHaveLength(0);
     expect(plain.get("line")).toContain("147 USD");
     expect(plain.get("samples note").length).toBeGreaterThan(0);
     // ChatGPT and Claude are named in the line their two marks sit beside.
     expect(plain.get("small line")).toMatch(/ChatGPT.*Claude/);
     expect(plain.get("credit")).toContain("147 USD");
-    // The sample screens: three angles, ten checks, and the tag that says the owner is invented.
+    // The one sample screen: three angles, ten checks, and the tag that says the owner is invented.
+    expect(Object.keys(samples)).toEqual(["tag", "script"]);
     expect(samples.tag).toBe("Sample");
     expect(samples.script.angles).toHaveLength(3);
     expect(samples.script.title).toContain(samples.script.angles[0]);
     expect(samples.script.checks).toHaveLength(10);
+    expect(samples.script.ready).toBe("Ready to film.");
   });
-  it("explains nine bands under the water, and none starts with a day or a week", () => {
-    const bands = section(7).list("band ");
-    expect(bands).toHaveLength(9);
-    for (const { words } of bands) expect(words).not.toMatch(/^(Day|Weeks?|After week)\b/);
-    expect(section(7).find("line under it")).toBeUndefined();
+  it("has no section under the water, and no line under the seven cards", () => {
+    expect(deck.sections).not.toHaveProperty("7");
+    expect(section(5).find("line under the cards")).toBeUndefined();
   });
   it("puts an apply strip after sections 5, 8 and 10", () => {
     for (const n of [5, 8, 10]) expect(section(n).get("apply strip").length).toBeGreaterThan(0);
-    for (const n of [1, 2, 3, 4, 6, 7, 9, 11])
-      expect(section(n).find("apply strip")).toBeUndefined();
+    for (const n of [1, 2, 3, 4, 6, 9, 11]) expect(section(n).find("apply strip")).toBeUndefined();
   });
   it("answers ten questions", () => {
     expect(section(11).list("question ")).toHaveLength(10);

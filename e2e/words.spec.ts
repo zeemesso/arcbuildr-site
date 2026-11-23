@@ -5,8 +5,9 @@ import { calendar, ending, plain, stub } from "./stubs";
 /**
  * The words the positioning dropped (VERDICT-3, rule 2), and the ones the packages dropped on 23 Nov:
  * any date ("Day 1", "Week 3", "Weeks 3 to 8") and the three names Clarity, Recognition, Momentum.
- * "Season One" is a package's name since VERDICT-6, so "Season" is off the list. "script" and "AI" are
- * plain words inside Say It Plain's own section (#tools, the deck's 5b) and banned everywhere else.
+ * "Season One" is a package's name since VERDICT-6, so "Season" is off the list. "script" is a plain
+ * word inside Say It Plain's own block (#say-it-plain, the deck's 8b) and banned everywhere else; "AI"
+ * is banned everywhere, since the five tools that said it left the page (VERDICT-7).
  * A length is not a date: "8 weeks",
  * "21 days" and "30 more days" stay, and so does the day the prices were checked. This reads what a visitor can meet on the home
  * page, around the form (both endings and the plain form) and on the page after a booking:
@@ -26,9 +27,9 @@ const BANNED: [string, RegExp][] = [
   ["a package's old name", /\b(Clarity|Recognition|Momentum)\b/],
   ["a count of the founding places", /\d of (3|three)\b/i],
 ];
-/** The two words Say It Plain's own section may say. */
-const PLAIN_ONLY = ["script", "AI"];
-/** Put in front of a line that was read inside Say It Plain's section. */
+/** The one word Say It Plain's own block may say. */
+const PLAIN_ONLY = ["script"];
+/** Put in front of a line that was read inside Say It Plain's block. */
 const IN_PLAIN = "\u0001";
 /** Nothing announces a film that is not there. */
 const NO_FILM = /watch this first/i;
@@ -44,7 +45,7 @@ const said = (page: Page) =>
       const parent = walk.currentNode.parentElement;
       if (parent && !parent.closest("script, style, noscript, template"))
         found.push(
-          (parent.closest("#tools") ? "\u0001" : "") + (walk.currentNode.textContent ?? ""),
+          (parent.closest("#say-it-plain") ? "\u0001" : "") + (walk.currentNode.textContent ?? ""),
         );
     }
     for (const name of ["alt", "title", "aria-label", "aria-description", "placeholder", "value"])
@@ -89,15 +90,13 @@ test("the home page says none of the dropped words: text, alt text, labels, titl
     .evaluateAll((els) => els.forEach((el) => ((el as HTMLDetailsElement).open = true)));
   const lines = await said(page);
   check(lines, "/");
-  // "script" and "AI" are said, and only inside Say It Plain's section.
-  for (const word of [/\bscripts?\b/i, /\bAI\b/]) {
-    const saying = lines.filter((line) => word.test(line));
-    expect(saying.length, String(word)).toBeGreaterThan(0);
-    expect(
-      saying.filter((line) => !line.startsWith(IN_PLAIN)),
-      String(word),
-    ).toEqual([]);
-  }
+  // "script" is said, and only inside Say It Plain's block. "AI" is said nowhere.
+  const saying = lines.filter((line) => /\bscripts?\b/i.test(line));
+  expect(saying.length).toBeGreaterThan(0);
+  expect(saying.filter((line) => !line.startsWith(IN_PLAIN))).toEqual([]);
+  expect(lines.filter((line) => /\bAI\b/.test(line))).toEqual([]);
+  // The last round's removals: no "Most Popular", and no dollar value on a bonus.
+  expect(lines.filter((line) => /most popular/i.test(line))).toEqual([]);
   // The one allowed use is on the page, once.
   expect(lines.filter((line) => /viral/i.test(line))).toEqual([ALLOWED_VIRAL]);
   // What the page gives to a search engine and to a shared link is read too.
@@ -162,7 +161,7 @@ test("the banned list catches what it should, and leaves a length alone", () => 
     expect(caught(line), line).toBe(true);
   for (const line of [
     "8 weeks, 24 videos",
-    "Season One Extended",
+    "Full Season",
     "A brand people recognize",
     "12 pieces, 21 days",
     "30 more days of answers",

@@ -10,11 +10,11 @@
         ],
         [
           "headline",
-          "A personal brand led by your story."
+          "Your content, built to bring you clients."
         ],
         [
           "line under it",
-          "We direct your brand and your content. Every video reaches you ready to film."
+          "A personal brand led by your story. We direct your brand and your content, and every video reaches you ready to film."
         ],
         [
           "video, sound button, words for a screen reader",
@@ -509,10 +509,6 @@
           "[CLIENT ZERO: one of Zyade's own Monday messages]"
         ],
         [
-          "line under the cards",
-          "The two larger packages add {product} and more time with me. The packages are below."
-        ],
-        [
           "apply strip",
           "All seven start from one 45-minute interview. The first step is 8 questions."
         ]
@@ -599,87 +595,6 @@
         ]
       ]
     },
-    "7": {
-      "title": "Under the water",
-      "slots": [
-        [
-          "label",
-          "Under the water"
-        ],
-        [
-          "heading",
-          "What you see before you pay is the small part."
-        ],
-        [
-          "above the water, label",
-          "Before you pay anything"
-        ],
-        [
-          "free 1",
-          "A 15-minute call with me."
-        ],
-        [
-          "free 2",
-          "Your one-page audit: the 3 things your videos leave unclear, written from your own account before we speak. You keep it."
-        ],
-        [
-          "free 2, picture",
-          "[ZYADE'S AUDIT: his own one-page audit, made from his own account. Shows only once it exists and he has approved it.]"
-        ],
-        [
-          "free 2, picture, words for a screen reader",
-          "A one-page audit, made from Zyade's own account: the 3 things his videos leave unclear."
-        ],
-        [
-          "free 3",
-          "A real video to read, from my own account. [CLIENT ZERO: video 1 of Zyade's plan, readable in full]"
-        ],
-        [
-          "waterline",
-          "Your package"
-        ],
-        [
-          "below the water, label",
-          "Below the water"
-        ],
-        [
-          "band 1",
-          "Your interview. 45 minutes with me."
-        ],
-        [
-          "band 2",
-          "The Lead. We decide what you're known for and write your Brand Strategy."
-        ],
-        [
-          "band 3",
-          "The World. We set your look in your Visual Identity System and rewrite your profile to match."
-        ],
-        [
-          "band 4",
-          "The Episodes. We plan every video and give each one a job, in your Content Strategy."
-        ],
-        [
-          "band 5",
-          "Your videos. 12, 24 or 36, built from your own stories and ready to film."
-        ],
-        [
-          "band 6",
-          "Our review of every video, before you see it."
-        ],
-        [
-          "band 7",
-          "Your filming plan, your phone guide, and a message from me every Monday."
-        ],
-        [
-          "band 8",
-          "With Season One and up: {product}, set up with you on a call, two more calls with me, and the live Group Reviews."
-        ],
-        [
-          "band 9",
-          "After. 30 more days of answers, and one review of how your first videos did. Your client area stays yours for life."
-        ]
-      ]
-    },
     "8": {
       "title": "The packages",
       "slots": [
@@ -737,7 +652,7 @@
         ],
         [
           "package 2, badge",
-          "Most Popular"
+          "Recommended"
         ],
         [
           "package 2, size",
@@ -761,7 +676,7 @@
         ],
         [
           "package 2, item 1",
-          "Everything in the Personal Brand Accelerator, with 24 videos."
+          "Everything in the Pilot, with 24 videos."
         ],
         [
           "package 2, item 2",
@@ -812,22 +727,6 @@
           "Apply and pick a time"
         ],
         [
-          "under the cards",
-          "Each package has one fixed price, and it does not change on the call."
-        ],
-        [
-          "under the cards, guarantee",
-          "Your Brand Strategy comes first. If you're not happy with it, every dollar comes back."
-        ],
-        [
-          "paragraph",
-          "The first three clients pay the founding price, because I need three examples to show. In return I ask two things: 10 minutes of feedback at the end, and your permission to show the work. You never have to praise it."
-        ],
-        [
-          "paragraph",
-          "Filming, editing, posting and ads are not part of any package. They stay with you or your editor."
-        ],
-        [
           "bonus title",
           "The bonuses"
         ],
@@ -837,7 +736,7 @@
         ],
         [
           "bonus 1, value",
-          "58 USD"
+          "Included"
         ],
         [
           "bonus 1, with",
@@ -853,11 +752,11 @@
         ],
         [
           "bonus 2, value",
-          "175 USD each"
+          "Included"
         ],
         [
           "bonus 2, with",
-          "Two with Season One, three with Season One Extended"
+          "Two with Season One, three with the Full Season"
         ],
         [
           "bonus 2, body",
@@ -1089,7 +988,7 @@
         ],
         [
           "package 1 name",
-          "Personal Brand Accelerator"
+          "Pilot"
         ],
         [
           "package 2 name",
@@ -1097,12 +996,12 @@
         ],
         [
           "package 3 name",
-          "Season One Extended"
+          "Full Season"
         ]
       ]
     },
-    "5b. say it plain": {
-      "title": "5b. Say It Plain",
+    "8b. say it plain": {
+      "title": "8b. Say It Plain",
       "slots": [
         [
           "label",
@@ -1110,55 +1009,51 @@
         ],
         [
           "heading",
-          "Five tools you keep."
+          "Say an idea. Get a video you can film."
         ],
         [
           "line",
-          "Included with Season One and Season One Extended. 147 USD on its own."
+          "Our content compass, set up from your interview. Included with Season One and the Full Season. 147 USD on its own."
         ],
         [
-          "tool 1, title",
-          "The profile your AI writes from"
+          "step 1",
+          "You say an idea in your own words."
         ],
         [
-          "tool 1, line",
-          "We write it from your interview. Your Claude or ChatGPT reads it first."
+          "step 2",
+          "It gives you 3 angles that fit your profile. You pick one."
         ],
         [
-          "tool 2, title",
-          "One idea becomes a checked script"
+          "step 3",
+          "It shapes the video: what you say, what you show shot by shot, and the caption. Then it runs ten checks before you film."
         ],
         [
-          "tool 2, line",
-          "Type one idea. You get 3 angles, then a script with 10 checks run on it."
+          "inside title",
+          "What's inside"
         ],
         [
-          "tool 3, title",
-          "Your AI checks your setup before filming"
+          "inside 1",
+          "Your profile: what you sell, who buys it, your stories, how you talk and what you never claim. We write it from your interview."
         ],
         [
-          "tool 3, line",
-          "Send a photo of your setup. You get the one fix that matters most."
+          "inside 2",
+          "The method: how an idea becomes a video, the Show's way."
         ],
         [
-          "tool 4, title",
-          "The video editor cuts your clip"
+          "inside 3",
+          "Opening lines from your own stories and your clients' words."
         ],
         [
-          "tool 4, line",
-          "Drop a clip in and type edit. You see the cuts before it exports."
+          "inside 4",
+          "A plan for your week, in filming order."
         ],
         [
-          "tool 5, title",
-          "We keep sending new files"
-        ],
-        [
-          "tool 5, line",
-          "You add each one in 3 steps."
+          "inside 5",
+          "New working files, as we make them."
         ],
         [
           "samples note",
-          "Samples, made with an invented owner."
+          "Sample, made with an invented owner."
         ],
         [
           "small line",

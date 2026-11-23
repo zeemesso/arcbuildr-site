@@ -1,21 +1,46 @@
 ---
 /**
- * The bonuses: each is a small card with its name, its value, which packages hold it and what it
- * removes. Every word is the deck's.
+ * The bonuses, their own block after Say It Plain (DESIGN.md, section 16), drawn as the 22 Nov page drew
+ * them: a white card with a pastel square holding our arc mark, the name, the body, and the line saying
+ * which packages hold it. No card has a dollar value: each reads the deck's "Included". The section's
+ * apply strip closes the block. Every word is the deck's (section 8).
  */
-interface Props {
-  items: { name: string; value: string; held: string; body: string }[];
-}
-const { items } = Astro.props;
+import Strip from "./Strip.astro";
+import { section } from "../../content/deck";
+const s = section(8);
+const bonuses = s
+  .list("bonus ")
+  .filter(({ slot }) => slot.endsWith(", name"))
+  .map(({ slot, words }) => {
+    const key = slot.replace(", name", "");
+    return {
+      name: words,
+      value: s.get(`${key}, value`),
+      held: s.get(`${key}, with`),
+      body: s.get(`${key}, body`),
+    };
+  });
 ---
 
-<ol class="bonuses" data-bonuses>
-  {items.map(({ name, value, held, body }, at) => (
-    <li class="bonus" data-reveal style={`--i:${at}`}>
-      <p class="bonus__held">{held}</p>
-      <h4 class="bonus__name">{name}</h4>
-      <span class="bonus__value">{value}</span>
-      <p class="bonus__body">{body}</p>
-    </li>
-  ))}
-</ol>
+<section class="extras" id="bonuses" aria-labelledby="bonuses-h">
+  <h2 class="h2" id="bonuses-h" data-reveal>
+    {s.get("bonus title")}
+  </h2>
+  <ol class="bonuses" data-bonuses>
+    {bonuses.map(({ name, value, held, body }, at) => (
+      <li class="bonus" data-reveal style={`--i:${at};--tone:var(--bonus-${(at % 4) + 1})`}>
+        <span class="bonus__cover" aria-hidden="true">
+          <svg viewBox="0 0 64 64" focusable="false">
+            <path d="M8 50 A 24 24 0 0 1 56 50" />
+            <path d="M20 50 A 12 12 0 0 1 44 50" />
+          </svg>
+        </span>
+        <h3 class="bonus__name">{name}</h3>
+        <span class="bonus__value">{value}</span>
+        <p class="bonus__body">{body}</p>
+        <p class="bonus__held">{held}</p>
+      </li>
+    ))}
+  </ol>
+  <Strip from={8} />
+</section>

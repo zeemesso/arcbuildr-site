@@ -20,7 +20,6 @@ export const action = "Apply and pick a time";
 export const page = {
   /** The header's button, once the first button has left the screen. */
   pill: "Apply",
-  nav: "Sections",
   /** The two marks' names, for someone who cannot see them. */
   marks: { claude: "Claude", chatgpt: "ChatGPT" },
   /** Names of controls for a screen reader. They are not shown. */

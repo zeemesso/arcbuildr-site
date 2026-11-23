@@ -11,17 +11,16 @@ import Problem from "./Problem.astro";
 import Beliefs from "./Beliefs.astro";
 import How from "./How.astro";
 import Get from "./Get.astro";
-import Tools from "./Tools.astro";
 import Gallery from "./Gallery.astro";
-import Berg from "./Berg.astro";
 import Packages from "./Packages.astro";
+import Plain from "./Plain.astro";
+import Bonuses from "./Bonuses.astro";
 import Guarantee from "./Guarantee.astro";
 import Fit from "./Fit.astro";
 import Faq from "./Faq.astro";
 import Apply from "./Apply.astro";
 import Foot from "./Foot.astro";
 import Application from "../application/Application.astro";
-import { section } from "../../content/deck";
 import { VSL_VIDEO } from "../../config";
 interface Props {
   /** The sales video's file. The home page takes VSL_VIDEO; the demo gives its test film. */
@@ -29,27 +28,20 @@ interface Props {
   noindex?: boolean;
 }
 const { film = VSL_VIDEO, noindex = false } = Astro.props;
-// The header's links are the sections' own labels.
-const links = [
-  { text: section(4).get("label"), href: "#how" },
-  { text: section(5).get("label"), href: "#get" },
-  { text: section(8).get("label"), href: "#packages" },
-  { text: section(11).get("label"), href: "#questions" },
-];
 ---
 
 <Home noindex={noindex}>
-  <Bar slot="bar" links={links} />
+  <Bar slot="bar" />
   <First film={film} />
   <Wins />
   <Problem />
   <Beliefs />
   <How />
   <Get />
-  <Tools />
   <Gallery />
-  <Berg />
   <Packages />
+  <Plain />
+  <Bonuses />
   <Guarantee />
   <Fit />
   <Faq />

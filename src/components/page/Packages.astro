@@ -1,7 +1,7 @@
 ---
 /**
- * 8. The packages, in the deck's order: three package cards side by side, the two lines under them, the
- * founding terms, then the bonuses. An apply strip closes it. Say It Plain has its own section (Tools.astro).
+ * 8. The packages: three package cards side by side, and nothing under them (DESIGN.md, section 16).
+ * Say It Plain (Plain.astro) and the bonuses (Bonuses.astro) follow as their own blocks.
  * A card has two parts split by a line: its length and size as a small label, its name, the outcome and
  * what's in it above; the price and the one button below. The card with the deck's badge stands taller
  * and is the only one with a filled button. On a phone one card shows at a time, under three tabs named
@@ -9,8 +9,6 @@
  * they need no script, and a browser that cannot follow them shows the three cards one above the other.
  * A card's button hands its package's name to the form and to the page after a booking (`data-package`).
  */
-import Strip from "./Strip.astro";
-import Bonuses from "./Bonuses.astro";
 import { section } from "../../content/deck";
 const s = section(8);
 /** "Founding price: 750 USD" → what the figure is, and the figure. */
@@ -38,19 +36,6 @@ const packages = s
       button: s.get(`${key}, button`),
     };
   });
-const paragraphs = s.list("paragraph").map(({ words }) => words);
-const bonuses = s
-  .list("bonus ")
-  .filter(({ slot }) => slot.endsWith(", name"))
-  .map(({ slot, words }) => {
-    const key = slot.replace(", name", "");
-    return {
-      name: words,
-      value: s.get(`${key}, value`),
-      held: s.get(`${key}, with`),
-      body: s.get(`${key}, body`),
-    };
-  });
 ---
 
 <section class="offer" id="packages" aria-labelledby="offer-h">
@@ -62,7 +47,7 @@ const bonuses = s
       {s.get("heading")}
     </h2>
     <p class="offer__lead" data-reveal>
-      {paragraphs[0]}
+      {s.get("paragraph")}
     </p>
   </div>
 
@@ -123,24 +108,4 @@ const bonuses = s
       ))}
     </ol>
   </div>
-  <div class="plans__under" data-reveal>
-    {s.list("under the cards").map(({ words }) => (
-      <p>{words}</p>
-    ))}
-  </div>
-
-  <div class="founding" data-reveal>
-    {paragraphs.slice(1).map((words) => (
-      <p>{words}</p>
-    ))}
-  </div>
-
-  <div class="offer__part">
-    <h3 class="offer__title" data-reveal>
-      {s.get("bonus title")}
-    </h3>
-    <Bonuses items={bonuses} />
-  </div>
-
-  <Strip from={8} />
 </section>

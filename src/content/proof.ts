@@ -32,7 +32,7 @@ export function shot(id: CardPiece): Shot | null {
   return found?.image ? { alt: "", ...found, image: found.image } : null;
 }
 
-/** The piece to read in full (the third free thing above the waterline). */
+/** The piece to read in full. No section shows it since Under the water was removed (23 Nov 2026). */
 export function reading(): Reading | null {
   const found = files["./proof/script-1-full.json"] as Partial<Reading> | undefined;
   return found?.lines?.length ? { ...found, lines: found.lines } : null;
@@ -50,8 +50,8 @@ export const founderPhoto = () =>
   (files["./proof/founder-photo.json"] as Partial<Shot> | undefined)?.image ?? "";
 
 /**
- * His own one-page audit, as a picture (the slot "audit"): beside the second free thing of the iceberg
- * and beside the two fields. Nothing until it exists and he has approved it.
+ * His own one-page audit, as a picture (the slot "audit"): beside the two fields of the last panel.
+ * Nothing until it exists and he has approved it.
  */
 export function auditPicture(): Shot | null {
   const found = files["./proof/audit.json"] as Partial<Shot> | undefined;

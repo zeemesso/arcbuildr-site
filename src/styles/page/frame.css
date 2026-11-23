@@ -169,7 +169,7 @@ main:focus {
 }
 
 /* A section sits on the paper itself. Only a few things are a surface of their own: the video, the
-   framework, the iceberg's picture, the product and the bonuses, the guarantee and the last panel. */
+   framework, the sample's panel and the bonus cards, the guarantee and the last panel. */
 .window {
   position: relative;
   margin: 0 auto;
@@ -279,33 +279,6 @@ main:focus {
 }
 .bar__pill:has(> .logo:last-child) {
   padding-right: 0.25rem;
-}
-.bar__links {
-  display: none;
-}
-.bar__links a {
-  display: inline-flex;
-  align-items: center;
-  min-height: 2.75rem;
-  padding: 0 0.875rem;
-  border-radius: var(--radius-pill);
-  color: var(--on-night-muted);
-  font-size: var(--text-sm);
-  font-weight: 600;
-  text-decoration: none;
-  white-space: nowrap;
-  transition:
-    color var(--dur-fast) var(--ease-move),
-    background-color var(--dur-fast) var(--ease-move);
-}
-.bar__links a:hover {
-  color: var(--on-night);
-  background: var(--hair-night);
-}
-@media (min-width: 64rem) {
-  .bar__links {
-    display: flex;
-  }
 }
 .bar__cta {
   display: inline-grid;

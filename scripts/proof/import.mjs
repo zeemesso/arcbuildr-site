@@ -57,7 +57,7 @@ const CARDS = [
   "monday-message",
 ];
 const GALLERY = [1, 2, 3, 4].flatMap((tab) => [1, 2, 3].map((n) => `gallery-${tab}-${n}`));
-/** The piece to read in full, above the iceberg's waterline. */
+/** The piece to read in full. The page has had no place for it since Under the water was removed. */
 const READING = "script-1-full";
 const SLOTS = [...CARDS, ...GALLERY, READING];
 const PHOTO = "founder-photo";

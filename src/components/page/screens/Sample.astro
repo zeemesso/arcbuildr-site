@@ -1,0 +1,82 @@
+---
+/**
+ * Say It Plain's one sample screen (deck section 8b): a small window that moves, drawn in units of its
+ * stage. An idea is typed, three angles appear, one is picked, the video's title and opening line appear,
+ * ten checks tick one by one, then "Ready to film." It carries the "Sample" tag the whole time: the owner
+ * is invented. The words are in src/content/samples.ts. Without scripts, and with reduced motion, it shows
+ * finished. It is a drawing: a screen reader is given the three steps beside it instead.
+ */
+import Tick from "./Tick.astro";
+import { samples } from "../../../content/samples";
+const { script } = samples;
+const words = (text: string) => text.split(" ");
+// The screen's times, in milliseconds into the loop.
+const idea = words(script.idea);
+const anglesAt = 700 + idea.length * 110 + 400;
+const pickAt = anglesAt + 1300;
+const draftAt = pickAt + 600;
+const checksAt = draftAt + 800;
+const doneAt = checksAt + 200 + script.checks.length * 160;
+---
+
+<figure class="ts" data-loop="12500" data-sample aria-hidden="true">
+  <span class="ts__tag">{samples.tag}</span>
+  <div class="ts__bar">
+    <i></i>
+    <b>{script.source}</b>
+    <span class="ts__meter">
+      <i data-at="200"></i>
+    </span>
+    <span>{script.length}</span>
+  </div>
+  <div class="ts__body">
+    <p class="ts__said typed pop" data-at="500">
+      {idea.map((word, k) => (
+        <span class="w" style={`--k:${k}`}>
+          {word}{" "}
+        </span>
+      ))}
+    </p>
+    <div class="ts__angles">
+      <p class="ts__cap pop" data-at={anglesAt}>
+        {script.anglesLabel}
+      </p>
+      <ol>
+        {script.angles.map((angle, k) => (
+          <li class="pop" data-at={anglesAt + 100 + k * 160}>
+            <b>{k + 1}</b>
+            <span>{angle}</span>
+            {k === 0 && <i class="ts__pick" data-at={pickAt} />}
+          </li>
+        ))}
+      </ol>
+    </div>
+    <div class="ts__draft pop" data-at={draftAt}>
+      <b>{script.title}</b>
+      <span class="ts__cap">{script.openingLabel}</span>
+      <span>{script.opening}</span>
+    </div>
+    <div class="ts__checks">
+      <p class="ts__cap pop" data-at={checksAt}>
+        {script.checksLabel}
+      </p>
+      <ul>
+        {script.checks.map((check, k) => (
+          <li class="pop" data-at={checksAt + 200 + k * 160}>
+            <Tick />
+            {check}
+          </li>
+        ))}
+      </ul>
+      <p class="ts__end">
+        <b class="pop" data-at={doneAt}>
+          {script.result}
+        </b>
+        <span class="ts__badge pop" data-at={doneAt + 400}>
+          <Tick />
+          {script.ready}
+        </span>
+      </p>
+    </div>
+  </div>
+</figure>

@@ -1,0 +1,58 @@
+---
+/**
+ * 8b. Say It Plain, our content compass: short, right under the three package cards (DESIGN.md,
+ * section 16). A heading and one line; the three steps beside one moving sample (screens/Sample.astro);
+ * what's inside as one short list; then the Claude and ChatGPT marks beside the small line, with the
+ * credit line under it. On a phone the sample sits under the steps.
+ * Every word outside the screen is the deck's ("8b. Say It Plain").
+ */
+import Marks from "./Marks.astro";
+import Sample from "./screens/Sample.astro";
+import { section } from "../../content/deck";
+const s = section("8b. say it plain");
+const steps = s.list("step ").map(({ words }) => words);
+const inside = s.list("inside ").filter(({ slot }) => /^inside \d+$/.test(slot));
+---
+
+<section class="compass" id="say-it-plain" aria-labelledby="compass-h">
+  <div class="compass__head">
+    <p class="label" data-reveal>
+      {s.get("label")}
+    </p>
+    <h2 class="h2" id="compass-h" data-reveal>
+      {s.get("heading")}
+    </h2>
+    <p class="compass__line" data-reveal>
+      {s.get("line")}
+    </p>
+  </div>
+  <div class="compass__grid">
+    <ol class="compass__steps" data-plain-steps data-reveal>
+      {steps.map((step, at) => (
+        <li>
+          <b>{at + 1}</b>
+          <span>{step}</span>
+        </li>
+      ))}
+    </ol>
+    <div class="compass__stage" data-reveal>
+      <Sample />
+      <p class="compass__note">{s.get("samples note")}</p>
+    </div>
+    <div class="compass__inside" data-reveal>
+      <h3>{s.get("inside title")}</h3>
+      <ul data-inside>
+        {inside.map(({ words }) => (
+          <li>{words}</li>
+        ))}
+      </ul>
+    </div>
+  </div>
+  <div class="compass__foot" data-reveal>
+    <Marks />
+    <div class="compass__small">
+      <p>{s.get("small line")}</p>
+      <p data-credit>{s.get("credit")}</p>
+    </div>
+  </div>
+</section>

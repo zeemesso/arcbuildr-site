@@ -326,30 +326,3 @@ if (vsl && film) {
     );
   }
 }
-
-// The iceberg: a line of the list and its band light up together, on hover, on focus, and (on a wide
-// screen, where the picture stays beside the list) as the line passes the middle of the screen.
-const berg = document.querySelector<HTMLElement>("[data-berg]");
-if (berg) {
-  const parts = [...berg.querySelectorAll<HTMLElement>("[data-band]")];
-  const light = (band: string | null) => {
-    berg.classList.toggle("has-hot", !!band);
-    for (const part of parts) part.classList.toggle("is-hot", part.dataset.band === band);
-  };
-  for (const part of parts) {
-    part.addEventListener("pointerenter", () => light(part.dataset.band!));
-    part.addEventListener("pointerleave", () => light(null));
-  }
-  if (matchMedia("(min-width: 64rem)").matches) {
-    const lines = parts.filter((part) => part.closest(".berg__items"));
-    const middle = new IntersectionObserver(
-      (entries) => {
-        const hit = entries.filter((entry) => entry.isIntersecting).pop();
-        if (hit) light((hit.target as HTMLElement).dataset.band!);
-        else if (entries.some((entry) => entry.target.classList.contains("is-hot"))) light(null);
-      },
-      { rootMargin: "-46% 0px -46% 0px" },
-    );
-    lines.forEach((line) => middle.observe(line));
-  }
-}
