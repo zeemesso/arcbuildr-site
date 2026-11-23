@@ -1,16 +1,17 @@
 ---
 /**
- * 1. First screen: who it is for, the headline, one sentence, one button, who is speaking and the
- * founding count.
- * With a film (VSL_VIDEO in src/config.ts) the sales video sits between the line and the button, a
- * 16:9 block with no label above it. Without one the block is not on the page at all, and the first
- * screen is complete as it stands.
+ * 1. First screen (DESIGN.md, section 15): who it is for, the headline at display size, one sentence,
+ * the two buttons side by side, one small line, then the video frame.
+ * Behind the words a trail of soft square pixels follows the pointer and fades (src/scripts/page.ts
+ * draws it into [data-trail]); it is decoration, so it is hidden from a screen reader.
+ * The second button carries the Claude and ChatGPT marks and leads to What you get.
+ * The video frame is always there, 16:9: the film once VSL_VIDEO is set, a poster with a play mark and
+ * no words until then.
  * The three wins follow it (Wins.astro).
  */
+import Marks from "./Marks.astro";
 import Vsl from "./Vsl.astro";
-import { founding, section } from "../../content/deck";
-import { founderPhoto } from "../../content/proof";
-import { FOUNDER_PHOTO, FOUNDING_PLACES_LEFT } from "../../config";
+import { section } from "../../content/deck";
 interface Props {
   /** The sales video's file, or "" while there is none. */
   film: string;
@@ -18,14 +19,12 @@ interface Props {
 const { film } = Astro.props;
 const s = section(1);
 const headline = s.get("headline");
-// Who "I" is: one line, with his photo beside it once a real one exists. Never a drawn face.
-const who = s.find("who, with his photo once it exists");
-const face = FOUNDER_PHOTO || founderPhoto();
 ---
 
-<section class:list={["first", { "first--film": film }]} id="top" aria-labelledby="first-h">
+<section class="first" id="top" aria-labelledby="first-h" data-first>
+  <div class="trail" data-trail aria-hidden="true"></div>
   <div class="first__words">
-    <p class="label" data-enter style="--i:0">
+    <p class="first__for" data-enter style="--i:0">
       {s.get("label above the headline")}
     </p>
     <h1 class="first__h" id="first-h" data-enter style="--i:1">
@@ -35,32 +34,25 @@ const face = FOUNDER_PHOTO || founderPhoto();
       {s.get("line under it")}
     </p>
   </div>
-  {film && (
-    <div class="first__watch" data-enter style="--i:3">
-      <Vsl src={film} title={headline} poster={s.get("video, poster, only once the film exists")} />
+  <div class="first__foot" data-enter style="--i:3">
+    <div class="first__actions">
+      <a class="btn" href="#apply" data-apply-open data-cta>
+        {s.get("button")}
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M5 12h14M13 6l6 6-6 6"></path>
+        </svg>
+      </a>
+      <a class="btn btn--quiet" href="#get" data-see>
+        <Marks />
+        {s.get("see everything button")}
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M6 9l6 6 6-6"></path>
+        </svg>
+      </a>
     </div>
-  )}
-  <div class="first__foot" data-enter style="--i:4">
-    <a class="btn" href="#apply" data-apply-open data-cta>
-      {s.get("button")}
-      <svg viewBox="0 0 24 24" aria-hidden="true">
-        <path d="M5 12h14M13 6l6 6-6 6"></path>
-      </svg>
-    </a>
-    {who && (
-      <p class="first__who" data-who>
-        {face && <img src={face} alt="" width="40" height="40" decoding="async" />}
-        {who}
-      </p>
-    )}
     <p class="first__under">{s.get("under the button")}</p>
-    <p class="first__places">
-      <span class="hang__dots" aria-hidden="true">
-        {[0, 1, 2].map((n) => (
-          <i data-taken={n >= FOUNDING_PLACES_LEFT ? "" : undefined} />
-        ))}
-      </span>
-      {founding(s.get("hanging tab"))}
-    </p>
+  </div>
+  <div class="first__watch" data-enter style="--i:4">
+    <Vsl src={film} title={headline} />
   </div>
 </section>

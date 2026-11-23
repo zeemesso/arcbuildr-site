@@ -4,7 +4,6 @@
  * no longer has stops the build, so a renamed line is noticed.
  */
 import data from "./deck.json" with { type: "json" };
-import { FOUNDING_PLACES_LEFT } from "../config";
 
 type Slot = [name: string, words: string];
 const sections = data.sections as unknown as Record<string, { title: string; slots: Slot[] }>;
@@ -64,10 +63,6 @@ export function section(key: number | string) {
     isProof: (name: string) => /\[CLIENT ZERO:/.test(find(name) ?? ""),
   };
 }
-
-/** The deck writes today's count ("3 of 3"). The number left comes from src/config.ts. */
-export const founding = (words: string) =>
-  words.replace(/\b\d of 3\b/, `${FOUNDING_PLACES_LEFT} of 3`);
 
 /** A piece of a slot's own words, used again inside a screen. Stops the build if the deck no longer says it. */
 export function excerpt(words: string, piece: string) {

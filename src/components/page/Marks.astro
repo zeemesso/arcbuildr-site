@@ -1,0 +1,29 @@
+---
+/**
+ * The Claude and ChatGPT marks, side by side (Zyade, 23 Nov 2026). Each file is the company's own,
+ * unchanged (public/marks/): each sits whole in its own disc, and the discs meet only at the rim.
+ * They are on the page in two places: the first screen's second button and Say It Plain's small line.
+ */
+import { page } from "../../content/site";
+---
+
+<span class="marks">
+  <span class="marks__disc">
+    <img
+      src="/marks/claude-spark.svg"
+      alt={page.marks.claude}
+      width="22"
+      height="22"
+      data-mark="claude"
+    />
+  </span>
+  <span class="marks__disc">
+    <img
+      src="/marks/openai-blossom.svg"
+      alt={page.marks.chatgpt}
+      width="38"
+      height="38"
+      data-mark="chatgpt"
+    />
+  </span>
+</span>

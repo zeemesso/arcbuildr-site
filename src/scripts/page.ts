@@ -30,6 +30,63 @@ try {
   /* As above. */
 }
 
+// The first screen's trail (tight.css): soft square pixels on a grid where the pointer has been, each
+// fading out. On a touch screen it drifts by itself, slowly. With reduced motion it stands still.
+const trail = document.querySelector<HTMLElement>("[data-trail]");
+if (trail) {
+  const first = trail.parentElement!;
+  let cell = 1;
+  const measure = () => (cell = parseFloat(getComputedStyle(trail).fontSize) || 48);
+  measure();
+  addEventListener("resize", measure);
+  const dot = (x: number, y: number, tone = (Math.random() * 5) | 0) => {
+    const square = document.createElement("i");
+    square.className = `t${tone}`;
+    square.style.cssText = `--x:${x};--y:${y}`;
+    trail.appendChild(square);
+  };
+  let last = "";
+  /** One step of the trail at a point of the first screen: its cell, and now and then a neighbour. */
+  const put = (left: number, top: number) => {
+    const x = Math.floor(left / cell);
+    const y = Math.floor(top / cell);
+    if (last === (last = `${x},${y}`) || trail.childElementCount > 80) return;
+    dot(x, y);
+    if (Math.random() < 0.55) dot(x + (Math.random() < 0.5 ? 1 : -1), y);
+    if (Math.random() < 0.35) dot(x, y + (Math.random() < 0.5 ? 1 : -1));
+  };
+  trail.addEventListener("animationend", (event) => (event.target as Element).remove());
+  if (calm) {
+    // A few squares at the two sides, placed once.
+    trail.classList.add("trail--still");
+    const across = Math.floor(trail.clientWidth / cell) - 1;
+    const down = Math.floor(trail.clientHeight / cell) - 1;
+    [
+      0.02, 0.2, 0.06, 0.32, 0.12, 0.32, 0.97, 0.16, 0.92, 0.26, 0.97, 0.26, 0.1, 0.72, 0.9, 0.66,
+    ].forEach(
+      (part, k, all) =>
+        k % 2 || dot(Math.round(part * across), Math.round(all[k + 1]! * down), (k / 2) % 5),
+    );
+  } else if (matchMedia("(hover: none)").matches) {
+    let shown = false;
+    let turn = 0;
+    new IntersectionObserver(([entry]) => (shown = entry!.isIntersecting)).observe(first);
+    setInterval(() => {
+      if (!shown || document.hidden) return;
+      turn += 0.11;
+      put(
+        trail.clientWidth * (0.5 + 0.44 * Math.sin(turn)),
+        trail.clientHeight * (0.36 + 0.3 * Math.sin(turn * 1.7 + 1)),
+      );
+    }, 240);
+  } else {
+    first.addEventListener("pointermove", (event) => {
+      const box = trail.getBoundingClientRect();
+      put(event.clientX - box.left, event.clientY - box.top);
+    });
+  }
+}
+
 // The moving screens. A figure with data-loop plays while it is on screen:
 //   data-at     the element gets "on" at this time (ms into the loop) and keeps it until the reset;
 //   data-now    it gets "now" at this time, and loses it at data-until (or keeps it, with no data-until).

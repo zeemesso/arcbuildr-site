@@ -6,13 +6,11 @@ export const TALLY_FORM = "M1aKGp";
 export const APPLICATION_URL = `https://tally.so/r/${TALLY_FORM}`;
 // Where the calendar's link leads when the calendar cannot load inside the page. Name and email are added to it.
 export const BOOKING_URL = "https://cal.com/arcbuildr/15-minute-call";
-// Changed by hand the day a client pays; 0 to 3.
-export const FOUNDING_PLACES_LEFT = 3;
 // The address shown on /privacy and in the footer.
 export const CONTACT_EMAIL = "hello@arcbuildr.co";
-// The sales video that leads the home page, 16:9. Put the file in public/video/ and set its path here,
-// for example "/video/vsl.mp4". While this is empty the video block is not on the page at all: the
-// first screen is complete without it. On a preview, `?vsl=demo` shows the block with a test film.
+// The sales video on the first screen, 16:9. Put the file in public/video/ and set its path here,
+// for example "/video/vsl.mp4". While this is empty the frame shows a poster with a play mark and no
+// words. On a preview, `?vsl=demo` shows the frame with a test film.
 export const VSL_VIDEO = "";
 // The 75-second video on /booked: put the file at public/video/confirmation.mp4.
 // Until that file exists the page has no video block (src/pages/booked.astro checks).

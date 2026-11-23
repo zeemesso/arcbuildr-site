@@ -1,0 +1,225 @@
+---
+/**
+ * A sample screen of Say It Plain, one per tool (deck section 5b): a small window that moves, drawn in
+ * units of its stage. Each carries the "Sample" tag the whole time: the owner is invented.
+ *   profile  the profile is written from the interview, part by part
+ *   script   an idea is typed, three angles appear, one is picked, the script and its ten checks follow
+ *   setup    a photo of a filming setup is checked, and one fix is named
+ *   editor   a clip's cut list: what goes, what is kept
+ *   files    a new file arrives and is added in 3 steps
+ * The words are in src/content/samples.ts. Without scripts, and with reduced motion, a screen shows
+ * finished. It is a drawing: a screen reader is given the tool's title and line instead.
+ */
+import Tick from "./Tick.astro";
+import { samples } from "../../../content/samples";
+interface Props {
+  kind: "profile" | "script" | "setup" | "editor" | "files";
+}
+const { kind } = Astro.props;
+const { profile, script, setup, editor, files } = samples;
+const LOOP = { profile: 9000, script: 12500, setup: 9000, editor: 10000, files: 10000 };
+const top = samples[kind];
+const words = (text: string) => text.split(" ");
+// The script screen's times, in milliseconds into the loop.
+const idea = words(script.idea);
+const anglesAt = 700 + idea.length * 110 + 400;
+const pickAt = anglesAt + 1300;
+const draftAt = pickAt + 600;
+const checksAt = draftAt + 800;
+const doneAt = checksAt + 200 + script.checks.length * 160;
+---
+
+<figure
+  class:list={["ts", `ts--${kind}`]}
+  data-loop={LOOP[kind]}
+  data-tool-screen={kind}
+  aria-hidden="true"
+>
+  <span class="ts__tag">{samples.tag}</span>
+  <div class="ts__bar">
+    <i></i>
+    <b>{top.source}</b>
+    <span class="ts__meter">
+      <i data-at="200"></i>
+    </span>
+    <span>{top.length}</span>
+  </div>
+  <div class="ts__body">
+    {kind === "profile" && (
+      <>
+        <p class="ts__file pop" data-at="400">
+          <svg viewBox="0 0 24 24">
+            <path d="M6 3h8l4 4v14H6z" />
+            <path d="M14 3v4h4M9 12h6M9 16h6" />
+          </svg>
+          <b>{profile.file}</b>
+        </p>
+        <ul class="ts__rows">
+          {profile.rows.map((row, k) => (
+            <li class="pop" data-at={800 + k * 520}>
+              <span>{row}</span>
+              <i style={`--w:${[58, 40, 34, 52, 46][k]}%`} />
+            </li>
+          ))}
+        </ul>
+      </>
+    )}
+    {kind === "script" && (
+      <>
+        <p class="ts__said typed pop" data-at="500">
+          {idea.map((word, k) => (
+            <span class="w" style={`--k:${k}`}>
+              {word}{" "}
+            </span>
+          ))}
+        </p>
+        <div class="ts__angles">
+          <p class="ts__cap pop" data-at={anglesAt}>
+            {script.anglesLabel}
+          </p>
+          <ol>
+            {script.angles.map((angle, k) => (
+              <li class="pop" data-at={anglesAt + 100 + k * 160}>
+                <b>{k + 1}</b>
+                <span>{angle}</span>
+                {k === 0 && <i class="ts__pick" data-at={pickAt} />}
+              </li>
+            ))}
+          </ol>
+        </div>
+        <div class="ts__draft pop" data-at={draftAt}>
+          <b>{script.title}</b>
+          <span class="ts__cap">{script.openingLabel}</span>
+          <span>{script.opening}</span>
+        </div>
+        <div class="ts__checks">
+          <p class="ts__cap pop" data-at={checksAt}>
+            {script.checksLabel}
+          </p>
+          <ul>
+            {script.checks.map((check, k) => (
+              <li class="pop" data-at={checksAt + 200 + k * 160}>
+                <Tick />
+                {check}
+              </li>
+            ))}
+          </ul>
+          <p class="ts__end">
+            <b class="pop" data-at={doneAt}>
+              {script.result}
+            </b>
+            <span class="ts__badge pop" data-at={doneAt + 400}>
+              <Tick />
+              {script.ready}
+            </span>
+          </p>
+        </div>
+      </>
+    )}
+    {kind === "setup" && (
+      <>
+        <div class="ts__snap">
+          <div class="ts__photo pop" data-at="400">
+            <i class="ts__wall" />
+            <i class="ts__floor" />
+            <i class="ts__lamp" />
+            <i class="ts__chair" />
+            <i class="ts__scan" data-at="1500" />
+          </div>
+          <p class="ts__said typed pop" data-at="900">
+            {words(setup.typed).map((word, k) => (
+              <span class="w" style={`--k:${k}`}>
+                {word}{" "}
+              </span>
+            ))}
+          </p>
+        </div>
+        <p class="ts__row pop" data-at="2900">
+          <span class="ts__cap">{setup.check}</span>
+          <i />
+          <span class="ts__badge">
+            <Tick />
+            {setup.verdict}
+          </span>
+        </p>
+        <p class="ts__fix pop" data-at="4000">
+          <span class="ts__phone" data-at="5000">
+            <i />
+          </span>
+          <span>
+            <span class="ts__cap">{setup.fixLabel}</span>
+            <b>{setup.fix}</b>
+          </span>
+        </p>
+      </>
+    )}
+    {kind === "editor" && (
+      <>
+        <p class="ts__said typed pop" data-at="400">
+          <span class="w">{editor.typed}</span>
+        </p>
+        <div class="ts__cut pop" data-at="1300">
+          <p class="ts__cuthead">
+            <b>{editor.head}</b>
+            <span class="ts__cap">{editor.summary}</span>
+          </p>
+          <div class="ts__track">
+            {editor.cuts.map((cut, k) => (
+              <i
+                class="ts__gap"
+                style={`--a:${cut.from}%;--b:${cut.to}%`}
+                data-at={1900 + k * 380}
+              />
+            ))}
+          </div>
+          <ol>
+            {editor.cuts.map((cut, k) => (
+              <li class="pop" data-at={1900 + k * 380}>
+                <b>{k + 1}</b>
+                <span>{cut.at}</span>
+                <em>{cut.what}</em>
+              </li>
+            ))}
+          </ol>
+          <p class="ts__never pop" data-at="3900">
+            <svg viewBox="0 0 24 24">
+              <rect x="5" y="11" width="14" height="9" rx="2" />
+              <path d="M8 11V8a4 4 0 0 1 8 0v3" />
+            </svg>
+            {editor.never}
+          </p>
+        </div>
+      </>
+    )}
+    {kind === "files" && (
+      <>
+        <div class="ts__addon pop" data-at="500">
+          <span class="ts__chip">{files.tag}</span>
+          <dl>
+            {files.lines.map((line, k) => (
+              <div class="pop" data-at={900 + k * 220}>
+                <dt>{line.k}</dt>
+                <dd>{line.v}</dd>
+              </div>
+            ))}
+          </dl>
+        </div>
+        <ol class="ts__steps">
+          {files.steps.map((step, k) => (
+            <li data-at={2600 + k * 900}>
+              <b>{k + 1}</b>
+              <span>{step}</span>
+              <Tick />
+            </li>
+          ))}
+        </ol>
+        <p class="ts__end ts__end--right">
+          <span class="ts__badge pop" data-at="5600">
+            <Tick />
+            {files.added}
+          </span>
+        </p>
+      </>
+    )}
+  </div>
+</figure>

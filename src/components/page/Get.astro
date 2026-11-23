@@ -4,7 +4,7 @@
  * the card is about, with the deck's labels on it), its title, the step of the Show it comes from and
  * what it does.
  * A card whose real document has a picture shows that picture in the screen's place.
- * Card 05 is wide. An apply strip closes the section.
+ * Two rows of three, then card 07 as one band across: its screen beside its words. An apply strip closes the section.
  */
 import Card from "./Card.astro";
 import Strip from "./Strip.astro";
@@ -50,7 +50,7 @@ const numbers = s
       const picture = shot(CARD_PIECES[n]);
       const Screen = SCREENS[n];
       return (
-        <Card n={n} wide={n === "05"}>
+        <Card n={n} wide={n === "07"}>
           {picture ? <Shot {...picture} /> : <Screen />}
         </Card>
       );

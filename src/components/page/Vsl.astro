@@ -1,37 +1,44 @@
 ---
 /**
- * The sales video that leads the page: a 16:9 block. On arrival the film plays without sound, under one
- * button that turns the sound on and starts it again from the top; then the player's own controls take
- * over. Where a browser will not start a film by itself, or the visitor asked for less motion, a poster
- * with a play button stands there instead: his photo when there is one, and the deck's line on who he is.
- * It is rendered only when there is a film to play (First.astro).
+ * The sales video's frame on the first screen: a 16:9 block, always on the page.
+ * With a film: on arrival it plays without sound, under one button that turns the sound on and starts
+ * it again from the top; then the player's own controls take over. Where a browser will not start a
+ * film by itself, or the visitor asked for less motion, the poster's play button starts it.
+ * Without a film yet: the poster alone, with a play mark and no words. It is a picture of what is to
+ * come, so nothing in it can be pressed and a screen reader is not told about it.
+ * His photo is on the poster once a real one exists.
  */
 import { page } from "../../content/site";
 import { section } from "../../content/deck";
 import { FOUNDER_PHOTO } from "../../config";
 import { founderPhoto } from "../../content/proof";
 interface Props {
-  /** The film's file. */
+  /** The film's file, or "" while there is none. */
   src: string;
   /** What the video is, for a screen reader: the page's own headline. */
   title: string;
-  /** The line on the poster: who he is, in the deck's words. */
-  poster: string;
 }
-const { src, title, poster } = Astro.props;
+const { src, title } = Astro.props;
 const photo = FOUNDER_PHOTO || founderPhoto();
 ---
 
-<figure class="vsl" data-vsl>
-  <video
-    class="vsl__video"
-    controls
-    playsinline
-    preload="none"
-    aria-label={title}
-    src={src}
-    data-vsl-video
-  ></video>
+<figure
+  class:list={["vsl", { "vsl--still": !src }]}
+  data-vsl={src ? "" : undefined}
+  data-vsl-still={src ? undefined : ""}
+  aria-hidden={src ? undefined : "true"}
+>
+  {src && (
+    <video
+      class="vsl__video"
+      controls
+      playsinline
+      preload="none"
+      aria-label={title}
+      src={src}
+      data-vsl-video
+    />
+  )}
   <div class:list={["vsl__poster", { "vsl__poster--photo": photo }]} data-vsl-poster>
     <svg class="vsl__arc" viewBox="0 0 400 225" aria-hidden="true" focusable="false">
       <path d="M-20 300 A 220 220 0 0 1 420 300"></path>
@@ -39,25 +46,34 @@ const photo = FOUNDER_PHOTO || founderPhoto();
       <path d="M100 300 A 100 100 0 0 1 300 300"></path>
     </svg>
     {photo && <img class="vsl__photo" src={photo} alt="" loading="eager" decoding="async" />}
-    <button class="vsl__play" type="button" data-vsl-play aria-label={page.ui.play}>
-      <svg viewBox="0 0 24 24" aria-hidden="true">
-        <path d="M8 5.5v13l11-6.5z"></path>
-      </svg>
-    </button>
-    <p class="vsl__who">{poster}</p>
+    {src ? (
+      <button class="vsl__play" type="button" data-vsl-play aria-label={page.ui.play}>
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M8 5.5v13l11-6.5z" />
+        </svg>
+      </button>
+    ) : (
+      <span class="vsl__play">
+        <svg viewBox="0 0 24 24">
+          <path d="M8 5.5v13l11-6.5z" />
+        </svg>
+      </span>
+    )}
   </div>
-  <button
-    class="vsl__sound"
-    type="button"
-    data-vsl-sound
-    aria-label={section(1).get("video, sound button, words for a screen reader")}
-    hidden
-  >
-    <span class="vsl__play vsl__play--sound">
-      <svg viewBox="0 0 24 24" aria-hidden="true">
-        <path d="M4 9.5h3.5L12 6v12l-4.5-3.5H4z"></path>
-        <path d="M16 9l5 6M21 9l-5 6"></path>
-      </svg>
-    </span>
-  </button>
+  {src && (
+    <button
+      class="vsl__sound"
+      type="button"
+      data-vsl-sound
+      aria-label={section(1).get("video, sound button, words for a screen reader")}
+      hidden
+    >
+      <span class="vsl__play vsl__play--sound">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M4 9.5h3.5L12 6v12l-4.5-3.5H4z" />
+          <path d="M16 9l5 6M21 9l-5 6" />
+        </svg>
+      </span>
+    </button>
+  )}
 </figure>

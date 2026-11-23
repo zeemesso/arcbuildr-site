@@ -89,3 +89,12 @@ Mechanics only, from the page's exported scripts. The deeper bundle analysis tim
 - Motion (Framer Motion) is in the bundle: in-view activation through IntersectionObserver, hover and tap states, and the native Web Animations path. Accordions animate their height with the native API. The header changes state on scroll through an observer.
 - No GSAP, ScrollTrigger, Lottie, Rive, anime or Lenis was found.
 - Not determined: which effects run on load or on scroll, and the stylesheet's keyframes. No frame recording was made of this site in this run.
+
+## The first screen's trail (from Zyade's pictures, 23 Nov 2026)
+
+Read from the two pictures Zyade supplied (six moments of the first screen, and one of the trail). Mechanics only.
+
+- A white first screen, everything centred: a very large, extra-bold headline on two lines, one sentence under it, then a filled button with a grey pill beside it. The pill holds small round marks and a short label.
+- Behind the words: rounded squares on a grid, each blurred, lit where the pointer has just been. Neighbours merge into one soft shape. Each fades out on its own, so the shape is a trail that follows the pointer's path and thins at its old end.
+- The squares sit under the text and take no pointer events; the text stays readable over them.
+- What Arcbuildr takes: the grid of blurred squares, the fade, the size of the headline, and the button with a pill beside it. Not its colours (ours are the accent, a peach mix, taupe, a clay mix and ink, from `tokens.css`), its words, its marks or its code. On a touch screen ours drifts by itself; with reduced motion it stands still.

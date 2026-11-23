@@ -1,0 +1,1005 @@
+/* The tight page (DESIGN.md, section 15), loaded last. Zyade, 23 Nov 2026: "too fat, spaced out and
+ * random". So: a first screen at display size with a trail of soft pixels behind it, Say It Plain as a
+ * grid of five small panels, and every section closer to the next, on one content width and one left edge.
+ * Painted with the names in tokens.css only; a tint is mixed from those names. */
+
+/* ---------- 1. First screen ---------- */
+.first {
+  position: relative;
+  isolation: isolate;
+  gap: clamp(1.5rem, 1.2rem + 1vw, 2rem);
+  padding-top: clamp(6.25rem, 4.5rem + 5vh, 8.5rem);
+}
+.first__words {
+  gap: clamp(1rem, 0.7rem + 1vw, 1.5rem);
+}
+/* Who it is for: heavier and larger than a section's label, in ink. */
+.first__for {
+  max-width: 36rem;
+  font-family: var(--font-mono);
+  font-size: clamp(0.75rem, 0.69rem + 0.28vw, 0.875rem);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  line-height: 1.5;
+  text-transform: uppercase;
+  text-wrap: balance;
+}
+.first__for::before {
+  content: "";
+  display: inline-block;
+  width: 0.5em;
+  height: 0.5em;
+  margin-right: 0.6em;
+  border-radius: 50%;
+  background: var(--color-accent);
+  vertical-align: 0.08em;
+}
+.first__h {
+  max-width: 10.5em;
+  font-size: var(--display);
+  font-weight: 700;
+  letter-spacing: -0.045em;
+  line-height: 0.98;
+}
+.first__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.625rem;
+}
+/* The second button: a grey pill with the two marks, each whole in its own white disc. */
+.first .btn--quiet {
+  --pill: color-mix(in oklch, var(--color-ink) 9%, var(--color-card));
+  --marks-ring: var(--pill);
+  gap: 0.75rem;
+  padding: 0 1.25rem 0 0.375rem;
+  background: var(--pill);
+}
+.first .btn--quiet:hover {
+  --pill: color-mix(in oklch, var(--color-ink) 14%, var(--color-card));
+}
+.marks {
+  display: inline-flex;
+  flex: none;
+}
+.marks__disc {
+  display: grid;
+  place-items: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  background: var(--color-card);
+  box-shadow: 0 0 0 2px var(--marks-ring, var(--canvas));
+}
+.marks__disc + .marks__disc {
+  margin-left: -0.5rem;
+}
+.marks__disc img {
+  width: 1.375rem;
+  height: 1.375rem;
+}
+/* The second file carries its own clear space, so it is drawn larger to look the same size. */
+.marks__disc img[data-mark="chatgpt"] {
+  width: 2.375rem;
+  height: 2.375rem;
+}
+@media (max-width: 35.99rem) {
+  .first__actions,
+  .first__actions .btn {
+    width: 100%;
+  }
+}
+/* On the narrowest phones the pill's parts sit closer, so it fits the screen. */
+@media (max-width: 22.49rem) {
+  .first .btn--quiet {
+    gap: 0.5rem;
+    padding-right: 0.875rem;
+    font-size: 0.875rem;
+  }
+  .first .marks__disc {
+    width: 2.125rem;
+    height: 2.125rem;
+  }
+  .first .marks__disc img {
+    width: 1.1875rem;
+    height: 1.1875rem;
+  }
+  .first .marks__disc img[data-mark="chatgpt"] {
+    width: 2rem;
+    height: 2rem;
+  }
+}
+/* The video frame, under the buttons. */
+.first__watch {
+  margin-top: clamp(0.25rem, 1vw, 0.75rem);
+}
+.vsl {
+  width: min(100%, 46rem);
+}
+/* Before the film exists: a poster and a play mark. Nothing in it can be pressed. */
+.vsl--still .vsl__play svg {
+  fill: currentColor;
+}
+
+/* The trail: soft square pixels where the pointer has been, each fading out. One square is one cell of
+ * a grid (1em here), so squares that meet read as one soft shape. src/scripts/page.ts adds them. */
+.trail {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  font-size: clamp(2.25rem, 1.6rem + 2.6vw, 3.75rem);
+  pointer-events: none;
+}
+.trail i {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 1em;
+  height: 1em;
+  border-radius: 28%;
+  background: var(--color-accent);
+  filter: blur(0.17em);
+  opacity: 0;
+  translate: calc(var(--x) * 1em) calc(var(--y) * 1em);
+  animation: trail 2400ms var(--ease-move) forwards;
+  will-change: opacity;
+}
+.trail .t1 {
+  background: color-mix(in oklch, var(--color-accent) 50%, var(--color-card));
+}
+.trail .t2 {
+  background: var(--color-taupe);
+  --peak: 0.5;
+}
+.trail .t3 {
+  background: color-mix(in oklch, var(--color-accent) 62%, var(--color-clay));
+}
+.trail .t4 {
+  background: var(--color-ink);
+  --peak: 0.2;
+}
+@keyframes trail {
+  0% {
+    opacity: 0;
+    scale: 0.5;
+  }
+  10% {
+    opacity: var(--peak, 0.72);
+    scale: 1;
+  }
+  55% {
+    opacity: var(--peak, 0.72);
+  }
+  100% {
+    opacity: 0;
+    scale: 0.86;
+  }
+}
+/* With reduced motion the trail stands still. */
+.trail--still i {
+  opacity: calc(var(--peak, 0.72) * 0.6);
+  animation: none;
+}
+
+/* ---------- One content width, one left edge ---------- */
+/* A panel starts where the text of every other section starts. */
+.window--night,
+.promise {
+  width: calc(100% - 2 * var(--pad));
+  max-width: var(--page);
+}
+.creed__head,
+.get__head,
+.fit__head,
+.offer__head,
+.berg__head,
+.tools__head {
+  gap: 0.75rem;
+  margin-bottom: clamp(1.5rem, 1.1rem + 1.6vw, 2.25rem);
+}
+.wins {
+  margin-top: clamp(2.25rem, 1.5rem + 3vw, 3.5rem);
+}
+.strip {
+  margin-top: clamp(2rem, 1.5rem + 2vw, 3rem);
+  padding-top: clamp(1.25rem, 2.4vw, 1.75rem);
+}
+.strip__words {
+  font-size: clamp(1.0625rem, 1rem + 0.4vw, 1.25rem);
+}
+
+/* ---------- 5. What you get: three in a row on a wide screen ---------- */
+.cards {
+  gap: clamp(1.75rem, 1.2rem + 2vw, 2.5rem) clamp(1.25rem, 2.4vw, 2rem);
+}
+.card {
+  gap: 1rem;
+}
+.card__h {
+  font-size: clamp(1.1875rem, 1.1rem + 0.4vw, 1.375rem);
+}
+.card__body {
+  font-size: 0.9375rem;
+  line-height: 1.5;
+}
+.get__after {
+  margin-top: clamp(1.75rem, 1.4rem + 1.6vw, 2.5rem);
+}
+/* Card 05's screen holds three labelled parts: on a narrow stage its labels run to two lines, so the
+   stage is a square there. The band's own screen keeps the shape of the others. */
+.card--wide .card__stage {
+  aspect-ratio: 4 / 3;
+}
+@media (max-width: 63.99rem) {
+  [data-card="05"] .card__stage {
+    aspect-ratio: 1;
+  }
+}
+/* On a small stage card 05's three parts sit closer, so its last label stays inside a 4:3 stage. */
+@container (max-width: 24rem) {
+  .s5__script,
+  .s5__side {
+    top: 4.5%;
+  }
+  .s5__side {
+    gap: 1.4cqw;
+  }
+  .s5__shots,
+  .s5__face {
+    gap: 1.2cqw;
+    padding: 2.4cqw 3cqw;
+  }
+  .s5__shots ol {
+    gap: 1cqw;
+  }
+}
+@media (min-width: 64rem) {
+  .cards {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  /* The last card closes the grid as one band: its words run beside its screen. */
+  .card--wide {
+    column-gap: clamp(1.25rem, 2.4vw, 2rem);
+  }
+  .card--wide .card__text {
+    grid-column: 2 / -1;
+    max-width: 34rem;
+  }
+}
+
+/* ---------- 5b. Say It Plain: five tools in one tight grid ---------- */
+.tools {
+  max-width: calc(var(--page) + 2 * var(--pad));
+  margin-inline: auto;
+  padding: var(--air) var(--pad) 0;
+}
+.tools__head {
+  display: grid;
+  justify-items: start;
+}
+.tools__line {
+  max-width: var(--measure);
+  color: var(--muted);
+  font-size: var(--lead);
+  line-height: 1.5;
+  text-wrap: pretty;
+}
+.tools__note {
+  margin-bottom: 0.75rem;
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.tools__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.75rem;
+}
+.tool {
+  display: grid;
+  align-content: start;
+  gap: 0.875rem;
+  padding: 0.75rem 0.75rem 1.125rem;
+  border-radius: var(--r-window);
+  background: var(--color-paper-2);
+}
+.tool__stage {
+  container-type: inline-size;
+}
+.tool__words {
+  display: grid;
+  align-content: start;
+  gap: 0.375rem;
+  padding-inline: 0.5rem;
+}
+.tool__n {
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.1em;
+}
+.tool__h {
+  font-size: 1.1875rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  text-wrap: balance;
+}
+.tool__words p {
+  color: var(--muted);
+  font-size: 0.9375rem;
+  line-height: 1.45;
+  text-wrap: pretty;
+}
+.tools__foot {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 1.25rem;
+}
+.tools__small {
+  display: grid;
+  gap: 0.125rem;
+  color: var(--muted);
+  font-size: var(--text-sm);
+  line-height: 1.5;
+  text-wrap: pretty;
+}
+@media (min-width: 40rem) {
+  .tools__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  /* The odd one out runs across, its words beside its screen. */
+  .tool:last-child,
+  .tool--wide {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: center;
+    padding-bottom: 0.75rem;
+  }
+  .tool:last-child {
+    grid-column: 1 / -1;
+  }
+  .tool--wide {
+    grid-template-columns: minmax(0, 1fr);
+    padding-bottom: 1.125rem;
+  }
+}
+@media (min-width: 64rem) {
+  .tools__grid {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+  .tool,
+  .tool:last-child {
+    grid-column: span 2;
+    grid-template-columns: minmax(0, 1fr);
+    align-items: start;
+    padding-bottom: 1.125rem;
+  }
+  /* The second tool has the most to show: it takes two cells, its words beside its screen. */
+  .tool--wide {
+    grid-column: span 4;
+    grid-template-columns: minmax(0, 1.08fr) minmax(0, 1fr);
+    align-content: center;
+    align-items: center;
+    gap: 1.5rem;
+    padding-bottom: 0.75rem;
+  }
+  .tool--wide .tool__h {
+    font-size: 1.5rem;
+  }
+  .tool--wide .tool__words p {
+    font-size: 1rem;
+  }
+}
+
+/* A sample screen: a small window, drawn in units of its stage (1em is 2.75% of the stage's width). */
+.ts {
+  position: relative;
+  margin: 0;
+  padding-top: 1.15em;
+  color: var(--ink);
+  font-size: 3.3cqw;
+  line-height: 1.3;
+}
+/* The wide cell's stage is wider, so its screen is drawn finer. */
+.tool--wide .ts {
+  font-size: 2.75cqw;
+}
+.ts__tag {
+  position: absolute;
+  top: 0;
+  right: 4%;
+  padding: 0.3em 0.7em 0.2em;
+  border-radius: 0.5em 0.5em 0 0;
+  background: var(--night);
+  color: var(--on-night);
+  font-family: var(--font-mono);
+  font-size: 0.66em;
+  letter-spacing: 0.12em;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+.ts__bar {
+  display: flex;
+  align-items: center;
+  gap: 0.7em;
+  padding: 0.7em 1.1em;
+  border-radius: 0.9em 0.9em 0 0;
+  background: var(--night);
+  color: var(--on-night);
+  font-size: 0.8em;
+}
+.ts__bar > i {
+  width: 0.55em;
+  height: 0.55em;
+  border-radius: 50%;
+  background: var(--color-accent);
+}
+.ts__bar > span:last-child {
+  color: var(--on-night-muted);
+  font-family: var(--font-mono);
+}
+.ts__meter {
+  flex: 1;
+  height: 0.2em;
+  border-radius: 1em;
+  background: var(--hair-night);
+  overflow: hidden;
+}
+.ts__meter i {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: var(--color-accent);
+  transform-origin: left;
+}
+.ts__body {
+  display: grid;
+  align-content: start;
+  gap: 0.8em;
+  height: 68cqw;
+  padding: 1.1em;
+  border-radius: 0 0 0.9em 0.9em;
+  background: var(--window);
+  box-shadow: var(--shadow-card);
+  overflow: hidden;
+}
+/* The script's screen is as tall as what it says. */
+.ts--script .ts__body {
+  height: auto;
+}
+.ts .tick {
+  flex: none;
+  width: 1em;
+  height: 1em;
+  color: var(--color-sage);
+}
+.ts__cap {
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 0.7em;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+/* What the owner types. */
+.ts__said {
+  justify-self: end;
+  padding: 0.45em 0.9em;
+  border-radius: 0.8em 0.8em 0.2em 0.8em;
+  background: var(--night);
+  color: var(--on-night);
+  font-size: 0.9em;
+  font-weight: 600;
+}
+.ts__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3em;
+  padding: 0.25em 0.75em 0.25em 0.55em;
+  border-radius: 99em;
+  background: var(--tint-sage);
+  font-size: 0.8em;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.ts__end {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6em;
+  font-size: 0.86em;
+}
+.ts__end--right {
+  justify-content: flex-end;
+}
+/* A number in a small square. */
+.ts ol b {
+  display: grid;
+  place-items: center;
+  width: 1.9em;
+  height: 1.9em;
+  border-radius: 0.5em;
+  background: var(--ink);
+  color: var(--window);
+  font-family: var(--font-mono);
+  font-size: 0.78em;
+  font-weight: 500;
+}
+
+/* 01 The profile. */
+.ts__file {
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+  font-family: var(--font-mono);
+  font-size: 0.85em;
+}
+.ts__file svg,
+.ts__never svg {
+  width: 1.25em;
+  height: 1.25em;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linejoin: round;
+}
+.ts__rows {
+  display: grid;
+  gap: 0.4em;
+}
+.ts__rows li {
+  display: grid;
+  gap: 0.35em;
+  padding: 0.45em 0.8em;
+  border-radius: 0.6em;
+  box-shadow: inset 0 0 0 1px var(--hair);
+}
+.ts__rows span {
+  color: var(--muted);
+  font-size: 0.74em;
+}
+.ts__rows i,
+.ts__row i {
+  display: block;
+  width: var(--w, auto);
+  height: 0.42em;
+  border-radius: 1em;
+  background: var(--bar);
+  transform-origin: left;
+}
+
+/* 02 The script. */
+.ts__angles,
+.ts__checks {
+  display: grid;
+  gap: 0.45em;
+}
+.ts__angles ol {
+  display: grid;
+  gap: 0.35em;
+}
+.ts__angles li {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.6em;
+  padding: 0.4em 0.55em;
+  border-radius: 0.55em;
+  background: var(--tint);
+  font-size: 0.88em;
+  font-weight: 600;
+}
+.ts__pick {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: color-mix(in oklch, var(--color-accent) 10%, transparent);
+  box-shadow: inset 0 0 0 1.5px var(--color-accent);
+}
+.ts__draft {
+  display: grid;
+  gap: 0.3em;
+  padding: 0.7em 0.8em;
+  border-radius: 0.6em;
+  box-shadow: inset 0 0 0 1px var(--hair);
+  font-size: 0.88em;
+}
+.ts__draft .ts__cap {
+  margin-top: 0.2em;
+}
+.ts__checks ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35em;
+}
+.ts__checks li {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25em;
+  padding: 0.2em 0.65em 0.2em 0.45em;
+  border-radius: 99em;
+  background: var(--tint-sage);
+  font-size: 0.74em;
+  font-weight: 500;
+}
+.ts__checks .ts__end {
+  margin-top: 0.3em;
+  padding-top: 0.6em;
+  border-top: 1px solid var(--hair);
+}
+
+/* 03 The setup: a drawn photo with nobody in it, one check, one fix. */
+.ts__snap {
+  display: grid;
+  grid-template-columns: 44% 1fr;
+  align-items: end;
+  gap: 0.8em;
+}
+.ts__photo {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  border-radius: 0.5em;
+  background: var(--scene-wall);
+  overflow: hidden;
+}
+.ts__photo i {
+  position: absolute;
+}
+.ts__floor {
+  inset: auto 0 0;
+  height: 22%;
+  background: var(--scene-floor);
+}
+.ts__lamp {
+  bottom: 22%;
+  left: 17%;
+  width: 2.5%;
+  height: 52%;
+  background: var(--scene-thing);
+}
+.ts__lamp::before {
+  content: "";
+  position: absolute;
+  top: -8%;
+  left: -260%;
+  width: 620%;
+  height: 16%;
+  border-radius: 0.3em;
+  background: var(--color-card);
+}
+.ts__chair {
+  bottom: 22%;
+  left: 47%;
+  width: 18%;
+  height: 34%;
+  border-radius: 0.3em 0.3em 0 0;
+  background: var(--scene-thing);
+}
+.ts__scan {
+  inset: 0 auto 0 0;
+  width: 16%;
+  background: linear-gradient(90deg, transparent, var(--shine-tile));
+  opacity: 0;
+}
+.ts__row {
+  display: flex;
+  align-items: center;
+  gap: 0.7em;
+  padding: 0.55em 0.8em;
+  border-radius: 0.6em;
+  box-shadow: inset 0 0 0 1px var(--hair);
+}
+.ts__row i {
+  flex: 1;
+}
+.ts__fix {
+  display: flex;
+  align-items: center;
+  gap: 0.9em;
+  padding: 0.7em 0.9em;
+  border-radius: 0.6em;
+  background: var(--tint-accent);
+}
+.ts__fix > span:last-child {
+  display: grid;
+  gap: 0.2em;
+}
+.ts__fix b {
+  font-size: 0.95em;
+}
+/* A phone, upright once the fix is said. */
+.ts__phone {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 2.6em;
+  height: 1.5em;
+  border-radius: 0.3em;
+  box-shadow: inset 0 0 0 1.5px var(--ink);
+  rotate: 90deg;
+}
+.ts__phone i {
+  width: 0.3em;
+  height: 0.3em;
+  border-radius: 50%;
+  background: var(--ink);
+}
+
+/* 04 The editor's cut list. */
+.ts__cut {
+  display: grid;
+  gap: 0.6em;
+  padding: 0.8em;
+  border-radius: 0.6em;
+  box-shadow: inset 0 0 0 1px var(--hair);
+}
+.ts__cuthead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.6em;
+  font-size: 0.9em;
+}
+.ts__track {
+  position: relative;
+  height: 1.3em;
+  border-radius: 0.3em;
+  background: var(--bar);
+  overflow: hidden;
+}
+.ts__gap {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: var(--a);
+  width: calc(var(--b) - var(--a));
+  min-width: 0.2em;
+  background: repeating-linear-gradient(
+    135deg,
+    var(--color-clay) 0 0.18em,
+    var(--tint-clay) 0.18em 0.42em
+  );
+}
+.ts__cut ol {
+  display: grid;
+  gap: 0.3em;
+}
+.ts__cut li {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 0.7em;
+  font-family: var(--font-mono);
+  font-size: 0.72em;
+}
+.ts__cut em {
+  color: var(--muted);
+  font-style: normal;
+}
+.ts__never {
+  display: flex;
+  align-items: center;
+  gap: 0.4em;
+  font-size: 0.76em;
+  font-weight: 600;
+}
+
+/* 05 A new file, added in 3 steps. */
+.ts__addon {
+  display: grid;
+  justify-items: start;
+  gap: 0.5em;
+  padding: 0.8em;
+  border-radius: 0.6em;
+  box-shadow: inset 0 0 0 1px var(--hair);
+}
+.ts__chip {
+  padding: 0.15em 0.55em;
+  border-radius: 0.3em;
+  background: var(--color-accent);
+  color: var(--color-ink);
+  font-family: var(--font-mono);
+  font-size: 0.66em;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.ts__addon dl {
+  display: grid;
+  gap: 0.25em;
+  width: 100%;
+}
+.ts__addon dl div {
+  display: grid;
+  grid-template-columns: 5.5em 1fr;
+  gap: 0.6em;
+  font-family: var(--font-mono);
+  font-size: 0.72em;
+}
+.ts__addon dt {
+  color: var(--muted);
+}
+.ts__addon dd {
+  font-weight: 600;
+}
+.ts__steps {
+  display: grid;
+  gap: 0.35em;
+}
+.ts__steps li {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 0.6em;
+  padding: 0.4em 0.6em;
+  border-radius: 0.55em;
+  box-shadow: inset 0 0 0 1px var(--hair);
+  font-size: 0.8em;
+}
+
+/* While a screen plays, a part that has not arrived yet is not there. */
+.ts.is-looping .pop:not(.on) {
+  translate: 0 0.5em;
+}
+.ts.is-looping .typed .w {
+  transition-delay: calc(var(--k, 0) * 110ms);
+}
+.ts.is-looping .ts__meter i:not(.on),
+.ts.is-looping .ts__rows li:not(.on) i {
+  scale: 0 1;
+}
+.ts.is-looping .ts__meter i {
+  transition: scale 1600ms var(--ease-move);
+}
+.ts.is-looping .ts__rows i {
+  transition: scale 500ms var(--ease-move) 150ms;
+}
+.ts.is-looping .ts__pick:not(.on),
+.ts.is-looping .ts__gap:not(.on),
+.ts.is-looping .ts__steps li:not(.on) .tick {
+  opacity: 0;
+}
+.ts.is-looping .ts__pick,
+.ts.is-looping .ts__gap,
+.ts.is-looping .ts__steps .tick,
+.ts.is-looping .ts__steps li {
+  transition: opacity 300ms var(--ease-move);
+}
+.ts.is-looping .ts__steps li:not(.on) {
+  opacity: 0.45;
+}
+.ts.is-looping .ts__phone:not(.on) {
+  rotate: 0deg;
+}
+.ts.is-looping .ts__phone {
+  transition: rotate 500ms var(--spring);
+}
+.ts.is-looping .ts__scan.on {
+  animation: ts-scan 1300ms linear;
+}
+@keyframes ts-scan {
+  0% {
+    opacity: 1;
+    translate: -100% 0;
+  }
+  100% {
+    opacity: 1;
+    translate: 640% 0;
+  }
+}
+
+/* ---------- 8. The packages ---------- */
+.plan__main,
+.plan__foot {
+  padding: clamp(1.25rem, 1.1rem + 0.6vw, 1.5rem);
+}
+.plan__main {
+  gap: 0.625rem;
+}
+.plan__foot {
+  gap: 0.875rem;
+}
+@media (min-width: 60rem) {
+  .plan--marked {
+    margin-block: -0.625rem;
+  }
+  .plan--marked .plan__main {
+    padding-top: calc(clamp(1.25rem, 1.1rem + 0.6vw, 1.5rem) + 0.625rem);
+  }
+  .plan--marked .plan__foot {
+    padding-bottom: calc(clamp(1.25rem, 1.1rem + 0.6vw, 1.5rem) + 0.625rem);
+  }
+  .plans__under {
+    margin-top: 1.5rem;
+  }
+}
+/* The founding terms: two short paragraphs under a hairline. */
+.founding {
+  display: grid;
+  gap: 0.75rem 3rem;
+  margin-top: clamp(1.75rem, 1.4rem + 1.6vw, 2.5rem);
+  padding-top: clamp(1.25rem, 2.4vw, 1.75rem);
+  border-top: 1px solid var(--hair);
+  color: var(--muted);
+  font-size: 0.9375rem;
+  line-height: 1.55;
+  text-wrap: pretty;
+}
+@media (min-width: 56rem) {
+  .founding {
+    grid-template-columns: 1.4fr 1fr;
+  }
+}
+.offer__part {
+  margin-top: clamp(2rem, 1.5rem + 2.4vw, 3rem);
+}
+
+/* ---------- The other sections, closer ---------- */
+.say {
+  gap: clamp(1.25rem, 2.6vw, 1.75rem);
+}
+.say__big {
+  font-size: clamp(1.625rem, 1.25rem + 1.6vw, 2.25rem);
+}
+.say__grid {
+  gap: clamp(1.5rem, 4vw, 3.5rem);
+  margin-top: 0.25rem;
+}
+.creed__close {
+  padding-top: clamp(1.25rem, 2.4vw, 1.75rem);
+}
+/* The three panels: less room around their words. */
+.how,
+.promise {
+  padding-block: clamp(2rem, 1.2rem + 3.4vw, 3.5rem);
+}
+.final {
+  gap: clamp(1.5rem, 3.6vw, 2.5rem);
+  padding-top: clamp(2rem, 1.2rem + 3.4vw, 3.5rem);
+}
+.how__head {
+  gap: 0.75rem;
+  margin-bottom: clamp(1.75rem, 1.2rem + 2.4vw, 2.75rem);
+}
+.hub {
+  gap: 1rem;
+}
+.hub__steps li {
+  padding-block: 0.75rem;
+}
+.hub__name {
+  font-size: clamp(1.25rem, 1.15rem + 0.45vw, 1.5rem);
+}
+.flow__card {
+  padding: 0.75rem 1rem;
+}
+.steps {
+  margin-top: clamp(1.75rem, 1.2rem + 2.4vw, 2.75rem);
+  padding-top: clamp(1.25rem, 2.4vw, 1.75rem);
+}
+.how__close {
+  margin-top: clamp(1.5rem, 1.2rem + 1.6vw, 2.25rem);
+}
+.berg__grid {
+  gap: clamp(1.75rem, 5vw, 4rem);
+}
+.berg__pic {
+  max-width: 23rem;
+}
+.berg__list {
+  gap: 0.5rem;
+}
+.berg__mark {
+  margin-block: 0.625rem 0.25rem;
+}
+.berg__items li {
+  padding-block: 0.4375rem;
+}
+.faq__row summary {
+  min-height: 3.25rem;
+  padding-block: 0.75rem;
+}

@@ -1,17 +1,17 @@
 ---
 /**
  * 12. Apply: the final dark window. The heading, the first screen's sentence, the two fields and the
- * button, the founding count beside it, and three small steps in a row.
+ * button, one small line beside it, and three small steps in a row.
  * Without scripts, or when the page's script fails, the browser posts the two fields itself to
  * POST /api/apply: the name and email are saved, and the person goes on to the booking page with both filled.
  */
-import { founding, section } from "../../content/deck";
+import { section } from "../../content/deck";
 import { auditPicture } from "../../content/proof";
 const s = section("the apply window");
 const steps = s.list("step ").map(({ words }) => words);
 // His own audit, beside the two fields, once the picture exists (the deck's `audit picture`).
 const audit = s.find("audit picture") !== undefined ? auditPicture() : null;
-const under = founding(s.get("under the button"));
+const under = s.get("under the button");
 ---
 
 <section class="window window--night final" id="apply" aria-labelledby="final-h">

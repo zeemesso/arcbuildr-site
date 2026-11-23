@@ -1,0 +1,67 @@
+---
+/**
+ * 5b. Say It Plain: our own product, in its own section right after What you get (DESIGN.md, section 15).
+ * Five tools in one tight grid: each is a small panel with its sample screen (screens/Tool.astro), its
+ * number, its title and one line. The second tool, the one with the most to show, takes the wide cell.
+ * Under the grid: the Claude and ChatGPT marks beside the small line, then the credit line.
+ * Every word outside a screen is the deck's ("5b. Say It Plain").
+ */
+import Marks from "./Marks.astro";
+import Tool from "./screens/Tool.astro";
+import { section } from "../../content/deck";
+const s = section("5b. say it plain");
+/** The sample screen of each tool, in the deck's order. */
+const KINDS = ["profile", "script", "setup", "editor", "files"] as const;
+const tools = s
+  .list("tool ")
+  .filter(({ slot }) => slot.endsWith(", title"))
+  .map(({ slot, words }, at) => ({
+    n: String(at + 1).padStart(2, "0"),
+    kind: KINDS[at]!,
+    title: words,
+    line: s.get(slot.replace(", title", ", line")),
+  }));
+---
+
+<section class="tools" id="tools" aria-labelledby="tools-h">
+  <div class="tools__head">
+    <p class="label" data-reveal>
+      {s.get("label")}
+    </p>
+    <h2 class="h2" id="tools-h" data-reveal>
+      {s.get("heading")}
+    </h2>
+    <p class="tools__line" data-reveal>
+      {s.get("line")}
+    </p>
+  </div>
+  <p class="tools__note" data-reveal>
+    {s.get("samples note")}
+  </p>
+  <ol class="tools__grid" data-tools>
+    {tools.map(({ n, kind, title, line }, at) => (
+      <li
+        class:list={["tool", { "tool--wide": kind === "script" }]}
+        data-tool={kind}
+        data-reveal
+        style={`--i:${at}`}
+      >
+        <div class="tool__stage">
+          <Tool kind={kind} />
+        </div>
+        <div class="tool__words">
+          <span class="tool__n">{n}</span>
+          <h3 class="tool__h">{title}</h3>
+          <p>{line}</p>
+        </div>
+      </li>
+    ))}
+  </ol>
+  <div class="tools__foot" data-reveal>
+    <Marks />
+    <div class="tools__small">
+      <p>{s.get("small line")}</p>
+      <p data-credit>{s.get("credit")}</p>
+    </div>
+  </div>
+</section>

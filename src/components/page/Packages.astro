@@ -1,20 +1,17 @@
 ---
 /**
- * 8. The packages, in the deck's order: three package cards side by side, the founding places, the
- * bonuses, the product card, then the stack: what the same work costs hired out, and one total for each
- * package beside its founding price. An apply strip closes it.
- * A card has two parts split by a line: the size label, the name, the outcome and what's in it above;
- * the price and the one button below. The card with the deck's badge stands taller and is the only one
- * with a filled button. On a phone one card shows at a time, under three tabs, the marked one first;
- * the tabs are radio buttons, so they need no script, and a browser that cannot follow them shows the
- * three cards one above the other.
+ * 8. The packages, in the deck's order: three package cards side by side, the two lines under them, the
+ * founding terms, then the bonuses. An apply strip closes it. Say It Plain has its own section (Tools.astro).
+ * A card has two parts split by a line: its length and size as a small label, its name, the outcome and
+ * what's in it above; the price and the one button below. The card with the deck's badge stands taller
+ * and is the only one with a filled button. On a phone one card shows at a time, under three tabs named
+ * by length (the first part of the small label), the marked one first; the tabs are radio buttons, so
+ * they need no script, and a browser that cannot follow them shows the three cards one above the other.
  * A card's button hands its package's name to the form and to the page after a booking (`data-package`).
  */
 import Strip from "./Strip.astro";
-import Product from "./Product.astro";
 import Bonuses from "./Bonuses.astro";
-import { founding, section } from "../../content/deck";
-import { FOUNDING_PLACES_LEFT } from "../../config";
+import { section } from "../../content/deck";
 const s = section(8);
 /** "Founding price: 750 USD" → what the figure is, and the figure. */
 const figure = (words: string) => {
@@ -31,6 +28,8 @@ const packages = s
       n: key.replace("package ", ""),
       name: words,
       size,
+      // "8 weeks, 24 videos" → the phone tab says the length alone.
+      tab: size.split(",")[0]!,
       badge: s.find(`${key}, badge`),
       outcome: s.get(`${key}, outcome`),
       price: figure(s.get(`${key}, price`)),
@@ -52,17 +51,6 @@ const bonuses = s
       body: s.get(`${key}, body`),
     };
   });
-/** A row of the stack: "Brand Strategy. 1,250 USD." The figure is the last sentence. */
-const rows = s.list("stack row ").map(({ words }) => {
-  const cut = words.lastIndexOf(". ");
-  return { name: words.slice(0, cut), value: words.slice(cut + 2).replace(/\.$/, "") };
-});
-/** "12 pieces: 4,160 USD. Founding price: 750 USD." → the name, the hired-out total, the price. */
-const totals = s.list("stack total, package ").map(({ words }) => {
-  const cut = /^(.+?): ([\d,]+ USD)\. (.+?): ([\d,]+ USD)\.$/.exec(words);
-  if (!cut) throw new Error(`deck: a stack total is not "Name: total. Label: price.": ${words}`);
-  return { name: cut[1]!, total: cut[2]!, label: cut[3]!, price: cut[4]! };
-});
 ---
 
 <section class="offer" id="packages" aria-labelledby="offer-h">
@@ -80,10 +68,10 @@ const totals = s.list("stack total, package ").map(({ words }) => {
 
   <div class="plans-box" data-plans-box>
     <div class="plans__tabs" role="radiogroup" aria-labelledby="offer-h" data-plans-tabs>
-      {packages.map(({ n, name, badge }) => (
+      {packages.map(({ n, tab, badge }) => (
         <label class="plans__tab">
           <input type="radio" name="plan" value={n} checked={!!badge} />
-          <span>{name}</span>
+          <span>{tab}</span>
         </label>
       ))}
     </div>
@@ -142,19 +130,9 @@ const totals = s.list("stack total, package ").map(({ words }) => {
   </div>
 
   <div class="founding" data-reveal>
-    <p class="founding__line">
-      <span class="hang__dots" aria-hidden="true">
-        {[0, 1, 2].map((n) => (
-          <i data-taken={n >= FOUNDING_PLACES_LEFT ? "" : undefined} />
-        ))}
-      </span>
-      {founding(s.get("founding line"))}
-    </p>
-    <div class="founding__more">
-      {paragraphs.slice(1).map((words) => (
-        <p>{words}</p>
-      ))}
-    </div>
+    {paragraphs.slice(1).map((words) => (
+      <p>{words}</p>
+    ))}
   </div>
 
   <div class="offer__part">
@@ -162,40 +140,6 @@ const totals = s.list("stack total, package ").map(({ words }) => {
       {s.get("bonus title")}
     </h3>
     <Bonuses items={bonuses} />
-  </div>
-
-  <Product />
-
-  <div class="offer__part stack">
-    <h3 class="offer__title" data-reveal>
-      {s.get("stack title")}
-    </h3>
-    <ol class="ledger" data-ledger data-reveal>
-      {rows.map(({ name, value }) => (
-        <li class="ledger__row">
-          <span class="ledger__name">{name}</span>
-          <span class="ledger__value">{value}</span>
-        </li>
-      ))}
-    </ol>
-    <p class="offer__note" data-reveal>
-      {s.get("stack note")}
-    </p>
-    <ol class="sums" data-sums data-reveal>
-      {totals.map(({ name, total, label, price }) => (
-        <li class="sum">
-          <h4 class="sum__name">{name}</h4>
-          <p class="sum__total">{total}</p>
-          <p class="sum__price">
-            <span>{label}</span>
-            <b>{price}</b>
-          </p>
-        </li>
-      ))}
-    </ol>
-    <p class="sum__note" data-reveal>
-      {s.get("line under the stack")}
-    </p>
   </div>
 
   <Strip from={8} />
