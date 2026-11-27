@@ -132,6 +132,34 @@ export interface IntakeDeps {
 }
 const DEPS: IntakeDeps = { now: () => new Date(), newId: () => crypto.randomUUID(), newToken };
 
+async function readBody(request: Request): Promise<Uint8Array<ArrayBuffer> | null> {
+  const reader = request.body?.getReader();
+  if (!reader) return new Uint8Array(0);
+  const chunks: Uint8Array[] = [];
+  let size = 0;
+  try {
+    for (;;) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      size += value.byteLength;
+      if (size > MAX_BODY_BYTES) {
+        void reader.cancel().catch(() => {});
+        return null;
+      }
+      if (value.byteLength) chunks.push(value);
+    }
+  } finally {
+    reader.releaseLock();
+  }
+  const body = new Uint8Array(size);
+  let offset = 0;
+  for (const chunk of chunks) {
+    body.set(chunk, offset);
+    offset += chunk.byteLength;
+  }
+  return body;
+}
+
 export async function handleSubmit(
   request: Request,
   env: Env,
@@ -163,8 +191,8 @@ export async function handleSubmit(
     return fail(SUBMIT_ERROR.tooBig, 413);
   let data: FormData;
   try {
-    const body = await request.arrayBuffer();
-    if (body.byteLength > MAX_BODY_BYTES) return fail(SUBMIT_ERROR.tooBig, 413);
+    const body = await readBody(request);
+    if (!body) return fail(SUBMIT_ERROR.tooBig, 413);
     data = await new Response(body, { headers: request.headers }).formData();
   } catch {
     return fail(SUBMIT_ERROR.badForm, 400);

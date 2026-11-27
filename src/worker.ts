@@ -1,5 +1,6 @@
 import type { Env, MagnetJob } from "./lib/env";
 import { handleLead } from "./lib/lead";
+import { PLAN_API_PATH } from "./lib/magnet/contract";
 import { handleSubmit } from "./lib/magnet/intake";
 import { writeFollowUps } from "./lib/magnet/followup";
 import { jobDeps, runLead } from "./lib/magnet/job";
@@ -23,8 +24,7 @@ export default {
     const short = shortLinkRedirect(url);
     if (short) return short;
     if (pathname === "/api/lead" && request.method === "POST") return handleLead(request, env);
-    const plan = /^\/api\/magnet\/plan\/([^/]{1,64})$/.exec(pathname);
-    if (plan && request.method === "GET") return handlePlan(env, plan[1]!);
+    if (pathname === PLAN_API_PATH && request.method === "GET") return handlePlan(request, env);
     const stop = /^\/api\/magnet\/unsubscribe\/([^/]{1,64})$/.exec(pathname);
     if (stop) return handleUnsubscribe(request, env, stop[1]!);
     const magnet = /^\/api\/magnet\/([a-z0-9-]{1,64})$/.exec(pathname);

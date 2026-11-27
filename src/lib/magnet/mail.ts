@@ -83,7 +83,7 @@ export async function sendDue(
   if (!deps.mail) return { ...report, waiting: due.length };
 
   for (const email of due) {
-    if (!(await claimEmail(db, email.leadId, email.step, deps.now()))) continue;
+    if (!(await claimEmail(db, email.leadId, email.step, deps.now(), email.dueAt))) continue;
     if (deps.now().getTime() - new Date(email.dueAt).getTime() > EXPIRE_MS) {
       await closeEmail(
         db,
@@ -98,6 +98,7 @@ export async function sendDue(
     const result = await deps.mail({
       to: email.to,
       subject: email.subject,
+      idempotencyKey: `magnet-${email.leadId}-${email.step}-${email.dueAt}`,
       text: `${email.body}\n\n--\n${EMAIL_TEXT.footer(`${site}${unsubscribePagePath(email.unsub)}`)}`,
       headers: {
         "List-Unsubscribe": `<${site}${unsubscribeApiPath(email.unsub)}>`,

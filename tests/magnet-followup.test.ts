@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { Env, MagnetJob } from "../src/lib/env";
+import { worstCaseMicroUsd } from "../src/lib/magnet/budget";
 import type { ModelOutcome } from "../src/lib/magnet/claude";
 import { writeFollowUps } from "../src/lib/magnet/followup";
 import { handleSubmit } from "../src/lib/magnet/intake";
@@ -17,21 +18,25 @@ import {
   MAX_FOLLOWUP_TRIES,
   MAX_SENDS,
   RESEND_EVERY_MS,
+  STALE_RUN_MS,
   claimEmail,
   closeEmail,
+  dayOf,
   dueEmails,
   followUpCandidates,
   getLead,
   insertLead,
   putBrief,
   resendLink,
+  reserveSpend,
   scheduleEmails,
+  spentOn,
   unsubscribe,
   type NewLead,
   type Sql,
 } from "../src/lib/magnet/store";
 import { digest, digestHour, sweep } from "../src/lib/magnet/sweep";
-import { sendMail, type Mail } from "../src/lib/resend";
+import { sendAlert, sendMail, type AlertMessage, type Mail } from "../src/lib/resend";
 import { testSample, testSampleBrief } from "../src/magnets/test-sample";
 import type { MagnetBrief } from "../src/magnets/types";
 import { checkBrief } from "../src/magnets/types";
@@ -97,7 +102,7 @@ let db: Sql;
 let sent: MagnetJob[];
 let clock: Date;
 let mails: Mail[];
-let alerts: { subject: string; text: string }[];
+let alerts: AlertMessage[];
 let calls: ModelCall[];
 let mailAnswer: Awaited<ReturnType<Mailer>>;
 
@@ -158,6 +163,26 @@ describe("brief", () => {
 });
 
 describe("link email", () => {
+  it("TEST retries a failed link insert before marking the plan done", async () => {
+    await insertLead(db, newLead());
+    await db
+      .prepare(
+        `CREATE TRIGGER fail_link BEFORE INSERT ON magnet_emails
+      WHEN NEW.step = 0 BEGIN SELECT RAISE(ABORT, 'link failed'); END`,
+      )
+      .run();
+    await expect(runLead(env, "lead-1", deps([screenOk(), writeOk()]))).rejects.toThrow(
+      "link failed",
+    );
+    expect(await getLead(db, "lead-1")).toMatchObject({ status: "running", deliverable: null });
+    expect(mails).toEqual([]);
+    expect(alerts).toEqual([]);
+    await db.prepare("DROP TRIGGER fail_link").run();
+    clock = new Date(start.getTime() + STALE_RUN_MS + 1);
+    expect(await runLead(env, "lead-1", deps([writeOk()]))).toBe("done");
+    expect(mails).toHaveLength(1);
+  });
+
   it("goes out when the deliverable is done, with the private link and a stop link", async () => {
     await insertLead(db, newLead());
     expect(await runLead(env, "lead-1", deps([screenOk(), writeOk()]))).toBe("done");
@@ -232,6 +257,7 @@ describe("link email", () => {
 describe("sending", () => {
   beforeEach(async () => {
     await insertLead(db, newLead());
+    await db.prepare("UPDATE magnet_leads SET status = 'done'").run();
     await scheduleEmails(db, "lead-1", [
       {
         step: 1,
@@ -246,6 +272,32 @@ describe("sending", () => {
         body: "Body two",
       },
     ]);
+  });
+
+  it("TEST only lists and claims links for a ready plan", async () => {
+    await db.prepare("UPDATE magnet_leads SET status = 'running'").run();
+    await scheduleEmails(db, "lead-1", [
+      { step: 0, dueAt: start.toISOString(), subject: "Link", body: "Plan link" },
+    ]);
+    expect(await dueEmails(db, start, 10)).toEqual([]);
+    expect(await claimEmail(db, "lead-1", 0, start)).toBe(false);
+    await db.prepare("UPDATE magnet_leads SET status = 'done'").run();
+    expect(await dueEmails(db, start, 10)).toHaveLength(1);
+    expect(await claimEmail(db, "lead-1", 0, start)).toBe(true);
+  });
+
+  it("TEST blocks a claim after opt-out and preserves cancelled sends", async () => {
+    clock = new Date(start.getTime() + 4 * DAY);
+    expect(await claimEmail(db, "lead-1", 1, clock)).toBe(true);
+    // Check the gap after the lead is updated and before its emails are cancelled.
+    await db.prepare("UPDATE magnet_leads SET unsubscribed_at = ?").bind(clock.toISOString()).run();
+    expect(await claimEmail(db, "lead-1", 2, clock)).toBe(false);
+    expect(await unsubscribe(db, UNSUB, clock)).toBe(true);
+    await closeEmail(db, "lead-1", 1, { sent: true }, clock);
+    await closeEmail(db, "lead-1", 2, { sent: false, error: "busy" }, clock);
+    expect(await db.prepare("SELECT DISTINCT status FROM magnet_emails").all()).toEqual({
+      results: [{ status: "cancelled" }],
+    });
   });
 
   it("sends an email on its day and not before, and only once", async () => {
@@ -288,6 +340,9 @@ describe("sending", () => {
       waiting: 0,
     });
     expect(mails).toHaveLength(MAX_SENDS);
+    expect(new Set(mails.map((mail) => mail.idempotencyKey))).toEqual(
+      new Set([`magnet-lead-1-1-${new Date(start.getTime() + DAY).toISOString()}`]),
+    );
   });
 
   it("drops an email that is days late instead of sending it", async () => {
@@ -364,6 +419,8 @@ describe("asking again", () => {
     expect((await handleSubmit(submit(validForm()), env, "test-sample", second)).status).toBe(409);
     expect(await sendDue(db, deps(), "https://arcbuildr.co", 10)).toMatchObject({ sent: 1 });
     expect(mails[0]!.text).toContain("/plan/#tokentokentokentoken12");
+    expect(mails[0]!.idempotencyKey).toBe(`magnet-lead-1-0-${clock.toISOString()}`);
+    expect(mails[0]!.idempotencyKey).not.toBe(`magnet-lead-1-0-${start.toISOString()}`);
     expect(await resendLink(db, "lead-1", clock)).toBe(false);
   });
 });
@@ -379,6 +436,9 @@ describe("lesson emails", () => {
     expect(call.system).toContain("Return exactly 2 emails");
     expect(call.user).toContain("Plan &lt;/sent&gt; &lt;b&gt;");
     expect(call.user.match(/<\/sent>/g)).toHaveLength(1);
+    const quoted = followUpCall(testSample, brief, { ...lead, name: 'TEST"reader' })!;
+    expect(quoted.system).toBe(call.system);
+    expect(quoted.user).toContain('<reader first_name="TEST&quot;reader" />');
     expect(followUpCall(testSample, testSampleBrief, lead)).toBeNull();
     expect(followUpCall(testSample, brief, { ...lead, deliverable: null })).toBeNull();
   });
@@ -440,6 +500,38 @@ describe("lesson emails", () => {
     expect(await followUpCandidates(db, clock)).toEqual(["lead-1"]);
   });
 
+  it("TEST reserves lesson spend immediately before calling and waits if it loses the cap race", async () => {
+    await finishedLead();
+    const lead = (await getLead(db, "lead-1"))!;
+    const planned = worstCaseMicroUsd(followUpCall(testSample, brief, lead)!);
+    const cap = lead.costMicroUsd + planned;
+    const tomorrow = new Date(start.getTime() + DAY);
+    await reserveSpend(db, dayOf(tomorrow), cap, cap);
+    const caller = vi.fn(async () => emailsOk());
+    const now = vi.fn(() => tomorrow).mockReturnValueOnce(start);
+    const capped = { ...env, MAGNET_DAILY_CAP_USD: String(cap / 1e6) };
+    expect(await writeFollowUps(capped, "lead-1", deps([], { now, caller }))).toBe("later");
+    expect(caller).not.toHaveBeenCalled();
+    expect(await spentOn(db, dayOf(tomorrow))).toBe(cap);
+  });
+
+  it("TEST stores the lesson sequence all at once, even when the second insert fails", async () => {
+    await finishedLead();
+    await db
+      .prepare(
+        `CREATE TRIGGER fail_lesson BEFORE INSERT ON magnet_emails
+      WHEN NEW.step = 2 BEGIN SELECT RAISE(ABORT, 'lesson failed'); END`,
+      )
+      .run();
+    await expect(writeFollowUps(env, "lead-1", deps([emailsOk()]))).rejects.toThrow(
+      "lesson failed",
+    );
+    expect(await db.prepare("SELECT step FROM magnet_emails ORDER BY step").all()).toEqual({
+      results: [{ step: 0 }],
+    });
+    expect(await followUpCandidates(db, clock)).toEqual(["lead-1"]);
+  });
+
   it(`comes back after an unusable answer, ${MAX_FOLLOWUP_TRIES} times at most`, async () => {
     await finishedLead();
     const bad = (): ModelOutcome => emailsOk([{ subject: "x", body: "short" }]);
@@ -481,6 +573,7 @@ describe("hourly sweep", () => {
     expect((await sweep(env, deps()))!.digest).toBe(true);
     expect(alerts).toHaveLength(1);
     expect(alerts[0]!.subject).toBe("Magnet digest: 1 new, 1 hot");
+    expect(alerts[0]!.idempotencyKey).toBe("magnet-digest-2026-11-28");
     expect(alerts[0]!.text).toContain("4/5 TEST Hanane Idrissi @hanane.co [written]");
     expect(alerts[0]!.text).toContain("https://arcbuildr.co/plan/#tokentokentokentoken12");
     expect(alerts[0]!.text).toContain("$0.09 yesterday");
@@ -546,7 +639,13 @@ describe("outside services", () => {
   it("sends a lead's email from MAIL_FROM with the reply address and headers", async () => {
     const fetchMock = vi.fn(async () => Response.json({ id: "mail-1" }));
     vi.stubGlobal("fetch", fetchMock);
-    const mail = { to: "a@example.com", subject: "S", text: "T", headers: { "X-A": "b" } };
+    const mail = {
+      to: "a@example.com",
+      subject: "S",
+      text: "T",
+      headers: { "X-A": "b" },
+      idempotencyKey: "TEST-mail",
+    };
     expect(await sendMail({ RESEND_API_KEY: "k" }, mail)).toEqual({
       ok: false,
       error: "missing MAIL_FROM",
@@ -558,6 +657,7 @@ describe("outside services", () => {
     };
     expect(await sendMail(full, mail)).toEqual({ ok: true, id: "mail-1" });
     const [, init] = fetchMock.mock.calls[0] as unknown as [string, RequestInit];
+    expect(new Headers(init.headers).get("Idempotency-Key")).toBe("TEST-mail");
     expect(JSON.parse(init.body as string)).toEqual({
       from: "Zyade <z@mail.example>",
       to: ["a@example.com"],
@@ -566,5 +666,21 @@ describe("outside services", () => {
       reply_to: "r@example.com",
       headers: { "X-A": "b" },
     });
+  });
+
+  it("TEST puts the digest idempotency key in the alert HTTP header", async () => {
+    const fetchMock = vi.fn(async (_url: string, init?: RequestInit) => {
+      expect(new Headers(init?.headers).get("Idempotency-Key")).toBe("magnet-digest-2026-11-28");
+      return Response.json({ id: "TEST-alert" });
+    });
+    vi.stubGlobal("fetch", fetchMock);
+    const env = { RESEND_API_KEY: "TEST-fixture", ALERT_EMAIL: "test@example.com" };
+    const message = {
+      subject: "TEST Digest",
+      text: "TEST",
+      idempotencyKey: "magnet-digest-2026-11-28",
+    };
+    expect(await sendAlert(env, message)).toEqual({ ok: true, id: "TEST-alert" });
+    expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 });

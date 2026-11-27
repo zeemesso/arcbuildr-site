@@ -6,6 +6,7 @@ ALTER TABLE magnet_leads ADD COLUMN unsub TEXT;
 ALTER TABLE magnet_leads ADD COLUMN unsubscribed_at TEXT;
 -- Tries at writing the lesson emails, so a lead that keeps failing is left alone.
 ALTER TABLE magnet_leads ADD COLUMN followup_tries INTEGER NOT NULL DEFAULT 0;
+UPDATE magnet_leads SET unsub = lower(hex(randomblob(11))) WHERE unsub IS NULL;
 CREATE UNIQUE INDEX magnet_leads_unsub ON magnet_leads (unsub);
 
 -- Step 0 is the "it's ready" link. Steps 1 and up are the lesson emails.

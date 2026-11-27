@@ -132,6 +132,16 @@ export function checkBrief(brief: MagnetBrief): string[] {
   if (!SLUG.test(brief.slug)) problems.push("slug must be lower-case words joined by dashes");
   if (!brief.outline.trim()) problems.push("outline is empty");
   if (!brief.hotRule.trim()) problems.push("hotRule is empty");
+  const guidance = brief.followUp?.guidance;
+  const characters =
+    brief.outline.length +
+    brief.knowledge.length +
+    brief.hotRule.length +
+    (typeof guidance === "string" ? guidance.length : 0);
+  if (characters > 40_000)
+    problems.push(
+      "outline, knowledge, hotRule and followUp.guidance must total at most 40,000 characters",
+    );
   if (!Number.isInteger(brief.maxWords) || brief.maxWords < 200 || brief.maxWords > 3000)
     problems.push("maxWords must be a whole number from 200 to 3000");
   if (brief.followUp) {

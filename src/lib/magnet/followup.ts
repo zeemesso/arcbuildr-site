@@ -1,18 +1,11 @@
 import type { Env } from "../env";
 import { getMagnet } from "../../magnets/registry";
 import { capMicroUsd, fitsCap } from "./budget";
+import { callWithinCap } from "./claude";
 import { SITE_URL, type JobDeps } from "./job";
 import { lessonEmails } from "./mail";
 import { followUpCall, readFollowUps } from "./prompt";
-import {
-  claimFollowUp,
-  getBrief,
-  getLead,
-  recordUsage,
-  scheduleEmails,
-  skipFollowUp,
-  type Sql,
-} from "./store";
+import { claimFollowUp, getBrief, getLead, scheduleEmails, skipFollowUp, type Sql } from "./store";
 
 // The lesson emails for one lead, written in one model call after the deliverable is done.
 // The hourly sweep queues this for every finished lead that has none yet, so a busy API or a
@@ -45,12 +38,12 @@ export async function writeFollowUps(
   // Checks that cost nothing and do not count as a try.
   const { caller } = deps;
   if (!caller) return "later";
-  if (!(await fitsCap(db, deps.now(), capMicroUsd(env.MAGNET_DAILY_CAP_USD), [call])))
-    return "later";
+  const cap = capMicroUsd(env.MAGNET_DAILY_CAP_USD);
+  if (!(await fitsCap(db, deps.now(), cap, [call]))) return "later";
   if (!(await claimFollowUp(db, id))) return "none";
 
-  const result = await caller(call);
-  if ("usage" in result) await recordUsage(db, id, result.usage, deps.now());
+  const result = await callWithinCap(db, id, caller, call, deps.now(), cap);
+  if (!result) return "later";
   if (!result.ok) {
     console.error("magnet: lesson emails not written", id, result.error);
     return "later";

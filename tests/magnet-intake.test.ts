@@ -234,6 +234,35 @@ describe("handleSubmit", () => {
     expect((await handleSubmit(notForm, env, "test-sample", deps)).status).toBe(400);
   });
 
+  it("TEST cancels a body without Content-Length as soon as it crosses the limit", async () => {
+    const { env, sent } = magnetEnv();
+    const cancel = vi.fn();
+    let chunks = 0;
+    const body = new ReadableStream<Uint8Array>(
+      {
+        pull(controller) {
+          chunks += 1;
+          controller.enqueue(new Uint8Array(80_000));
+        },
+        cancel,
+      },
+      { highWaterMark: 0 },
+    );
+    const init = {
+      method: "POST",
+      headers: { "content-type": "application/x-www-form-urlencoded", Accept: "application/json" },
+      body,
+      duplex: "half",
+    };
+    const request = new Request("https://x.test/api/magnet/test-sample", init);
+    const response = await handleSubmit(request, env, "test-sample", deps);
+    expect(response.status).toBe(413);
+    expect(await response.json()).toEqual({ ok: false, error: SUBMIT_ERROR.tooBig });
+    expect(chunks).toBe(2);
+    expect(cancel).toHaveBeenCalledTimes(1);
+    expect(sent).toEqual([]);
+  });
+
   it("keeps the lead when the queue is down, and says try again when the database is missing", async () => {
     const down = magnetEnv({
       MAGNET_QUEUE: {

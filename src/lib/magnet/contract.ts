@@ -26,7 +26,7 @@ export const answerField = (id: string) => `q_${id}`;
 export const MAX_LENGTH = { short: 300, long: 4000 } as const;
 
 export const submitPath = (slug: string) => `/api/magnet/${slug}`;
-export const planApiPath = (token: string) => `/api/magnet/plan/${token}`;
+export const PLAN_API_PATH = "/api/magnet/plan";
 /** The token rides in the fragment, so it never reaches a server log or a Referer header. */
 export const planPagePath = (token: string) => `/plan/#${token}`;
 /** The page a lead opens to stop the emails, and the request its button sends. */

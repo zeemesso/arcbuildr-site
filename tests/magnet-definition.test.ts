@@ -95,6 +95,20 @@ describe("checkBrief", () => {
       "maxWords must be a whole number from 200 to 3000",
     ]);
   });
+
+  it("TEST caps the combined brief text at 40,000 characters", () => {
+    const brief = {
+      ...testSampleBrief,
+      outline: "x".repeat(10_000),
+      knowledge: "x".repeat(10_000),
+      hotRule: "x".repeat(10_000),
+      followUp: { days: [1], guidance: "x".repeat(10_000) },
+    };
+    expect(checkBrief(brief)).toEqual([]);
+    expect(checkBrief({ ...brief, knowledge: brief.knowledge + "x" })).toEqual([
+      expect.stringContaining("at most 40,000 characters"),
+    ]);
+  });
 });
 
 describe("registry", () => {

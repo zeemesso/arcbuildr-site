@@ -2,7 +2,7 @@ import { expect, test, type Page } from "@playwright/test";
 import {
   FIELD,
   answerField,
-  planApiPath,
+  PLAN_API_PATH,
   planPagePath,
   submitPath,
   unsubscribeApiPath,
@@ -80,7 +80,7 @@ async function mockSubmit(page: Page, answers: (SubmitResult | "down" | "html")[
 test("walks the draft, validates each step, and submits the contract fields", async ({ page }) => {
   const bodies = await mockSubmit(page, [{ ok: true, url: RESULT }]);
   // The result route is covered separately; keep this mock scoped to the submission.
-  await page.route(`**${planApiPath(TEST_TOKEN)}`, (route) =>
+  await page.route(`**${PLAN_API_PATH}`, (route) =>
     route.fulfill({ json: { status: "working" } satisfies PlanState }),
   );
   await page.goto(`${MAGNET}?rr=abc12345&utm_source=insta&src=dm#intro`);
@@ -285,9 +285,10 @@ test("a working plan polls through a failed request, then renders the plan and C
   await page.clock.install();
   await page.route("**/api/magnet/**", (route) => {
     const request = route.request();
-    expect(new URL(request.url()).pathname).toBe(planApiPath(TEST_TOKEN));
+    expect(new URL(request.url()).pathname).toBe(PLAN_API_PATH);
     expect(request.method()).toBe("GET");
     expect(request.headers().accept).toBe("application/json");
+    expect(request.headers().authorization).toBe(`Bearer ${TEST_TOKEN}`);
     expect(request.headers().referer).toBeUndefined();
     polls += 1;
     return polls === 2 ? route.abort() : route.fulfill({ json: plan });

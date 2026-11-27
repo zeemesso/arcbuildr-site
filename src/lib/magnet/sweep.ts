@@ -131,7 +131,7 @@ export async function sweep(
       site,
     );
     if (message) {
-      await deps.alert(message);
+      await deps.alert({ ...message, idempotencyKey: `magnet-digest-${dayOf(now)}` });
       sent = true;
     }
   }

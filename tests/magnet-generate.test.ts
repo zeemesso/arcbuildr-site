@@ -8,11 +8,17 @@ import {
   fitsCap,
   worstCaseMicroUsd,
 } from "../src/lib/magnet/budget";
-import { callerFor, type MessagesClient, type ModelOutcome } from "../src/lib/magnet/claude";
+import {
+  anthropicClient,
+  callerFor,
+  type MessagesClient,
+  type ModelOutcome,
+} from "../src/lib/magnet/claude";
 import { MAX_ATTEMPTS, runLead, type JobDeps } from "../src/lib/magnet/job";
 import {
   SCREEN_MODEL,
   WRITER_MODEL,
+  answersBlock,
   deliverableProblem,
   readScreen,
   screenCall,
@@ -20,11 +26,13 @@ import {
   type ModelCall,
 } from "../src/lib/magnet/prompt";
 import {
+  STALE_RUN_MS,
+  claimLead,
   dayOf,
   getLead,
   insertLead,
   putBrief,
-  recordUsage,
+  reserveSpend,
   spentOn,
   type Lead,
   type NewLead,
@@ -60,6 +68,7 @@ const stored = (over: Partial<Lead> = {}): Lead => ({
   ...newLead(),
   status: "queued",
   attempts: 0,
+  startedAt: null,
   score: null,
   setterNote: null,
   screenReason: null,
@@ -122,6 +131,23 @@ describe("prompts", () => {
     expect(screen.schema).toBeDefined();
   });
 
+  it("TEST keeps reader details out of system prompts and escapes quotes in attributes", () => {
+    const lead = stored({ name: 'TEST"reader Extra', instagram: '@test"handle' });
+    const [first, ...others] = testSample.questions;
+    const magnet = { ...testSample, questions: [{ ...first!, label: 'Say "hello"' }, ...others] };
+    const writer = writerCall(magnet, testSampleBrief, lead);
+    expect(writer.system).not.toContain('TEST"reader');
+    expect(writer.system).toContain("first name in the <reader> element");
+    expect(writer.user).toContain(
+      '<reader first_name="TEST&quot;reader" instagram="@test&quot;handle" />',
+    );
+    const answers = answersBlock(magnet, lead);
+    expect(answers).toContain('question="Say &quot;hello&quot;"');
+    const screen = screenCall(magnet, testSampleBrief, lead);
+    expect(screen.user).toContain(answers);
+    expect(screen.system).not.toContain(lead.answers.stuck);
+  });
+
   it("reads a screen answer and refuses anything off the schema", () => {
     expect(readScreen(screenOk().ok ? (screenOk() as { text: string }).text : "")).toEqual({
       verdict: "write",
@@ -165,6 +191,30 @@ describe("budget", () => {
       expect(capMicroUsd(bad)).toBe(DEFAULT_DAILY_CAP_USD * 1e6);
   });
 
+  it("TEST prices the entire Haiku call at the higher tier above 100,000 input tokens", () => {
+    const counts = {
+      inputTokens: 99_800,
+      cacheWriteTokens: 100,
+      cacheReadTokens: 100,
+      outputTokens: 100,
+    };
+    expect(costMicroUsd(SCREEN_MODEL, counts)).toBe(10_044);
+    const long = { ...counts, cacheReadTokens: 101 };
+    expect(costMicroUsd(SCREEN_MODEL, long)).toBe(50_218);
+    expect(costMicroUsd(WRITER_MODEL, long)).toBe(200_871);
+    expect(costMicroUsd("claude-opus-5-5", long)).toBe(401_741);
+    const call: ModelCall = {
+      model: SCREEN_MODEL,
+      system: "x".repeat(99_499),
+      user: "x",
+      maxTokens: 100,
+      effort: "low",
+    };
+    expect(worstCaseMicroUsd(call)).toBe(10_050);
+    expect(worstCaseMicroUsd({ ...call, user: "xx" })).toBe(50_251);
+    expect(worstCaseMicroUsd({ ...call, user: "xx", model: WRITER_MODEL })).toBe(201_002);
+  });
+
   it("counts planned calls at their worst against what the day already spent", async () => {
     const { db } = magnetEnv();
     await insertLead(db, newLead());
@@ -175,11 +225,11 @@ describe("budget", () => {
       maxTokens: 1000,
       effort: "medium",
     };
-    expect(worstCaseMicroUsd(call)).toBe(12_000);
-    expect(await fitsCap(db, now, 12_000, [call])).toBe(true);
-    await recordUsage(db, "lead-1", usage(WRITER_MODEL, 1), now);
-    expect(await fitsCap(db, now, 12_000, [call])).toBe(false);
-    expect(await fitsCap(db, new Date("2026-11-28T00:00:01Z"), 12_000, [call])).toBe(true);
+    expect(worstCaseMicroUsd(call)).toBe(15_000);
+    expect(await fitsCap(db, now, 15_000, [call])).toBe(true);
+    await reserveSpend(db, dayOf(now), 1, 15_000);
+    expect(await fitsCap(db, now, 15_000, [call])).toBe(false);
+    expect(await fitsCap(db, new Date("2026-11-28T00:00:01Z"), 15_000, [call])).toBe(true);
   });
 });
 
@@ -238,17 +288,39 @@ describe("callerFor", () => {
     const busy = new Anthropic.RateLimitError(429, undefined, "slow down", headers);
     const down = new Anthropic.InternalServerError(529, undefined, "overloaded", headers);
     const offline = new Anthropic.APIConnectionError({ message: "no route" });
-    expect(await callerFor(clientWith(auth).client)(call)).toMatchObject({ kind: "config" });
+    expect(await callerFor(clientWith(auth).client)(call)).toMatchObject({
+      kind: "config",
+      billed: "no",
+    });
     expect(await callerFor(clientWith(busy).client)(call)).toEqual({
       ok: false,
       kind: "retry",
       error: "claude 429",
+      billed: "no",
     });
     expect(await callerFor(clientWith(down).client)(call)).toMatchObject({ kind: "retry" });
-    expect(await callerFor(clientWith(offline).client)(call)).toMatchObject({ kind: "retry" });
+    expect(await callerFor(clientWith(offline).client)(call)).toMatchObject({
+      kind: "retry",
+      billed: "unknown",
+    });
     expect(await callerFor(clientWith(new TypeError("x")).client)(call)).toMatchObject({
       kind: "retry",
+      billed: "unknown",
     });
+  });
+
+  it("TEST leaves retries to the queue after a retryable response", async () => {
+    const fetchMock = vi.fn(async () => Response.json({}, { status: 429 }));
+    vi.stubGlobal("fetch", fetchMock);
+    try {
+      expect(await callerFor(anthropicClient("TEST-fixture"))(call)).toMatchObject({
+        kind: "retry",
+        billed: "no",
+      });
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+    } finally {
+      vi.unstubAllGlobals();
+    }
   });
 });
 
@@ -341,7 +413,7 @@ describe("runLead", () => {
   });
 
   it("asks for a retry when the API is busy, keeps the paid screen, then gives up", async () => {
-    const busy: ModelOutcome = { ok: false, kind: "retry", error: "claude 529" };
+    const busy: ModelOutcome = { ok: false, kind: "retry", error: "claude 529", billed: "no" };
     expect(await runLead(env, "lead-1", depsWith(screenOk(), busy))).toBe("retry");
     expect(await getLead(db, "lead-1")).toMatchObject({ status: "queued", score: 4, attempts: 1 });
     // The second try goes straight to the writer.
@@ -375,5 +447,143 @@ describe("runLead", () => {
     const garbled: ModelOutcome = { ok: true, text: "sure!", usage: usage(SCREEN_MODEL, 300) };
     expect(await runLead(env, "lead-1", depsWith(garbled))).toBe("retry");
     expect(await getLead(db, "lead-1")).toMatchObject({ status: "queued", score: null });
+  });
+
+  it("TEST reserves and settles each call on its own UTC day", async () => {
+    let clock = new Date("2026-11-27T23:59:59Z");
+    const nextDay = new Date("2026-11-28T00:00:01Z");
+    const caller = vi.fn(async (call: ModelCall) => {
+      expect(await spentOn(db, dayOf(clock))).toBe(worstCaseMicroUsd(call));
+      if (call.model === WRITER_MODEL) return writeOk();
+      clock = nextDay;
+      return screenOk();
+    });
+    expect(await runLead(env, "lead-1", { ...depsWith(), now: () => clock, caller })).toBe("done");
+    expect(caller).toHaveBeenCalledTimes(2);
+    expect(await spentOn(db, dayOf(now))).toBe(400);
+    expect(await spentOn(db, dayOf(nextDay))).toBe(90_000);
+  });
+
+  it("TEST holds before the writer when another run reserves the remaining spend", async () => {
+    const cap = 200_000;
+    const caller = vi.fn(async (call: ModelCall) => {
+      await reserveSpend(db, dayOf(now), cap - worstCaseMicroUsd(call), cap);
+      return screenOk();
+    });
+    const capped = { ...env, MAGNET_DAILY_CAP_USD: "0.2" };
+    expect(await runLead(capped, "lead-1", { ...depsWith(), caller })).toBe("held");
+    expect(caller).toHaveBeenCalledTimes(1);
+    expect(await getLead(db, "lead-1")).toMatchObject({
+      score: 4,
+      error: "daily spend cap reached",
+    });
+  });
+
+  it("TEST keeps spend reserved when a request times out without a status", async () => {
+    const timeout = { ok: false, kind: "retry", error: "connection", billed: "unknown" } as const;
+    expect(await runLead(env, "lead-1", depsWith(timeout))).toBe("retry");
+    expect(await spentOn(db, dayOf(now))).toBe(worstCaseMicroUsd(calls[0]!));
+    expect((await getLead(db, "lead-1"))?.costMicroUsd).toBe(0);
+  });
+
+  it.each([
+    ["magnet_spend", "microusd", "NEW.microusd < OLD.microusd"],
+    ["magnet_leads", "cost_microusd", "1"],
+  ])("TEST keeps the reservation when a write to %s fails", async (table, column, condition) => {
+    await db
+      .prepare(
+        `CREATE TRIGGER fail_usage BEFORE UPDATE OF ${column} ON ${table}
+      WHEN ${condition} BEGIN SELECT RAISE(ABORT, 'usage failed'); END`,
+      )
+      .run();
+    await expect(runLead(env, "lead-1", depsWith(screenOk()))).rejects.toThrow("usage failed");
+    expect(await spentOn(db, dayOf(now))).toBe(worstCaseMicroUsd(calls[0]!));
+    expect((await getLead(db, "lead-1"))?.costMicroUsd).toBe(0);
+  });
+
+  it("TEST leaves the last live attempt alone and fails it once after it goes stale", async () => {
+    await db
+      .prepare("UPDATE magnet_leads SET status = 'running', attempts = ?, started_at = ?")
+      .bind(MAX_ATTEMPTS, now.toISOString())
+      .run();
+    expect(await runLead(env, "lead-1", depsWith())).toBe("skip");
+    const stale = { ...depsWith(), now: () => new Date(now.getTime() + STALE_RUN_MS + 1) };
+    const outcomes = await Promise.all([
+      runLead(env, "lead-1", stale),
+      runLead(env, "lead-1", stale),
+    ]);
+    expect(outcomes.sort()).toEqual(["failed", "skip"]);
+    expect(await getLead(db, "lead-1")).toMatchObject({ status: "failed", attempts: MAX_ATTEMPTS });
+    expect(alerts.map(({ subject }) => subject)).toEqual([expect.stringContaining("FAILED")]);
+    expect(calls).toEqual([]);
+  });
+
+  it("TEST skips a pre-claim hold if another run claims the lead first", async () => {
+    const lead = (await getLead(db, "lead-1"))!;
+    const prepare = db.prepare;
+    let claim: Promise<boolean> | undefined;
+    vi.spyOn(db, "prepare").mockImplementation((query) => {
+      if (query.startsWith("SELECT brief_json")) claim = claimLead(db, lead, now);
+      return prepare(query);
+    });
+    expect(await runLead(env, "lead-1", { ...depsWith(), caller: null })).toBe("skip");
+    expect(await claim).toBe(true);
+    expect(await getLead(db, "lead-1")).toMatchObject({ status: "running", attempts: 1 });
+    expect(alerts).toEqual([]);
+  });
+
+  it.each([
+    ["done", writeOk()],
+    ["queued", { ok: false, kind: "retry", error: "busy", billed: "no" } satisfies ModelOutcome],
+    ["held", writeOk("No heading.")],
+  ])("TEST skips a stale writer's %s result after another claim", async (_status, outcome) => {
+    const mail = vi.fn();
+    const caller = async (call: ModelCall) => {
+      if (call.model === SCREEN_MODEL) return screenOk();
+      const lead = (await getLead(db, "lead-1"))!;
+      const stale = new Date(now.getTime() + STALE_RUN_MS + 1);
+      expect(await claimLead(db, lead, stale)).toBe(true);
+      return outcome;
+    };
+    expect(await runLead(env, "lead-1", { ...depsWith(), caller, mail })).toBe("skip");
+    expect(await getLead(db, "lead-1")).toMatchObject({
+      status: "running",
+      attempts: 2,
+      deliverable: null,
+    });
+    expect(await db.prepare("SELECT step FROM magnet_emails").all()).toEqual({ results: [] });
+    expect(alerts).toEqual([]);
+    expect(mail).not.toHaveBeenCalled();
+  });
+
+  it("TEST keeps a rejected screen and its status together when a write fails", async () => {
+    const reject = screenOk({
+      verdict: "reject",
+      reason: "Gibberish.",
+      score: 1,
+      setter_note: "Rejected.",
+    });
+    await db
+      .prepare(
+        `CREATE TRIGGER fail_reject BEFORE UPDATE OF status ON magnet_leads
+      WHEN NEW.status = 'rejected' BEGIN SELECT RAISE(ABORT, 'rejection failed'); END`,
+      )
+      .run();
+    await expect(runLead(env, "lead-1", depsWith(reject))).rejects.toThrow("rejection failed");
+    expect(await getLead(db, "lead-1")).toMatchObject({
+      status: "running",
+      score: null,
+      screenReason: null,
+    });
+    await db.prepare("DROP TRIGGER fail_reject").run();
+    const stale = { ...depsWith(reject), now: () => new Date(now.getTime() + STALE_RUN_MS + 1) };
+    expect(await runLead(env, "lead-1", stale)).toBe("rejected");
+    expect(calls.map(({ model }) => model)).toEqual([SCREEN_MODEL, SCREEN_MODEL]);
+    expect(await getLead(db, "lead-1")).toMatchObject({
+      status: "rejected",
+      score: 1,
+      setterNote: "Rejected.",
+      screenReason: "Gibberish.",
+    });
   });
 });

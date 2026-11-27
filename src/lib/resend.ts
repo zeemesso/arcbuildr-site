@@ -5,9 +5,15 @@ export const ALERT_FROM = "Arcbuildr <onboarding@resend.dev>";
 
 export type SendAlertResult = { ok: true; id: string } | Failure;
 
+export interface AlertMessage {
+  subject: string;
+  text: string;
+  idempotencyKey?: string;
+}
+
 export async function sendAlert(
   env: { RESEND_API_KEY?: string; ALERT_EMAIL?: string },
-  message: { subject: string; text: string },
+  message: AlertMessage,
 ): Promise<SendAlertResult> {
   if (!env.RESEND_API_KEY) return { ok: false, error: "missing RESEND_API_KEY" };
   if (!env.ALERT_EMAIL) return { ok: false, error: "missing ALERT_EMAIL" };
@@ -17,6 +23,7 @@ export async function sendAlert(
       headers: {
         Authorization: `Bearer ${env.RESEND_API_KEY}`,
         "Content-Type": "application/json",
+        ...(message.idempotencyKey ? { "Idempotency-Key": message.idempotencyKey } : {}),
       },
       body: JSON.stringify({
         from: ALERT_FROM,
@@ -35,10 +42,8 @@ export async function sendAlert(
 }
 
 /** One email to a lead. */
-export interface Mail {
+export interface Mail extends AlertMessage {
   to: string;
-  subject: string;
-  text: string;
   headers?: Record<string, string>;
 }
 
@@ -55,6 +60,7 @@ export async function sendMail(
       headers: {
         Authorization: `Bearer ${env.RESEND_API_KEY}`,
         "Content-Type": "application/json",
+        ...(mail.idempotencyKey ? { "Idempotency-Key": mail.idempotencyKey } : {}),
       },
       body: JSON.stringify({
         from: env.MAIL_FROM,

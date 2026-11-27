@@ -5,14 +5,26 @@ import { dayOf, spentOn, type Sql, type Usage } from "./store";
 // forms can cost at most the cap. Prices are US dollars per million tokens, which is the
 // same number as millionths of a dollar per token.
 
+type Price = { input: number; output: number };
+
 /** Checked against the published price list on 2026-11-27. Update when prices change. */
-export const PRICES: Record<string, { input: number; output: number }> = {
-  "claude-haiku-5-5": { input: 0.1, output: 0.5 },
+export const PRICES: Record<string, Price & { longPrompt?: Price & { over: number } }> = {
+  "claude-haiku-5-5": {
+    input: 0.1,
+    output: 0.5,
+    longPrompt: { over: 100_000, input: 0.5, output: 2.5 },
+  },
   "claude-sonnet-5-5": { input: 2, output: 10 },
   "claude-opus-5-5": { input: 4, output: 20 },
 };
 /** A model missing from the list is priced as the dearest one, so the cap errs on the safe side. */
 const DEAREST = { input: 4, output: 20 };
+
+function priceFor(model: string, inputTokens: number): Price {
+  const price = PRICES[model];
+  if (!price) return DEAREST;
+  return price.longPrompt && inputTokens > price.longPrompt.over ? price.longPrompt : price;
+}
 
 /** The cap when MAGNET_DAILY_CAP_USD is not set, in US dollars per UTC day. */
 export const DEFAULT_DAILY_CAP_USD = 3;
@@ -27,11 +39,10 @@ export interface TokenCounts {
 
 /** What a finished call cost, in millionths of a dollar, rounded up. */
 export function costMicroUsd(model: string, tokens: TokenCounts): number {
-  const price = PRICES[model] ?? DEAREST;
-  const input =
-    tokens.inputTokens +
-    (tokens.cacheWriteTokens ?? 0) * 1.25 +
-    (tokens.cacheReadTokens ?? 0) * 0.1;
+  const cacheWrite = tokens.cacheWriteTokens ?? 0;
+  const cacheRead = tokens.cacheReadTokens ?? 0;
+  const price = priceFor(model, tokens.inputTokens + cacheWrite + cacheRead);
+  const input = tokens.inputTokens + cacheWrite * 1.25 + cacheRead * 0.1;
   return Math.ceil(input * price.input + tokens.outputTokens * price.output);
 }
 
@@ -42,10 +53,10 @@ export const usageOf = (model: string, tokens: TokenCounts): Usage => ({
   costMicroUsd: costMicroUsd(model, tokens),
 });
 
-/** The most a call can cost before it is made: every prompt character a token, output full. */
+/** The most a call can cost: one token per prompt character, overhead, and full output. */
 export function worstCaseMicroUsd(call: ModelCall): number {
-  const price = PRICES[call.model] ?? DEAREST;
-  const input = Math.ceil((call.system.length + call.user.length) / 2);
+  const input = call.system.length + call.user.length + 500;
+  const price = priceFor(call.model, input);
   return Math.ceil(input * price.input + call.maxTokens * price.output);
 }
 

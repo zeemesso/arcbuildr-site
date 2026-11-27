@@ -33,7 +33,7 @@ import { PLAN_TEXT as t } from "../../lib/magnet/text";
 </html>
 
 <script>
-  import { planApiPath, TOKEN, type PlanState } from "../../lib/magnet/contract";
+  import { PLAN_API_PATH, TOKEN, type PlanState } from "../../lib/magnet/contract";
   import { PLAN_TEXT } from "../../lib/magnet/text";
 
   const title = document.getElementById("plan-title")!;
@@ -55,8 +55,8 @@ import { PLAN_TEXT as t } from "../../lib/magnet/text";
     if (remaining <= 0) return;
     tries += 1;
     try {
-      const response = await fetch(planApiPath(token), {
-        headers: { Accept: "application/json" },
+      const response = await fetch(PLAN_API_PATH, {
+        headers: { Accept: "application/json", Authorization: `Bearer ${token}` },
         cache: "no-store",
         signal: AbortSignal.timeout(Math.min(remaining, 15_000)),
       });

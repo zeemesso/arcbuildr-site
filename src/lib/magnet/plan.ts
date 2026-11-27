@@ -7,12 +7,12 @@ import { renderMarkdown } from "./render";
 import { getLeadByToken } from "./store";
 import { PLAN_TEXT } from "./text";
 
-// GET /api/magnet/plan/<token>: what the result page shows. The token is the only key:
-// 128 random bits, sent to nobody but the lead.
+// The result page sends its token in the Authorization header.
 
 const capital = (text: string) => text.charAt(0).toUpperCase() + text.slice(1);
 
-export async function handlePlan(env: Env, token: string): Promise<Response> {
+export async function handlePlan(request: Request, env: Env): Promise<Response> {
+  const token = /^Bearer ([^\s]+)$/i.exec(request.headers.get("Authorization") ?? "")?.[1] ?? "";
   const answer = (state: PlanState, status = 200) => json(state, status);
   if (!TOKEN.test(token)) return answer({ status: "unavailable", message: PLAN_TEXT.badLink }, 404);
   if (!env.DB) {

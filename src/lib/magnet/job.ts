@@ -1,9 +1,9 @@
 import type { Env } from "../env";
-import { sendAlert } from "../resend";
+import { sendAlert, type AlertMessage } from "../resend";
 import { getMagnet } from "../../magnets/registry";
 import type { MagnetDefinition } from "../../magnets/types";
 import { capMicroUsd, fitsCap } from "./budget";
-import { anthropicClient, callerFor, type ModelCaller } from "./claude";
+import { anthropicClient, callerFor, callWithinCap, type ModelCaller } from "./claude";
 import { planPagePath } from "./contract";
 import { linkEmail, mailerFor, sendDue, type Mailer } from "./mail";
 import { deliverableProblem, readScreen, screenCall, writerCall } from "./prompt";
@@ -13,16 +13,15 @@ import {
   finishLead,
   getBrief,
   getLead,
-  recordUsage,
+  MAX_ATTEMPTS,
   saveScreen,
-  scheduleEmails,
+  STALE_RUN_MS,
   type Lead,
   type Sql,
 } from "./store";
 
 // One lead, from stored answers to a stored deliverable. Run by the queue consumer.
-// Order matters for money: nothing is spent before the cap is checked, the cheap screen
-// runs before the writer, and every call is counted the moment it returns.
+// The cheap screen runs before the writer. Each call reserves spend before it goes out.
 
 /**
  * done / rejected / failed: finished, the lead will not run again.
@@ -33,8 +32,7 @@ import {
  */
 export type RunOutcome = "done" | "rejected" | "failed" | "held" | "retry" | "skip";
 
-/** Paid or failed tries per lead before we stop and tell Zyade. */
-export const MAX_ATTEMPTS = 3;
+export { MAX_ATTEMPTS } from "./store";
 
 export const SITE_URL = "https://arcbuildr.co";
 
@@ -42,7 +40,7 @@ export interface JobDeps {
   now: () => Date;
   /** Null when there is no API key. */
   caller: ModelCaller | null;
-  alert: (message: { subject: string; text: string }) => Promise<unknown>;
+  alert: (message: AlertMessage) => Promise<unknown>;
   /** Sends email to leads. Null until a sender on our own domain is set. */
   mail: Mailer | null;
   /** Asks ReplyRail which Instagram account got the link with this code. */
@@ -92,13 +90,33 @@ export async function runLead(
   }
   const lead = await getLead(db, id);
   if (!lead || !["queued", "held", "running"].includes(lead.status)) return "skip";
+  const stale = new Date(deps.now().getTime() - STALE_RUN_MS).toISOString();
+  if (lead.status === "running" && lead.startedAt !== null && lead.startedAt >= stale)
+    return "skip";
   const magnet = getMagnet(lead.magnet);
   const site = env.SITE_URL || SITE_URL;
   const label = `${lead.name} (${lead.magnet})`;
+  let expected = { status: lead.status, attempts: lead.attempts };
+  const finish = (end: Parameters<typeof finishLead>[3]) =>
+    finishLead(db, id, expected, end, deps.now());
+
+  const fail = async (reason: string): Promise<RunOutcome> => {
+    if (!(await finish({ status: "failed", error: reason }))) return "skip";
+    await deps.alert({
+      subject: oneLine(`Magnet lead FAILED: ${label}`),
+      text: [
+        `Gave up after ${expected.attempts} tries: ${reason}`,
+        "",
+        ...leadLines(lead, magnet, site),
+      ].join("\n"),
+    });
+    return "failed";
+  };
+  if (lead.attempts >= MAX_ATTEMPTS) return fail(lead.error ?? "attempt limit reached");
 
   /** Parks the lead and tells Zyade once per reason, not once per hourly sweep. */
   const hold = async (reason: string): Promise<RunOutcome> => {
-    await finishLead(db, id, { status: "held", error: reason }, deps.now());
+    if (!(await finish({ status: "held", error: reason }))) return "skip";
     if (lead.error !== reason)
       await deps.alert({
         subject: oneLine(`Magnet lead waiting: ${label}`),
@@ -116,46 +134,36 @@ export async function runLead(
   const writer = writerCall(magnet, brief, lead);
   const screened = lead.score !== null;
   const planned = screened ? [writer] : [screen, writer];
-  if (!(await fitsCap(db, deps.now(), capMicroUsd(env.MAGNET_DAILY_CAP_USD), planned)))
-    return hold("daily spend cap reached");
+  const cap = capMicroUsd(env.MAGNET_DAILY_CAP_USD);
+  const capReason = "daily spend cap reached";
+  if (!(await fitsCap(db, deps.now(), cap, planned))) return hold(capReason);
 
-  if (!(await claimLead(db, id, deps.now()))) return "skip";
+  if (!(await claimLead(db, lead, deps.now()))) return "skip";
   const attempt = lead.attempts + 1;
+  expected = { status: "running", attempts: attempt };
 
   /** A try that did not produce a deliverable: again later, or stop after the last one. */
   const again = async (reason: string, wait: "queue" | "sweep"): Promise<RunOutcome> => {
-    if (attempt < MAX_ATTEMPTS) {
-      if (wait === "sweep") return hold(reason);
-      await finishLead(db, id, { status: "queued", error: reason }, deps.now());
-      return "retry";
-    }
-    await finishLead(db, id, { status: "failed", error: reason }, deps.now());
-    await deps.alert({
-      subject: oneLine(`Magnet lead FAILED: ${label}`),
-      text: [
-        `Gave up after ${attempt} tries: ${reason}`,
-        "",
-        ...leadLines(lead, magnet, site),
-      ].join("\n"),
-    });
-    return "failed";
+    if (attempt >= MAX_ATTEMPTS) return fail(reason);
+    if (wait === "sweep") return hold(reason);
+    return (await finish({ status: "queued", error: reason })) ? "retry" : "skip";
   };
 
   // Step 1: the screen. Skipped when an earlier try already paid for it.
   let score = lead.score;
   let setterNote = lead.setterNote ?? "";
   if (!screened) {
-    const result = await caller(screen);
-    if ("usage" in result) await recordUsage(db, id, result.usage, deps.now());
+    const result = await callWithinCap(db, id, caller, screen, deps.now(), cap);
+    if (!result) return hold(capReason);
     if (!result.ok)
       return result.kind === "retry"
         ? again(result.error, "queue")
         : again(`screen: ${result.error}`, "sweep");
     const verdict = readScreen(result.text);
     if (!verdict) return again("screen: answer was not the expected JSON", "queue");
-    await saveScreen(db, id, verdict);
     if (verdict.verdict === "reject") {
-      await finishLead(db, id, { status: "rejected", error: verdict.reason }, deps.now());
+      if (!(await finish({ status: "rejected", error: verdict.reason, screen: verdict })))
+        return "skip";
       await deps.alert({
         subject: oneLine(`Magnet form rejected: ${label}`),
         text: [`Not written. Reason: ${verdict.reason}`, "", ...leadLines(lead, magnet, site)].join(
@@ -164,13 +172,14 @@ export async function runLead(
       });
       return "rejected";
     }
+    if (!(await saveScreen(db, id, attempt, verdict))) return "skip";
     score = verdict.score;
     setterNote = verdict.setterNote;
   }
 
   // Step 2: the deliverable.
-  const result = await caller(writer);
-  if ("usage" in result) await recordUsage(db, id, result.usage, deps.now());
+  const result = await callWithinCap(db, id, caller, writer, deps.now(), cap);
+  if (!result) return hold(capReason);
   if (!result.ok)
     return result.kind === "retry"
       ? again(result.error, "queue")
@@ -178,12 +187,12 @@ export async function runLead(
   const problem = deliverableProblem(result.text, brief);
   if (problem) return again(`writer: ${problem}`, "sweep");
 
-  await finishLead(db, id, { status: "done", deliverable: result.text }, deps.now());
+  const link = linkEmail(magnet, lead, site, deps.now());
+  if (!(await finish({ status: "done", deliverable: result.text, link }))) return "skip";
 
   // The deliverable is stored. Nothing below may undo that, so each part fails on its own.
   let mailed = "not sent";
   try {
-    await scheduleEmails(db, id, [linkEmail(magnet, lead, site, deps.now())]);
     const report = await sendDue(db, deps, site, 1, id);
     if (report.sent) mailed = "sent";
     else if (report.waiting) mailed = "NOT SENT, no MAIL_FROM yet. Send them the link yourself";

@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { Env } from "../src/lib/env";
+import { PLAN_API_PATH } from "../src/lib/magnet/contract";
 import { handlePlan } from "../src/lib/magnet/plan";
 import { escapeHtml, renderMarkdown } from "../src/lib/magnet/render";
 import { claimLead, finishLead, insertLead, type Sql } from "../src/lib/magnet/store";
@@ -9,6 +10,12 @@ import { magnetEnv, submit, validForm } from "./helpers/magnet-fixtures";
 
 const now = new Date("2026-11-27T10:00:00.000Z");
 const TOKEN = "tokentokentokentoken12";
+const queued = { status: "queued", attempts: 0 } as const;
+
+const planRequest = (authorization?: string) =>
+  new Request(`https://x.test${PLAN_API_PATH}`, {
+    headers: authorization ? { Authorization: authorization } : {},
+  });
 
 describe("renderMarkdown", () => {
   it("renders the supported marks", () => {
@@ -100,13 +107,13 @@ describe("handlePlan", () => {
     await insertLead(db, lead);
   });
   const state = async (token = TOKEN) => {
-    const res = await handlePlan(env, token);
+    const res = await handlePlan(planRequest(`Bearer ${token}`), env);
     return { status: res.status, body: await res.json(), cache: res.headers.get("cache-control") };
   };
 
   it("says working while the lead is queued or running", async () => {
     expect(await state()).toEqual({ status: 200, body: { status: "working" }, cache: "no-store" });
-    await claimLead(db, "lead-1", now);
+    await claimLead(db, { id: "lead-1", ...queued }, now);
     expect((await state()).body).toEqual({ status: "working" });
   });
 
@@ -114,6 +121,7 @@ describe("handlePlan", () => {
     await finishLead(
       db,
       "lead-1",
+      queued,
       { status: "done", deliverable: "## Plan\n<script>x</script>" },
       now,
     );
@@ -128,7 +136,7 @@ describe("handlePlan", () => {
   });
 
   it("gives a plain message for a rejected, held or failed lead", async () => {
-    await finishLead(db, "lead-1", { status: "rejected", error: "Gibberish." }, now);
+    await finishLead(db, "lead-1", queued, { status: "rejected", error: "Gibberish." }, now);
     expect((await state()).body).toEqual({ status: "unavailable", message: PLAN_TEXT.rejected });
     await db.prepare("UPDATE magnet_leads SET status = 'held' WHERE id = 'lead-1'").run();
     expect((await state()).body).toEqual({ status: "unavailable", message: PLAN_TEXT.held });
@@ -151,6 +159,19 @@ describe("handlePlan", () => {
     env = magnetEnv({ DB: undefined }).env;
     expect(await state()).toMatchObject({ status: 503, body: { status: "working" } });
   });
+
+  it("TEST requires the Bearer header even when the token is in the query", async () => {
+    const requests = [
+      planRequest(),
+      planRequest(`Basic ${TOKEN}`),
+      new Request(`https://x.test${PLAN_API_PATH}?token=${TOKEN}`),
+    ];
+    for (const request of requests) {
+      const response = await handlePlan(request, env);
+      expect(response.status).toBe(404);
+      expect(response.headers.get("cache-control")).toBe("no-store");
+    }
+  });
 });
 
 describe("worker routes", () => {
@@ -160,11 +181,15 @@ describe("worker routes", () => {
     expect(posted.status).toBe(200);
     const { url } = (await posted.json()) as { url: string };
     const token = url.split("#")[1]!;
-    const plan = await worker.fetch(
-      new Request(`https://x.test/api/magnet/plan/${token}`) as never,
+    const plan = await worker.fetch(planRequest(`Bearer ${token}`) as never, env);
+    expect(await plan.json()).toEqual({ status: "working" });
+    const old = await worker.fetch(
+      new Request(`https://x.test${PLAN_API_PATH}/${token}`) as never,
       env,
     );
-    expect(await plan.json()).toEqual({ status: "working" });
+    expect(old.status).toBe(404);
+    expect(old.headers.get("cache-control")).toBe("no-store");
+    expect(await old.text()).toBe("Not found");
     const wrongMethod = await worker.fetch(
       new Request("https://x.test/api/magnet/test-sample") as never,
       env,

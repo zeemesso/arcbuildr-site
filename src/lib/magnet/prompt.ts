@@ -24,7 +24,7 @@ export interface ModelCall {
 
 /** Keeps visitor text from closing a tag or opening one. */
 const inert = (text: string) =>
-  text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 
 export const firstName = (name: string) => name.trim().split(/\s+/)[0] ?? "";
 
@@ -114,7 +114,7 @@ ${brief.outline.trim()}
 
 <format>
 Markdown, and only these marks: "## " and "### " headings, paragraphs, "- " lists, "1. " lists, **bold**, *italic*, "> " for a line quoted from their answers, and "---". No links, tables, images, code, HTML or emoji. No title line above the first section: the page shows the title.
-Open the first section by addressing ${name || "the reader"} by first name. At most ${brief.maxWords} words in total. Output the document and nothing else.
+Open the first section by addressing the reader by the first name in the <reader> element, when one is given. At most ${brief.maxWords} words in total. Output the document and nothing else.
 </format>`;
 
   return {

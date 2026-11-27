@@ -1,5 +1,7 @@
 import { beforeEach, describe, expect, it } from "vitest";
+import { TOKEN } from "../src/lib/magnet/contract";
 import {
+  MAX_ATTEMPTS,
   STALE_RUN_MS,
   claimLead,
   dayOf,
@@ -10,8 +12,9 @@ import {
   getLeadByToken,
   insertLead,
   putBrief,
-  recordUsage,
+  reserveSpend,
   saveScreen,
+  settleSpend,
   spentOn,
   waitingLeads,
   type NewLead,
@@ -46,6 +49,13 @@ beforeEach(() => {
   db = memoryDb() as Sql;
 });
 
+async function claim(id: string, when = now) {
+  const snapshot = (await getLead(db, id)) ?? { id, status: "queued", attempts: 0 };
+  return claimLead(db, snapshot, when);
+}
+
+const running = { status: "running", attempts: 1 } as const;
+
 describe("leads", () => {
   it("stores a lead and reads it back by id, token and email", async () => {
     expect(await insertLead(db, lead())).toBe(true);
@@ -69,36 +79,48 @@ describe("leads", () => {
 
   it("gives a lead to one run only, until that run is stale", async () => {
     await insertLead(db, lead());
-    expect(await claimLead(db, "lead-1", now)).toBe(true);
-    expect(await claimLead(db, "lead-1", later(60_000))).toBe(false);
-    expect(await claimLead(db, "lead-1", later(STALE_RUN_MS + 1000))).toBe(true);
+    expect(await claim("lead-1")).toBe(true);
+    expect(await claim("lead-1", later(60_000))).toBe(false);
+    expect(await claim("lead-1", later(STALE_RUN_MS + 1000))).toBe(true);
     expect((await getLead(db, "lead-1"))?.attempts).toBe(2);
-    expect(await claimLead(db, "nope", now)).toBe(false);
+    expect(await claim("nope")).toBe(false);
   });
 
   it("does not run a finished lead again", async () => {
     await insertLead(db, lead());
-    await claimLead(db, "lead-1", now);
-    await finishLead(db, "lead-1", { status: "done", deliverable: "## Plan" }, later(1000));
-    expect(await claimLead(db, "lead-1", later(STALE_RUN_MS * 2))).toBe(false);
+    await claim("lead-1");
+    await finishLead(
+      db,
+      "lead-1",
+      running,
+      { status: "done", deliverable: "## Plan" },
+      later(1000),
+    );
+    expect(await claim("lead-1", later(STALE_RUN_MS * 2))).toBe(false);
     expect(await getLead(db, "lead-1")).toMatchObject({ status: "done", deliverable: "## Plan" });
   });
 
   it("lets a held lead run again and keeps the reason", async () => {
     await insertLead(db, lead());
-    await claimLead(db, "lead-1", now);
-    await finishLead(db, "lead-1", { status: "held", error: "daily cap reached" }, now);
+    await claim("lead-1");
+    await finishLead(db, "lead-1", running, { status: "held", error: "daily cap reached" }, now);
     expect(await getLead(db, "lead-1")).toMatchObject({
       status: "held",
       error: "daily cap reached",
     });
     expect(await waitingLeads(db, later(1000))).toEqual(["lead-1"]);
-    expect(await claimLead(db, "lead-1", later(1000))).toBe(true);
+    expect(await claim("lead-1", later(1000))).toBe(true);
   });
 
   it("keeps a deliverable only for a done lead", async () => {
     await insertLead(db, lead());
-    await finishLead(db, "lead-1", { status: "failed", deliverable: "x", error: "boom" }, now);
+    await finishLead(
+      db,
+      "lead-1",
+      { status: "queued", attempts: 0 },
+      { status: "failed", deliverable: "x", error: "boom" },
+      now,
+    );
     expect(await getLead(db, "lead-1")).toMatchObject({ status: "failed", deliverable: null });
   });
 
@@ -106,21 +128,32 @@ describe("leads", () => {
     await insertLead(db, lead());
     await insertLead(db, lead({ id: "lead-2", token: "t2", email: "b@example.com" }));
     await insertLead(db, lead({ id: "lead-3", token: "t3", email: "c@example.com" }));
-    await claimLead(db, "lead-2", now);
-    await claimLead(db, "lead-3", now);
-    await finishLead(db, "lead-3", { status: "done", deliverable: "ok" }, now);
+    await claim("lead-2");
+    await claim("lead-3");
+    await finishLead(db, "lead-3", running, { status: "done", deliverable: "ok" }, now);
     expect(await waitingLeads(db, later(60_000))).toEqual([]);
     expect(await waitingLeads(db, later(STALE_RUN_MS + 1000))).toEqual(["lead-1", "lead-2"]);
   });
 
   it("stores the screen result", async () => {
     await insertLead(db, lead());
-    await saveScreen(db, "lead-1", { score: 4, setterNote: "Sells already.", reason: "real" });
+    await claim("lead-1");
+    await saveScreen(db, "lead-1", 1, { score: 4, setterNote: "Sells already.", reason: "real" });
     expect(await getLead(db, "lead-1")).toMatchObject({
       score: 4,
       setterNote: "Sells already.",
       screenReason: "real",
     });
+  });
+
+  it("TEST leaves an exhausted running lead for the sweep without letting it claim again", async () => {
+    await insertLead(db, lead());
+    for (let i = 0; i < MAX_ATTEMPTS; i++)
+      expect(await claim("lead-1", later(i * (STALE_RUN_MS + 1000)))).toBe(true);
+    const stale = later(MAX_ATTEMPTS * (STALE_RUN_MS + 1000));
+    expect(await waitingLeads(db, stale)).toEqual(["lead-1"]);
+    expect(await claim("lead-1", stale)).toBe(false);
+    expect((await getLead(db, "lead-1"))?.attempts).toBe(MAX_ATTEMPTS);
   });
 });
 
@@ -128,12 +161,42 @@ describe("spend", () => {
   it("adds each call to the lead and to the day", async () => {
     await insertLead(db, lead());
     const usage = { model: "m", inputTokens: 100, outputTokens: 50, costMicroUsd: 700 };
-    await recordUsage(db, "lead-1", usage, now);
-    await recordUsage(db, "lead-1", usage, now);
+    for (let i = 0; i < 2; i++) {
+      expect(await reserveSpend(db, dayOf(now), 1000, 2000)).toBe(true);
+      await settleSpend(db, dayOf(now), 1000, usage.costMicroUsd, { id: "lead-1", usage });
+    }
     expect((await getLead(db, "lead-1"))?.costMicroUsd).toBe(1400);
     expect(await spentOn(db, dayOf(now))).toBe(1400);
     expect(await spentOn(db, "2026-11-28")).toBe(0);
   });
+
+  it("TEST reserves against the same cap concurrently and floors the ledger at zero", async () => {
+    const day = dayOf(now);
+    const results = await Promise.all([
+      reserveSpend(db, day, 60, 100),
+      reserveSpend(db, day, 60, 100),
+    ]);
+    expect(results.filter(Boolean)).toHaveLength(1);
+    expect(await spentOn(db, day)).toBe(60);
+    await settleSpend(db, day, 70, 0);
+    expect(await spentOn(db, day)).toBe(0);
+  });
+});
+
+it("TEST backfills distinct unsubscribe codes for leads from the first migration", async () => {
+  const legacy = memoryDb((file, sqlite) => {
+    if (file !== "0002_magnet_emails.sql") return;
+    sqlite.exec(`INSERT INTO magnet_leads
+      (id, token, magnet, created_at, name, email, instagram, answers)
+      VALUES ('test-1', 'test-1', 'test-sample', '', 'TEST One', 'one@example.com', '', '{}'),
+             ('test-2', 'test-2', 'test-sample', '', 'TEST Two', 'two@example.com', '', '{}')`);
+  }) as Sql;
+  const { results } = await legacy
+    .prepare("SELECT unsub FROM magnet_leads")
+    .all<{ unsub: string }>();
+  expect(results).toHaveLength(2);
+  expect(new Set(results.map(({ unsub }) => unsub)).size).toBe(2);
+  for (const { unsub } of results) expect(unsub).toMatch(TOKEN);
 });
 
 describe("briefs", () => {
