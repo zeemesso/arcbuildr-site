@@ -180,7 +180,7 @@ export const en = {
     description:
       "What Arcbuildr collects when you use this site, why, who else sees it, and how to ask us to delete it.",
     h1: "Privacy",
-    updated: "Last updated: November 8, 2026",
+    updated: "Last updated: November 27, 2026",
     // A string is a paragraph; an array of strings is a bullet list.
     sections: [
       {
@@ -206,6 +206,17 @@ export const en = {
         ],
       },
       {
+        id: "p-resource",
+        title: "When you ask for a free resource",
+        body: [
+          "Some pages offer a resource written for you, such as a plan. There you type longer answers about your business, with your name, email, Instagram handle and, if you want, your phone number.",
+          "An AI model reads your answers and writes the resource from them. We use Claude, made by Anthropic. It gets your first name, your Instagram handle and your answers. It does not get your email or your phone number.",
+          "We read your answers too, and we may write to you on Instagram about what you sent.",
+          "We email you the link to your page, then a few short lessons. Every email has a link that stops them.",
+          "Your page has a private link. Anyone who has the link can read the page, so keep it to yourself.",
+        ],
+      },
+      {
         id: "p-others",
         title: "Who else sees it",
         body: [
@@ -213,8 +224,10 @@ export const en = {
           [
             "Cloudflare hosts this site and counts visits without cookies.",
             "Google Sheets (Google) stores what you type in the form.",
-            "Resend sends us an email when a new form comes in.",
+            "Resend sends us an email when a new form comes in, and sends you the emails for a free resource.",
             "Cal.com runs the booking calendar.",
+            "Cloudflare also stores your answers and your page when you ask for a free resource.",
+            "Anthropic (Claude) reads those answers and writes the resource.",
           ],
           "We don't sell your details or share them with anyone else.",
         ],
@@ -223,7 +236,7 @@ export const en = {
         id: "p-keep",
         title: "How long we keep it, and how to ask us to delete it",
         body: [
-          "We keep your details while we talk about working together and while we work with you. To have them deleted, email [email] or send us a DM, and we delete them from our spreadsheet and from our email.",
+          "We keep your details while we talk about working together and while we work with you. To have them deleted, email [email] or send us a DM, and we delete them from our spreadsheet, our database and our email.",
         ],
       },
     ],

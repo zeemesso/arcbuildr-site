@@ -1,7 +1,7 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
 
-test("privacy page has the five sections and names the four tools", async ({ page }) => {
+test("privacy page has the six sections and names the five tools", async ({ page }) => {
   await page.goto("/privacy");
   await expect(page.getByRole("heading", { level: 1, name: "Privacy" })).toBeVisible();
   const headings = await page.getByRole("heading", { level: 2 }).allTextContents();
@@ -9,11 +9,12 @@ test("privacy page has the five sections and names the four tools", async ({ pag
     "Who we are",
     "What we collect",
     "Why we collect it",
+    "When you ask for a free resource",
     "Who else sees it",
     "How long we keep it, and how to ask us to delete it",
   ]);
   const text = await page.locator("main").innerText();
-  for (const tool of ["Cloudflare", "Google Sheets", "Resend", "Cal.com"])
+  for (const tool of ["Cloudflare", "Google Sheets", "Resend", "Cal.com", "Anthropic"])
     expect(text).toContain(tool);
   const results = await new AxeBuilder({ page })
     .withTags(["wcag2a", "wcag2aa", "wcag22aa"])
