@@ -27,8 +27,9 @@ export type MessagesClient = { messages: Pick<Anthropic["messages"], "create"> }
  */
 export const REQUEST_TIMEOUT_MS = 240_000;
 
-export const anthropicClient = (apiKey: string): MessagesClient =>
-  new Anthropic({ apiKey, maxRetries: 0, timeout: REQUEST_TIMEOUT_MS });
+/** Without a key the SDK uses the `ant auth login` sign-in on this machine. The Worker always passes a key. */
+export const anthropicClient = (apiKey?: string): MessagesClient =>
+  new Anthropic({ ...(apiKey ? { apiKey } : {}), maxRetries: 0, timeout: REQUEST_TIMEOUT_MS });
 
 /** Reserves before calling and settles on the day the call started. */
 export async function callWithinCap(

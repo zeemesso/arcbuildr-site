@@ -61,7 +61,9 @@ Fixed for every magnet: page layout, form behaviour, contact fields (name, email
 7. ReplyRail: one automation for the keyword, with the link to `/m/<slug>`.
 8. Film the reel that asks for the keyword.
 
-The Claude API key for step 4 goes in `.dev.vars` (git-ignored) as `ANTHROPIC_API_KEY=...`. The same file serves the local run.
+Step 4 needs no API key on Zyade's Mac: without `ANTHROPIC_API_KEY` the tool uses the `ant auth login` sign-in. The local Worker (`npm run magnet:dev`) cannot use the sign-in; it reads `ANTHROPIC_API_KEY=...` from `.dev.vars` (git-ignored).
+
+VERIFIED on 2026-11-27 through the sign-in: `review test-sample --spend` on one test answer file cost $0.018 (worst case shown before the run: $0.116) and wrote the deliverable and both lesson emails. `test-sample` has a short brief; a full-size magnet will cost more.
 
 ## Run it locally
 
@@ -90,15 +92,17 @@ The queue consumer and the hourly run start with the first production deploy of 
 
 Later migrations: `wrangler d1 migrations apply arcbuildr-magnets --remote` (needs `wrangler login`), or the dashboard console with a row added to `d1_migrations`.
 
-Still open: the settings below.
+Sender, set on 2026-11-27: `arcbuildr.co` is verified in Resend, and `wrangler.jsonc` sets `MAIL_FROM` to `Zyade from Arcbuildr <hello@arcbuildr.co>` [ASSUMED name and address]. Cloudflare Email Routing forwards `hello@arcbuildr.co` to Zyade's inbox, so a lead's reply arrives without `MAIL_REPLY_TO`. The domain has no DMARC record yet.
+
+Still open: `ANTHROPIC_API_KEY`.
 
 Settings on the Worker:
 
 | Name                     | Kind   | What                                                              |
 | ------------------------ | ------ | ----------------------------------------------------------------- |
 | `ANTHROPIC_API_KEY`      | secret | From a Console workspace with its own monthly limit               |
-| `MAIL_FROM`              | var    | Sender on a domain verified in Resend, like `Zyade <hi@...>`      |
-| `MAIL_REPLY_TO`          | var    | Optional. Where replies go                                        |
+| `MAIL_FROM`              | var    | Set in `wrangler.jsonc`. Sender on a domain verified in Resend    |
+| `MAIL_REPLY_TO`          | var    | Optional. Where replies go, when not the sender's address         |
 | `REPLYRAIL_URL`          | var    | Optional. ReplyRail's address, https                              |
 | `REPLYRAIL_SECRET`       | secret | Optional. Same value as ReplyRail's `LINK_LOOKUP_SECRET`          |
 | `MAGNET_DAILY_CAP_USD`   | var    | Optional. Default 3                                               |
@@ -118,7 +122,7 @@ Settings on the Worker:
 7. Done in `~/replyrail/scaffold`, not deployed. **ReplyRail link.** `/r/<code>` adds `rr=<code>` for hosts in `MAGNET_HOSTS`; `GET /api/link/lookup?code=` with `LINK_LOOKUP_SECRET` returns the account. The engine uses it for the setter alert only. The form is not prefilled.
 8. Done. **Follow-up.** Link email, lesson emails, hourly cron, daily digest.
 9. Done. **Magnet tool.** `scripts/magnet.mjs`.
-10. Partly done. **Wiring.** Database, queue, config and privacy text are done. Secrets and the sender address are open. See "Waiting on Zyade".
+10. Partly done. **Wiring.** Database, queue, config, sender address and privacy text are done. The Worker's Claude API key is open. See "Waiting on Zyade".
 
 ## Changed from the first plan
 
@@ -140,9 +144,9 @@ Every call's real cost is saved on the lead row and counted in the daily total. 
 
 ## Waiting on Zyade
 
-1. Claude API key in a new Console workspace with a monthly limit. Into `.dev.vars` for local runs, and as the Worker secret `ANTHROPIC_API_KEY`. 5 min.
+1. Claude API key in a new Console workspace with a monthly limit, added as the Worker secret `ANTHROPIC_API_KEY`. The `ant` sign-in covers the Mac only and cannot create keys. 5 min.
 2. Done 2026-11-27: D1 database and queue on the Cloudflare account.
-3. DNS records for a Resend sending domain, then `MAIL_FROM`. 10 min.
+3. Done 2026-11-27: Resend domain verified, `MAIL_FROM` set. Confirm the sender name and address. Optional: a DMARC record for `arcbuildr.co` (DNS change).
 4. ReplyRail: deploy, set `MAGNET_HOSTS` and `LINK_LOOKUP_SECRET`, live test from a second Instagram account. 15 min.
 5. Legal check of the privacy text and of the emails (consent line, sender address) before the first live magnet.
 6. Confirm the emails' sign-off: "Zyade / Arcbuildr".

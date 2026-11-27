@@ -30,4 +30,6 @@
     ],
   },
   "triggers": { "crons": ["0 * * * *"] },
+  // Sender of the emails to leads. arcbuildr.co is verified in Resend; replies to hello@ are forwarded by Email Routing.
+  "vars": { "MAIL_FROM": "Zyade from Arcbuildr <hello@arcbuildr.co>" },
 }

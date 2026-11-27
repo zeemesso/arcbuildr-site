@@ -405,7 +405,7 @@ async function review(kit, slug, flags) {
 
   if (!flags.spend) return console.log("\nNo call made. Add --spend to run it on the Claude API.");
   const key = process.env.ANTHROPIC_API_KEY ?? vars.ANTHROPIC_API_KEY;
-  if (!key) stop("No ANTHROPIC_API_KEY. Put ANTHROPIC_API_KEY=... in .dev.vars (git-ignored).");
+  if (!key) console.log("No ANTHROPIC_API_KEY: using the `ant auth login` sign-in.\n");
   if (worstTotal > cap)
     stop("The worst case is above the cap. Run one file with --fixture=<name>, or raise the cap.");
 
