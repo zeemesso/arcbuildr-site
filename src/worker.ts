@@ -1,6 +1,7 @@
-import type { Env } from "./lib/env";
+import type { Env, MagnetJob } from "./lib/env";
 import { handleLead } from "./lib/lead";
 import { handleSubmit } from "./lib/magnet/intake";
+import { runLead } from "./lib/magnet/job";
 import { shortLinkRedirect } from "./lib/shortlinks";
 
 /** Same answer for every unknown /api request, so nothing leaks. */
@@ -23,4 +24,19 @@ export default {
     if (pathname.startsWith("/api/")) return notFound();
     return env.ASSETS.fetch(request);
   },
-} satisfies ExportedHandler<Env>;
+
+  /** The magnet queue: one lead per message. A busy API means "deliver it again later". */
+  async queue(batch, env): Promise<void> {
+    for (const message of batch.messages) {
+      let again: boolean;
+      try {
+        again = (await runLead(env, message.body.id)) === "retry";
+      } catch (err) {
+        console.error("magnet: run crashed", message.body.id, (err as Error).message);
+        again = true;
+      }
+      if (again) message.retry({ delaySeconds: Math.min(900, 60 * 2 ** (message.attempts - 1)) });
+      else message.ack();
+    }
+  },
+} satisfies ExportedHandler<Env, MagnetJob>;
