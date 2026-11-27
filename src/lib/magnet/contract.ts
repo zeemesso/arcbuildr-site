@@ -27,7 +27,8 @@ export const MAX_LENGTH = { short: 300, long: 4000 } as const;
 
 export const submitPath = (slug: string) => `/api/magnet/${slug}`;
 export const planApiPath = (token: string) => `/api/magnet/plan/${token}`;
-export const planPagePath = (token: string) => `/plan/${token}`;
+/** The token rides in the fragment, so it never reaches a server log or a Referer header. */
+export const planPagePath = (token: string) => `/plan/#${token}`;
 
 /** A result link token: 22 characters of base64url, 128 random bits. */
 export const TOKEN = /^[A-Za-z0-9_-]{22}$/;
@@ -35,7 +36,13 @@ export const TOKEN = /^[A-Za-z0-9_-]{22}$/;
 export type SubmitResult =
   { ok: true; url: string } | { ok: false; error: string; errors?: Record<string, string> };
 
-/** What the result page gets when it asks for a plan. */
+/** A ReplyRail link code as it arrives in ?rr=. Anything else is dropped. */
+export const LINK_CODE = /^[A-Za-z0-9_-]{6,64}$/;
+
+/**
+ * What the result page gets when it asks for a plan.
+ * `html` is built by the Worker from escaped text only; the page may insert it as is.
+ */
 export type PlanState =
   | { status: "working" }
   | { status: "ready"; title: string; name: string; html: string }
