@@ -29,6 +29,9 @@ export const submitPath = (slug: string) => `/api/magnet/${slug}`;
 export const planApiPath = (token: string) => `/api/magnet/plan/${token}`;
 /** The token rides in the fragment, so it never reaches a server log or a Referer header. */
 export const planPagePath = (token: string) => `/plan/#${token}`;
+/** The page a lead opens to stop the emails, and the request its button sends. */
+export const unsubscribePagePath = (code: string) => `/unsubscribe/#${code}`;
+export const unsubscribeApiPath = (code: string) => `/api/magnet/unsubscribe/${code}`;
 
 /** A result link token: 22 characters of base64url, 128 random bits. */
 export const TOKEN = /^[A-Za-z0-9_-]{22}$/;

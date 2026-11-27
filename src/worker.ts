@@ -1,8 +1,11 @@
 import type { Env, MagnetJob } from "./lib/env";
 import { handleLead } from "./lib/lead";
 import { handleSubmit } from "./lib/magnet/intake";
-import { runLead } from "./lib/magnet/job";
+import { writeFollowUps } from "./lib/magnet/followup";
+import { jobDeps, runLead } from "./lib/magnet/job";
 import { handlePlan } from "./lib/magnet/plan";
+import { sweep } from "./lib/magnet/sweep";
+import { handleUnsubscribe } from "./lib/magnet/unsubscribe";
 import { shortLinkRedirect } from "./lib/shortlinks";
 
 /** Same answer for every unknown /api request, so nothing leaks. */
@@ -22,6 +25,8 @@ export default {
     if (pathname === "/api/lead" && request.method === "POST") return handleLead(request, env);
     const plan = /^\/api\/magnet\/plan\/([^/]{1,64})$/.exec(pathname);
     if (plan && request.method === "GET") return handlePlan(env, plan[1]!);
+    const stop = /^\/api\/magnet\/unsubscribe\/([^/]{1,64})$/.exec(pathname);
+    if (stop) return handleUnsubscribe(request, env, stop[1]!);
     const magnet = /^\/api\/magnet\/([a-z0-9-]{1,64})$/.exec(pathname);
     if (magnet && request.method === "POST") return handleSubmit(request, env, magnet[1]!);
     if (pathname.startsWith("/api/")) return notFound();
@@ -31,15 +36,28 @@ export default {
   /** The magnet queue: one lead per message. A busy API means "deliver it again later". */
   async queue(batch, env): Promise<void> {
     for (const message of batch.messages) {
-      let again: boolean;
+      const { id, task } = message.body;
+      let again = false;
       try {
-        again = (await runLead(env, message.body.id)) === "retry";
+        // Lesson emails are never retried here: the hourly sweep queues them again.
+        if (task === "followup") await writeFollowUps(env, id, jobDeps(env));
+        else again = (await runLead(env, id)) === "retry";
       } catch (err) {
-        console.error("magnet: run crashed", message.body.id, (err as Error).message);
-        again = true;
+        console.error("magnet: run crashed", id, task ?? "write", (err as Error).message);
+        again = task !== "followup";
       }
       if (again) message.retry({ delaySeconds: Math.min(900, 60 * 2 ** (message.attempts - 1)) });
       else message.ack();
+    }
+  },
+
+  /** Once an hour: queue what waits, send the emails that are due, and the daily digest. */
+  async scheduled(_controller, env): Promise<void> {
+    try {
+      const report = await sweep(env, jobDeps(env));
+      if (report) console.log("magnet: sweep", JSON.stringify(report));
+    } catch (err) {
+      console.error("magnet: sweep crashed", (err as Error).message);
     }
   },
 } satisfies ExportedHandler<Env, MagnetJob>;

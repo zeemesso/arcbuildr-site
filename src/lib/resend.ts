@@ -33,3 +33,43 @@ export async function sendAlert(
     return { ok: false, error: `resend request failed: ${(err as Error).name}` };
   }
 }
+
+/** One email to a lead. */
+export interface Mail {
+  to: string;
+  subject: string;
+  text: string;
+  headers?: Record<string, string>;
+}
+
+/** Sends one plain-text email to a lead, from MAIL_FROM. */
+export async function sendMail(
+  env: { RESEND_API_KEY?: string; MAIL_FROM?: string; MAIL_REPLY_TO?: string },
+  mail: Mail,
+): Promise<SendAlertResult> {
+  if (!env.RESEND_API_KEY) return { ok: false, error: "missing RESEND_API_KEY" };
+  if (!env.MAIL_FROM) return { ok: false, error: "missing MAIL_FROM" };
+  try {
+    const res = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${env.RESEND_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        from: env.MAIL_FROM,
+        to: [mail.to],
+        subject: mail.subject,
+        text: mail.text,
+        ...(env.MAIL_REPLY_TO ? { reply_to: env.MAIL_REPLY_TO } : {}),
+        ...(mail.headers ? { headers: mail.headers } : {}),
+      }),
+      signal: AbortSignal.timeout(8000),
+    });
+    const body = (await res.json().catch(() => ({}))) as { id?: string; name?: string };
+    if (res.ok && body.id) return { ok: true, id: body.id };
+    return { ok: false, error: `resend ${res.status} ${body.name ?? "no_name"}` };
+  } catch (err) {
+    return { ok: false, error: `resend request failed: ${(err as Error).name}` };
+  }
+}

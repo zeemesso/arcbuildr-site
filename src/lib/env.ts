@@ -16,11 +16,21 @@ export interface Env {
   MAGNET_DAILY_CAP_USD?: string;
   /** Where result links in emails point. Default https://arcbuildr.co. */
   SITE_URL?: string;
+  /** Sender of emails to leads, on a domain verified in Resend. Without it none are sent. */
+  MAIL_FROM?: string;
+  /** Where a lead's reply goes. Default: the sender. */
+  MAIL_REPLY_TO?: string;
+  /** ReplyRail, to check which Instagram account got the link. Set both or neither. */
+  REPLYRAIL_URL?: string;
+  REPLYRAIL_SECRET?: string;
+  /** UTC hour (0 to 23) of the daily digest. Default 7. */
+  MAGNET_DIGEST_HOUR_UTC?: string;
 }
 
-/** One message on the magnet queue: write the deliverable for this lead. */
+/** One message on the magnet queue: write this lead's deliverable, or its lesson emails. */
 export interface MagnetJob {
   id: string;
+  task?: "followup";
 }
 
 export interface BuildInfo {

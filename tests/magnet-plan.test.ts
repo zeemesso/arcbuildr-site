@@ -92,6 +92,7 @@ describe("handlePlan", () => {
     utm: "",
     rr: "",
     tz: "",
+    unsub: "unsubunsubunsubunsub12",
   };
   beforeEach(async () => {
     vi.spyOn(console, "error").mockImplementation(() => {});

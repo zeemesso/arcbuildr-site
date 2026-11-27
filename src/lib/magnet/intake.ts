@@ -10,7 +10,7 @@ import {
   planPagePath,
   type SubmitResult,
 } from "./contract";
-import { insertLead, type NewLead } from "./store";
+import { getLeadByEmail, insertLead, resendLink, type NewLead } from "./store";
 import { FIELD_ERROR, SUBMIT_ERROR } from "./text";
 
 // POST /api/magnet/<slug>: check a magnet form, store the lead, queue the writing.
@@ -44,7 +44,7 @@ export function normalizeHandle(input: string): string {
   return HANDLE.test(name) ? `@${name}` : "";
 }
 
-export type Submission = Omit<NewLead, "id" | "token" | "createdAt">;
+export type Submission = Omit<NewLead, "id" | "token" | "unsub" | "createdAt">;
 export type Parsed = { ok: true; lead: Submission } | { ok: false; errors: Record<string, string> };
 
 /** Same rules as the script on the page, so a bypass of the script gets the same answer. */
@@ -184,11 +184,17 @@ export async function handleSubmit(
     ...parsed.lead,
     id: deps.newId(),
     token: deps.newToken(),
+    unsub: deps.newToken(),
     createdAt: deps.now().toISOString(),
   };
   try {
-    // The earlier link belongs to whoever owns the inbox, so it is never shown here.
-    if (!(await insertLead(env.DB, lead))) return fail(SUBMIT_ERROR.duplicate, 409);
+    if (!(await insertLead(env.DB, lead))) {
+      // The earlier link belongs to whoever owns the inbox, so it is never shown here.
+      // It goes to that inbox again instead, at most once a day.
+      const earlier = await getLeadByEmail(env.DB, lead.magnet, lead.email);
+      if (earlier) await resendLink(env.DB, earlier.id, deps.now());
+      return fail(SUBMIT_ERROR.duplicate, 409);
+    }
   } catch (err) {
     console.error("magnet: insert failed", (err as Error).message);
     return fail(SUBMIT_ERROR.failure, 502);

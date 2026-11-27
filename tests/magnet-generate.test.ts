@@ -53,6 +53,7 @@ const newLead = (over: Partial<NewLead> = {}): NewLead => ({
   utm: "utm_source=ig",
   rr: "abc12345",
   tz: "Africa/Casablanca",
+  unsub: `unsub-${over.id ?? "lead-1"}`,
   ...over,
 });
 const stored = (over: Partial<Lead> = {}): Lead => ({
@@ -65,6 +66,7 @@ const stored = (over: Partial<Lead> = {}): Lead => ({
   deliverable: null,
   costMicroUsd: 0,
   error: null,
+  unsubscribedAt: null,
   ...over,
 });
 
@@ -264,6 +266,8 @@ describe("runLead", () => {
       return next;
     },
     alert: async (message) => void alerts.push(message),
+    mail: null,
+    origin: async () => null,
   });
 
   beforeEach(async () => {

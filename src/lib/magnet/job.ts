@@ -5,7 +5,9 @@ import type { MagnetDefinition } from "../../magnets/types";
 import { capMicroUsd, fitsCap } from "./budget";
 import { anthropicClient, callerFor, type ModelCaller } from "./claude";
 import { planPagePath } from "./contract";
+import { linkEmail, mailerFor, sendDue, type Mailer } from "./mail";
 import { deliverableProblem, readScreen, screenCall, writerCall } from "./prompt";
+import { lookupOrigin, type LinkOrigin } from "./replyrail";
 import {
   claimLead,
   finishLead,
@@ -13,6 +15,7 @@ import {
   getLead,
   recordUsage,
   saveScreen,
+  scheduleEmails,
   type Lead,
   type Sql,
 } from "./store";
@@ -40,11 +43,17 @@ export interface JobDeps {
   /** Null when there is no API key. */
   caller: ModelCaller | null;
   alert: (message: { subject: string; text: string }) => Promise<unknown>;
+  /** Sends email to leads. Null until a sender on our own domain is set. */
+  mail: Mailer | null;
+  /** Asks ReplyRail which Instagram account got the link with this code. */
+  origin: (code: string) => Promise<LinkOrigin | null>;
 }
 
 export const jobDeps = (env: Env): JobDeps => ({
   now: () => new Date(),
   caller: env.ANTHROPIC_API_KEY ? callerFor(anthropicClient(env.ANTHROPIC_API_KEY)) : null,
+  mail: mailerFor(env),
+  origin: (code) => lookupOrigin(env, code),
   alert: async (message) => {
     const sent = await sendAlert(env, message);
     if (!sent.ok) console.error("magnet: alert failed", sent.error);
@@ -170,12 +179,42 @@ export async function runLead(
   if (problem) return again(`writer: ${problem}`, "sweep");
 
   await finishLead(db, id, { status: "done", deliverable: result.text }, deps.now());
+
+  // The deliverable is stored. Nothing below may undo that, so each part fails on its own.
+  let mailed = "not sent";
+  try {
+    await scheduleEmails(db, id, [linkEmail(magnet, lead, site, deps.now())]);
+    const report = await sendDue(db, deps, site, 1, id);
+    if (report.sent) mailed = "sent";
+    else if (report.waiting) mailed = "NOT SENT, no MAIL_FROM yet. Send them the link yourself";
+    else mailed = "not sent yet, we try again within the hour";
+  } catch (err) {
+    console.error("magnet: link email failed", id, (err as Error).message);
+  }
+  const origin = lead.rr ? await deps.origin(lead.rr).catch(() => null) : null;
+  const typed = lead.instagram.replace(/^@/, "").toLowerCase();
+  const originLines = origin
+    ? [
+        oneLine(
+          `ReplyRail sent the link to @${origin.username}${origin.automation ? ` (automation ${origin.automation}, ${origin.trigger || "trigger unknown"})` : ""}.`,
+        ),
+        ...(origin.username.toLowerCase() === typed
+          ? []
+          : ["The form names a different handle. Message the ReplyRail one first."]),
+      ]
+    : [];
   const cost = (await getLead(db, id))?.costMicroUsd ?? 0;
   await deps.alert({
     subject: oneLine(`Magnet lead ${score}/5: ${label}`),
-    text: [setterNote, "", ...leadLines(lead, magnet, site), "", `Cost: ${dollars(cost)}`].join(
-      "\n",
-    ),
+    text: [
+      setterNote,
+      ...originLines,
+      "",
+      ...leadLines(lead, magnet, site),
+      "",
+      `Link email: ${mailed}.`,
+      `Cost: ${dollars(cost)}`,
+    ].join("\n"),
   });
   return "done";
 }

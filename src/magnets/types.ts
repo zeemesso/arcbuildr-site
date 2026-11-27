@@ -61,6 +61,13 @@ export interface MagnetBrief {
   maxWords: number;
   /** In plain words: when a lead counts as hot. The screen step scores against it. */
   hotRule: string;
+  /** The lesson emails sent after the deliverable. Leave out to send none. */
+  followUp?: {
+    /** Days after the deliverable, one per email, rising. Example: [1, 3, 6]. */
+    days: number[];
+    /** What each email teaches, in order, in plain words. */
+    guidance: string;
+  };
 }
 
 const SLUG = /^[a-z0-9]+(-[a-z0-9]+)*$/;
@@ -127,5 +134,16 @@ export function checkBrief(brief: MagnetBrief): string[] {
   if (!brief.hotRule.trim()) problems.push("hotRule is empty");
   if (!Number.isInteger(brief.maxWords) || brief.maxWords < 200 || brief.maxWords > 3000)
     problems.push("maxWords must be a whole number from 200 to 3000");
+  if (brief.followUp) {
+    const { days, guidance } = brief.followUp;
+    const usable =
+      Array.isArray(days) &&
+      days.length >= 1 &&
+      days.length <= 5 &&
+      days.every((day, i) => Number.isInteger(day) && day <= 30 && day > (days[i - 1] ?? 0));
+    if (!usable) problems.push("followUp.days must be 1 to 5 rising whole numbers from 1 to 30");
+    if (typeof guidance !== "string" || !guidance.trim())
+      problems.push("followUp.guidance is empty");
+  }
   return problems;
 }

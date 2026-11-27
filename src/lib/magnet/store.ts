@@ -30,6 +30,8 @@ export interface NewLead {
   utm: string;
   rr: string;
   tz: string;
+  /** Random code for the stop-the-emails link. */
+  unsub: string;
 }
 
 export interface Lead extends NewLead {
@@ -41,6 +43,7 @@ export interface Lead extends NewLead {
   deliverable: string | null;
   costMicroUsd: number;
   error: string | null;
+  unsubscribedAt: string | null;
 }
 
 type Row = {
@@ -65,6 +68,8 @@ type Row = {
   deliverable_md: string | null;
   cost_microusd: number;
   error: string | null;
+  unsub: string | null;
+  unsubscribed_at: string | null;
 };
 
 const toLead = (row: Row): Lead => ({
@@ -89,6 +94,8 @@ const toLead = (row: Row): Lead => ({
   deliverable: row.deliverable_md,
   costMicroUsd: row.cost_microusd,
   error: row.error,
+  unsub: row.unsub ?? "",
+  unsubscribedAt: row.unsubscribed_at,
 });
 
 /** A lead stuck in "running" this long was dropped mid-run and may be taken again. */
@@ -99,8 +106,9 @@ export async function insertLead(db: Sql, lead: NewLead): Promise<boolean> {
   const result = await db
     .prepare(
       `INSERT INTO magnet_leads
-         (id, token, magnet, created_at, name, email, instagram, phone, answers, page, utm, rr, tz)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+         (id, token, magnet, created_at, name, email, instagram, phone, answers, page, utm, rr, tz,
+          unsub)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
        ON CONFLICT (magnet, email) DO NOTHING`,
     )
     .bind(
@@ -117,6 +125,7 @@ export async function insertLead(db: Sql, lead: NewLead): Promise<boolean> {
       lead.utm,
       lead.rr,
       lead.tz,
+      lead.unsub,
     )
     .run();
   return result.meta.changes === 1;
@@ -274,5 +283,210 @@ export async function putBrief(db: Sql, brief: MagnetBrief, now: Date): Promise<
                                         updated_at = excluded.updated_at`,
     )
     .bind(brief.slug, JSON.stringify(brief), now.toISOString())
+    .run();
+}
+
+// ---- Emails to leads ----
+
+export interface NewEmail {
+  step: number;
+  dueAt: string;
+  subject: string;
+  body: string;
+}
+
+/** Stores emails for a lead. A step that already exists is left as it is. */
+export async function scheduleEmails(db: Sql, leadId: string, emails: NewEmail[]): Promise<void> {
+  for (const email of emails)
+    await db
+      .prepare(
+        `INSERT INTO magnet_emails (lead_id, step, due_at, subject, body) VALUES (?, ?, ?, ?, ?)
+         ON CONFLICT (lead_id, step) DO NOTHING`,
+      )
+      .bind(leadId, email.step, email.dueAt, email.subject, email.body)
+      .run();
+}
+
+export interface DueEmail {
+  leadId: string;
+  step: number;
+  dueAt: string;
+  subject: string;
+  body: string;
+  to: string;
+  unsub: string;
+}
+
+/** A send that was claimed this long ago and never closed was dropped; it may go again. */
+export const STALE_SEND_MS = 30 * 60 * 1000;
+
+/** Emails whose time has come, oldest first. Leads who stopped the emails get none. */
+export async function dueEmails(
+  db: Sql,
+  now: Date,
+  limit: number,
+  leadId?: string,
+): Promise<DueEmail[]> {
+  const stale = new Date(now.getTime() - STALE_SEND_MS).toISOString();
+  const { results } = await db
+    .prepare(
+      `SELECT e.lead_id AS leadId, e.step, e.due_at AS dueAt, e.subject, e.body,
+              l.email AS "to", l.unsub
+         FROM magnet_emails e JOIN magnet_leads l ON l.id = e.lead_id
+        WHERE (e.status = 'pending' OR (e.status = 'sending' AND e.claimed_at < ?))
+          AND e.due_at <= ? AND l.unsubscribed_at IS NULL AND (? IS NULL OR e.lead_id = ?)
+        ORDER BY e.due_at LIMIT ?`,
+    )
+    .bind(stale, now.toISOString(), leadId ?? null, leadId ?? null, limit)
+    .all<DueEmail>();
+  return results;
+}
+
+/** Takes one email for sending and counts the try. True for one caller only. */
+export async function claimEmail(
+  db: Sql,
+  leadId: string,
+  step: number,
+  now: Date,
+): Promise<boolean> {
+  const stale = new Date(now.getTime() - STALE_SEND_MS).toISOString();
+  const result = await db
+    .prepare(
+      `UPDATE magnet_emails SET status = 'sending', attempts = attempts + 1, claimed_at = ?
+        WHERE lead_id = ? AND step = ?
+          AND (status = 'pending' OR (status = 'sending' AND claimed_at < ?))`,
+    )
+    .bind(now.toISOString(), leadId, step, stale)
+    .run();
+  return result.meta.changes === 1;
+}
+
+/** Sends tried per email before it is given up. */
+export const MAX_SENDS = 3;
+
+/** Ends a send. A failed send goes back to pending until it has been tried MAX_SENDS times. */
+export async function closeEmail(
+  db: Sql,
+  leadId: string,
+  step: number,
+  end: { sent: true } | { sent: false; error: string; final?: boolean },
+  now: Date,
+): Promise<void> {
+  if (end.sent) {
+    await db
+      .prepare(
+        `UPDATE magnet_emails SET status = 'sent', error = NULL, sent_at = ?
+          WHERE lead_id = ? AND step = ?`,
+      )
+      .bind(now.toISOString(), leadId, step)
+      .run();
+    return;
+  }
+  await db
+    .prepare(
+      `UPDATE magnet_emails
+          SET status = CASE WHEN ? = 1 OR attempts >= ? THEN 'failed' ELSE 'pending' END, error = ?
+        WHERE lead_id = ? AND step = ?`,
+    )
+    .bind(end.final ? 1 : 0, MAX_SENDS, end.error, leadId, step)
+    .run();
+}
+
+/** Stops every email for the lead with this code. False when no lead has it. */
+export async function unsubscribe(db: Sql, code: string, now: Date): Promise<boolean> {
+  const lead = await db
+    .prepare("SELECT id FROM magnet_leads WHERE unsub = ?")
+    .bind(code)
+    .first<{ id: string }>();
+  if (!lead) return false;
+  await db
+    .prepare("UPDATE magnet_leads SET unsubscribed_at = COALESCE(unsubscribed_at, ?) WHERE id = ?")
+    .bind(now.toISOString(), lead.id)
+    .run();
+  await db
+    .prepare(
+      `UPDATE magnet_emails SET status = 'cancelled'
+        WHERE lead_id = ? AND status IN ('pending', 'sending')`,
+    )
+    .bind(lead.id)
+    .run();
+  return true;
+}
+
+/** A person may ask for the link again once in this long. */
+export const RESEND_EVERY_MS = 24 * 60 * 60 * 1000;
+
+/** Queues the "it's ready" email again, at most once a day. True when it was queued. */
+export async function resendLink(db: Sql, leadId: string, now: Date): Promise<boolean> {
+  const before = new Date(now.getTime() - RESEND_EVERY_MS).toISOString();
+  const result = await db
+    .prepare(
+      `UPDATE magnet_emails SET status = 'pending', attempts = 0, due_at = ?
+        WHERE lead_id = ? AND step = 0
+          AND ((status = 'sent' AND sent_at < ?) OR status = 'failed')`,
+    )
+    .bind(now.toISOString(), leadId, before)
+    .run();
+  return result.meta.changes === 1;
+}
+
+/** How long after the deliverable the lesson emails may still be written. */
+export const FOLLOWUP_WINDOW_MS = 3 * 24 * 60 * 60 * 1000;
+export const MAX_FOLLOWUP_TRIES = 3;
+
+/** Finished leads that have no lesson emails yet. Oldest first. */
+export async function followUpCandidates(db: Sql, now: Date, limit = 10): Promise<string[]> {
+  const since = new Date(now.getTime() - FOLLOWUP_WINDOW_MS).toISOString();
+  const { results } = await db
+    .prepare(
+      `SELECT id FROM magnet_leads l
+        WHERE status = 'done' AND finished_at > ? AND unsubscribed_at IS NULL
+          AND followup_tries < ?
+          AND NOT EXISTS (SELECT 1 FROM magnet_emails e WHERE e.lead_id = l.id AND e.step > 0)
+        ORDER BY finished_at LIMIT ?`,
+    )
+    .bind(since, MAX_FOLLOWUP_TRIES, limit)
+    .all<{ id: string }>();
+  return results.map((row) => row.id);
+}
+
+/** Counts a try at the lesson emails. False when the lead has none left or has them already. */
+export async function claimFollowUp(db: Sql, id: string): Promise<boolean> {
+  const result = await db
+    .prepare(
+      `UPDATE magnet_leads SET followup_tries = followup_tries + 1
+        WHERE id = ? AND status = 'done' AND unsubscribed_at IS NULL AND followup_tries < ?
+          AND NOT EXISTS (SELECT 1 FROM magnet_emails e WHERE e.lead_id = ? AND e.step > 0)`,
+    )
+    .bind(id, MAX_FOLLOWUP_TRIES, id)
+    .run();
+  return result.meta.changes === 1;
+}
+
+/** Leads created in [from, to), hottest first, for the daily digest. */
+export async function leadsBetween(db: Sql, from: Date, to: Date): Promise<Lead[]> {
+  const { results } = await db
+    .prepare(
+      `SELECT * FROM magnet_leads WHERE created_at >= ? AND created_at < ?
+        ORDER BY score DESC, created_at DESC LIMIT 100`,
+    )
+    .bind(from.toISOString(), to.toISOString())
+    .all<Row>();
+  return results.map(toLead);
+}
+
+/** How many leads wait for us right now (held, or given up on). */
+export async function stuckCount(db: Sql): Promise<number> {
+  const row = await db
+    .prepare("SELECT COUNT(*) AS n FROM magnet_leads WHERE status IN ('held', 'failed')")
+    .first<{ n: number }>();
+  return row?.n ?? 0;
+}
+
+/** Marks a lead as one that gets no lesson emails, so the sweep stops asking. */
+export async function skipFollowUp(db: Sql, id: string): Promise<void> {
+  await db
+    .prepare("UPDATE magnet_leads SET followup_tries = ? WHERE id = ?")
+    .bind(MAX_FOLLOWUP_TRIES, id)
     .run();
 }

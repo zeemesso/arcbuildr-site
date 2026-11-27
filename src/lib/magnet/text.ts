@@ -68,3 +68,26 @@ export const PLAN_TEXT = {
   /** Shown when writing failed on our side or is waiting for us. */
   held: "We got your answers. Writing it is taking us longer than planned. We email you the link when it's ready.",
 } as const;
+
+/** The fixed parts of every email to a lead. The lesson emails get their middle from the model. */
+export const EMAIL_TEXT = {
+  greeting: (name: string) => (name ? `Hi ${name},` : "Hi,"),
+  linkSubject: (deliverable: string) =>
+    `${deliverable.charAt(0).toUpperCase()}${deliverable.slice(1)} is ready`,
+  linkBody: (deliverable: string, url: string) =>
+    `We wrote ${deliverable} from your answers. Open it here:\n${url}\n\nThe link is private. Anyone who has it can read your page, so keep it to yourself.`,
+  lesson: (title: string, url: string) => `Watch: ${title}\n${url}`,
+  signoff: "Zyade\nArcbuildr",
+  footer: (url: string) =>
+    `You get these emails because you asked for this at arcbuildr.co. Stop them here: ${url}`,
+} as const;
+
+export const UNSUBSCRIBE_TEXT = {
+  title: "Stop the emails",
+  body: "One click and we send you nothing more. Your page stays open.",
+  button: "Stop the emails",
+  working: "Stopping...",
+  done: "Done. You get no more emails from us.",
+  badLink: "This link is not complete. Use the link at the bottom of one of our emails.",
+  failure: "That didn't work. Try again, or DM us at @arcbuildr.",
+} as const;
