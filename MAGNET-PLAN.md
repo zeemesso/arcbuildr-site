@@ -1,6 +1,6 @@
 # Magnet engine
 
-Branch: `magnet-engine`, cut from `sl-p1-lead-capture` at 4bb7d88. Planned and built 2026-11-27.
+Planned and built 2026-11-27 on the branch `magnet-engine`, cut from `sl-p1-lead-capture` at 4bb7d88. Deployed the same day: `main` is `l1-p11-page` at 6e1bdee plus the engine (merge 7c46a74). New engine work starts from `main`. The `magnet-engine` branch is old.
 
 Goal: one reusable engine for AI lead magnets. A visitor answers a long form and gets a deliverable written from their own answers. Adding a magnet means filling one definition file and one private folder. Nothing else changes.
 
@@ -88,13 +88,21 @@ Done on 2026-11-27: the D1 database `arcbuildr-magnets` and the queue `arcbuildr
 
 `max_batch_size: 1` is required: one lead uses about 15 database queries, and a Free plan run has 50.
 
-The queue consumer and the hourly run start with the first production deploy of this branch. A preview version gets the database and can put jobs on the queue, but the deployed Worker is the one that reads them.
+Deployed on 2026-11-27 to `https://arcbuildr.zeemesso.workers.dev`. VERIFIED after the deploy: the pages answer, the plan API reads the database, the hourly run and the queue consumer are attached, the draft magnet is not served. A preview version gets the database and can put jobs on the queue, but the deployed Worker is the one that reads them.
+
+Not done yet:
+
+- `arcbuildr.co` is not attached to the Worker. Links in the emails use `SITE_URL`, which defaults to `https://arcbuildr.co`, so they are dead until the domain is attached or `SITE_URL` is set to the workers.dev address. Do one of the two before the first live magnet.
+- No Claude call has run inside the Worker (UNVERIFIED). There is no live magnet and `MAGNET_DRAFTS` is not set in production. The first TEST lead on a real magnet settles it, and the CPU limit question above with it.
+- No email has gone to a lead through Resend from the Worker (UNVERIFIED).
+
+The GitHub check builds `main` under the name `ci-main`, so the browser tests get a preview build (toolbar, demo pages, draft magnet). The production build is checked by `test:main-build`.
 
 Later migrations: `wrangler d1 migrations apply arcbuildr-magnets --remote` (needs `wrangler login`), or the dashboard console with a row added to `d1_migrations`.
 
 Sender, set on 2026-11-27: `arcbuildr.co` is verified in Resend, and `wrangler.jsonc` sets `MAIL_FROM` to `Zyade from Arcbuildr <hello@arcbuildr.co>` [ASSUMED name and address]. Cloudflare Email Routing forwards `hello@arcbuildr.co` to Zyade's inbox, so a lead's reply arrives without `MAIL_REPLY_TO`. The domain has no DMARC record yet.
 
-Still open: `ANTHROPIC_API_KEY`.
+`ANTHROPIC_API_KEY` was added as a Worker secret by Zyade on 2026-11-27.
 
 Settings on the Worker:
 
@@ -103,6 +111,7 @@ Settings on the Worker:
 | `ANTHROPIC_API_KEY`      | secret | From a Console workspace with its own monthly limit               |
 | `MAIL_FROM`              | var    | Set in `wrangler.jsonc`. Sender on a domain verified in Resend    |
 | `MAIL_REPLY_TO`          | var    | Optional. Where replies go, when not the sender's address         |
+| `SITE_URL`               | var    | Optional. Address used in email links. Default `arcbuildr.co`     |
 | `REPLYRAIL_URL`          | var    | Optional. ReplyRail's address, https                              |
 | `REPLYRAIL_SECRET`       | secret | Optional. Same value as ReplyRail's `LINK_LOOKUP_SECRET`          |
 | `MAGNET_DAILY_CAP_USD`   | var    | Optional. Default 3                                               |
@@ -122,7 +131,7 @@ Settings on the Worker:
 7. Done in `~/replyrail/scaffold`, not deployed. **ReplyRail link.** `/r/<code>` adds `rr=<code>` for hosts in `MAGNET_HOSTS`; `GET /api/link/lookup?code=` with `LINK_LOOKUP_SECRET` returns the account. The engine uses it for the setter alert only. The form is not prefilled.
 8. Done. **Follow-up.** Link email, lesson emails, hourly cron, daily digest.
 9. Done. **Magnet tool.** `scripts/magnet.mjs`.
-10. Partly done. **Wiring.** Database, queue, config, sender address and privacy text are done. The Worker's Claude API key is open. See "Waiting on Zyade".
+10. Done, deployed 2026-11-27. **Wiring.** Database, queue, config, sender address, privacy text, Claude API key, production deploy. What is left is in "Not done yet" and "Waiting on Zyade".
 
 ## Changed from the first plan
 
@@ -144,12 +153,14 @@ Every call's real cost is saved on the lead row and counted in the daily total. 
 
 ## Waiting on Zyade
 
-1. Claude API key in a new Console workspace with a monthly limit, added as the Worker secret `ANTHROPIC_API_KEY`. The `ant` sign-in covers the Mac only and cannot create keys. 5 min.
+1. Done 2026-11-27: Claude API key added as the Worker secret `ANTHROPIC_API_KEY`.
 2. Done 2026-11-27: D1 database and queue on the Cloudflare account.
 3. Done 2026-11-27: Resend domain verified, `MAIL_FROM` set. Confirm the sender name and address. Optional: a DMARC record for `arcbuildr.co` (DNS change).
 4. ReplyRail: deploy, set `MAGNET_HOSTS` and `LINK_LOOKUP_SECRET`, live test from a second Instagram account. 15 min.
 5. Legal check of the privacy text and of the emails (consent line, sender address) before the first live magnet.
 6. Confirm the emails' sign-off: "Zyade / Arcbuildr".
+7. Confirm the privacy wording for free resources [ASSUMED], in `src/content/site.ts`: "the handle of your social account" and "An artificial intelligence model reads your answers". 5 min.
+8. Attach `arcbuildr.co` to the Worker (DNS change), or say that email links may use the workers.dev address until then. 10 min.
 
 ## Out of scope
 
