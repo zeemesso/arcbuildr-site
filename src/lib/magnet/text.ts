@@ -35,7 +35,7 @@ export const FIELD_ERROR = {
   choice: "Pick one.",
   name: "Add your name.",
   email: "Check your email address.",
-  instagram: "Add your Instagram handle.",
+  instagram: "Add your Instagram handle, like @yourname.",
   phone: "Check the number, with the country code. Or leave it empty.",
   consent: "Tick the box so we can write it.",
 } as const;
@@ -45,6 +45,9 @@ export const SUBMIT_ERROR = {
   check: "Check the answers marked above.",
   badForm: "That didn't look like a form.",
   closed: "This page isn't open right now.",
+  tooBig: "That was too much text for one send. Shorten your longest answer and try again.",
+  duplicate:
+    "We already wrote this one for that email. The link is in your inbox. Can't find it? DM us at @arcbuildr.",
   failure:
     "We couldn't send your answers. Try again, or DM us at @arcbuildr. What you typed is still here.",
 } as const;

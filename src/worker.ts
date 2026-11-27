@@ -1,5 +1,6 @@
 import type { Env } from "./lib/env";
 import { handleLead } from "./lib/lead";
+import { handleSubmit } from "./lib/magnet/intake";
 import { shortLinkRedirect } from "./lib/shortlinks";
 
 /** Same answer for every unknown /api request, so nothing leaks. */
@@ -17,6 +18,8 @@ export default {
     const short = shortLinkRedirect(url);
     if (short) return short;
     if (pathname === "/api/lead" && request.method === "POST") return handleLead(request, env);
+    const magnet = /^\/api\/magnet\/([a-z0-9-]{1,64})$/.exec(pathname);
+    if (magnet && request.method === "POST") return handleSubmit(request, env, magnet[1]!);
     if (pathname.startsWith("/api/")) return notFound();
     return env.ASSETS.fetch(request);
   },
