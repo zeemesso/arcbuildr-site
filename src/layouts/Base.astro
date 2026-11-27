@@ -13,12 +13,15 @@ interface Props {
   noindex?: boolean;
   /** False on the booking confirmation: someone who has booked is not asked to apply again. */
   apply?: boolean;
+  /** False where the address holds a private link (the plan page): the visit counter never sees it. */
+  analytics?: boolean;
 }
 const {
   title = meta.title,
   description = meta.description,
   noindex = false,
   apply = true,
+  analytics = true,
 } = Astro.props;
 const analyticsToken = import.meta.env.PUBLIC_CF_ANALYTICS_TOKEN;
 ---
@@ -27,6 +30,7 @@ const analyticsToken = import.meta.env.PUBLIC_CF_ANALYTICS_TOKEN;
 <html lang="en">
   <head>
     <Head title={title} description={description} noindex={noindex} />
+    <slot name="head" />
   </head>
   <body>
     <a class="skip" href="#main">
@@ -43,7 +47,7 @@ const analyticsToken = import.meta.env.PUBLIC_CF_ANALYTICS_TOKEN;
       import "../scripts/motion";
       if (__PREVIEW__) import("../components/mountFeedback");
     </script>
-    {analyticsToken && (
+    {analytics && analyticsToken && (
       <script
         defer
         is:inline

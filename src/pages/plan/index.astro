@@ -1,68 +1,58 @@
 ---
-import "../../styles/tokens.css";
-import "../../styles/base.css";
-import "../../styles/look.css";
-import "../../styles/sections.css";
-import Head from "../../layouts/Head.astro";
+import Base from "../../layouts/Base.astro";
 import { PLAN_TEXT as t } from "../../lib/magnet/text";
 ---
 
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta name="referrer" content="no-referrer" />
-    <Head title={t.workingTitle} description={t.workingBody} noindex />
-  </head>
-  <body>
-    <main class="doc plan">
-      <header class="doc__block" id="plan-header" aria-live="polite">
-        <h1 id="plan-title">{t.workingTitle}</h1>
-        <p class="muted" id="plan-status">
-          {t.workingBody}
-        </p>
-      </header>
-      <div class="card plan__progress" id="plan-progress" hidden>
-        <div class="plan__row">
-          <span class="plan__dot" aria-hidden="true"></span>
-          <span id="plan-step" aria-live="polite" aria-atomic="true"></span>
-          <span id="plan-percent" aria-hidden="true"></span>
-        </div>
-        <div
-          class="plan__track"
-          id="plan-track"
-          role="progressbar"
-          aria-labelledby="plan-step"
-          aria-valuemin="0"
-          aria-valuemax="100"
-        >
-          <div class="plan__fill" id="plan-fill"></div>
-        </div>
-      </div>
-      <section class="card" id="plan-video" aria-labelledby="video-title" hidden>
-        <h2 id="video-title"></h2>
-        <video controls playsinline preload="metadata" aria-labelledby="video-title"></video>
-      </section>
-      <p class="muted" id="plan-help">
-        {t.help}
+<Base title={t.workingTitle} description={t.workingBody} noindex apply={false} analytics={false}>
+  <meta slot="head" name="referrer" content="no-referrer" />
+  <div class="doc plan">
+    <header class="doc__block" id="plan-header" aria-live="polite">
+      <h1 id="plan-title">{t.workingTitle}</h1>
+      <p class="muted" id="plan-status">
+        {t.workingBody}
       </p>
-      <header class="doc__block" id="plan-result" hidden>
-        <p id="plan-ready-below" hidden>
-          {t.readyBelow}
-        </p>
-        <p class="small muted" id="plan-kicker"></p>
-        <h1 id="plan-result-title"></h1>
-      </header>
-      <article class="doc__block plan__article" id="plan-article" hidden></article>
-      <section class="card" id="plan-cta" aria-labelledby="plan-cta-title" hidden>
-        <h2 id="plan-cta-title">{t.ctaTitle}</h2>
-        <p>{t.ctaBody}</p>
-        <a class="btn btn--parts" href={t.ctaHref}>
-          {t.ctaButton}
-        </a>
-      </section>
-    </main>
-  </body>
-</html>
+    </header>
+    <div class="card plan__progress" id="plan-progress" hidden>
+      <div class="plan__row">
+        <span class="plan__dot" aria-hidden="true"></span>
+        <span id="plan-step" aria-live="polite" aria-atomic="true"></span>
+        <span id="plan-percent" aria-hidden="true"></span>
+      </div>
+      <div
+        class="plan__track"
+        id="plan-track"
+        role="progressbar"
+        aria-labelledby="plan-step"
+        aria-valuemin="0"
+        aria-valuemax="100"
+      >
+        <div class="plan__fill" id="plan-fill"></div>
+      </div>
+    </div>
+    <section class="card" id="plan-video" aria-labelledby="video-title" hidden>
+      <h2 id="video-title"></h2>
+      <video controls playsinline preload="metadata" aria-labelledby="video-title"></video>
+    </section>
+    <p class="muted" id="plan-help">
+      {t.help}
+    </p>
+    <header class="doc__block" id="plan-result" hidden>
+      <p id="plan-ready-below" hidden>
+        {t.readyBelow}
+      </p>
+      <p class="small muted" id="plan-kicker"></p>
+      <h1 id="plan-result-title"></h1>
+    </header>
+    <article class="doc__block plan__article" id="plan-article" hidden></article>
+    <section class="card" id="plan-cta" aria-labelledby="plan-cta-title" hidden>
+      <h2 id="plan-cta-title">{t.ctaTitle}</h2>
+      <p>{t.ctaBody}</p>
+      <a class="btn btn--parts" href={t.ctaHref}>
+        {t.ctaButton}
+      </a>
+    </section>
+  </div>
+</Base>
 
 <script>
   import {

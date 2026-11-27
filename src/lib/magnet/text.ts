@@ -2,6 +2,8 @@
 // and the Worker read this file, so the page and the server say the same thing.
 // A magnet's own words (title, questions) live in its definition, not here.
 
+import { action } from "../../content/site";
+
 export const FORM_TEXT = {
   serious: "We read your answers before we write a word. Rushed or empty answers get nothing back.",
   start: "Start",
@@ -69,8 +71,9 @@ export const PLAN_TEXT = {
   kicker: (name: string) => `Written for ${name}`,
   ctaTitle: "Want us to build this with you?",
   ctaBody: "Tell us about your business. If it's a fit, we get on a call.",
-  ctaButton: "Apply to work with us",
-  ctaHref: "/#start",
+  /** The site's own apply button: same words, same place. */
+  ctaButton: action,
+  ctaHref: "/#apply",
   badLink: "This link doesn't open anything. Use the link from your email, or DM us at @arcbuildr.",
   /** Shown when the answers could not be turned into a deliverable. */
   rejected:
