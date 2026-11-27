@@ -12,3 +12,6 @@ src/generated/
 test-results/
 playwright-report/
 .playwright-mcp/
+# Codex hand-off reports
+codex-*.md
+codex-*.done

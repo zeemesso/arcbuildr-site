@@ -1,0 +1,41 @@
+// The magnet engine on this machine: `npm run magnet:dev`. Local database, local queue,
+// no Cloudflare account needed. It is also the model for production: MAGNET-PLAN.md
+// (task 10) says which blocks move into wrangler.jsonc once the real resources exist.
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "arcbuildr-magnet-local",
+  "main": "src/worker.ts",
+  "compatibility_date": "2026-10-01",
+  "assets": {
+    "directory": "./dist",
+    "binding": "ASSETS",
+    "html_handling": "auto-trailing-slash",
+    "not_found_handling": "404-page",
+    "run_worker_first": ["/", "/api/*", "/ig", "/ig/", "/dm", "/dm/", "/tt", "/tt/"],
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "arcbuildr-magnets",
+      "database_id": "00000000-0000-0000-0000-000000000000",
+      "migrations_dir": "migrations",
+    },
+  ],
+  "queues": {
+    "producers": [{ "binding": "MAGNET_QUEUE", "queue": "arcbuildr-magnets" }],
+    // One lead per run, one run at a time: each run then has the full limits to itself.
+    "consumers": [
+      {
+        "queue": "arcbuildr-magnets",
+        "max_batch_size": 1,
+        "max_concurrency": 1,
+        "max_retries": 5,
+      },
+    ],
+  },
+  "triggers": { "crons": ["0 * * * *"] },
+  "vars": {
+    "MAGNET_DRAFTS": "1",
+    "SITE_URL": "http://127.0.0.1:8788",
+  },
+}

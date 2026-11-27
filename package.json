@@ -16,6 +16,8 @@
     "format:check": "prettier --check .",
     "test:e2e": "playwright test",
     "test:main-build": "node scripts/verify-main-build.mjs",
+    "magnet": "node scripts/magnet.mjs",
+    "magnet:dev": "WORKERS_CI_BRANCH=magnet-local npm run build && wrangler d1 migrations apply arcbuildr-magnets --local --config wrangler.magnet-local.jsonc && wrangler dev --config wrangler.magnet-local.jsonc --port 8788 --ip 127.0.0.1 --test-scheduled",
     "check": "npm run format:check && npm run typecheck && npm test && npm run build && npm run test:main-build && npm run test:e2e"
   },
   "devDependencies": {
