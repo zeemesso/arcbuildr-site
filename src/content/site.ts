@@ -121,7 +121,7 @@ export const privacy = {
   description:
     "What Arcbuildr collects when you use this site, why, who else handles it, and how to ask us to delete it.",
   h1: "Privacy",
-  updated: "Last updated: 23 November 2026",
+  updated: "Last updated: 27 November 2026",
   /** A string is a paragraph. An array of strings is a list. `{email}` is CONTACT_EMAIL. */
   sections: [
     {
@@ -148,6 +148,17 @@ export const privacy = {
       ],
     },
     {
+      id: "p-resource",
+      title: "When you ask for a free resource",
+      body: [
+        "Some pages offer a resource written for you, such as a plan. There you type longer answers about your business, with your name, email, the handle of your social account and, if you want, your phone number.",
+        "An artificial intelligence model reads your answers and writes the resource from them. We use Claude, made by Anthropic. It gets your first name, your handle and your answers. It does not get your email or your phone number.",
+        "We read your answers too, and we may message you on that account about what you sent.",
+        "We email you the link to your page, then a few short lessons. Every email has a link that stops them.",
+        "Your page has a private link. Anyone who has the link can read the page, so keep it to yourself.",
+      ],
+    },
+    {
       id: "p-others",
       title: "Who else handles it",
       body: [
@@ -157,7 +168,9 @@ export const privacy = {
           "Tally runs the application form.",
           "Cal.com runs the booking page.",
           "Google Sheets (Google) holds our list of applications.",
-          "Resend sends us an email when someone applies.",
+          "Resend sends us an email when someone applies, and sends you the emails for a free resource.",
+          "Cloudflare also stores your answers and your page when you ask for a free resource.",
+          "Anthropic (Claude) reads those answers and writes the resource.",
         ],
         "We do not sell your details or share them with anyone else.",
       ],
@@ -166,7 +179,7 @@ export const privacy = {
       id: "p-keep",
       title: "How long we keep it, and how to delete it",
       body: [
-        "We keep your details while we talk about working together and while we work with you. To have them deleted, write to {email}. We delete them from our list and from our email.",
+        "We keep your details while we talk about working together and while we work with you. To have them deleted, write to {email}. We delete them from our list, our database and our email.",
       ],
     },
   ],

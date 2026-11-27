@@ -1,0 +1,71 @@
+---
+import type { GetStaticPaths } from "astro";
+import MagnetForm from "../../components/MagnetForm.astro";
+import Base from "../../layouts/Base.astro";
+import { FORM_TEXT } from "../../lib/magnet/text";
+import { visibleMagnets } from "../../magnets/registry";
+import type { MagnetDefinition } from "../../magnets/types";
+
+export const getStaticPaths = (() =>
+  visibleMagnets(__PREVIEW__).map((magnet) => ({
+    params: { slug: magnet.slug },
+    props: { magnet },
+  }))) satisfies GetStaticPaths;
+
+interface Props {
+  magnet: MagnetDefinition;
+}
+
+const { magnet } = Astro.props;
+const { heroVideo, meta } = magnet;
+const draft = magnet.status === "draft";
+---
+
+<Base title={meta.title} description={meta.description} noindex={draft} apply={false}>
+  <div class="doc magnet">
+    <header class="doc__block">
+      {draft && <p class="small magnet__draft">{FORM_TEXT.draft}</p>}
+      <h1>{magnet.title}</h1>
+      <p class="lead">{magnet.forWho}</p>
+      <p>{magnet.intro}</p>
+      <p class="small muted">{FORM_TEXT.minutes(magnet.minutes)}</p>
+    </header>
+    {heroVideo && (
+      <figure class="doc__block">
+        <video
+          src={heroVideo.src}
+          poster={heroVideo.poster}
+          controls
+          playsinline
+          preload="metadata"
+          aria-describedby={heroVideo.caption ? "magnet-video-caption" : undefined}
+        />
+        {heroVideo.caption && (
+          <figcaption class="small muted" id="magnet-video-caption">
+            {heroVideo.caption}
+          </figcaption>
+        )}
+      </figure>
+    )}
+    <MagnetForm magnet={magnet} />
+  </div>
+</Base>
+
+<style>
+  .magnet {
+    overflow-wrap: anywhere;
+  }
+  .magnet__draft {
+    justify-self: start;
+    padding: 0.25rem 0.75rem;
+    border-radius: var(--radius-pill);
+    background: color-mix(in oklch, var(--color-accent) 16%, var(--color-card));
+    font-weight: 600;
+  }
+  video {
+    display: block;
+    width: 100%;
+    border-radius: var(--radius-md);
+    background: var(--color-ink);
+  }
+</style>

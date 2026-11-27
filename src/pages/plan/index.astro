@@ -1,0 +1,135 @@
+---
+import "../../styles/tokens.css";
+import "../../styles/base.css";
+import "../../styles/look.css";
+import "../../styles/sections.css";
+import Head from "../../layouts/Head.astro";
+import { PLAN_TEXT as t } from "../../lib/magnet/text";
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta name="referrer" content="no-referrer" />
+    <Head title={t.workingTitle} description={t.workingBody} noindex />
+  </head>
+  <body>
+    <main class="doc plan">
+      <header class="doc__block" aria-live="polite" aria-atomic="true">
+        <p class="small muted" id="plan-kicker" hidden></p>
+        <h1 id="plan-title">{t.workingTitle}</h1>
+        <p class="muted" id="plan-status">
+          {t.workingBody}
+        </p>
+      </header>
+      <article class="doc__block plan__article" id="plan-article" hidden></article>
+      <section class="card" id="plan-cta" aria-labelledby="plan-cta-title" hidden>
+        <h2 id="plan-cta-title">{t.ctaTitle}</h2>
+        <p>{t.ctaBody}</p>
+        <a class="btn btn--parts" href={t.ctaHref}>
+          {t.ctaButton}
+        </a>
+      </section>
+    </main>
+  </body>
+</html>
+
+<script>
+  import { PLAN_API_PATH, TOKEN, type PlanState } from "../../lib/magnet/contract";
+  import { PLAN_TEXT } from "../../lib/magnet/text";
+
+  const title = document.getElementById("plan-title")!;
+  const status = document.getElementById("plan-status")!;
+  const kicker = document.getElementById("plan-kicker")!;
+  const article = document.getElementById("plan-article")!;
+  const cta = document.getElementById("plan-cta")!;
+  const token = location.hash.slice(1);
+  let tries = 0;
+  let slowUntil = 0;
+
+  function finish(heading: string) {
+    title.textContent = document.title = heading;
+    status.hidden = true;
+  }
+
+  async function poll() {
+    const remaining = slowUntil ? slowUntil - Date.now() : 15_000;
+    if (remaining <= 0) return;
+    tries += 1;
+    try {
+      const response = await fetch(PLAN_API_PATH, {
+        headers: { Accept: "application/json", Authorization: `Bearer ${token}` },
+        cache: "no-store",
+        signal: AbortSignal.timeout(Math.min(remaining, 15_000)),
+      });
+      const plan = (await response.json()) as PlanState;
+      if (plan.status === "ready") {
+        finish(plan.title);
+        kicker.textContent = PLAN_TEXT.kicker(plan.name);
+        kicker.hidden = false;
+        // The result endpoint builds this HTML from escaped text (PlanState contract).
+        article.innerHTML = plan.html;
+        article.hidden = cta.hidden = false;
+        return;
+      }
+      if (plan.status === "unavailable") {
+        finish(plan.message);
+        return;
+      }
+    } catch {
+      // A failed request uses one attempt. The next poll may still succeed.
+    }
+
+    if (tries < 60) {
+      setTimeout(poll, 3_000);
+      return;
+    }
+    if (tries === 60) {
+      status.textContent = PLAN_TEXT.slow;
+      slowUntil = Date.now() + 10 * 60_000;
+    }
+    if (Date.now() + 15_000 <= slowUntil) setTimeout(poll, 15_000);
+  }
+
+  if (TOKEN.test(token)) void poll();
+  else finish(PLAN_TEXT.badLink);
+</script>
+
+<style>
+  .plan {
+    padding-bottom: 3rem;
+    overflow-wrap: anywhere;
+  }
+  .plan__article :global(ul),
+  .plan__article :global(ol) {
+    display: grid;
+    gap: 0.375rem;
+    padding-inline-start: 1.25rem;
+  }
+  .plan__article :global(ul) {
+    list-style: disc;
+  }
+  .plan__article :global(ol) {
+    list-style: decimal;
+  }
+  .plan__article :global(blockquote) {
+    margin: 0;
+    border-inline-start: 3px solid var(--color-rule);
+    padding-inline-start: 1rem;
+    color: var(--color-ink-muted);
+  }
+  .plan__article :global(hr) {
+    border: 0;
+    border-top: 1px solid var(--color-rule);
+    width: 100%;
+    margin: 0;
+  }
+  .plan__article > :global(* + h2),
+  .plan__article > :global(* + h3) {
+    margin-top: 0.75rem;
+  }
+  .plan__article :global(h3) {
+    font-size: var(--text-lg);
+    line-height: 1.2;
+  }
+</style>

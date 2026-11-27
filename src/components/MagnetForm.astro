@@ -1,0 +1,557 @@
+---
+import "./application/application.css";
+import { answerField, FIELD, MAX_LENGTH, submitPath } from "../lib/magnet/contract";
+import { FORM_TEXT as t } from "../lib/magnet/text";
+import type { MagnetDefinition } from "../magnets/types";
+
+interface Props {
+  magnet: MagnetDefinition;
+}
+
+const { magnet } = Astro.props;
+const total = magnet.questions.length;
+const contactFields = [
+  { name: FIELD.name, label: t.name, type: "text", autocomplete: "name", required: true },
+  {
+    name: FIELD.email,
+    label: t.email,
+    type: "email",
+    autocomplete: "email",
+    required: true,
+    help: t.emailHelp,
+  },
+  { name: FIELD.instagram, label: t.instagram, type: "text", autocomplete: "off", required: true },
+  {
+    name: FIELD.phone,
+    label: t.phone,
+    type: "tel",
+    autocomplete: "tel",
+    required: false,
+    help: t.phoneHelp,
+  },
+] as const;
+---
+
+<form
+  id="magnet-form"
+  method="post"
+  action={submitPath(magnet.slug)}
+  class="card magnet-form"
+  data-slug={magnet.slug}
+>
+  <div class="small muted" data-progress hidden>
+    <p id="magnet-progress"></p>
+    <progress max={total} value="0" aria-labelledby="magnet-progress"></progress>
+  </div>
+  <p class="vh" data-field-alert aria-live="polite" aria-atomic="true"></p>
+
+  <div class="screen" data-screen hidden>
+    <button class="btn btn--parts" data-start type="button">
+      {t.start}
+    </button>
+  </div>
+  {magnet.questions.map((question) => {
+    const name = answerField(question.id);
+    const id = `magnet-${name}`;
+    const required = question.required !== false;
+    const describedBy =
+      [
+        !required && `${id}-optional`,
+        question.help && `${id}-help`,
+        question.kind === "long" && `${id}-voice`,
+        question.kind === "choice" && question.placeholder && `${id}-placeholder`,
+      ]
+        .filter(Boolean)
+        .join(" ") || undefined;
+    const details = {
+      id,
+      name,
+      required,
+      placeholder: question.placeholder,
+      "aria-describedby": describedBy,
+    };
+    const optional = !required && (
+      <p class="small muted" id={`${id}-optional`}>
+        {t.optional}
+      </p>
+    );
+    const help = question.help && (
+      <p class="small muted" id={`${id}-help`}>
+        {question.help}
+      </p>
+    );
+    return (
+      <div class="screen" data-screen>
+        {question.kind === "choice" ? (
+          <fieldset data-field={name}>
+            <legend class="plain__lead">{question.label}</legend>
+            {optional}
+            {help}
+            {question.placeholder && (
+              <p class="small muted" id={`${id}-placeholder`}>
+                {question.placeholder}
+              </p>
+            )}
+            <div class="choice__options">
+              {question.options.map((option, i) => (
+                <label class="choice">
+                  <input
+                    type="radio"
+                    name={name}
+                    value={option.value}
+                    required={required && i === 0}
+                    aria-describedby={describedBy}
+                  />
+                  <span>{option.label}</span>
+                </label>
+              ))}
+            </div>
+            <p class="error q__err" id={`${id}-error`} hidden></p>
+          </fieldset>
+        ) : (
+          <div class="plain__field" data-field={name}>
+            <label class="plain__lead" for={id}>
+              {question.label}
+            </label>
+            {optional}
+            {help}
+            {question.kind === "short" ? (
+              <input class="q__field" {...details} type="text" maxlength={MAX_LENGTH.short} />
+            ) : (
+              <>
+                <textarea
+                  class="q__field"
+                  {...details}
+                  maxlength={MAX_LENGTH.long}
+                  rows="5"
+                ></textarea>
+                <p class="small muted" id={`${id}-voice`}>
+                  {t.voiceHint}
+                </p>
+              </>
+            )}
+            <p class="error q__err" id={`${id}-error`} hidden></p>
+          </div>
+        )}
+      </div>
+    );
+  })}
+
+  <div class="screen" data-screen>
+    <h2 tabindex="-1">{t.contactTitle}</h2>
+    <p>{t.contactIntro(magnet.deliverableName)}</p>
+    {contactFields.map((field) => {
+      const id = `magnet-${field.name}`;
+      const help = "help" in field ? field.help : undefined;
+      return (
+        <div class="plain__field" data-field={field.name}>
+          <label class="plain__label" for={id}>
+            {field.label}
+          </label>
+          <input
+            class="q__field"
+            id={id}
+            name={field.name}
+            type={field.type}
+            autocomplete={field.autocomplete}
+            required={field.required}
+            autocapitalize={field.name === FIELD.name ? undefined : "none"}
+            spellcheck={field.name === FIELD.name ? undefined : "false"}
+            aria-describedby={help ? `${id}-help` : undefined}
+          />
+          {help && (
+            <p class="small muted" id={`${id}-help`}>
+              {help}
+            </p>
+          )}
+          <p class="error q__err" id={`${id}-error`} hidden></p>
+        </div>
+      );
+    })}
+    <div class="plain__field" data-field={FIELD.consent}>
+      <label class="consent">
+        <input name={FIELD.consent} type="checkbox" value="on" required autocomplete="off" />
+        <span>{t.consent}</span>
+      </label>
+      <p class="small muted">
+        <a class="more" href={t.privacyHref}>
+          {t.privacyLink}
+        </a>
+      </p>
+      <p class="error q__err" id={`magnet-${FIELD.consent}-error`} hidden></p>
+    </div>
+  </div>
+
+  <div class="apply__trap" aria-hidden="true">
+    <label for="magnet-website">{t.trap}</label>
+    <input id="magnet-website" name={FIELD.trap} type="text" tabindex="-1" autocomplete="off" />
+  </div>
+  {[FIELD.timeZone, FIELD.page, FIELD.utm, FIELD.replyRail, FIELD.sentAt].map((name) => (
+    <input type="hidden" name={name} value="" />
+  ))}
+
+  <p class="error q__err" data-form-error role="alert" aria-atomic="true"></p>
+  <div class="actions" data-actions>
+    <button class="btn btn--parts btn--back" data-back type="button" hidden>
+      {t.back}
+    </button>
+    <button class="btn btn--parts" data-next type="button" hidden>
+      {t.next}
+    </button>
+    <button class="btn btn--parts" type="submit">
+      {t.send}
+    </button>
+  </div>
+  <p class="small muted saved" data-saved role="status"></p>
+</form>
+
+<script>
+  import { FIELD, LINK_CODE, type SubmitResult } from "../lib/magnet/contract";
+  import { FIELD_ERROR, FORM_TEXT, SUBMIT_ERROR } from "../lib/magnet/text";
+
+  const form = document.querySelector<HTMLFormElement>("#magnet-form")!;
+  const screens = Array.from(form.querySelectorAll<HTMLElement>("[data-screen]"));
+  const contact = screens.length - 1;
+  const progress = form.querySelector<HTMLElement>("[data-progress]")!;
+  const progressText = progress.querySelector("p")!;
+  const progressBar = progress.querySelector("progress")!;
+  const formError = form.querySelector<HTMLElement>("[data-form-error]")!;
+  const fieldAlert = form.querySelector<HTMLElement>("[data-field-alert]")!;
+  const actions = form.querySelector<HTMLElement>("[data-actions]")!;
+  const start = form.querySelector<HTMLButtonElement>("[data-start]")!;
+  const back = form.querySelector<HTMLButtonElement>("[data-back]")!;
+  const next = form.querySelector<HTMLButtonElement>("[data-next]")!;
+  const send = form.querySelector<HTMLButtonElement>("[type=submit]")!;
+  const saved = form.querySelector<HTMLElement>("[data-saved]")!;
+  const storageKey = `arcbuildr:magnet:${form.dataset.slug}`;
+  const motion = matchMedia("(prefers-reduced-motion: reduce)");
+  const formInput = (name: string) => form.elements.namedItem(name) as HTMLInputElement;
+
+  const fields = Array.from(form.querySelectorAll<HTMLElement>("[data-field]"), (element) => ({
+    name: element.dataset.field!,
+    screen: screens.indexOf(element.closest<HTMLElement>("[data-screen]")!),
+    inputs: Array.from(
+      element.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>("input, textarea"),
+    ),
+    error: element.querySelector<HTMLElement>(".error")!,
+  }));
+  type Field = (typeof fields)[number];
+
+  const params = new URLSearchParams(location.search);
+  const utm = new URLSearchParams();
+  for (const key of ["utm_source", "utm_medium", "utm_campaign", "utm_term", "utm_content"]) {
+    const value = params.get(key);
+    if (value) utm.set(key, value.slice(0, 100));
+  }
+  const src = params.get("src");
+  if (src && ["ig", "dm", "tt"].includes(src)) utm.set("src", src);
+  const rr = params.get("rr") ?? "";
+  formInput(FIELD.timeZone).value = Intl.DateTimeFormat().resolvedOptions().timeZone ?? "";
+  formInput(FIELD.page).value = location.href.split("#")[0]!;
+  formInput(FIELD.utm).value = utm.toString();
+  formInput(FIELD.replyRail).value = LINK_CODE.test(rr) ? rr : "";
+
+  const draftFields = fields.filter(({ name }) => name !== FIELD.consent);
+  function restoreDraft() {
+    try {
+      const stored = localStorage.getItem(storageKey);
+      if (!stored) return;
+      const draft = JSON.parse(stored) as Record<string, unknown> | null;
+      for (const { name, inputs } of draftFields) {
+        const value = draft?.[name];
+        if (typeof value !== "string") continue;
+        for (const input of inputs) {
+          if (input instanceof HTMLInputElement && input.type === "radio") {
+            input.checked = input.value === value;
+          } else {
+            input.value = value;
+          }
+        }
+      }
+      if (draft) saved.textContent = FORM_TEXT.saved;
+    } catch {
+      // Storage may be blocked or a saved draft may be unreadable.
+    }
+  }
+
+  function saveDraft() {
+    try {
+      const data = new FormData(form);
+      const draft = Object.fromEntries(draftFields.map(({ name }) => [name, data.get(name)]));
+      localStorage.setItem(storageKey, JSON.stringify(draft));
+      if (!saved.textContent) saved.textContent = FORM_TEXT.saved;
+    } catch {
+      // The form still works if storage is blocked or full.
+    }
+  }
+
+  function showFieldError({ inputs, error }: Field, message: string) {
+    error.textContent = message;
+    error.hidden = !message;
+    for (const input of inputs) {
+      if (message) input.setAttribute("aria-invalid", "true");
+      else input.removeAttribute("aria-invalid");
+      const ids = new Set(input.getAttribute("aria-describedby")?.split(/\s+/).filter(Boolean));
+      if (message) ids.add(error.id);
+      else ids.delete(error.id);
+      if (ids.size) input.setAttribute("aria-describedby", [...ids].join(" "));
+      else input.removeAttribute("aria-describedby");
+    }
+  }
+
+  let current = 0;
+
+  function focusStep(target: HTMLElement) {
+    target.focus({ preventScroll: true });
+    target.scrollIntoView({ block: "nearest", behavior: motion.matches ? "instant" : "smooth" });
+  }
+
+  function showScreen(index: number, target?: HTMLElement) {
+    current = index;
+    screens.forEach((screen, i) => (screen.hidden = i !== index));
+    progress.hidden = actions.hidden = index === 0;
+    back.hidden = index === 0;
+    next.hidden = index === contact;
+    send.hidden = index !== contact;
+    if (index > 0) {
+      const question = Math.min(index, progressBar.max);
+      progressText.textContent = FORM_TEXT.progress(question, progressBar.max);
+      progressBar.value = question;
+    }
+    if (target) focusStep(target);
+    else {
+      const focus =
+        screens[index]!.querySelector<HTMLElement>("h2, input:checked") ??
+        screens[index]!.querySelector<HTMLElement>("input, textarea, button")!;
+      focusStep(focus);
+    }
+  }
+
+  function validationMessage({ name, inputs }: Field, data: FormData) {
+    const value = (data.get(name)?.toString() ?? "").trim();
+    switch (name) {
+      case FIELD.name:
+        return value ? "" : FIELD_ERROR.name;
+      case FIELD.email:
+        return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(value) ? "" : FIELD_ERROR.email;
+      case FIELD.instagram:
+        return value ? "" : FIELD_ERROR.instagram;
+      case FIELD.consent:
+        return value ? "" : FIELD_ERROR.consent;
+      default:
+        if (value || !inputs.some((input) => input.required)) return "";
+        return inputs[0] instanceof HTMLInputElement && inputs[0].type === "radio"
+          ? FIELD_ERROR.choice
+          : FIELD_ERROR.answer;
+    }
+  }
+
+  function validateScreen() {
+    const data = new FormData(form);
+    let first: Field | undefined;
+    for (const field of fields) {
+      if (field.screen !== current) continue;
+      const message = validationMessage(field, data);
+      showFieldError(field, message);
+      if (message) first ??= field;
+    }
+    if (!first) return true;
+    fieldAlert.textContent = first.error.textContent;
+    focusStep(first.inputs[0]!);
+    return false;
+  }
+
+  function advance() {
+    if (validateScreen()) showScreen(current + 1);
+  }
+
+  form.addEventListener("input", (event) => {
+    const field = fields.find(({ inputs }) => inputs.some((input) => input === event.target));
+    if (!field) return;
+    showFieldError(field, "");
+    fieldAlert.textContent = "";
+    if (field.name !== FIELD.consent) saveDraft();
+  });
+  start.addEventListener("click", () => showScreen(1));
+  back.addEventListener("click", () => showScreen(current - 1));
+  next.addEventListener("click", advance);
+  form.addEventListener("keydown", (event) => {
+    if (
+      event.key === "Enter" &&
+      !event.isComposing &&
+      current > 0 &&
+      current < contact &&
+      event.target instanceof HTMLInputElement &&
+      event.target.type === "text"
+    ) {
+      event.preventDefault();
+      advance();
+    }
+  });
+
+  form.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    if (current !== contact || send.disabled) return;
+    formError.textContent = "";
+    if (!validateScreen()) return;
+
+    formInput(FIELD.sentAt).value = new Date().toISOString();
+    send.disabled = back.disabled = true;
+    send.textContent = FORM_TEXT.sending;
+    let sent = false;
+    try {
+      const response = await fetch(form.action, {
+        method: "POST",
+        body: new FormData(form),
+        headers: { Accept: "application/json" },
+      });
+      const result = (await response.json()) as SubmitResult;
+      if (result.ok === true && typeof result.url === "string") {
+        try {
+          localStorage.removeItem(storageKey);
+        } catch {
+          // Storage could be blocked in this browser.
+        }
+        location.assign(result.url);
+        sent = true;
+      } else if (result.ok === false) {
+        let first: Field | undefined;
+        for (const field of fields) {
+          const message = result.errors?.[field.name];
+          if (typeof message !== "string" || !message) continue;
+          showFieldError(field, message);
+          first ??= field;
+        }
+        formError.textContent = result.error || SUBMIT_ERROR.check;
+        if (first) showScreen(first.screen, first.inputs[0]);
+      } else {
+        formError.textContent = SUBMIT_ERROR.failure;
+      }
+    } catch {
+      formError.textContent = SUBMIT_ERROR.failure;
+    } finally {
+      if (!sent) {
+        send.disabled = back.disabled = false;
+        send.textContent = FORM_TEXT.send;
+      }
+    }
+  });
+
+  restoreDraft();
+  formInput(FIELD.consent).checked = false;
+  form.noValidate = true;
+  screens.forEach((screen, i) => (screen.hidden = i !== 0));
+  actions.hidden = true;
+</script>
+
+<style>
+  .magnet-form {
+    /* The shared application fields read these from their form. */
+    --f-ink: var(--color-ink);
+    --f-muted: var(--color-ink-muted);
+    --f-radius-in: var(--radius-md);
+    --f-inout: var(--ease-move);
+    min-width: 0;
+  }
+  [data-form-error]:empty,
+  .saved:empty {
+    position: absolute;
+  }
+  .screen {
+    display: grid;
+    gap: 0.875rem;
+  }
+  .plain__field {
+    min-width: 0;
+  }
+  fieldset > :not(legend) + * {
+    margin-top: 0.375rem;
+  }
+  legend {
+    padding: 0;
+  }
+  textarea {
+    resize: vertical;
+  }
+  .q__field:not(:focus) {
+    border-color: var(--color-taupe);
+  }
+  .q__field::placeholder {
+    opacity: 1;
+  }
+  .q__field:focus-visible {
+    outline: 3px solid var(--color-focus);
+    outline-offset: 3px;
+  }
+  .q__field[aria-invalid="true"] {
+    border-color: var(--color-error);
+    box-shadow: 0 0 0 3px color-mix(in oklch, var(--color-error) 14%, transparent);
+  }
+  .choice__options,
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 0.625rem;
+  }
+  .actions {
+    justify-content: space-between;
+  }
+  .actions button:last-child {
+    margin-inline-start: auto;
+  }
+  .btn--back {
+    background: var(--color-paper);
+    color: var(--color-ink);
+    box-shadow: none;
+  }
+  .btn--back:hover {
+    background: var(--color-paper-2);
+  }
+  .btn:disabled {
+    background: var(--color-ink-muted);
+    color: var(--color-on-accent);
+    box-shadow: none;
+    transform: none;
+    cursor: not-allowed;
+  }
+  .choice,
+  .consent {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.625rem;
+    min-height: 2.75rem;
+    cursor: pointer;
+  }
+  .choice {
+    min-width: 0;
+    max-width: 100%;
+    padding: 0.5rem 1.125rem;
+    border: 1px solid var(--color-taupe);
+    border-radius: var(--radius-pill);
+    background: var(--color-field);
+    font-weight: 600;
+  }
+  .choice:has(:checked) {
+    border-color: var(--color-ink);
+    background: color-mix(in oklch, var(--color-accent) 16%, var(--color-card));
+  }
+  .choice:has([aria-invalid="true"]) {
+    border-color: var(--color-error);
+  }
+  .choice input,
+  .consent input {
+    flex: none;
+    width: 1.25rem;
+    height: 1.25rem;
+    margin: 0;
+    accent-color: var(--color-ink);
+    cursor: pointer;
+  }
+  progress {
+    display: block;
+    width: 100%;
+    height: 0.5rem;
+    margin-top: 0.375rem;
+    accent-color: var(--color-accent-text);
+  }
+</style>

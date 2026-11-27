@@ -1,6 +1,8 @@
 import type { APIRoute } from "astro";
+import { visibleMagnets } from "../magnets/registry";
 
-const paths = ["/", "/privacy"];
+// Result pages such as /plan are noindex and stay out. Draft magnets stay out too.
+const paths = ["/", "/privacy", ...visibleMagnets(false).map(({ slug }) => `/m/${slug}`)];
 
 export const GET: APIRoute = async ({ site }) => {
   return new Response(

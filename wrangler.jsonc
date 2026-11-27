@@ -13,4 +13,23 @@
   "workers_dev": true,
   "preview_urls": true,
   "observability": { "enabled": true },
+  // Magnet engine (MAGNET-PLAN.md). The tables were created from migrations/ on 2026-11-27.
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "arcbuildr-magnets",
+      "database_id": "837356bb-4f91-450c-a619-a4277ad6d2ba",
+      "migrations_dir": "migrations",
+    },
+  ],
+  "queues": {
+    "producers": [{ "binding": "MAGNET_QUEUE", "queue": "arcbuildr-magnets" }],
+    // One lead per run: a lead uses about 15 database queries and a Free plan run has 50.
+    "consumers": [
+      { "queue": "arcbuildr-magnets", "max_batch_size": 1, "max_concurrency": 1, "max_retries": 5 },
+    ],
+  },
+  "triggers": { "crons": ["0 * * * *"] },
+  // Sender of the emails to leads. arcbuildr.co is verified in Resend; replies to hello@ are forwarded by Email Routing.
+  "vars": { "MAIL_FROM": "Zyade from Arcbuildr <hello@arcbuildr.co>" },
 }

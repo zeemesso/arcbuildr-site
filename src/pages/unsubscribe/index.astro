@@ -1,0 +1,74 @@
+---
+import "../../styles/tokens.css";
+import "../../styles/base.css";
+import "../../styles/look.css";
+import "../../styles/sections.css";
+import Head from "../../layouts/Head.astro";
+import { UNSUBSCRIBE_TEXT as t } from "../../lib/magnet/text";
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta name="referrer" content="no-referrer" />
+    <Head title={t.title} description={t.body} noindex />
+  </head>
+  <body>
+    <main class="doc stop">
+      <h1>{t.title}</h1>
+      <p class="muted" id="stop-status" role="status">
+        {t.body}
+      </p>
+      <button class="btn btn--parts" id="stop-button" type="button">
+        {t.button}
+      </button>
+    </main>
+  </body>
+</html>
+
+<script>
+  import { TOKEN, unsubscribeApiPath } from "../../lib/magnet/contract";
+  import { UNSUBSCRIBE_TEXT } from "../../lib/magnet/text";
+
+  // The code rides in the fragment, like the result link. Nothing happens until the click:
+  // mail scanners open links, and a scanner must not unsubscribe anyone.
+  const status = document.getElementById("stop-status")!;
+  const button = document.getElementById("stop-button") as HTMLButtonElement;
+  const code = location.hash.slice(1);
+
+  if (!TOKEN.test(code)) {
+    status.textContent = UNSUBSCRIBE_TEXT.badLink;
+    button.hidden = true;
+  }
+
+  button.addEventListener("click", async () => {
+    button.disabled = true;
+    button.textContent = UNSUBSCRIBE_TEXT.working;
+    try {
+      const response = await fetch(unsubscribeApiPath(code), {
+        method: "POST",
+        headers: { Accept: "application/json" },
+      });
+      const result = (await response.json()) as { ok?: boolean };
+      if (!response.ok || result.ok !== true) throw new Error("not stopped");
+      status.textContent = UNSUBSCRIBE_TEXT.done;
+      button.hidden = true;
+    } catch {
+      status.textContent = UNSUBSCRIBE_TEXT.failure;
+      button.disabled = false;
+      button.textContent = UNSUBSCRIBE_TEXT.button;
+    }
+  });
+</script>
+
+<style>
+  .stop {
+    padding-bottom: 3rem;
+  }
+  .btn:disabled {
+    background: var(--color-ink-muted);
+    box-shadow: none;
+    transform: none;
+    cursor: not-allowed;
+  }
+</style>

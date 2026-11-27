@@ -225,7 +225,21 @@ Unchanged from draft 1.
 
 ## Privacy (`/privacy`)
 
-Unchanged. It still needs a legal check before launch.
+Unchanged, except for the magnet engine additions below (2026-11-27). It still needs a legal check before launch.
+
+**New section, after "Why we collect it":** When you ask for a free resource
+
+- Some pages offer a resource written for you, such as a plan. There you type longer answers about your business, with your name, email, Instagram handle and, if you want, your phone number.
+- An AI model reads your answers and writes the resource from them. We use Claude, made by Anthropic. It gets your first name, your Instagram handle and your answers. It does not get your email or your phone number.
+- We read your answers too, and we may write to you on Instagram about what you sent.
+- We email you the link to your page, then a few short lessons. Every email has a link that stops them.
+- Your page has a private link. Anyone who has the link can read the page, so keep it to yourself.
+
+**"Who else sees it", two more lines:** Cloudflare also stores your answers and your page when you ask for a free resource. Anthropic (Claude) reads those answers and writes the resource.
+
+**"How long we keep it":** deletion also covers our database.
+
+[ASSUMED] The wording of these additions. Zyade and the legal check confirm it.
 
 ---
 
