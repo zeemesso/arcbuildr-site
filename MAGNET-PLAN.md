@@ -11,7 +11,7 @@ Zyade approved on 2026-11-27: the design, AI processing of lead answers, Sonnet 
 - This repo is public on GitHub. The Arcbuildr method, each magnet's outline and the setter rules stay out of it. They live in the database as a private brief, pushed from a local folder.
 - Cloudflare Free covers the engine (docs read 2026-11-27, REPORTED): D1 at 5 million row reads and 100,000 writes a day; Queues at 10,000 operations a day, 15 minutes wall time per consumer run; time spent waiting on a network call is not CPU time.
 - Not confirmed: the CPU limit for a queue consumer on the Free plan. The first run on a preview deploy settles it.
-- `wrangler` is not logged in on this Mac. Deploys run from Cloudflare's git integration, so the D1 database and the queue have to exist before a branch with their bindings is pushed. Until then the bindings live in `wrangler.magnet-local.jsonc` only.
+- `wrangler` is not logged in on this Mac. Deploys run from Cloudflare's git integration. The D1 database and the queue were created in the dashboard on 2026-11-27, and their bindings are in `wrangler.jsonc`.
 - e2e tests run against `astro preview`, which has no Worker. API calls are mocked in the browser, as `e2e/form.spec.ts` does.
 
 ## Architecture
@@ -69,9 +69,9 @@ The Claude API key for step 4 goes in `.dev.vars` (git-ignored) as `ANTHROPIC_AP
 
 VERIFIED on 2026-11-27 without an API key: form post, row in D1, queue run, lead held with "no brief", brief pushed, hourly run queues the lead again, lead held with "no ANTHROPIC_API_KEY", result API answers "taking longer".
 
-## Production wiring (task 10, not done)
+## Production wiring (task 10)
 
-Needs a D1 database and a queue on the Cloudflare account first. Then these blocks move from `wrangler.magnet-local.jsonc` into `wrangler.jsonc`, with the real `database_id`:
+Done on 2026-11-27: the D1 database `arcbuildr-magnets` and the queue `arcbuildr-magnets` exist on the Cloudflare account, and both migrations were run in the dashboard console and recorded in `d1_migrations`. `wrangler.jsonc` has these blocks:
 
 ```jsonc
 "d1_databases": [
@@ -86,7 +86,11 @@ Needs a D1 database and a queue on the Cloudflare account first. Then these bloc
 
 `max_batch_size: 1` is required: one lead uses about 15 database queries, and a Free plan run has 50.
 
-Migrations: `wrangler d1 migrations apply arcbuildr-magnets --remote`.
+The queue consumer and the hourly run start with the first production deploy of this branch. A preview version gets the database and can put jobs on the queue, but the deployed Worker is the one that reads them.
+
+Later migrations: `wrangler d1 migrations apply arcbuildr-magnets --remote` (needs `wrangler login`), or the dashboard console with a row added to `d1_migrations`.
+
+Still open: the settings below.
 
 Settings on the Worker:
 
@@ -114,7 +118,7 @@ Settings on the Worker:
 7. Done in `~/replyrail/scaffold`, not deployed. **ReplyRail link.** `/r/<code>` adds `rr=<code>` for hosts in `MAGNET_HOSTS`; `GET /api/link/lookup?code=` with `LINK_LOOKUP_SECRET` returns the account. The engine uses it for the setter alert only. The form is not prefilled.
 8. Done. **Follow-up.** Link email, lesson emails, hourly cron, daily digest.
 9. Done. **Magnet tool.** `scripts/magnet.mjs`.
-10. Open. **Wiring.** Cloudflare resources, secrets, privacy text. See "Waiting on Zyade".
+10. Partly done. **Wiring.** Database, queue, config and privacy text are done. Secrets and the sender address are open. See "Waiting on Zyade".
 
 ## Changed from the first plan
 
@@ -137,7 +141,7 @@ Every call's real cost is saved on the lead row and counted in the daily total. 
 ## Waiting on Zyade
 
 1. Claude API key in a new Console workspace with a monthly limit. Into `.dev.vars` for local runs, and as the Worker secret `ANTHROPIC_API_KEY`. 5 min.
-2. D1 database and queue on the Cloudflare account. 10 min, or Claude does it in Chrome.
+2. Done 2026-11-27: D1 database and queue on the Cloudflare account.
 3. DNS records for a Resend sending domain, then `MAIL_FROM`. 10 min.
 4. ReplyRail: deploy, set `MAGNET_HOSTS` and `LINK_LOOKUP_SECRET`, live test from a second Instagram account. 15 min.
 5. Legal check of the privacy text and of the emails (consent line, sender address) before the first live magnet.
