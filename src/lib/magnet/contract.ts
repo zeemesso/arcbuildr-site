@@ -37,7 +37,7 @@ export type SubmitResult =
   { ok: true; url: string } | { ok: false; error: string; errors?: Record<string, string> };
 
 /** A ReplyRail link code as it arrives in ?rr=. Anything else is dropped. */
-export const LINK_CODE = /^[A-Za-z0-9_-]{6,64}$/;
+export const LINK_CODE = /^[A-Za-z0-9_-]{8,64}$/;
 
 /**
  * What the result page gets when it asks for a plan.

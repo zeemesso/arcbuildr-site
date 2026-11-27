@@ -2,6 +2,7 @@ import type { Env, MagnetJob } from "./lib/env";
 import { handleLead } from "./lib/lead";
 import { handleSubmit } from "./lib/magnet/intake";
 import { runLead } from "./lib/magnet/job";
+import { handlePlan } from "./lib/magnet/plan";
 import { shortLinkRedirect } from "./lib/shortlinks";
 
 /** Same answer for every unknown /api request, so nothing leaks. */
@@ -19,6 +20,8 @@ export default {
     const short = shortLinkRedirect(url);
     if (short) return short;
     if (pathname === "/api/lead" && request.method === "POST") return handleLead(request, env);
+    const plan = /^\/api\/magnet\/plan\/([^/]{1,64})$/.exec(pathname);
+    if (plan && request.method === "GET") return handlePlan(env, plan[1]!);
     const magnet = /^\/api\/magnet\/([a-z0-9-]{1,64})$/.exec(pathname);
     if (magnet && request.method === "POST") return handleSubmit(request, env, magnet[1]!);
     if (pathname.startsWith("/api/")) return notFound();
