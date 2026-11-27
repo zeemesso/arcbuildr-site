@@ -16,6 +16,7 @@ import {
   PLAN_TEXT,
   SUBMIT_ERROR,
   UNSUBSCRIBE_TEXT,
+  splitMessage,
 } from "../src/lib/magnet/text";
 import { testSample } from "../src/magnets/test-sample";
 
@@ -81,7 +82,7 @@ test("walks the draft, validates each step, and submits the contract fields", as
   const bodies = await mockSubmit(page, [{ ok: true, url: RESULT }]);
   // The result route is covered separately; keep this mock scoped to the submission.
   await page.route(`**${PLAN_API_PATH}`, (route) =>
-    route.fulfill({ json: { status: "working" } satisfies PlanState }),
+    route.fulfill({ json: { status: "working", step: "queued", wait: null } satisfies PlanState }),
   );
   await page.goto(`${MAGNET}?rr=abc12345&utm_source=insta&src=dm#intro`);
   await expect(page.getByRole("heading", { level: 1 })).toHaveText(testSample.title);
@@ -272,7 +273,9 @@ test("a bad fragment shows the bad-link message without an API call", async ({ p
     return route.abort();
   });
   await page.goto("/plan/#bad");
-  await expect(page.getByRole("heading", { level: 1 })).toHaveText(PLAN_TEXT.badLink);
+  const badLink = splitMessage(PLAN_TEXT.badLink);
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText(badLink.heading);
+  await expect(page.getByText(badLink.body)).toBeVisible();
   await expect(page.locator('meta[name="referrer"]')).toHaveAttribute("content", "no-referrer");
   expect(requests).toEqual([]);
 });
@@ -281,7 +284,7 @@ test("a working plan polls through a failed request, then renders the plan and C
   page,
 }) => {
   let polls = 0;
-  let plan: PlanState = { status: "working" };
+  let plan: PlanState = { status: "working", step: "queued", wait: null };
   await page.clock.install();
   await page.route("**/api/magnet/**", (route) => {
     const request = route.request();
@@ -331,7 +334,9 @@ test("an unavailable plan shows the server's message", async ({ page }) => {
     }),
   );
   await page.goto(RESULT);
-  await expect(page.getByRole("heading", { level: 1 })).toHaveText(PLAN_TEXT.held);
+  const held = splitMessage(PLAN_TEXT.held);
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText(held.heading);
+  await expect(page.getByText(held.body)).toBeVisible();
   await expect(page.getByRole("article")).toBeHidden();
   await expect(page.getByRole("link", { name: PLAN_TEXT.ctaButton })).toBeHidden();
 });

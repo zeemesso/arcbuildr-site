@@ -3,8 +3,10 @@ import type { Env } from "../src/lib/env";
 import { PLAN_API_PATH } from "../src/lib/magnet/contract";
 import { handlePlan } from "../src/lib/magnet/plan";
 import { escapeHtml, renderMarkdown } from "../src/lib/magnet/render";
-import { claimLead, finishLead, insertLead, type Sql } from "../src/lib/magnet/store";
-import { PLAN_TEXT } from "../src/lib/magnet/text";
+import { claimLead, finishLead, insertLead, saveScreen, type Sql } from "../src/lib/magnet/store";
+import { PLAN_TEXT, splitMessage } from "../src/lib/magnet/text";
+import * as registry from "../src/magnets/registry";
+import { testSample } from "../src/magnets/test-sample";
 import worker from "../src/worker";
 import { magnetEnv, submit, validForm } from "./helpers/magnet-fixtures";
 
@@ -19,6 +21,24 @@ const planRequest = (authorization?: string) =>
   new Request(`https://x.test${PLAN_API_PATH}`, {
     headers: authorization ? { Authorization: authorization } : {},
   });
+
+describe("splitMessage", () => {
+  it("makes the first sentence of each plan message the headline", () => {
+    for (const message of [PLAN_TEXT.badLink, PLAN_TEXT.rejected, PLAN_TEXT.held]) {
+      const { heading, body } = splitMessage(message);
+      expect(heading.endsWith(".")).toBe(true);
+      expect(body).not.toBe("");
+      expect(`${heading} ${body}`).toBe(message);
+    }
+  });
+
+  it("keeps a one-sentence message whole", () => {
+    expect(splitMessage("This link doesn't open anything.")).toEqual({
+      heading: "This link doesn't open anything.",
+      body: "",
+    });
+  });
+});
 
 describe("renderMarkdown", () => {
   it("renders the supported marks", () => {
@@ -114,10 +134,28 @@ describe("handlePlan", () => {
     return { status: res.status, body: await res.json(), cache: res.headers.get("cache-control") };
   };
 
-  it("says working while the lead is queued or running", async () => {
-    expect(await state()).toEqual({ status: 200, body: { status: "working" }, cache: "no-store" });
+  it("reports the saved job step through claim, screening and a queued retry", async () => {
+    const working = { status: "working", step: "queued", wait: null };
+    expect(await state()).toEqual({ status: 200, body: working, cache: "no-store" });
     await claimLead(db, { id: "lead-1", ...queued }, now);
-    expect((await state()).body).toEqual({ status: "working" });
+    expect((await state()).body).toEqual({ ...working, step: "reading" });
+    await saveScreen(db, "lead-1", 1, { score: 3, reason: "TEST", setterNote: "TEST" });
+    expect((await state()).body).toEqual({ ...working, step: "writing" });
+    await finishLead(db, "lead-1", { status: "running", attempts: 1 }, { status: "queued" }, now);
+    expect((await state()).body).toEqual(working);
+  });
+
+  it("includes the public video for this magnet", async () => {
+    const wait = { title: "TEST video", src: "/wait.mp4", poster: "/poster.jpg" };
+    const magnet = vi
+      .spyOn(registry, "getMagnet")
+      .mockReturnValue({ ...testSample, waitVideo: wait });
+    try {
+      expect((await state()).body).toEqual({ status: "working", step: "queued", wait });
+      expect(magnet).toHaveBeenCalledWith(lead.magnet);
+    } finally {
+      magnet.mockRestore();
+    }
   });
 
   it("returns the rendered deliverable when it is done, and nothing else about the lead", async () => {
@@ -140,7 +178,11 @@ describe("handlePlan", () => {
 
   it("gives a plain message for a rejected, held or failed lead", async () => {
     await finishLead(db, "lead-1", queued, { status: "rejected", error: "Gibberish." }, now);
-    expect((await state()).body).toEqual({ status: "unavailable", message: PLAN_TEXT.rejected });
+    expect((await state()).body).toEqual({
+      status: "unavailable",
+      message:
+        "We read your answers and did not write anything. We only write when the answers give us enough to work with. Think we got it wrong? DM us at @arcbuildr.",
+    });
     await db.prepare("UPDATE magnet_leads SET status = 'held' WHERE id = 'lead-1'").run();
     expect((await state()).body).toEqual({ status: "unavailable", message: PLAN_TEXT.held });
     await db.prepare("UPDATE magnet_leads SET status = 'failed' WHERE id = 'lead-1'").run();
@@ -160,7 +202,22 @@ describe("handlePlan", () => {
 
   it("keeps the page waiting when the database is missing", async () => {
     env = magnetEnv({ DB: undefined }).env;
-    expect(await state()).toMatchObject({ status: 503, body: { status: "working" } });
+    expect(await state()).toEqual({
+      status: 503,
+      body: { status: "working", step: "queued", wait: null },
+      cache: "no-store",
+    });
+  });
+
+  it("keeps the page waiting when the lookup fails", async () => {
+    vi.spyOn(db, "prepare").mockImplementationOnce(() => {
+      throw new Error("lookup failed");
+    });
+    expect(await state()).toEqual({
+      status: 503,
+      body: { status: "working", step: "queued", wait: null },
+      cache: "no-store",
+    });
   });
 
   it("TEST requires the Bearer header even when the token is in the query", async () => {
@@ -185,7 +242,7 @@ describe("worker routes", () => {
     const { url } = (await posted.json()) as { url: string };
     const token = url.split("#")[1]!;
     const plan = await worker.fetch(planRequest(`Bearer ${token}`) as never, env, ctx);
-    expect(await plan.json()).toEqual({ status: "working" });
+    expect(await plan.json()).toEqual({ status: "working", step: "queued", wait: null });
     const old = await worker.fetch(
       new Request(`https://x.test${PLAN_API_PATH}/${token}`) as never,
       env,

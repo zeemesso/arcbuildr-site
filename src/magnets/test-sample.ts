@@ -11,6 +11,7 @@ export const testSample: MagnetDefinition = {
   intro: "Answer a few questions. The engine writes a short plan from what you typed.",
   minutes: 2,
   heroVideo: null,
+  waitVideo: null,
   lessons: [],
   questions: [
     {

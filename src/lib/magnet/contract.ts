@@ -1,5 +1,6 @@
 // What the magnet form posts and what the Worker answers. The page script, the Worker and
 // the tests all read this file, so the two sides cannot drift apart.
+import type { WaitVideo } from "../../magnets/types";
 
 /** Fixed form field names. Answers to a magnet's questions use answerField(id). */
 export const FIELD = {
@@ -42,11 +43,13 @@ export type SubmitResult =
 /** A ReplyRail link code as it arrives in ?rr=. Anything else is dropped. */
 export const LINK_CODE = /^[A-Za-z0-9_-]{8,64}$/;
 
+export type WorkingStep = "queued" | "reading" | "writing";
+
 /**
  * What the result page gets when it asks for a plan.
  * `html` is built by the Worker from escaped text only; the page may insert it as is.
  */
 export type PlanState =
-  | { status: "working" }
+  | { status: "working"; step: WorkingStep; wait: WaitVideo | null }
   | { status: "ready"; title: string; name: string; html: string }
   | { status: "unavailable"; message: string };

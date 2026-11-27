@@ -17,6 +17,26 @@ const live = (over: Partial<MagnetDefinition> = {}): MagnetDefinition => ({
 });
 
 describe("checkDefinition", () => {
+  it("accepts a magnet with no waiting video or with a root-relative or HTTPS source", () => {
+    expect(checkDefinition(live({ waitVideo: null }))).toEqual([]);
+    for (const src of ["/wait.mp4", "https://example.test/wait.mp4"])
+      expect(checkDefinition(live({ waitVideo: { title: "Watch", src } }))).toEqual([]);
+  });
+
+  it.each([
+    "javascript:alert(1)",
+    "http://example.test/v",
+    "//example.test/v",
+    "/\\example.test/v",
+    "/\n/example.test/v",
+    "wait.mp4",
+  ])("checks the waiting video title and rejects the source %j", (src) => {
+    expect(checkDefinition(live({ waitVideo: { title: "  ", src } }))).toEqual([
+      "test-sample: waitVideo.title is empty",
+      "test-sample: waitVideo.src must be a root-relative path or HTTPS URL",
+    ]);
+  });
+
   it("accepts every magnet in the registry", () => {
     for (const magnet of MAGNETS) expect(checkDefinition(magnet)).toEqual([]);
   });
@@ -85,6 +105,14 @@ describe("checkDefinition", () => {
 });
 
 describe("checkBrief", () => {
+  it("accepts an optional text screening rule and flags other types in stored JSON", () => {
+    expect(checkBrief({ ...testSampleBrief, screenRule: "Describe one example." })).toEqual([]);
+    for (const screenRule of [null, false, 42, ["example"]])
+      expect(checkBrief(JSON.parse(JSON.stringify({ ...testSampleBrief, screenRule })))).toContain(
+        "screenRule must be a string",
+      );
+  });
+
   it("accepts the fixture brief", () => {
     expect(checkBrief(testSampleBrief)).toEqual([]);
   });
@@ -105,6 +133,9 @@ describe("checkBrief", () => {
       followUp: { days: [1], guidance: "x".repeat(10_000) },
     };
     expect(checkBrief(brief)).toEqual([]);
+    expect(checkBrief({ ...brief, screenRule: "x" })).toContainEqual(
+      expect.stringContaining("at most 40,000 characters"),
+    );
     expect(checkBrief({ ...brief, knowledge: brief.knowledge + "x" })).toEqual([
       expect.stringContaining("at most 40,000 characters"),
     ]);

@@ -75,6 +75,7 @@ function loadBrief(slug) {
     knowledge: read(join(folder, "knowledge.md")).trim(),
     maxWords: settings.maxWords,
     hotRule: settings.hotRule,
+    screenRule: settings.screenRule,
     ...(settings.followUp ? { followUp: settings.followUp } : {}),
   };
 }
@@ -174,6 +175,7 @@ export const ${camel(slug)}: MagnetDefinition = {
   intro: "TODO: what they get and what it takes.",
   minutes: 10,
   heroVideo: null,
+  waitVideo: null,
   lessons: [],
   questions: [
     {
@@ -220,6 +222,7 @@ The reader never sees this text, and it never leaves this folder and the databas
 const BRIEF = {
   maxWords: 900,
   hotRule: "TODO: in plain words, when a lead counts as hot.",
+  screenRule: "",
   followUp: {
     days: [1, 3, 6],
     guidance: "TODO: one line per email, in order. What each one teaches.",

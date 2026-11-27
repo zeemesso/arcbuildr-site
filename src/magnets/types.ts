@@ -5,6 +5,15 @@
 
 export type Option = { value: string; label: string };
 
+export type WaitVideo = { src: string; poster?: string; title: string };
+
+/** A media URL must be an absolute HTTPS URL or a path on this site. */
+export function isMediaUrl(value: unknown): value is string {
+  if (typeof value !== "string" || /[\\\u0000-\u001f]/.test(value)) return false;
+  if (value.startsWith("/")) return !value.startsWith("//");
+  return /^https:\/\//i.test(value) && URL.canParse(value);
+}
+
 /** What an answer tells us. The writer model gets this next to each answer. */
 export type Role = "problem" | "circumstance" | "outcome" | "qualify";
 
@@ -42,6 +51,8 @@ export interface MagnetDefinition {
   minutes: number;
   /** Zyade on camera, 60 to 90 seconds. Required before a magnet goes live. */
   heroVideo: { src: string; poster?: string; caption?: string } | null;
+  /** Shown on the result page while the plan is being written. */
+  waitVideo: WaitVideo | null;
   /** Short lesson videos the follow-up emails point to. */
   lessons: { id: string; title: string; url: string }[];
   questions: MagnetQuestion[];
@@ -61,6 +72,8 @@ export interface MagnetBrief {
   maxWords: number;
   /** In plain words: when a lead counts as hot. The screen step scores against it. */
   hotRule: string;
+  /** In plain words: what answers must show before we write. Added to the screen step. */
+  screenRule?: string;
   /** The lesson emails sent after the deliverable. Leave out to send none. */
   followUp?: {
     /** Days after the deliverable, one per email, rising. Example: [1, 3, 6]. */
@@ -87,6 +100,11 @@ export function checkDefinition(def: MagnetDefinition): string[] {
   if (!Number.isInteger(def.minutes) || def.minutes < 1)
     say("minutes must be a whole number above 0");
   if (!KEYWORD.test(def.keyword)) say("keyword must be one lower-case word of 2 to 20 characters");
+  if (def.waitVideo !== null) {
+    if (!def.waitVideo?.title?.trim()) say("waitVideo.title is empty");
+    if (!isMediaUrl(def.waitVideo?.src))
+      say("waitVideo.src must be a root-relative path or HTTPS URL");
+  }
 
   const { questions } = def;
   if (questions.length < 3 || questions.length > 24) say("a magnet has 3 to 24 questions");
@@ -132,15 +150,18 @@ export function checkBrief(brief: MagnetBrief): string[] {
   if (!SLUG.test(brief.slug)) problems.push("slug must be lower-case words joined by dashes");
   if (!brief.outline.trim()) problems.push("outline is empty");
   if (!brief.hotRule.trim()) problems.push("hotRule is empty");
+  if (brief.screenRule !== undefined && typeof brief.screenRule !== "string")
+    problems.push("screenRule must be a string");
   const guidance = brief.followUp?.guidance;
   const characters =
     brief.outline.length +
     brief.knowledge.length +
     brief.hotRule.length +
+    (typeof brief.screenRule === "string" ? brief.screenRule.length : 0) +
     (typeof guidance === "string" ? guidance.length : 0);
   if (characters > 40_000)
     problems.push(
-      "outline, knowledge, hotRule and followUp.guidance must total at most 40,000 characters",
+      "outline, knowledge, hotRule, screenRule and followUp.guidance must total at most 40,000 characters",
     );
   if (!Number.isInteger(brief.maxWords) || brief.maxWords < 200 || brief.maxWords > 3000)
     problems.push("maxWords must be a whole number from 200 to 3000");

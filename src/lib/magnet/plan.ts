@@ -18,14 +18,14 @@ export async function handlePlan(request: Request, env: Env): Promise<Response> 
   if (!env.DB) {
     console.error("magnet: no DB binding");
     // "working" keeps the page asking, which is right for a fault on our side.
-    return answer({ status: "working" }, 503);
+    return answer({ status: "working", step: "queued", wait: null }, 503);
   }
   let lead;
   try {
     lead = await getLeadByToken(env.DB, token);
   } catch (err) {
     console.error("magnet: plan lookup failed", (err as Error).message);
-    return answer({ status: "working" }, 503);
+    return answer({ status: "working", step: "queued", wait: null }, 503);
   }
   if (!lead) return answer({ status: "unavailable", message: PLAN_TEXT.badLink }, 404);
 
@@ -42,7 +42,10 @@ export async function handlePlan(request: Request, env: Env): Promise<Response> 
     case "held":
     case "failed":
       return answer({ status: "unavailable", message: PLAN_TEXT.held });
-    default:
-      return answer({ status: "working" });
+    default: {
+      const step =
+        lead.status !== "running" ? "queued" : lead.score === null ? "reading" : "writing";
+      return answer({ status: "working", step, wait: getMagnet(lead.magnet)?.waitVideo ?? null });
+    }
   }
 }

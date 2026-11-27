@@ -15,12 +15,42 @@ import { PLAN_TEXT as t } from "../../lib/magnet/text";
   </head>
   <body>
     <main class="doc plan">
-      <header class="doc__block" aria-live="polite" aria-atomic="true">
-        <p class="small muted" id="plan-kicker" hidden></p>
+      <header class="doc__block" id="plan-header" aria-live="polite">
         <h1 id="plan-title">{t.workingTitle}</h1>
         <p class="muted" id="plan-status">
           {t.workingBody}
         </p>
+      </header>
+      <div class="card plan__progress" id="plan-progress" hidden>
+        <div class="plan__row">
+          <span class="plan__dot" aria-hidden="true"></span>
+          <span id="plan-step" aria-live="polite" aria-atomic="true"></span>
+          <span id="plan-percent" aria-hidden="true"></span>
+        </div>
+        <div
+          class="plan__track"
+          id="plan-track"
+          role="progressbar"
+          aria-labelledby="plan-step"
+          aria-valuemin="0"
+          aria-valuemax="100"
+        >
+          <div class="plan__fill" id="plan-fill"></div>
+        </div>
+      </div>
+      <section class="card" id="plan-video" aria-labelledby="video-title" hidden>
+        <h2 id="video-title"></h2>
+        <video controls playsinline preload="metadata" aria-labelledby="video-title"></video>
+      </section>
+      <p class="muted" id="plan-help">
+        {t.help}
+      </p>
+      <header class="doc__block" id="plan-result" hidden>
+        <p id="plan-ready-below" hidden>
+          {t.readyBelow}
+        </p>
+        <p class="small muted" id="plan-kicker"></p>
+        <h1 id="plan-result-title"></h1>
       </header>
       <article class="doc__block plan__article" id="plan-article" hidden></article>
       <section class="card" id="plan-cta" aria-labelledby="plan-cta-title" hidden>
@@ -35,21 +65,99 @@ import { PLAN_TEXT as t } from "../../lib/magnet/text";
 </html>
 
 <script>
-  import { PLAN_API_PATH, TOKEN, type PlanState } from "../../lib/magnet/contract";
-  import { PLAN_TEXT } from "../../lib/magnet/text";
+  import {
+    PLAN_API_PATH,
+    TOKEN,
+    type PlanState,
+    type WorkingStep,
+  } from "../../lib/magnet/contract";
+  import { progressPercent } from "../../lib/magnet/progress";
+  import { PLAN_TEXT, splitMessage } from "../../lib/magnet/text";
+  import { isMediaUrl, type WaitVideo } from "../../magnets/types";
 
-  const title = document.getElementById("plan-title")!;
+  const header = document.getElementById("plan-header")!;
   const status = document.getElementById("plan-status")!;
-  const kicker = document.getElementById("plan-kicker")!;
+  const progress = document.getElementById("plan-progress")!;
+  const track = document.getElementById("plan-track")!;
+  const fill = document.getElementById("plan-fill")!;
+  const stepLabel = document.getElementById("plan-step")!;
+  const percent = document.getElementById("plan-percent")!;
+  const videoBlock = document.getElementById("plan-video")!;
+  const video = videoBlock.querySelector("video")!;
+  const videoTitle = document.getElementById("video-title")!;
+  const motion = matchMedia("(prefers-reduced-motion: reduce)");
   const article = document.getElementById("plan-article")!;
   const cta = document.getElementById("plan-cta")!;
   const token = location.hash.slice(1);
   let tries = 0;
   let slowUntil = 0;
+  let step: WorkingStep | "ready" | undefined;
+  let creepTimer: number | undefined;
+  let started = false;
+  video.addEventListener("play", () => {
+    started = true;
+  });
 
-  function finish(heading: string) {
-    title.textContent = document.title = heading;
-    status.hidden = true;
+  function setPercent(value: number) {
+    const width = `${value}%`;
+    if (percent.textContent === width) return;
+    percent.textContent = width;
+    fill.style.width = width;
+    track.setAttribute("aria-valuenow", String(value));
+  }
+
+  function setLabel(label: string) {
+    if (stepLabel.textContent === label) return;
+    stepLabel.textContent = label;
+    track.setAttribute("aria-valuetext", label);
+  }
+
+  function showStep(next: WorkingStep | "ready") {
+    if (step === next) return;
+    step = next;
+    window.clearInterval(creepTimer);
+    progress.hidden = false;
+    progress.removeAttribute("data-creep");
+    setLabel(PLAN_TEXT.steps[next]);
+    setPercent(progressPercent(next));
+    if (next === "ready") {
+      progress.toggleAttribute("data-still", true);
+      return;
+    }
+    const entered = performance.now();
+    creepTimer = window.setInterval(() => {
+      if (motion.matches) return;
+      progress.toggleAttribute("data-creep", true);
+      setPercent(progressPercent(next, performance.now() - entered));
+    }, 2000);
+  }
+
+  function showVideo(wait: WaitVideo | null) {
+    if (!wait || !isMediaUrl(wait.src)) {
+      if (!video.paused) video.pause();
+      videoBlock.hidden = true;
+      return;
+    }
+    videoTitle.textContent = wait.title;
+    if (isMediaUrl(wait.poster)) video.setAttribute("poster", wait.poster);
+    else video.removeAttribute("poster");
+    if (video.getAttribute("src") !== wait.src) {
+      started = false;
+      video.src = wait.src;
+    }
+    videoBlock.hidden = false;
+  }
+
+  function unavailable(message: string) {
+    window.clearInterval(creepTimer);
+    progress.hidden = true;
+    showVideo(null);
+    document.getElementById("plan-help")!.hidden = true;
+    // A whole message in the headline is a wall of large text on a phone.
+    const { heading, body } = splitMessage(message);
+    document.getElementById("plan-title")!.textContent = document.title = heading;
+    status.textContent = body;
+    status.hidden = !body;
   }
 
   async function poll() {
@@ -64,17 +172,26 @@ import { PLAN_TEXT as t } from "../../lib/magnet/text";
       });
       const plan = (await response.json()) as PlanState;
       if (plan.status === "ready") {
-        finish(plan.title);
-        kicker.textContent = PLAN_TEXT.kicker(plan.name);
-        kicker.hidden = false;
+        showStep("ready");
+        header.hidden = true;
+        videoBlock.hidden = videoBlock.hidden || (!started && video.paused);
+        document.getElementById("plan-ready-below")!.hidden = videoBlock.hidden;
+        document.getElementById("plan-result-title")!.textContent = document.title = plan.title;
+        document.getElementById("plan-kicker")!.textContent = PLAN_TEXT.kicker(plan.name);
+        document.getElementById("plan-result")!.hidden = false;
         // The result endpoint builds this HTML from escaped text (PlanState contract).
         article.innerHTML = plan.html;
         article.hidden = cta.hidden = false;
         return;
       }
       if (plan.status === "unavailable") {
-        finish(plan.message);
+        unavailable(plan.message);
         return;
+      }
+      // A service fault carries no observation about the lead or its video.
+      if (response.ok && plan.status === "working") {
+        if (!slowUntil) showStep(plan.step);
+        showVideo(plan.wait);
       }
     } catch {
       // A failed request uses one attempt. The next poll may still succeed.
@@ -85,20 +202,76 @@ import { PLAN_TEXT as t } from "../../lib/magnet/text";
       return;
     }
     if (tries === 60) {
-      status.textContent = PLAN_TEXT.slow;
+      window.clearInterval(creepTimer);
+      setLabel(PLAN_TEXT.slow);
+      progress.toggleAttribute("data-still", true);
+      status.hidden = true;
       slowUntil = Date.now() + 10 * 60_000;
     }
     if (Date.now() + 15_000 <= slowUntil) setTimeout(poll, 15_000);
   }
 
-  if (TOKEN.test(token)) void poll();
-  else finish(PLAN_TEXT.badLink);
+  if (TOKEN.test(token)) {
+    // Keep the bar at its minimum until the first observation from the worker.
+    progress.hidden = false;
+    setPercent(progressPercent("queued"));
+    setLabel(PLAN_TEXT.steps.queued);
+    void poll();
+  } else unavailable(PLAN_TEXT.badLink);
 </script>
 
 <style>
   .plan {
+    grid-template-columns: minmax(0, 1fr);
     padding-bottom: 3rem;
     overflow-wrap: anywhere;
+  }
+  .plan__row {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 0.625rem;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
+  .plan__dot {
+    width: 0.625rem;
+    height: 0.625rem;
+    border-radius: var(--radius-pill);
+    background: var(--color-sage);
+  }
+  .plan__track,
+  .plan__fill {
+    height: 0.625rem;
+    border-radius: var(--radius-pill);
+  }
+  .plan__track {
+    overflow: hidden;
+    background: var(--color-rule);
+  }
+  .plan__fill {
+    background: var(--color-sage);
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .plan__progress:not([data-still]) .plan__dot {
+      animation: pulse 2s ease-in-out infinite alternate;
+    }
+    .plan__progress[data-creep] .plan__fill {
+      transition: width var(--dur-fast) var(--ease-out);
+    }
+  }
+  @keyframes pulse {
+    to {
+      opacity: 0.45;
+    }
+  }
+  video {
+    display: block;
+    width: 100%;
+    min-width: 0;
+    aspect-ratio: 16 / 9;
+    border-radius: var(--radius-md);
+    background: var(--color-ink);
   }
   .plan__article :global(ul),
   .plan__article :global(ol) {

@@ -45,8 +45,9 @@ const contactFields = [
   </div>
   <p class="vh" data-field-alert aria-live="polite" aria-atomic="true"></p>
 
-  <div class="screen" data-screen hidden>
-    <button class="btn btn--parts" data-start type="button">
+  <div class="screen" data-screen>
+    <p>{t.serious}</p>
+    <button class="btn btn--parts" data-start type="button" hidden>
       {t.start}
     </button>
   </div>
@@ -441,6 +442,7 @@ const contactFields = [
   formInput(FIELD.consent).checked = false;
   form.noValidate = true;
   screens.forEach((screen, i) => (screen.hidden = i !== 0));
+  start.hidden = false;
   actions.hidden = true;
 </script>
 

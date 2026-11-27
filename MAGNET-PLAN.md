@@ -45,8 +45,8 @@ Email rules: plain text through Resend, from `MAIL_FROM`. Without `MAIL_FROM` no
 
 ## One magnet = two halves
 
-1. Public, in the repo: `src/magnets/<slug>.ts`. Title, who it is for, questions, hero video, lesson videos, ReplyRail keyword, page meta. The visitor sees all of it anyway.
-2. Private, on Zyade's Mac: `~/arcbuildr-magnets/<slug>/` with `outline.md` (the sections of the deliverable), `knowledge.md` (method notes), `brief.json` (word cap, hot-lead rule, follow-up days and what each email teaches) and `fixtures/*.json` (test answers).
+1. Public, in the repo: `src/magnets/<slug>.ts`. Title, who it is for, questions, hero video, optional waiting-page video (`waitVideo`), lesson videos, ReplyRail keyword, page meta. The visitor sees all of it anyway.
+2. Private, on Zyade's Mac: `~/arcbuildr-magnets/<slug>/` with `outline.md` (the sections of the deliverable), `knowledge.md` (method notes), `brief.json` (word cap, hot-lead rule, optional `screenRule` describing what answers must show before writing, follow-up days and what each email teaches) and `fixtures/*.json` (test answers).
 
 Fixed for every magnet: page layout, form behaviour, contact fields (name, email, Instagram, optional phone), consent line, spend cap, emails' frame, alert format.
 

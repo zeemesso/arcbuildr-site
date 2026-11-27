@@ -3,6 +3,7 @@
 // A magnet's own words (title, questions) live in its definition, not here.
 
 export const FORM_TEXT = {
+  serious: "We read your answers before we write a word. Rushed or empty answers get nothing back.",
   start: "Start",
   next: "Next",
   back: "Back",
@@ -54,6 +55,14 @@ export const SUBMIT_ERROR = {
 } as const;
 
 export const PLAN_TEXT = {
+  steps: {
+    queued: "We got your answers.",
+    reading: "Reading your answers.",
+    writing: "Writing it for you.",
+    ready: "It's ready.",
+  },
+  help: "We also email you the link. Not there in ten minutes? Check spam and promotions, or DM us at @arcbuildr.",
+  readyBelow: "It's ready, right below the video.",
   workingTitle: "We're writing it now.",
   workingBody: "This takes about two minutes. Keep this page open.",
   slow: "This is taking longer than usual. You can close this page. We email you the link when it's ready.",
@@ -65,10 +74,18 @@ export const PLAN_TEXT = {
   badLink: "This link doesn't open anything. Use the link from your email, or DM us at @arcbuildr.",
   /** Shown when the answers could not be turned into a deliverable. */
   rejected:
-    "We couldn't write this from the answers we got. DM us at @arcbuildr and we'll sort it out.",
+    "We read your answers and did not write anything. We only write when the answers give us enough to work with. Think we got it wrong? DM us at @arcbuildr.",
   /** Shown when writing failed on our side or is waiting for us. */
   held: "We got your answers. Writing it is taking us longer than planned. We email you the link when it's ready.",
 } as const;
+
+/** A plan message on the page: its first sentence is the headline, the rest is body text. */
+export function splitMessage(message: string): { heading: string; body: string } {
+  const cut = message.indexOf(". ");
+  return cut === -1
+    ? { heading: message, body: "" }
+    : { heading: message.slice(0, cut + 1), body: message.slice(cut + 2) };
+}
 
 /** The fixed parts of every email to a lead. The lesson emails get their middle from the model. */
 export const EMAIL_TEXT = {
