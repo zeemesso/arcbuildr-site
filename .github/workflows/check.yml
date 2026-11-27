@@ -19,4 +19,6 @@ jobs:
         env:
           CI: "true"
           # A push checkout is detached, so name the branch the way Workers Builds does.
-          WORKERS_CI_BRANCH: ${{ github.ref_name }}
+          # On main the name is "ci-main": the browser tests need a preview build (the toolbar, the
+          # demo pages, the draft magnet). The main build has its own check, test:main-build.
+          WORKERS_CI_BRANCH: ${{ github.ref_name == 'main' && 'ci-main' || github.ref_name }}
