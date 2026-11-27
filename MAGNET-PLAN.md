@@ -117,6 +117,7 @@ Settings on the Worker:
 | `MAGNET_DAILY_CAP_USD`   | var    | Optional. Default 3                                               |
 | `MAGNET_DIGEST_HOUR_UTC` | var    | Optional. Default 7                                               |
 | `MAGNET_DRAFTS`          | var    | `1` on preview deployments only, so draft magnets take TEST leads |
+| `STATS_SECRET`           | secret | Optional. 32+ characters. The control room reads `/api/stats`     |
 
 `RESEND_API_KEY` and `ALERT_EMAIL` exist already for the application form.
 

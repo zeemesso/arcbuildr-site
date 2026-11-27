@@ -265,6 +265,79 @@ export async function spentOn(db: Sql, day: string): Promise<number> {
   return row?.microusd ?? 0;
 }
 
+export interface LeadStatsCounts {
+  finished: number;
+  written: number;
+  screened_out: number;
+  hot: number;
+  cost_microusd: number;
+}
+
+const HOT_SCORE = 4; // Same threshold as the sweep digest.
+
+/** Counts every lead created in [from, to), grouped by UTC day and magnet. */
+export async function leadStatsByDayAndMagnet(db: Sql, from: Date, to: Date) {
+  // Accepted screens also save a reason, so only the rejected status identifies a refusal.
+  const { results } = await db
+    .prepare(
+      `SELECT substr(created_at, 1, 10) AS day, magnet, COUNT(*) AS finished,
+              COUNT(CASE WHEN status = ? OR deliverable_md IS NOT NULL THEN 1 END) AS written,
+              COUNT(CASE WHEN status = ? AND deliverable_md IS NULL THEN 1 END) AS screened_out,
+              COUNT(CASE WHEN score >= ? THEN 1 END) AS hot,
+              SUM(cost_microusd) AS cost_microusd
+         FROM magnet_leads WHERE created_at >= ? AND created_at < ?
+        GROUP BY day, magnet`,
+    )
+    .bind("done", "rejected", HOT_SCORE, from.toISOString(), to.toISOString())
+    .all<LeadStatsCounts & { day: string; magnet: string }>();
+  return results;
+}
+
+type StatsPersonRow = Pick<
+  Row,
+  "name" | "email" | "instagram" | "magnet" | "status" | "score" | "screen_reason" | "created_at"
+> & {
+  run: string | null;
+  stage: string;
+  hot: number;
+  finished_at: string | null;
+};
+
+/** Only the fields the dashboard shows, for the newest leads in [from, to). */
+export async function statsPeople(db: Sql, from: Date, to: Date) {
+  const { results } = await db
+    .prepare(
+      `SELECT name, email, instagram, magnet, NULLIF(rr, '') AS run, status, stage,
+              score, COALESCE(score >= ?, 0) AS hot, screen_reason, created_at, finished_at
+         FROM magnet_leads WHERE created_at >= ? AND created_at < ?
+        ORDER BY created_at DESC, id DESC LIMIT ?`,
+    )
+    .bind(HOT_SCORE, from.toISOString(), to.toISOString(), 200)
+    .all<StatsPersonRow>();
+  return results.map((row) => ({ ...row, hot: row.hot === 1 }));
+}
+
+export async function statsHealth(db: Sql) {
+  const row = await db
+    .prepare(
+      `SELECT (SELECT COUNT(*) FROM magnet_leads WHERE status = ?) AS queued,
+              (SELECT COUNT(*) FROM magnet_leads WHERE status = ?) AS running,
+              (SELECT COUNT(*) FROM magnet_leads WHERE status = ?) AS failed,
+              (SELECT COUNT(*) FROM magnet_emails WHERE status = ?) AS emails_pending,
+              (SELECT COUNT(*) FROM magnet_emails WHERE status = ?) AS emails_failed`,
+    )
+    .bind("queued", "running", "failed", "pending", "failed")
+    .first<{
+      queued: number;
+      running: number;
+      failed: number;
+      emails_pending: number;
+      emails_failed: number;
+    }>();
+  // The SELECT always returns one row, including when the tables are empty.
+  return row!;
+}
+
 /** Changes a lead only while it still has the state this run expects. */
 export async function finishLead(
   db: Sql,

@@ -6,6 +6,7 @@ import { handleSubmit } from "./lib/magnet/intake";
 import { writeFollowUps } from "./lib/magnet/followup";
 import { jobDeps, runLead } from "./lib/magnet/job";
 import { handlePlan } from "./lib/magnet/plan";
+import { handleStats } from "./lib/magnet/stats";
 import { sweep } from "./lib/magnet/sweep";
 import { handleUnsubscribe } from "./lib/magnet/unsubscribe";
 import { shortLinkRedirect } from "./lib/shortlinks";
@@ -31,6 +32,7 @@ export default {
     if (stop) return handleUnsubscribe(request, env, stop[1]!);
     const magnet = /^\/api\/magnet\/([a-z0-9-]{1,64})$/.exec(pathname);
     if (magnet && request.method === "POST") return handleSubmit(request, env, magnet[1]!);
+    if (pathname === "/api/stats") return handleStats(request, env);
     if (pathname.startsWith("/api/")) return notFound();
     return env.ASSETS.fetch(request);
   },

@@ -14,6 +14,8 @@ export interface Env {
   ANTHROPIC_API_KEY?: string;
   /** Most the model calls may cost per UTC day, in US dollars. Default 3. */
   MAGNET_DAILY_CAP_USD?: string;
+  /** Bearer secret for the read-only stats endpoint. */
+  STATS_SECRET?: string;
   /** Where result links in emails point. Default https://arcbuildr.co. */
   SITE_URL?: string;
   /** Sender of emails to leads, on a domain verified in Resend. Without it none are sent. */
