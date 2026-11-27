@@ -1,0 +1,146 @@
+---
+import "../../styles/global.css";
+import { PLAN_TEXT as t } from "../../lib/magnet/text";
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex" />
+    <meta name="referrer" content="no-referrer" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <title>{t.workingTitle}</title>
+  </head>
+  <body>
+    <main class="wrap plan">
+      <header class="plan__head" aria-live="polite" aria-atomic="true">
+        <p class="kicker" id="plan-kicker" hidden></p>
+        <h1 id="plan-title">{t.workingTitle}</h1>
+        <p id="plan-status">{t.workingBody}</p>
+      </header>
+      <article class="card plan__article" id="plan-article" hidden></article>
+      <section class="card plan__cta" id="plan-cta" aria-labelledby="plan-cta-title" hidden>
+        <h2 id="plan-cta-title">{t.ctaTitle}</h2>
+        <p>{t.ctaBody}</p>
+        <a class="btn" href={t.ctaHref}>
+          {t.ctaButton}
+        </a>
+      </section>
+    </main>
+  </body>
+</html>
+
+<script>
+  import { planApiPath, TOKEN, type PlanState } from "../../lib/magnet/contract";
+  import { PLAN_TEXT } from "../../lib/magnet/text";
+
+  const title = document.getElementById("plan-title")!;
+  const status = document.getElementById("plan-status")!;
+  const kicker = document.getElementById("plan-kicker")!;
+  const article = document.getElementById("plan-article")!;
+  const cta = document.getElementById("plan-cta")!;
+  const token = location.hash.slice(1);
+  let tries = 0;
+  let slowUntil = 0;
+
+  function finish(heading: string) {
+    title.textContent = document.title = heading;
+    status.hidden = true;
+  }
+
+  async function poll() {
+    const remaining = slowUntil ? slowUntil - Date.now() : 15_000;
+    if (remaining <= 0) return;
+    tries += 1;
+    try {
+      const response = await fetch(planApiPath(token), {
+        headers: { Accept: "application/json" },
+        cache: "no-store",
+        signal: AbortSignal.timeout(Math.min(remaining, 15_000)),
+      });
+      const plan = (await response.json()) as PlanState;
+      if (plan.status === "ready") {
+        finish(plan.title);
+        kicker.textContent = PLAN_TEXT.kicker(plan.name);
+        kicker.hidden = false;
+        // The result endpoint builds this HTML from escaped text (PlanState contract).
+        article.innerHTML = plan.html;
+        article.hidden = cta.hidden = false;
+        return;
+      }
+      if (plan.status === "unavailable") {
+        finish(plan.message);
+        return;
+      }
+    } catch {
+      // A failed request uses one attempt. The next poll may still succeed.
+    }
+
+    if (tries < 60) {
+      setTimeout(poll, 3_000);
+      return;
+    }
+    if (tries === 60) {
+      status.textContent = PLAN_TEXT.slow;
+      slowUntil = Date.now() + 10 * 60_000;
+    }
+    if (Date.now() + 15_000 <= slowUntil) setTimeout(poll, 15_000);
+  }
+
+  if (TOKEN.test(token)) void poll();
+  else finish(PLAN_TEXT.badLink);
+</script>
+
+<style>
+  .plan {
+    max-width: calc(var(--measure) + var(--gutter) * 2);
+    padding-block: var(--space-2xl);
+    overflow-wrap: anywhere;
+  }
+  .plan__head > :not([hidden]) + :not([hidden]) {
+    margin-top: var(--space-md);
+  }
+  .kicker,
+  #plan-status {
+    color: var(--color-ink-muted);
+  }
+  .plan__article,
+  .plan__cta {
+    margin-top: var(--space-xl);
+    padding: clamp(var(--space-md), 5vw, var(--space-xl));
+  }
+  .plan__article :global(ul),
+  .plan__article :global(ol) {
+    margin: 0;
+    padding-inline-start: var(--space-lg);
+  }
+  .plan__article :global(li + li) {
+    margin-top: var(--space-xs);
+  }
+  .plan__article :global(blockquote) {
+    margin: 0;
+    border-inline-start: 3px solid var(--color-rule);
+    padding-inline-start: var(--space-md);
+    color: var(--color-ink-muted);
+  }
+  .plan__article :global(hr) {
+    border: 0;
+    border-top: var(--rule-thin);
+    margin: 0;
+  }
+  .plan__article > :global(* + *) {
+    margin-top: var(--space-md);
+  }
+  .plan__article > :global(* + h2),
+  .plan__article > :global(* + h3) {
+    margin-top: var(--space-xl);
+  }
+  .plan__cta > * + * {
+    margin-top: var(--space-md);
+  }
+  .plan__cta .btn {
+    white-space: normal;
+  }
+</style>

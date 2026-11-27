@@ -27,6 +27,7 @@ export const FORM_TEXT = {
   consent: "I agree that Arcbuildr uses an AI model to read my answers and write this for me.",
   privacyLink: "How we handle your answers",
   privacyHref: "/privacy",
+  trap: "Leave this empty",
 } as const;
 
 /** Messages for a field that fails a check. The server sends the same ones. */

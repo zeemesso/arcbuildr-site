@@ -1,8 +1,9 @@
 import type { APIRoute } from "astro";
+import { visibleMagnets } from "../magnets/registry";
 
-// /thanks is left out on purpose: it is noindex and only reached after the form.
+// /thanks and /plan are noindex result pages.
 // /content-arc too: a noindex draft until the product launches.
-const paths = ["/", "/privacy"];
+const paths = ["/", "/privacy", ...visibleMagnets(false).map(({ slug }) => `/m/${slug}`)];
 
 export const GET: APIRoute = async ({ site }) => {
   return new Response(
