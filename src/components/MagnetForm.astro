@@ -1,5 +1,4 @@
 ---
-import "./application/application.css";
 import { answerField, FIELD, MAX_LENGTH, submitPath } from "../lib/magnet/contract";
 import { FORM_TEXT as t } from "../lib/magnet/text";
 import type { MagnetDefinition } from "../magnets/types";
@@ -36,16 +35,16 @@ const contactFields = [
   id="magnet-form"
   method="post"
   action={submitPath(magnet.slug)}
-  class="card magnet-form"
+  class="prose__panel magnet-form"
   data-slug={magnet.slug}
 >
-  <div class="small muted" data-progress hidden>
+  <div class="prose__note" data-progress hidden>
     <p id="magnet-progress"></p>
     <progress max={total} value="0" aria-labelledby="magnet-progress"></progress>
   </div>
-  <p class="vh" data-field-alert aria-live="polite" aria-atomic="true"></p>
+  <p class="sr-only" data-field-alert aria-live="polite" aria-atomic="true"></p>
 
-  <div class="screen" data-screen>
+  <div class="magnet-form__step" data-screen>
     <p>{t.serious}</p>
     <button class="btn btn--parts" data-start type="button" hidden>
       {t.start}
@@ -72,24 +71,24 @@ const contactFields = [
       "aria-describedby": describedBy,
     };
     const optional = !required && (
-      <p class="small muted" id={`${id}-optional`}>
+      <p class="prose__note" id={`${id}-optional`}>
         {t.optional}
       </p>
     );
     const help = question.help && (
-      <p class="small muted" id={`${id}-help`}>
+      <p class="prose__note" id={`${id}-help`}>
         {question.help}
       </p>
     );
     return (
-      <div class="screen" data-screen>
+      <div class="magnet-form__step" data-screen>
         {question.kind === "choice" ? (
           <fieldset data-field={name}>
             <legend class="plain__lead">{question.label}</legend>
             {optional}
             {help}
             {question.placeholder && (
-              <p class="small muted" id={`${id}-placeholder`}>
+              <p class="prose__note" id={`${id}-placeholder`}>
                 {question.placeholder}
               </p>
             )}
@@ -126,7 +125,7 @@ const contactFields = [
                   maxlength={MAX_LENGTH.long}
                   rows="5"
                 ></textarea>
-                <p class="small muted" id={`${id}-voice`}>
+                <p class="prose__note" id={`${id}-voice`}>
                   {t.voiceHint}
                 </p>
               </>
@@ -138,7 +137,7 @@ const contactFields = [
     );
   })}
 
-  <div class="screen" data-screen>
+  <div class="magnet-form__step" data-screen>
     <h2 tabindex="-1">{t.contactTitle}</h2>
     <p>{t.contactIntro(magnet.deliverableName)}</p>
     {contactFields.map((field) => {
@@ -161,7 +160,7 @@ const contactFields = [
             aria-describedby={help ? `${id}-help` : undefined}
           />
           {help && (
-            <p class="small muted" id={`${id}-help`}>
+            <p class="prose__note" id={`${id}-help`}>
               {help}
             </p>
           )}
@@ -174,8 +173,8 @@ const contactFields = [
         <input name={FIELD.consent} type="checkbox" value="on" required autocomplete="off" />
         <span>{t.consent}</span>
       </label>
-      <p class="small muted">
-        <a class="more" href={t.privacyHref}>
+      <p class="prose__note">
+        <a class="prose__link" href={t.privacyHref}>
           {t.privacyLink}
         </a>
       </p>
@@ -203,7 +202,7 @@ const contactFields = [
       {t.send}
     </button>
   </div>
-  <p class="small muted saved" data-saved role="status"></p>
+  <p class="prose__note magnet-form__saved" data-saved role="status"></p>
 </form>
 
 <script>
@@ -449,17 +448,17 @@ const contactFields = [
 <style>
   .magnet-form {
     /* The shared application fields read these from their form. */
-    --f-ink: var(--color-ink);
-    --f-muted: var(--color-ink-muted);
+    --f-ink: var(--ink);
+    --f-muted: var(--muted);
     --f-radius-in: var(--radius-md);
     --f-inout: var(--ease-move);
     min-width: 0;
   }
   [data-form-error]:empty,
-  .saved:empty {
+  .magnet-form__saved:empty {
     position: absolute;
   }
-  .screen {
+  .magnet-form__step {
     display: grid;
     gap: 0.875rem;
   }
@@ -502,15 +501,15 @@ const contactFields = [
     margin-inline-start: auto;
   }
   .btn--back {
-    background: var(--color-paper);
-    color: var(--color-ink);
+    background: var(--canvas);
+    color: var(--ink);
     box-shadow: none;
   }
   .btn--back:hover {
-    background: var(--color-paper-2);
+    background: var(--tint);
   }
   .btn:disabled {
-    background: var(--color-ink-muted);
+    background: var(--muted);
     color: var(--color-on-accent);
     box-shadow: none;
     transform: none;
@@ -534,8 +533,8 @@ const contactFields = [
     font-weight: 600;
   }
   .choice:has(:checked) {
-    border-color: var(--color-ink);
-    background: color-mix(in oklch, var(--color-accent) 16%, var(--color-card));
+    border-color: var(--ink);
+    background: var(--tint-accent);
   }
   .choice:has([aria-invalid="true"]) {
     border-color: var(--color-error);
@@ -546,7 +545,7 @@ const contactFields = [
     width: 1.25rem;
     height: 1.25rem;
     margin: 0;
-    accent-color: var(--color-ink);
+    accent-color: var(--ink);
     cursor: pointer;
   }
   progress {

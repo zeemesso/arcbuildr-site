@@ -1,5 +1,6 @@
 import { defineConfig } from "vitest/config";
 
 export default defineConfig({
-  test: { include: ["tests/**/*.test.ts"] },
+  // The style files are read as text by tests/design-source.test.ts; Vitest blanks CSS it does not include.
+  test: { include: ["tests/**/*.test.ts"], css: { include: [/\.css\?raw$/] } },
 });

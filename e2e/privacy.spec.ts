@@ -14,5 +14,5 @@ test("privacy renders all content, lists and contact replacement", async ({ page
         await expect(page.locator("main")).toContainText(
           line.replaceAll("{email}", CONTACT_EMAIL || "[contact email]"),
         );
-  await expect(page.locator("header [data-apply]")).toHaveAttribute("href", "/#apply");
+  await expect(page.locator("header .bar__cta")).toHaveAttribute("href", "/#apply");
 });

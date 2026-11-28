@@ -1,5 +1,7 @@
 # DESIGN.md
 
+Every page uses the L1-P11 design: sections 11 to 17. Sections 1 to 10 describe earlier designs and are kept for history.
+
 Direction A2, "Daylight bento, bolder", with the dark pill header. Chosen on 18 Nov 2026. It builds on Direction A ("Daylight bento", in git at `4bb7d88`) and replaces Direction B ("Plan on a desk", in git at `720b426`).
 
 The page has one job: the visitor starts the application. Most visitors arrive from a phone, inside an in-app browser about 650 px tall.
@@ -125,7 +127,7 @@ Sections 4 to 6 describe the pages that keep Direction A2: `/sample`, `/booked`,
 
 ## 11. The page from 22 Nov 2026 (L1-P11)
 
-Section 10 is history. The home page and `/booked` follow this section; `/privacy` and the 404 page keep Direction A2. `/sample` is gone.
+Section 10 is history. Every page follows this section and section 17. `/sample` is gone.
 
 - **Words.** Every word comes from the deck, `~/fable-sprint/L1-P10/deck-v2.md`. `node scripts/deck/sync.mjs` copies it into `src/content/deck.json`; components read a line by the deck's own name for it (`src/content/deck.ts`), so a renamed or removed line stops the build. `--check` says whether the page is in sync. The few interface words the deck has no line for (button labels of the form, "Pause the gallery", "Close", "Day 1") live in `src/content/site.ts`. There is no word budget any more: the deck decides the words.
 - **Files.** `src/layouts/Home.astro`, `src/components/page/` (one component per section, `screens/` for the 11 live screens), `src/scripts/page.ts`, and `src/styles/page/`: `frame.css` (the frame, the first screen, motion), `cards.css` and `screens.css` (section 5), `sections.css` (2 to 4), `more.css` (6 to 12), `booked.css`.
@@ -225,3 +227,15 @@ Zyade's final changes. Sections 12 and 15 stay for the paper, the type and the s
 - **The bonuses** (`Bonuses.astro`, `id="bonuses"`, the deck's `bonus` slots of section 8), their own block after Say It Plain, mechanics from the 22 Nov page (the bonus cards of commits `e3bfc21` and `b9d661b`). The title, then four white cards: a pastel square with the arc mark (four tones: `--tint-accent`, `--tint-sage`, `--tint-clay`, `--tint-taupe`), the name, an "Included" pill, the body, and the line saying which packages hold it. Two columns from 896 px, one on a phone. No dollar value. Section 8's apply strip closes this block.
 - **What you get** loses its line under the seven cards.
 - **Banned words.** "script" passes inside `#say-it-plain` only (deck 8b, `samples.ts`). "AI" is banned everywhere again: nothing on the page says it. "Most Popular" is not on the page.
+
+## 17. One design for every page (28 Nov 2026)
+
+Every page of arcbuildr.co and go.arcbuildr.co has the home page's design. There is no second look.
+
+- **One layout.** Every page renders through `src/layouts/Home.astro` with the same header (`Bar.astro`) and footer (`Foot.astro`): the home page through `src/components/page/Page.astro`, `/booked` directly, every other page through `src/layouts/Base.astro`. No page writes its own `<html>`, header or footer. A page with nothing to apply to (a free-resource page, the plan page, unsubscribe) hides the header's button with `apply={false}`. On a page without the form, the button goes to `/#apply`.
+- **One list of styles.** `src/styles/site.css` lists every shared style file. `Home.astro` loads it, and no other file loads those files. A new shared style file goes into that list.
+- **Text pages.** Privacy, the 404 page, the free-resource pages (`/m/…`), the plan page and unsubscribe put their words in `.prose` (`src/styles/page/prose.css`): `.prose__block`, `.prose__lead`, `.prose__muted`, `.prose__note`, `.prose__link`, `.prose__list`, `.prose__panel`. A new text page uses these classes. A rule only one page needs stays in that page, written with token names only.
+- **Where a design change goes.** Colours, type and sizes: `tokens.css`. The frame, the header, the footer, buttons: `src/styles/page/frame.css`, `Bar.astro`, `Foot.astro`, `Logo.astro`. Text pages: `prose.css`. Form fields: `src/components/application/application.css`. A change made there reaches every page at once.
+- **go.arcbuildr.co.** MagnetRail (`~/magnetrail`) copies `site.css` and every file it lists, the fonts, the logo and the browser tab icon from the site's `main` branch, and rebuilds the header, footer and logo in React (`src/ui/site/`). Its build stops while its copies are behind `main`. After every design change that reaches `main`, run `cd ~/magnetrail && npm run deploy`. When it names a changed `Bar.astro`, `Foot.astro` or `Logo.astro`, update the matching file in `src/ui/site/` first, then run `npm run design:sync -- --mirrors-done`.
+- **Checked by tests.** `tests/design-source.test.ts`: every page renders through the one layout; `Base.astro` has the home page's header and footer; the shared styles load in one place; every shared style file is listed in `site.css`; no page, component or layout writes a colour or a font of its own. MagnetRail's `tests/design-source.test.ts` checks its side.
+- **Not part of it.** The control room and ReplyRail's dashboard are internal tools with their own look. They are not pages of arcbuildr.co.

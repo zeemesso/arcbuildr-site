@@ -1,30 +1,21 @@
 ---
-import "../../styles/tokens.css";
-import "../../styles/base.css";
-import "../../styles/look.css";
-import "../../styles/sections.css";
-import Head from "../../layouts/Head.astro";
+import Base from "../../layouts/Base.astro";
 import { UNSUBSCRIBE_TEXT as t } from "../../lib/magnet/text";
+// The stop code rides in the address: no referrer leaves this page, and the visit counter never sees it.
 ---
 
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta name="referrer" content="no-referrer" />
-    <Head title={t.title} description={t.body} noindex />
-  </head>
-  <body>
-    <main class="doc stop">
-      <h1>{t.title}</h1>
-      <p class="muted" id="stop-status" role="status">
-        {t.body}
-      </p>
-      <button class="btn btn--parts" id="stop-button" type="button">
-        {t.button}
-      </button>
-    </main>
-  </body>
-</html>
+<Base title={t.title} description={t.body} noindex apply={false} analytics={false}>
+  <meta slot="head" name="referrer" content="no-referrer" />
+  <section class="prose">
+    <h1>{t.title}</h1>
+    <p class="prose__muted" id="stop-status" role="status">
+      {t.body}
+    </p>
+    <button class="btn btn--parts" id="stop-button" type="button">
+      {t.button}
+    </button>
+  </section>
+</Base>
 
 <script>
   import { TOKEN, unsubscribeApiPath } from "../../lib/magnet/contract";
@@ -62,11 +53,8 @@ import { UNSUBSCRIBE_TEXT as t } from "../../lib/magnet/text";
 </script>
 
 <style>
-  .stop {
-    padding-bottom: 3rem;
-  }
   .btn:disabled {
-    background: var(--color-ink-muted);
+    background: var(--muted);
     box-shadow: none;
     transform: none;
     cursor: not-allowed;

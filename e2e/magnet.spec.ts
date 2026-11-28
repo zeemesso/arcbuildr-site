@@ -367,5 +367,5 @@ test("the stop page does nothing until the click, then stops the emails", async 
 test("the stop page with a broken link offers no button", async ({ page }) => {
   await page.goto("/unsubscribe/#bad");
   await expect(page.getByRole("status")).toHaveText(UNSUBSCRIBE_TEXT.badLink);
-  await expect(page.getByRole("button")).toBeHidden();
+  await expect(page.locator("main").getByRole("button")).toBeHidden();
 });

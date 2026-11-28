@@ -380,7 +380,7 @@ test("the layer closes with its button, with Escape and with Back", async ({ pag
 test("the apply link on another page leads to the two fields", async ({ page }) => {
   const calls = await stub(page);
   await page.goto("/privacy");
-  await press(page.locator("header a[data-apply]"));
+  await press(page.locator("header .bar__cta"));
   await expect(page).toHaveURL(/\/#apply$/);
   await expect(page.locator("#apply input[name=name]")).toBeInViewport();
   await expect(popup(page)).toHaveCount(0);

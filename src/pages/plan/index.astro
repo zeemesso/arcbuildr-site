@@ -5,46 +5,46 @@ import { PLAN_TEXT as t } from "../../lib/magnet/text";
 
 <Base title={t.workingTitle} description={t.workingBody} noindex apply={false} analytics={false}>
   <meta slot="head" name="referrer" content="no-referrer" />
-  <div class="doc plan">
-    <header class="doc__block" id="plan-header" aria-live="polite">
+  <div class="prose result">
+    <header class="prose__block" id="plan-header" aria-live="polite">
       <h1 id="plan-title">{t.workingTitle}</h1>
-      <p class="muted" id="plan-status">
+      <p class="prose__muted" id="plan-status">
         {t.workingBody}
       </p>
     </header>
-    <div class="card plan__progress" id="plan-progress" hidden>
-      <div class="plan__row">
-        <span class="plan__dot" aria-hidden="true"></span>
+    <div class="prose__panel result__progress" id="plan-progress" hidden>
+      <div class="result__row">
+        <span class="result__dot" aria-hidden="true"></span>
         <span id="plan-step" aria-live="polite" aria-atomic="true"></span>
         <span id="plan-percent" aria-hidden="true"></span>
       </div>
       <div
-        class="plan__track"
+        class="result__track"
         id="plan-track"
         role="progressbar"
         aria-labelledby="plan-step"
         aria-valuemin="0"
         aria-valuemax="100"
       >
-        <div class="plan__fill" id="plan-fill"></div>
+        <div class="result__fill" id="plan-fill"></div>
       </div>
     </div>
-    <section class="card" id="plan-video" aria-labelledby="video-title" hidden>
+    <section class="prose__panel" id="plan-video" aria-labelledby="video-title" hidden>
       <h2 id="video-title"></h2>
       <video controls playsinline preload="metadata" aria-labelledby="video-title"></video>
     </section>
-    <p class="muted" id="plan-help">
+    <p class="prose__muted" id="plan-help">
       {t.help}
     </p>
-    <header class="doc__block" id="plan-result" hidden>
+    <header class="prose__block" id="plan-result" hidden>
       <p id="plan-ready-below" hidden>
         {t.readyBelow}
       </p>
-      <p class="small muted" id="plan-kicker"></p>
+      <p class="label" id="plan-kicker"></p>
       <h1 id="plan-result-title"></h1>
     </header>
-    <article class="doc__block plan__article" id="plan-article" hidden></article>
-    <section class="card" id="plan-cta" aria-labelledby="plan-cta-title" hidden>
+    <article class="prose__block result__article" id="plan-article" hidden></article>
+    <section class="prose__panel" id="plan-cta" aria-labelledby="plan-cta-title" hidden>
       <h2 id="plan-cta-title">{t.ctaTitle}</h2>
       <p>{t.ctaBody}</p>
       <a class="btn btn--parts" href={t.ctaHref}>
@@ -211,12 +211,10 @@ import { PLAN_TEXT as t } from "../../lib/magnet/text";
 </script>
 
 <style>
-  .plan {
+  .result {
     grid-template-columns: minmax(0, 1fr);
-    padding-bottom: 3rem;
-    overflow-wrap: anywhere;
   }
-  .plan__row {
+  .result__row {
     display: grid;
     grid-template-columns: auto minmax(0, 1fr) auto;
     align-items: center;
@@ -224,29 +222,29 @@ import { PLAN_TEXT as t } from "../../lib/magnet/text";
     font-weight: 600;
     font-variant-numeric: tabular-nums;
   }
-  .plan__dot {
+  .result__dot {
     width: 0.625rem;
     height: 0.625rem;
     border-radius: var(--radius-pill);
     background: var(--color-sage);
   }
-  .plan__track,
-  .plan__fill {
+  .result__track,
+  .result__fill {
     height: 0.625rem;
     border-radius: var(--radius-pill);
   }
-  .plan__track {
+  .result__track {
     overflow: hidden;
-    background: var(--color-rule);
+    background: var(--hair);
   }
-  .plan__fill {
+  .result__fill {
     background: var(--color-sage);
   }
   @media (prefers-reduced-motion: no-preference) {
-    .plan__progress:not([data-still]) .plan__dot {
+    .result__progress:not([data-still]) .result__dot {
       animation: pulse 2s ease-in-out infinite alternate;
     }
-    .plan__progress[data-creep] .plan__fill {
+    .result__progress[data-creep] .result__fill {
       transition: width var(--dur-fast) var(--ease-out);
     }
   }
@@ -260,39 +258,35 @@ import { PLAN_TEXT as t } from "../../lib/magnet/text";
     width: 100%;
     min-width: 0;
     aspect-ratio: 16 / 9;
-    border-radius: var(--radius-md);
-    background: var(--color-ink);
+    border-radius: var(--r-inner);
+    background: var(--night);
   }
-  .plan__article :global(ul),
-  .plan__article :global(ol) {
+  .result__article :global(ul),
+  .result__article :global(ol) {
     display: grid;
     gap: 0.375rem;
     padding-inline-start: 1.25rem;
   }
-  .plan__article :global(ul) {
+  .result__article :global(ul) {
     list-style: disc;
   }
-  .plan__article :global(ol) {
+  .result__article :global(ol) {
     list-style: decimal;
   }
-  .plan__article :global(blockquote) {
+  .result__article :global(blockquote) {
     margin: 0;
-    border-inline-start: 3px solid var(--color-rule);
+    border-inline-start: 3px solid var(--hair);
     padding-inline-start: 1rem;
-    color: var(--color-ink-muted);
+    color: var(--muted);
   }
-  .plan__article :global(hr) {
+  .result__article :global(hr) {
     border: 0;
-    border-top: 1px solid var(--color-rule);
+    border-top: 1px solid var(--hair);
     width: 100%;
     margin: 0;
   }
-  .plan__article > :global(* + h2),
-  .plan__article > :global(* + h3) {
+  .result__article > :global(* + h2),
+  .result__article > :global(* + h3) {
     margin-top: 0.75rem;
-  }
-  .plan__article :global(h3) {
-    font-size: var(--text-lg);
-    line-height: 1.2;
   }
 </style>

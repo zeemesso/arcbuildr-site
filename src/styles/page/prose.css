@@ -1,0 +1,128 @@
+/* The text pages: privacy, not found, the magnet pages, the plan page, unsubscribe (DESIGN.md, section 17).
+ * One column of words on the paper, in the home page's type, under the same header and above the same
+ * footer. Painted with the names in tokens.css and frame.css only. */
+.prose {
+  display: grid;
+  align-content: start;
+  gap: 1.25rem;
+  max-width: calc(44rem + 2 * var(--pad));
+  margin-inline: auto;
+  /* The top clears the header pill, as on the page after a booking. */
+  padding: clamp(6.5rem, 12vw, 9rem) var(--pad) var(--air);
+  overflow-wrap: anywhere;
+}
+/* A short text page keeps the footer at the bottom of the screen, not in the middle of it. */
+body:has(> main > .prose) {
+  display: flex;
+  flex-direction: column;
+  min-height: 100svh;
+}
+body:has(> main > .prose) > main {
+  flex: 1 0 auto;
+}
+.prose h1 {
+  font-size: var(--h1);
+  font-weight: 700;
+  letter-spacing: -0.045em;
+  line-height: 0.98;
+  text-wrap: balance;
+}
+.prose h2 {
+  margin-top: 0.75rem;
+  font-size: var(--h2);
+  font-weight: 600;
+  letter-spacing: var(--track);
+  line-height: 1.12;
+  text-wrap: balance;
+}
+.prose h3 {
+  font-size: var(--text-lg);
+  font-weight: 600;
+  line-height: 1.25;
+}
+.prose p,
+.prose li {
+  text-wrap: pretty;
+}
+.prose section,
+.prose__block {
+  display: grid;
+  gap: 0.75rem;
+}
+.prose .btn {
+  justify-self: start;
+}
+/* A part these pages show later (a form step, the plan, a status) carries `hidden`: it stays hidden even
+   when its own class sets a display. */
+.prose [hidden] {
+  display: none !important;
+}
+
+/* The line under a headline. */
+.prose__lead {
+  max-width: var(--measure);
+  font-size: var(--lead);
+  line-height: 1.55;
+}
+/* Secondary words: dates, help under a field, what happens to an answer. */
+.prose__muted {
+  color: var(--muted);
+}
+.prose__note {
+  color: var(--muted);
+  font-size: var(--text-sm);
+}
+
+/* A link inside the words, and a link that stands on its own line. */
+.prose p a,
+.prose li a,
+.prose__link {
+  color: inherit;
+  font-weight: 600;
+  text-decoration: underline;
+  text-decoration-color: var(--color-accent);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 0.2em;
+}
+.prose p a:hover,
+.prose li a:hover,
+.prose__link:hover {
+  text-decoration-thickness: 4px;
+}
+.prose__link {
+  display: inline-flex;
+  align-items: center;
+  justify-self: start;
+  min-height: 2.75rem;
+  font-weight: 700;
+}
+
+.prose__list {
+  display: grid;
+  gap: 0.375rem;
+  padding-inline-start: 1.25rem;
+  list-style: disc;
+}
+
+/* A surface of its own on the paper: the magnet form, the plan's progress, video and last step. */
+.prose__panel {
+  display: grid;
+  gap: 0.875rem;
+  min-width: 0;
+  padding: clamp(1.25rem, 4vw, 2rem);
+  border-radius: var(--r-window);
+  background: var(--window);
+  box-shadow: 0 0 0 1px var(--hair);
+}
+.prose__panel h2 {
+  margin: 0;
+}
+
+/* A label too long for a phone: it breaks between its two parts, never inside one. */
+.btn--parts {
+  flex-wrap: wrap;
+  column-gap: 0.3em;
+  max-width: 100%;
+  white-space: normal;
+  text-align: center;
+}

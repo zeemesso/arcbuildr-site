@@ -4,10 +4,10 @@ import { notFound } from "../content/site";
 ---
 
 <Base title={notFound.title} noindex>
-  <section class="doc">
+  <section class="prose">
     <h1>{notFound.h1}</h1>
-    <p class="lead">{notFound.body}</p>
-    <a class="more" href="/">
+    <p class="prose__lead">{notFound.body}</p>
+    <a class="prose__link" href="/">
       {notFound.link}
     </a>
   </section>

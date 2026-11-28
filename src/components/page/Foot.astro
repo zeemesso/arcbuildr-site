@@ -1,13 +1,16 @@
 ---
-/** The home page's footer: privacy, the contact address, the year. */
+/** The footer of every page: privacy, the contact address, the year. */
 import Logo from "../Logo.astro";
 import { CONTACT_EMAIL } from "../../config";
 import { footer } from "../../content/site";
+const onPrivacy = Astro.url.pathname.replace(/\/$/, "") === "/privacy";
 ---
 
 <footer class="foot">
   <Logo />
-  <a href="/privacy">{footer.privacy}</a>
+  <a href="/privacy" aria-current={onPrivacy ? "page" : undefined}>
+    {footer.privacy}
+  </a>
   {CONTACT_EMAIL && <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>}
   <span>{footer.rights}</span>
 </footer>

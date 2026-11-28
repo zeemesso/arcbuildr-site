@@ -1,0 +1,12 @@
+/* The one list of shared styles (DESIGN.md, section 17). Every page of arcbuildr.co loads it through
+ * src/layouts/Home.astro, and go.arcbuildr.co copies it with every file it imports. A design change goes
+ * into these files, so it reaches every page at once. */
+@import "./tokens.css";
+@import "./page/frame.css";
+@import "./page/sections.css";
+@import "./page/more.css";
+@import "./page/screens.css";
+@import "./page/folio.css";
+@import "./page/tight.css";
+@import "./page/prose.css";
+@import "../components/application/application.css";

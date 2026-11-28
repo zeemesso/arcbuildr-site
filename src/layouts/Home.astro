@@ -1,15 +1,10 @@
 ---
 /**
- * The home page's own layout. It shares the head with Base.astro and loads only tokens.css and the
- * page styles (src/styles/page/): its class names would collide with the other pages' styles.
+ * The one layout of the site (DESIGN.md, section 17). The home page uses it as it is; every other page
+ * comes through Base.astro, which adds the same header and footer. It loads src/styles/site.css, the one
+ * list of shared styles.
  */
-import "../styles/tokens.css";
-import "../styles/page/frame.css";
-import "../styles/page/sections.css";
-import "../styles/page/more.css";
-import "../styles/page/screens.css";
-import "../styles/page/folio.css";
-import "../styles/page/tight.css";
+import "../styles/site.css";
 import Head from "./Head.astro";
 import { meta } from "../content/site";
 import { section } from "../content/deck";
@@ -20,6 +15,8 @@ interface Props {
   noindex?: boolean;
   /** True for a page that starts the form itself, with its own settings. */
   ownForm?: boolean;
+  /** False where the address holds a private link (the plan page): the visit counter never sees it. */
+  analytics?: boolean;
 }
 const head = section("title and description");
 const {
@@ -27,6 +24,7 @@ const {
   description = head.get("description"),
   noindex = false,
   ownForm = false,
+  analytics = true,
 } = Astro.props;
 // A shared link shows the deck's own preview lines.
 const share = Astro.props.title
@@ -39,6 +37,7 @@ const analyticsToken = import.meta.env.PUBLIC_CF_ANALYTICS_TOKEN;
 <html lang="en" class="home" data-own-form={ownForm ? "" : undefined}>
   <head>
     <Head title={title} description={description} noindex={noindex} share={share} />
+    <slot name="head" />
   </head>
   <body>
     <a class="skip" href="#main">
@@ -58,7 +57,7 @@ const analyticsToken = import.meta.env.PUBLIC_CF_ANALYTICS_TOKEN;
       import "../scripts/page";
       if (__PREVIEW__) import("../components/mountFeedback");
     </script>
-    {analyticsToken && (
+    {analytics && analyticsToken && (
       <script
         defer
         is:inline

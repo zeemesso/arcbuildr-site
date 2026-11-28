@@ -1,22 +1,28 @@
 ---
 /**
- * The header: a dark pill that follows the page, with the logo and the one button. It has no links to
- * sections. Its button is always there, at every scroll position and width.
+ * The header of every page: a dark pill that follows the page, with the logo and the one button. It has
+ * no links to sections. Its button is always there, at every scroll position and width.
  */
 import Logo from "../Logo.astro";
 import { page } from "../../content/site";
 interface Props {
   /** False on a page with nothing to apply to. */
   cta?: boolean;
+  /** False on a page without the application form: the button then leads to the home page's form. */
+  form?: boolean;
 }
-const { cta = true } = Astro.props;
+const { cta = true, form = true } = Astro.props;
 ---
 
 <header class="bar">
   <div class="bar__pill">
     <Logo />
     {cta && (
-      <a class="bar__cta" href="#apply" data-apply-open>
+      <a
+        class="bar__cta"
+        href={form ? "#apply" : "/#apply"}
+        data-apply-open={form ? "" : undefined}
+      >
         <span>{page.pill}</span>
       </a>
     )}

@@ -104,8 +104,6 @@ export const booked = {
 
 export const footer = {
   privacy: "Privacy",
-  /** Shown only when CONTACT_EMAIL is set. `{email}` is CONTACT_EMAIL. */
-  contact: "Questions? Write to {email}",
   rights: "© 2026 Arcbuildr",
 };
 

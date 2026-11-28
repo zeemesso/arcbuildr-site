@@ -1,17 +1,17 @@
 ---
-import "../styles/tokens.css";
-import "../styles/base.css";
-import "../styles/look.css";
-import "../styles/sections.css";
+/**
+ * Every page that is not the home page: the home page's layout with the same header and footer around
+ * the page's own words (DESIGN.md, section 17). A text page puts its words in `.prose` (prose.css).
+ */
+import Home from "./Home.astro";
+import Bar from "../components/page/Bar.astro";
+import Foot from "../components/page/Foot.astro";
 import { meta } from "../content/site";
-import Head from "./Head.astro";
-import Header from "../components/Header.astro";
-import Footer from "../components/Footer.astro";
 interface Props {
   title?: string;
   description?: string;
   noindex?: boolean;
-  /** False on the booking confirmation: someone who has booked is not asked to apply again. */
+  /** False where there is nothing to apply to: a magnet page, the plan page, unsubscribe. */
   apply?: boolean;
   /** False where the address holds a private link (the plan page): the visit counter never sees it. */
   analytics?: boolean;
@@ -23,37 +23,13 @@ const {
   apply = true,
   analytics = true,
 } = Astro.props;
-const analyticsToken = import.meta.env.PUBLIC_CF_ANALYTICS_TOKEN;
 ---
 
-<!doctype html>
-<html lang="en">
-  <head>
-    <Head title={title} description={description} noindex={noindex} />
+<Home title={title} description={description} noindex={noindex} analytics={analytics}>
+  <Fragment slot="head">
     <slot name="head" />
-  </head>
-  <body>
-    <a class="skip" href="#main">
-      {meta.skip}
-    </a>
-    <Header apply={apply} />
-    <main id="main" tabindex="-1">
-      <slot />
-    </main>
-    <Footer />
-    <!-- The page's own script comes before the visit counter: scripts run in this order, so another
-         company's slow server can never hold the page's script up. -->
-    <script>
-      import "../scripts/motion";
-      if (__PREVIEW__) import("../components/mountFeedback");
-    </script>
-    {analytics && analyticsToken && (
-      <script
-        defer
-        is:inline
-        src="https://static.cloudflareinsights.com/beacon.min.js"
-        data-cf-beacon={JSON.stringify({ token: analyticsToken })}
-      />
-    )}
-  </body>
-</html>
+  </Fragment>
+  <Bar slot="bar" cta={apply} form={false} />
+  <slot />
+  <Foot slot="after" />
+</Home>
